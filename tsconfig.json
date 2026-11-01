@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/junit" },
+    { "path": "packages/lang-java" },
+    { "path": "packages/lang-ts" },
+    { "path": "packages/lang-python" },
+    { "path": "packages/cli" }
+  ]
+}

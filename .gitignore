@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.stryker-tmp/
+reports/
+*.log
+.DS_Store
+# fixture build output
+fixtures/**/target/
+fixtures/**/build/
+fixtures/**/.gradle/
+fixtures/**/node_modules/
+fixtures/**/__pycache__/
+fixtures/**/.pytest_cache/

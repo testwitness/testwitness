@@ -1,0 +1,131 @@
+# Engineering conventions
+
+Read this before touching any package. The spec is the source of truth; this
+page is the contract between packages so parallel work fits together.
+
+## Repository rules
+
+- TypeScript, strict, ESM, Node 20 or newer. `verbatimModuleSyntax` is on, so
+  type imports use `import type`.
+- Tests: vitest, files named `*.test.ts` next to the code. Property tests use
+  fast-check. Every exported function with logic has a test.
+- Do not add dependencies without a reason written in the PR or LOG.md. Never
+  run `pnpm install` while another task may be running it; the lockfile is
+  shared. Everything needed for the language and junit packages is installed.
+- No network calls at runtime anywhere in the tool. No execution of scanned
+  repository code. No model calls.
+- Prose in docs and messages: no dashes (use commas or full stops). Hyphens are
+  fine inside code, file names, flags and YAML keys.
+- Run `pnpm typecheck && pnpm lint && pnpm test` before declaring anything done,
+  and read the output.
+
+## Language front end contract (`packages/lang-*`)
+
+Each language package exports one object implementing `LanguageFrontEnd` from
+`@testwitness/core` (see `packages/core/src/types.ts`), plus its framework
+tables. Layout:
+
+```
+packages/lang-<x>/
+  package.json
+  queries/            # tree-sitter .scm files, one per concept
+    tests.scm         # test declarations
+    assertions.scm    # assertion call shapes
+    markers.scm       # skip, focus, todo, fixme, xfail markers
+    mocks.scm         # mock and stub declarations
+  src/
+    index.ts          # export const <lang>FrontEnd: LanguageFrontEnd
+    grammar.ts        # resolves and loads the bundled wasm via core/loadLanguage
+    frameworks.ts     # FrameworkTable[] (names, modifiers, assertion sets, lattice)
+    inventory.ts      # builds TestInventory from a Tree
+    *.test.ts
+```
+
+Grammar loading: use `createRequire(import.meta.url).resolve('tree-sitter-java/tree-sitter-java.wasm')`
+and `loadLanguage(path)` from core. Queries are read from the `queries/`
+directory relative to the package (`new URL('../queries/tests.scm', import.meta.url)`)
+and compiled once with `compileQuery`.
+
+### TestInventory field rules
+
+- `qualifiedName` never contains the file path (the inventory already has it).
+  - Java: `OuterClass$Inner#methodName`.
+  - TypeScript and JavaScript: describe titles and the test title joined with
+    ` › ` (space, U+203A, space), for example `Billing › charge › rejects expired cards`.
+    Template literal or dynamic titles use the raw source text of the argument.
+  - Python: `TestClass::test_name` for methods, `test_name` for functions.
+- `name` is the last segment of the qualified name.
+- `container` is the list of enclosing class or describe titles, outermost first.
+- `bodyHash` is `shortHash(normaliseText(bodyText))` over the body only, never
+  the name, so a renamed test with the same body hashes the same.
+- `statementCount` counts executable statements in the body and excludes:
+  `pass`, bare `return` with no value, docstrings and string literal expression
+  statements, comments, `TODO` only lines. A body of only `pass` is 0.
+- `assertions` lists every assertion statement using the sets in spec section
+  1.2 (A001). Classify `kind`:
+  - `value`: equality, comparison, matcher on a returned value.
+  - `state`: assertion on an object or collection state the subject mutated
+    (use `value` when you cannot tell; `state` is best effort).
+  - `interaction`: `verify(...)`, `toHaveBeenCalled*`, `assert_called*`.
+  - `exception`: `assertThrows`, `pytest.raises`, `toThrow`, `@Test(expected=)`,
+    `assertRaises`.
+  - `snapshot`: `toMatchSnapshot`, `toMatchInlineSnapshot`, approval style.
+  - `smoke`: `assertNotNull`, `toBeDefined`, `toBeTruthy`, `isNotNone`,
+    `assertDoesNotThrow`, `not.toThrow()` alone, `instanceof` checks.
+  - `custom`: a call to a function defined in the same file whose body
+    contains assertions (one level deep), or a name in `profile.extraAssertions`.
+  - `callee` is the normalised call, for example `assertEquals`,
+    `assertThat.isEqualTo`, `expect.toBe`, `expect.not.toBe`, `assert` (pytest
+    bare assert), `self.assertEqual`, `verify`, `pytest.raises`.
+  - `subject` is the normalised source of the thing asserted on when
+    identifiable (first argument of `expect`, the actual operand of
+    `assertEquals`, the left side of a pytest `==`).
+  - `family` and `strength` follow the A002 lattice tables in `frameworks.ts`
+    (higher is stronger). Leave undefined when not in a known family.
+- `markers` are per test. `kind`: `skip`, `focus`, `todo`, `fixme`, `xfail`,
+  `conditional-skip`. Set `constant: true` when the condition is a literal
+  `true`/`True` or the marker is unconditional. Set `reason` when a reason
+  string is present. Include class level and describe level markers on every
+  test they cover (and record them in `fileMarkers` when module level).
+- `parameterCount`: number of literal cases in `@ValueSource`, `@CsvSource`,
+  `test.each` tables, `@pytest.mark.parametrize` lists; undefined when dynamic
+  (`@MethodSource`, a variable) or absent.
+- `mocks`: normalised mock targets (`jest.mock('../billing')` gives
+  `../billing`; `@Mock BillingService` gives `BillingService`;
+  `mock.patch('app.billing.charge')` gives `app.billing.charge`).
+- `framework`: detected per file from imports and annotations, one of
+  `junit5`, `junit4`, `testng`, `jest`, `vitest`, `mocha`, `playwright`,
+  `pytest`, `unittest`; fall back to the profile, then to the language default
+  (`junit5`, `jest`, `pytest`).
+- `assertionHelpers`: names of functions defined in the file whose body has an
+  assertion and whose name does not make it a test.
+- `parseErrors`: `countParseErrors(tree.rootNode)`.
+
+### isTestFile
+
+Path patterns per spec R002 plus a content sniff when the path is unusual
+(`describe(` and `it(`/`test(` present; `@Test` present; `def test_` present).
+
+## Fixture convention (`fixtures/`)
+
+```
+fixtures/<lang>-<framework>-<build>/     e.g. java-junit5-maven, ts-jest, py-pytest
+  project/                 # a tiny real project that builds and runs
+  junit/                   # real XML produced by the real runner, committed
+  cases/<rule>-<slug>/
+    base/                  # files as they are before the PR (relative to project root)
+    head/                  # files after the PR; a missing file means deleted
+    expected.json          # golden findings: [{ruleId, severity, subject, label?}]
+    README.md              # one paragraph: what the case is and why it is positive or negative
+```
+
+A case is positive when `expected.json` lists findings and negative when it is
+`[]`. Negative cases must cover the false positive controls named in the spec:
+tests renamed, moved to another file, parametrised folds, helper extraction,
+conditional skips with constants that fold to false, reason strings that
+reference an issue.
+
+## JUnit XML fixtures (`fixtures/<x>/junit/`)
+
+Always produced by running the real framework. Never hand written. Record the
+producer and version in a `PRODUCER.md` next to the XML.

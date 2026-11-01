@@ -1,0 +1,45 @@
+{
+  "name": "testwitness",
+  "version": "0.1.0",
+  "description": "testwitness CLI",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "queries",
+    "README.md",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@testwitness/core": "workspace:*",
+    "@testwitness/junit": "workspace:*",
+    "@testwitness/lang-java": "workspace:*",
+    "@testwitness/lang-ts": "workspace:*",
+    "@testwitness/lang-python": "workspace:*",
+    "commander": "^14.0.0"
+  },
+  "devDependencies": {},
+  "bin": {
+    "testwitness": "./bin/testwitness.js"
+  }
+}

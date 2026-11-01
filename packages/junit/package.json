@@ -1,0 +1,14 @@
+{
+  "name": "@testwitness/junit",
+  "version": "0.1.0",
+  "description": "Streaming JUnit XML reader and normaliser",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "exports": { ".": { "types": "./src/index.ts", "default": "./src/index.ts" } },
+  "publishConfig": { "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } } },
+  "files": ["dist", "queries", "README.md"],
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "dependencies": { "saxes": "^6.0.0" },
+  "devDependencies": {}
+}
