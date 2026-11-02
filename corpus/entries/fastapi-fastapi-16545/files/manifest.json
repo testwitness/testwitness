@@ -1,0 +1,22 @@
+[
+  {
+    "path": "docs/en/docs/release-notes.md",
+    "status": "modified"
+  },
+  {
+    "path": "docs/en/docs/tutorial/body-fields.md",
+    "status": "modified"
+  },
+  {
+    "path": "fastapi/param_functions.py",
+    "status": "modified"
+  },
+  {
+    "path": "fastapi/params.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/test_union_form_normalization.py",
+    "status": "modified"
+  }
+]

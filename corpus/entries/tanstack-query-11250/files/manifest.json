@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/vue-query/src/__tests__/suspense.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/vue-query/src/__tests__/useQuery.test.ts",
+    "status": "modified"
+  }
+]

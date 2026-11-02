@@ -1,0 +1,6 @@
+[
+  {
+    "path": "integration-tests/vertx-http/src/test/java/io/quarkus/it/vertx/AccessLogTestCase.java",
+    "status": "modified"
+  }
+]

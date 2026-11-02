@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/netty/netty/pull/14828",
+  "repo": "netty/netty",
+  "number": 14828,
+  "title": "Disable flaky test for now",
+  "merged_at": "2025-02-17T21:55:22Z",
+  "stars": 35073,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "tp",
+  "split": "heldout",
+  "base_sha": "626707b524053f0cb7f7aca8a184b4fac050693a",
+  "head_sha": "ef9292fd97b6069de6d1c9b1c3bae4db00485f9b",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

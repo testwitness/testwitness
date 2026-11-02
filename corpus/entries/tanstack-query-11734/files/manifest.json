@@ -1,0 +1,18 @@
+[
+  {
+    "path": "packages/lit-query/src/__tests__/client-switch-controllers.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/lit-query/src/__tests__/createInfiniteQueryController.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/lit-query/src/__tests__/createMutationController.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/lit-query/src/__tests__/createQueriesController.test.ts",
+    "status": "modified"
+  }
+]

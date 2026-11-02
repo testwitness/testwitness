@@ -1,0 +1,18 @@
+[
+  {
+    "path": "clients/clients-integration-tests/src/test/java/org/apache/kafka/clients/admin/CreateTopicsTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "clients/clients-integration-tests/src/test/java/org/apache/kafka/clients/admin/DeleteTopicTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "server/src/test/java/org/apache/kafka/server/KRaftClusterTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "server/src/test/java/org/apache/kafka/server/quota/ClientQuotasRequestTest.java",
+    "status": "modified"
+  }
+]

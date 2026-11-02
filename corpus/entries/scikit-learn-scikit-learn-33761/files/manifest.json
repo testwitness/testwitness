@@ -1,0 +1,10 @@
+[
+  {
+    "path": "sklearn/metrics/cluster/_supervised.py",
+    "status": "modified"
+  },
+  {
+    "path": "sklearn/metrics/cluster/tests/test_supervised.py",
+    "status": "modified"
+  }
+]

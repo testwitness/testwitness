@@ -11,3 +11,5 @@ export * from './report/json.js';
 export * from './report/markdown.js';
 export * from './inventory.js';
 export * from './provenance.js';
+export * from './evidence/normalise.js';
+export * from './evidence/claims.js';

@@ -1,0 +1,10 @@
+[
+  {
+    "path": "components/input/__tests__/__snapshots__/textarea.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  }
+]

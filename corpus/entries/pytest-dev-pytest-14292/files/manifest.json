@@ -1,0 +1,30 @@
+[
+  {
+    "path": "doc/en/deprecations.rst",
+    "status": "modified"
+  },
+  {
+    "path": "src/_pytest/config/compat.py",
+    "status": "deleted"
+  },
+  {
+    "path": "src/_pytest/deprecated.py",
+    "status": "modified"
+  },
+  {
+    "path": "src/_pytest/nodes.py",
+    "status": "modified"
+  },
+  {
+    "path": "src/_pytest/python.py",
+    "status": "modified"
+  },
+  {
+    "path": "testing/deprecated_test.py",
+    "status": "modified"
+  },
+  {
+    "path": "testing/test_nodes.py",
+    "status": "modified"
+  }
+]

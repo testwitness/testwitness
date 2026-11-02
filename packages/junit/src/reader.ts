@@ -2,7 +2,7 @@ import { SaxesParser } from 'saxes';
 import type { SaxesTagPlain } from 'saxes';
 import { createReadStream } from 'node:fs';
 import type { Evidence, TestStatus } from '@testwitness/core';
-import { normaliseKey, classKey } from './normalise.js';
+import { normaliseKey, classKey } from '@testwitness/core';
 
 export interface TestRecord {
   /** Normalised lookup key. */

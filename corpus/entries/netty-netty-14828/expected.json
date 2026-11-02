@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "S001",
+    "subject": "SingleThreadIoEventLoopTest",
+    "verdict": "tp",
+    "reason": "@Disabled added with a free text flaky reason and no tracking issue"
+  }
+]

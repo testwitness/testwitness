@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trpc/trpc/pull/1709",
+  "repo": "trpc/trpc",
+  "number": 1709,
+  "title": "skip flaky test",
+  "merged_at": "2022-03-27T17:42:52Z",
+  "stars": 40758,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "tp",
+  "split": "heldout",
+  "base_sha": "67460a77e17aa2715b6ef09a041e7d9306ce3fbd",
+  "head_sha": "dadd35bf64ff16f1ac483b28ca4955a70dd5aef9",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

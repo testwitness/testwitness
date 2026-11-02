@@ -441,6 +441,34 @@ class FooTest { @Test void a() { svc.run(); log.info("x"); when(mock.get()).then
   });
 });
 
+describe('expected operand', () => {
+  it('assertEquals expected is the first argument, TestNG the second', async () => {
+    const t5 = await one(`${JUNIT5_HEADER}
+class FooTest { @Test void a() { assertEquals(42, actual); assertThrows(IOException.class, () -> io.read()); assertNotNull(x); } }`);
+    expect(t5.assertions[0]!.expected).toBe('42');
+    expect(t5.assertions[1]!.expected).toBe('IOException');
+    expect(t5.assertions[2]!.expected).toBeUndefined();
+    const ng = await one(`${TESTNG_HEADER}
+public class FooTest { @Test public void a() { assertEquals(actual, 42); } }`);
+    expect(ng.assertions[0]!.expected).toBe('42');
+  });
+
+  it('AssertJ, Hamcrest, Spring and REST Assured carry the matcher argument as expected', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+class FooTest { @Test void a() throws Exception {
+  assertThat(name).isEqualTo("jane");
+  assertThat(obj).isNotNull();
+  assertThat(count, is(equalTo(5)));
+  mockMvc.perform(get("/x")).andExpect(status().isOk());
+  given().when().get("/u").then().statusCode(200);
+} }`);
+    expect(t.assertions.map((a) => a.expected)).toEqual(['"jane"', undefined, 'is(equalTo(5))', 'status().isOk()', '200']);
+  });
+});
+
 describe('markers', () => {
   it('@Disabled with a reason is a constant skip', async () => {
     const t = await one(`${JUNIT5_HEADER}

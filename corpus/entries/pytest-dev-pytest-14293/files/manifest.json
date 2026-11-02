@@ -1,0 +1,14 @@
+[
+  {
+    "path": "doc/en/deprecations.rst",
+    "status": "modified"
+  },
+  {
+    "path": "src/_pytest/outcomes.py",
+    "status": "modified"
+  },
+  {
+    "path": "testing/test_runner.py",
+    "status": "modified"
+  }
+]

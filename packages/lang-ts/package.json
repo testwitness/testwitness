@@ -4,11 +4,29 @@
   "description": "TypeScript and JavaScript front end (Jest, Vitest, Mocha, Playwright Test)",
   "license": "Apache-2.0",
   "type": "module",
-  "engines": { "node": ">=20" },
-  "exports": { ".": { "types": "./src/index.ts", "default": "./src/index.ts" } },
-  "publishConfig": { "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } } },
-  "files": ["dist", "queries", "README.md"],
-  "scripts": { "build": "tsc -p tsconfig.json" },
-  "dependencies": { "@testwitness/core": "workspace:*", "web-tree-sitter": "^0.27.1", "tree-sitter-typescript": "^0.23.2", "tree-sitter-javascript": "^0.25.0" },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "queries",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@testwitness/core": "workspace:*",
+    "web-tree-sitter": "^0.27.1",
+    "tree-sitter-typescript": "^0.23.2",
+    "tree-sitter-javascript": "^0.25.0"
+  },
   "devDependencies": {}
 }

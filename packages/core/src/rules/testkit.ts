@@ -2,7 +2,7 @@
  * Helpers for unit testing rules without tree-sitter: build inventories by hand.
  * Exported from the package so fixture and plugin authors can reuse them.
  */
-import type { Assertion, ChangedFile, InventoryPair, LanguageId, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
+import type { Assertion, ChangedFile, Evidence, InventoryPair, LanguageId, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
 import { defaultConfig } from '../config.js';
 import { fingerprint } from '../hash.js';
 import { shortHash } from '../hash.js';
@@ -63,6 +63,7 @@ export interface ContextSpec {
   headTree?: Record<string, TestInventory>;
   changedProduction?: string[];
   prText?: { title: string; body: string };
+  evidence?: Evidence;
 }
 
 export function context(spec: ContextSpec): RuleContext {
@@ -77,6 +78,7 @@ export function context(spec: ContextSpec): RuleContext {
     readBase: async () => undefined,
     readHead: async () => undefined,
     ...(spec.prText ? { prText: spec.prText } : {}),
+    ...(spec.evidence ? { evidence: spec.evidence } : {}),
     profile: { frameworks: new Set(), extraAssertions: [] },
     config: cfg,
     fingerprint,

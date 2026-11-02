@@ -1,0 +1,26 @@
+[
+  {
+    "path": ".github/workflows/ci.yml",
+    "status": "modified"
+  },
+  {
+    "path": "playground/hasWindowsUnicodeFsBug.js",
+    "status": "added"
+  },
+  {
+    "path": "playground/hmr/__tests__/hmr.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "playground/html/__tests__/html.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "playground/html/vite.config.js",
+    "status": "modified"
+  },
+  {
+    "path": "playground/vitestGlobalSetup.ts",
+    "status": "modified"
+  }
+]

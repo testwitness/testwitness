@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/25894",
+  "repo": "pandas-dev/pandas",
+  "number": 25894,
+  "title": "Skipped flaky part of test_time",
+  "merged_at": "2019-03-27T20:44:44Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "tp",
+  "split": "heldout",
+  "base_sha": "ac318d26cdbe3d10030f4863b84a06e938da9bba",
+  "head_sha": "2b9c032d65ae80f4760d1393c70dad7e4700ab97",
+  "files_changed": 1,
+  "additions": 27,
+  "deletions": 0
+}

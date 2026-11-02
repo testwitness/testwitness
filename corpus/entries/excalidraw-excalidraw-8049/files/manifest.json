@@ -1,0 +1,34 @@
+[
+  {
+    "path": "packages/excalidraw/element/textWysiwyg.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/__snapshots__/contextmenu.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/__snapshots__/history.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/__snapshots__/move.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/__snapshots__/regressionTests.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/data/__snapshots__/restore.test.ts.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/linearElementEditor.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "packages/excalidraw/tests/test-utils.ts",
+    "status": "modified"
+  }
+]

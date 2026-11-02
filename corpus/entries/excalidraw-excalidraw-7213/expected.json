@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "S001",
+    "subject": "should bump the version of a labeled arrow when the label is updated",
+    "verdict": "tp",
+    "reason": "it changed to it.skip with a FIXME comment and no issue reference"
+  }
+]

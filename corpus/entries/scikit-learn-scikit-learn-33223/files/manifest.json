@@ -1,0 +1,10 @@
+[
+  {
+    "path": "sklearn/metrics/_plot/tests/test_common_curve_display.py",
+    "status": "modified"
+  },
+  {
+    "path": "sklearn/metrics/_plot/tests/test_roc_curve_display.py",
+    "status": "modified"
+  }
+]

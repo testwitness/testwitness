@@ -1,0 +1,7 @@
+{
+  "name": "@testwitness/fixtures",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@testwitness/core": "workspace:*", "testwitness": "workspace:*" },
+  "devDependencies": { "vitest": "^5.0.5" }
+}

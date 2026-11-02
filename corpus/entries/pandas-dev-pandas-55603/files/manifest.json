@@ -1,0 +1,78 @@
+[
+  {
+    "path": "pandas/tests/arrays/test_datetimes.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/frame/methods/test_map.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_grouping.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_constructors.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_date_range.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_datetimelike.py",
+    "status": "deleted"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_formats.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_setops.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/datetimes/test_timezones.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/multi/test_setops.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/period/methods/test_factorize.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexes/period/test_formats.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/indexing/test_coercion.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/io/formats/test_format.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/reshape/concat/test_datetimes.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/scalar/test_nat.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/scalar/timestamp/test_rendering.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/test_algos.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/tseries/offsets/test_offsets.py",
+    "status": "modified"
+  }
+]

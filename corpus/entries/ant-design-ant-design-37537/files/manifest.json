@@ -1,0 +1,14 @@
+[
+  {
+    "path": "components/card/Card.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "components/card/__tests__/__snapshots__/demo-extend.test.ts.snap",
+    "status": "modified"
+  },
+  {
+    "path": "components/card/__tests__/__snapshots__/demo.test.ts.snap",
+    "status": "modified"
+  }
+]

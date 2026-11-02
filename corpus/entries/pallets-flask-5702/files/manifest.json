@@ -1,0 +1,10 @@
+[
+  {
+    "path": "tests/conftest.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/test_instance_config.py",
+    "status": "modified"
+  }
+]

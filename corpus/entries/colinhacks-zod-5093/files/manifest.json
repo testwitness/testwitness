@@ -1,0 +1,14 @@
+[
+  {
+    "path": "packages/zod/src/v4/classic/tests/file.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/zod/src/v4/classic/tests/set.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/zod/src/v4/core/checks.ts",
+    "status": "modified"
+  }
+]

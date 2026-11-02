@@ -1,0 +1,22 @@
+[
+  {
+    "path": "pandas/conftest.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/arithmetic/test_string.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/arrays/string_/test_string.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/arrays/string_/test_string_arrow.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/extension/test_string.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleIsolatedTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleTest.java",
+    "status": "modified"
+  }
+]

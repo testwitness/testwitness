@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/quarkusio/quarkus/pull/55429",
+  "repo": "quarkusio/quarkus",
+  "number": 55429,
+  "title": "Disable flaky test",
+  "merged_at": "2026-07-13T07:45:37Z",
+  "stars": 15973,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "tp",
+  "split": "tuning",
+  "base_sha": "db19d2283a50a53502afe9ba2be217d464af54f6",
+  "head_sha": "eaf9166429043adac37423ba5d8d919384fffa41",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

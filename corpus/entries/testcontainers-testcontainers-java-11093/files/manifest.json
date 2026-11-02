@@ -1,0 +1,11 @@
+[
+  {
+    "path": "docs/modules/databases/tidb.md",
+    "status": "modified"
+  },
+  {
+    "path": "modules/tidb/src/test/java/org/testcontainers/tidb/TiDBContainerTest.java",
+    "status": "renamed",
+    "oldPath": "modules/tidb/src/test/java/org/testcontainers/junit/tidb/SimpleTiDBTest.java"
+  }
+]

@@ -367,6 +367,7 @@ function makeAssertion(
   strength: number | undefined,
   subjectNode: Node | undefined,
   anchor: Node = chain.top,
+  expectedNode?: Node | string,
 ): Assertion {
   const stmt = enclosingStatement(anchor);
   const a: Assertion = {
@@ -379,6 +380,8 @@ function makeAssertion(
   if (subject !== undefined) a.subject = subject;
   if (family !== undefined) a.family = family;
   if (strength !== undefined) a.strength = strength;
+  const expected = typeof expectedNode === 'string' ? expectedNode : expectedNode ? classLiteralName(expectedNode) : undefined;
+  if (expected !== undefined) a.expected = expected;
   return a;
 }
 
@@ -444,6 +447,7 @@ function classifyJUnit(chain: Chain, ctx: FileContext): Assertion[] {
   let kind = shape.kind;
   let strength = shape.strength;
   let subject: Node | undefined;
+  let expected: Node | undefined;
   if (UNARY_ASSERTS.has(root.name)) {
     const args = stripMessage(root.args, 1, table);
     subject = args[0];
@@ -461,11 +465,13 @@ function classifyJUnit(chain: Chain, ctx: FileContext): Assertion[] {
   } else if (BINARY_ASSERTS.has(root.name)) {
     const args = stripMessage(root.args, root.name === 'assertArrayEquals' && root.args.length >= 3 && !isStringNode(root.args[0]) && !isStringNode(root.args[root.args.length - 1]) ? 3 : 2, table);
     subject = table.actualArgument === 'first' ? args[0] : args[1];
+    expected = table.actualArgument === 'first' ? args[1] : args[0];
   } else if (TYPE_FIRST_ASSERTS.has(root.name)) {
     const args = stripMessage(root.args, 2, table);
     subject = args[1];
+    expected = args[0];
   }
-  return [makeAssertion(chain, root.name, kind, family, strength, subject)];
+  return [makeAssertion(chain, root.name, kind, family, strength, subject, chain.top, expected)];
 }
 
 function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
@@ -487,7 +493,7 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
       for (const m of matcherArgs) {
         const key = springMatcherKey(m);
         const shape = key ? springMatchers[key] : undefined;
-        out.push(makeAssertion(chain, key ? `andExpect.${key}` : 'andExpect', shape?.kind ?? 'value', 'spring', shape?.strength ?? 2, subject, call.node));
+        out.push(makeAssertion(chain, key ? `andExpect.${key}` : 'andExpect', shape?.kind ?? 'value', 'spring', shape?.strength ?? 2, subject, call.node, m));
       }
       if (matcherArgs.length === 0) out.push(makeAssertion(chain, 'andExpect', 'value', 'spring', 2, subject, call.node));
     }
@@ -502,7 +508,8 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     for (const call of calls.slice(thenIndex + 1)) {
       const shape = restAssuredTerminals[call.name];
       if (!shape) continue;
-      out.push(makeAssertion(chain, `then.${call.name}`, shape.kind, 'restassured', shape.strength, subject, call.node));
+      const expected = call.args.length ? normaliseText(call.args.map((a) => a.text).join(', ')) : undefined;
+      out.push(makeAssertion(chain, `then.${call.name}`, shape.kind, 'restassured', shape.strength, subject, call.node, expected));
     }
     return out;
   }
@@ -551,7 +558,7 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
         const shape = matcherName ? hamcrestMatchers[matcherName] : undefined;
         let kind: AssertionKind = shape?.kind ?? 'value';
         if (kind === 'value' && matcherName && stateMatchers.has(matcherName) && isPlainReference(actual)) kind = 'state';
-        return [makeAssertion(chain, matcherName ? `assertThat.${matcherName}` : 'assertThat', kind, 'hamcrest', shape?.strength ?? 2, actual)];
+        return [makeAssertion(chain, matcherName ? `assertThat.${matcherName}` : 'assertThat', kind, 'hamcrest', shape?.strength ?? 2, actual, chain.top, matcher)];
       }
       return [];
     }
@@ -571,7 +578,8 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     }
     let kind = shape.kind;
     if (kind === 'value' && stateMatchers.has(terminal.name) && isPlainReference(subject)) kind = 'state';
-    return [makeAssertion(chain, `${root.name}.${terminal.name}`, kind, family, shape.strength, subject)];
+    const expected = terminal.args.length ? normaliseText(terminal.args.map((a) => a.text).join(', ')) : undefined;
+    return [makeAssertion(chain, `${root.name}.${terminal.name}`, kind, family, shape.strength, subject, chain.top, expected)];
   }
 
   // JUnit, TestNG: one call, optional Assert/Assertions qualifier.
@@ -1025,7 +1033,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
           const v = a.args.get(key);
           if (!v) continue;
           const names = v.type === 'element_value_array_initializer' ? v.namedChildren.map(classLiteralName) : [classLiteralName(v)];
-          assertions.push({ callee: `@Test(${key})`, subject: names.join(', '), text: a.node.text.trim(), line: a.line, kind: 'exception', family: 'junit', strength: 3 });
+          assertions.push({ callee: `@Test(${key})`, subject: names.join(', '), expected: names.join(', '), text: a.node.text.trim(), line: a.line, kind: 'exception', family: 'junit', strength: 3 });
         }
       }
       assertions.sort((x, y) => x.line - y.line);

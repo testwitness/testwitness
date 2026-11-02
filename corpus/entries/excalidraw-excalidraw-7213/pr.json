@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/excalidraw/excalidraw/pull/7213",
+  "repo": "excalidraw/excalidraw",
+  "number": 7213,
+  "title": "test: disable flaky test",
+  "merged_at": "2023-10-31T11:05:08Z",
+  "stars": 134975,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "tp",
+  "split": "heldout",
+  "base_sha": "ea677d45819fa71919604e0d1d60c518045cd966",
+  "head_sha": "df24341db2baefc69201d5c9959803cbc2a67518",
+  "files_changed": 1,
+  "additions": 14,
+  "deletions": 14
+}

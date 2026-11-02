@@ -1,0 +1,14 @@
+[
+  {
+    "path": "packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v8.test.ts.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v9.test.ts.snap",
+    "status": "modified"
+  },
+  {
+    "path": "packages/integration-tests/tests/__snapshots__/recommended-does-not-require-program.test.ts.snap",
+    "status": "modified"
+  }
+]

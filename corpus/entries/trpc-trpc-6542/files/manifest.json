@@ -1,0 +1,330 @@
+[
+  {
+    "path": "packages/client/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/test/issue-4130-ssr-different-transformers.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-4130-ssr-different-transformers.test.tsx"
+  },
+  {
+    "path": "packages/react-query/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/react-query/test/__queryClient.ts",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/__queryClient.ts"
+  },
+  {
+    "path": "packages/react-query/test/__reactHelpers.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/__reactHelpers.tsx"
+  },
+  {
+    "path": "packages/react-query/test/__setupTests.ts",
+    "status": "renamed",
+    "oldPath": "packages/tests/setupTests.ts"
+  },
+  {
+    "path": "packages/react-query/test/__testHelpers.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/__testHelpers.tsx"
+  },
+  {
+    "path": "packages/react-query/test/abortOnUnmount.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/abortOnUnmount.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/bigBoi.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/bigBoi.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/createClient.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/createClient.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/createQueryUtils.test.ts",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/createQueryUtils.test.ts"
+  },
+  {
+    "path": "packages/react-query/test/dehydrate.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/dehydrate.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/ensureQueryData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/ensureQueryData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/errors.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/errors.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/formData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/formData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/formatError.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/formatError.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/getQueryKey.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/getQueryKey.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/invalidateQueries.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/invalidateQueries.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/invalidateRouters.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/invalidateRouters.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/multiple-trpc-providers.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/multiple-trpc-providers.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/mutationkey.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/mutationkey.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/octetStreams.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/octetStreams.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/offline.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/offline.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/overrides.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/overrides.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/polymorphism.common.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/polymorphism.common.tsx"
+  },
+  {
+    "path": "packages/react-query/test/polymorphism.factory.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/polymorphism.factory.tsx"
+  },
+  {
+    "path": "packages/react-query/test/polymorphism.subtyped-factory.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/polymorphism.subtyped-factory.tsx"
+  },
+  {
+    "path": "packages/react-query/test/polymorphism.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/polymorphism.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/prefetchQuery.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/prefetchQuery.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/queryClientDefaults.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/queryClientDefaults.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/queryOptions.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/queryOptions.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-1645-setErrorStatusSSR.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/regression/issue-1645-setErrorStatusSSR.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-2942-useInfiniteQuery-setData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-2942-useInfiniteQuery-setData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-2996-defined-data.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-2996-defined-data.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-3455-56-invalidate-queries.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-3455-56-invalidate-queries.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-3461-reserved-properties.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/regression/issue-3461-reserved-properties.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-4486-initialData-types.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/regression/issue-4486-initialData-types.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-4519-invalid-select-as-transform.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/regression/issue-4519-invalid-select-as-transform.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-5357-input-always-required.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/regression/issue-5357-input-always-required.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/regression/issue-5808-proxy-in-dep-array.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/regression/issue-5808-proxy-in-dep-array.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/rsc-prefetch.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/rsc-prefetch.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/setInfiniteQueryData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/setInfiniteQueryData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/setQueriesData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/setQueriesData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/setQueryData.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/setQueryData.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/ssg.test.ts",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/ssg.test.ts"
+  },
+  {
+    "path": "packages/react-query/test/ssgExternal.test.ts",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/ssgExternal.test.ts"
+  },
+  {
+    "path": "packages/react-query/test/trpc-options.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/trpc-options.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useInfiniteQuery.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useInfiniteQuery.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useMutation.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useMutation.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useQueries.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useQueries.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useQuery.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useQuery.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useSubscription.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useSubscription.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useSuspenseInfiniteQuery.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useSuspenseInfiniteQuery.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useSuspenseQueries.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useSuspenseQueries.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useSuspenseQuery.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useSuspenseQuery.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/useUtils.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/useUtils.test.tsx"
+  },
+  {
+    "path": "packages/react-query/test/withTRPC.test.tsx",
+    "status": "renamed",
+    "oldPath": "packages/tests/server/react/withTRPC.test.tsx"
+  },
+  {
+    "path": "packages/react-query/tsconfig.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/react-query/vitest.config.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/tests/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/tests/server/adapters/next.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/tests/tsconfig.json",
+    "status": "modified"
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "scripts/generateBigBoi.ts",
+    "status": "modified"
+  },
+  {
+    "path": "turbo.json",
+    "status": "modified"
+  },
+  {
+    "path": "vitest.config.ts",
+    "status": "modified"
+  }
+]

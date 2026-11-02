@@ -92,7 +92,7 @@ function unwindChain(expr: Node): Chain | undefined {
         if (carried) seg.args = carried;
         segments.unshift(seg);
         carried = undefined;
-        if (prop.text === 'should') shouldSubject = squash(obj.text);
+        if (prop.text === 'should') shouldSubject = squash(unwrapExpression(obj).text);
         node = obj;
         break;
       }
@@ -507,14 +507,6 @@ export async function buildInventory(path: string, source: string, profile: Fram
   // 1. Declarations.
   const tests = new Map<NodeId, Declaration>();
   const containers = new Map<NodeId, Declaration>();
-  for (const call of capturedNodes(queries.tests, root, 'call')) {
-    if (isInnerCall(call)) continue;
-    if (tests.has(call.id) || containers.has(call.id)) continue;
-    const decl = analyseDeclaration(call);
-    if (!decl) continue;
-    (decl.base === 'test' ? tests : containers).set(call.id, decl);
-  }
-
   const scopeOf = (node: Node): Scope => {
     let cur: Node | null = node.parent;
     while (cur) {
@@ -528,6 +520,17 @@ export async function buildInventory(path: string, source: string, profile: Fram
     }
     return { kind: 'file' };
   };
+
+  for (const call of capturedNodes(queries.tests, root, 'call')) {
+    if (isInnerCall(call)) continue;
+    if (tests.has(call.id) || containers.has(call.id)) continue;
+    const decl = analyseDeclaration(call);
+    if (!decl) continue;
+    // A test declared inside another test body is not a declaration in any framework;
+    // Playwright's inline test.skip('reason') lands here and is read as a marker instead.
+    if (decl.base === 'test' && scopeOf(call).kind === 'test') continue;
+    (decl.base === 'test' ? tests : containers).set(call.id, decl);
+  }
 
   // 2. Assertion helpers: named functions outside tests whose body asserts.
   const assertionHelpers = new Set<string>();
@@ -775,7 +778,7 @@ function analyseInlineMarker(call: Node, tests: Map<NodeId, Declaration>, contai
   }
 
   // A declaration shape (title first) is handled by tests.scm, never here.
-  if (args[0] && isStringLike(args[0]) && (args.length === 1 || args[1] === undefined || isFunctionNode(args[1]!) || args[1]!.type === 'object')) {
+  if (args[0] && isStringLike(args[0]) && args[1] && (isFunctionNode(args[1]) || args[1].type === 'object')) {
     return undefined;
   }
   const kindByProp: Record<string, MarkerKind> = { skip: 'skip', fixme: 'fixme', fail: 'xfail' };

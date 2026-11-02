@@ -2,15 +2,17 @@ import type { Rule } from '../types.js';
 import { rulesR } from './R.js';
 import { rulesO } from './O.js';
 import { rulesA } from './A.js';
+import { rulesV } from './V.js';
 
 export * from './R.js';
 export * from './O.js';
 export * from './A.js';
+export * from './V.js';
 export * from './util.js';
 
 /** Built in rules in catalogue order. */
 export function builtinRules(): Rule[] {
-  return [...rulesR(), ...rulesA(), ...rulesO()];
+  return [...rulesR(), ...rulesA(), ...rulesO(), ...rulesV()];
 }
 
 export function ruleMap(rules: Rule[] = builtinRules()): Map<string, Rule> {

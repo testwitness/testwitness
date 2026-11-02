@@ -1,0 +1,14 @@
+[
+  {
+    "path": "news/b8f2cc6f-00f0-4509-baeb-2e9fd5e35bcf.trivial",
+    "status": "added"
+  },
+  {
+    "path": "tests/functional/test_uninstall.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/functional/test_wheel.py",
+    "status": "modified"
+  }
+]
