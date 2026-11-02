@@ -58,8 +58,14 @@ function isSame(a: TestCase, b: TestCase): boolean {
   return (
     a.bodyHash === b.bodyHash &&
     markersKey(a) === markersKey(b) &&
-    a.parameterCount === b.parameterCount
+    a.parameterCount === b.parameterCount &&
+    assertionsKey(a) === assertionsKey(b)
   );
+}
+
+/** Assertions as seen by the front end, including helper calls that resolve to assertions; changes in a helper show up here even when the body did not change. */
+export function assertionsKey(t: TestCase): string {
+  return t.assertions.map((a) => `${a.kind}:${a.text.replace(/\s+/g, '')}`).join('|');
 }
 
 export function markersKey(t: TestCase): string {
@@ -86,7 +92,7 @@ export function allChanges(pairs: InventoryPair[]): Array<{ pair: InventoryPair;
 
 /** Does a test have an active (unconditional or constant true) skip style marker. */
 export function isSkipped(t: TestCase): boolean {
-  return t.markers.some((m) => (m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false);
+  return t.markers.some((m) => ((m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false) || (m.kind === 'conditional-skip' && m.constant === true));
 }
 
 export function isFocused(t: TestCase): boolean {

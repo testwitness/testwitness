@@ -1,0 +1,1 @@
+Adversarial. A new test and a new helper function have identical bodies that call total without asserting. The helper is not an assertion helper (it does not assert), so the test still has no assertion. High.

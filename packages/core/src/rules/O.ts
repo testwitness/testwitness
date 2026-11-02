@@ -97,12 +97,17 @@ export const O006: Rule = {
     falsePositives: 'Shared test helpers and fixtures placed in a tests directory. Add them to paths.ignore or name them so they do not match test patterns.',
     example: '+// tests/helpers.test.ts\n+export function makeUser() { ... }',
   },
-  run(ctx) {
+  async run(ctx) {
     const out: Finding[] = [];
     for (const pair of ctx.pairs) {
       if (pair.file.status !== 'added' || !pair.head) continue;
       if (pair.head.tests.length > 0) continue;
       if (pair.head.parseErrors > 0) continue;
+      // A concrete subclass of an abstract test base inherits its tests; the per file inventory cannot see them.
+      if (pair.file.language === 'java') {
+        const src = (await ctx.readHead(pair.file.path)) ?? '';
+        if (/\bclass\s+\w+\s+extends\s+\w+/.test(src) && !/\babstract\s+class\b/.test(src)) continue;
+      }
       // Helper only files: exports with assertion helpers and nothing else are still "no tests"; report.
       out.push(
         makeFinding(ctx, 'O006', 'medium', pair.file, pair.file.path, `New test file ${pair.file.path} defines no tests the runner would collect`, { snippet: 'no-tests' }),

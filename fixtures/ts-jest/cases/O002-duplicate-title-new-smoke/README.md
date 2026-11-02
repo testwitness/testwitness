@@ -1,0 +1,1 @@
+Adversarial. A new test reuses the title of an existing real test in the same describe block and only checks toBeDefined. Pairing by position matches the first, so the second is the added one and is reported.

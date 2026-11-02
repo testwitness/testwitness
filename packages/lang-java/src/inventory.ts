@@ -688,6 +688,14 @@ function isLiteralTrue(node: Node | undefined): boolean {
   return s !== undefined && s.trim() === 'true';
 }
 
+/** Exception types that only an assertion raises. Expecting one of them is an expected failure, not an exception test. */
+const ASSERTION_FAILURE_TYPES = /(^|\.)(AssertionError|AssertionFailedError|ComparisonFailure|MultipleFailuresError)$/;
+
+/** Class names from `@Test(expected = X.class)` or `@Test(expectedExceptions = { X.class, Y.class })`. */
+function expectedExceptionNames(value: Node): string[] {
+  return value.type === 'element_value_array_initializer' ? value.namedChildren.map(classLiteralName) : [classLiteralName(value)];
+}
+
 function markersFromAnnotations(annotations: ParsedAnnotation[], framework: JavaFramework): SkipMarker[] {
   const out: SkipMarker[] = [];
   const rules = new Map<string, { kind: SkipMarker['kind']; constant: boolean }>();
@@ -715,6 +723,15 @@ function markersFromAnnotations(annotations: ParsedAnnotation[], framework: Java
         } else if (v.type !== 'true') {
           out.push({ marker: `@Test(${skipAttr.key}=)`, kind: 'conditional-skip', line: a.line });
         }
+      }
+      // JUnit 4 and TestNG have no xfail marker. Expecting an assertion failure type is the idiom used instead:
+      // the test then passes exactly when its own assertions fail.
+      for (const key of [...junit4.expectedExceptionKeys, ...testng.expectedExceptionKeys]) {
+        const e = a.args.get(key);
+        if (!e) continue;
+        const names = expectedExceptionNames(e);
+        const failure = names.find((n) => ASSERTION_FAILURE_TYPES.test(n));
+        if (failure) out.push({ marker: `@Test(${key}=${failure})`, kind: 'xfail', constant: true, line: a.line });
       }
     }
   }
@@ -1032,8 +1049,10 @@ export async function buildJavaInventory(path: string, source: string, profile: 
         for (const key of [...junit4.expectedExceptionKeys, ...testng.expectedExceptionKeys]) {
           const v = a.args.get(key);
           if (!v) continue;
-          const names = v.type === 'element_value_array_initializer' ? v.namedChildren.map(classLiteralName) : [classLiteralName(v)];
-          assertions.push({ callee: `@Test(${key})`, subject: names.join(', '), expected: names.join(', '), text: a.node.text.trim(), line: a.line, kind: 'exception', family: 'junit', strength: 3 });
+          const names = expectedExceptionNames(v);
+          // No `expected` field: the subject is the exception type and there is no second operand. Setting both to the
+          // same text made core read the annotation as a tautology (subject equals expected).
+          assertions.push({ callee: `@Test(${key})`, subject: names.join(', '), text: a.node.text.trim(), line: a.line, kind: 'exception', family: 'junit', strength: 3 });
         }
       }
       assertions.sort((x, y) => x.line - y.line);

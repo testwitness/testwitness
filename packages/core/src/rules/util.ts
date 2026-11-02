@@ -160,17 +160,29 @@ async function buildHeadIndex(ctx: RuleContext): Promise<HeadIndex> {
     const dir = f.split('/').slice(0, -1).join('/');
     if (changedDirs.has(dir)) candidates.add(f);
   }
-  const changedPaths = new Set(ctx.pairs.map((p) => p.file.path));
+  // Only tests that this PR added or changed can be the destination of a refactor.
+  const changedTests = new Map<string, Set<string>>();
+  for (const p of ctx.pairs) {
+    if (!p.head) continue;
+    const baseByName = new Map((p.base?.tests ?? []).map((t) => [t.qualifiedName, t]));
+    const set = new Set<string>();
+    for (const t of p.head.tests) {
+      const b = baseByName.get(t.qualifiedName);
+      if (!b || b.bodyHash !== t.bodyHash) set.add(t.qualifiedName);
+    }
+    changedTests.set(p.file.path, set);
+  }
   for (const path of candidates) {
     const inv = await ctx.headInventoryFor(path);
     if (!inv) continue;
+    const changedHere = changedTests.get(path);
     for (const t of inv.tests) {
       if (t.statementCount > 0) {
         const arr = byHash.get(t.bodyHash);
         if (arr) arr.push({ path, test: t });
         else byHash.set(t.bodyHash, [{ path, test: t }]);
       }
-      if (changedPaths.has(path)) {
+      if (changedHere?.has(t.qualifiedName)) {
         for (const a of t.assertions) {
           const k = assertionKeyOf(a.text);
           const set = assertionOwners.get(k) ?? new Set<string>();

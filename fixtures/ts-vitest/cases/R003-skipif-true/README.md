@@ -1,0 +1,1 @@
+Adversarial. test.skipIf(true) is added. The condition is the literal true, so the front end records a conditional skip with constant true, and the test never runs. That is a hard skip and should be reported medium, not as a low conditional skip.

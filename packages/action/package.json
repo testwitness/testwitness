@@ -1,0 +1,20 @@
+{
+  "name": "@testwitness/action",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitHub Action glue for testwitness",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "exports": { ".": { "development": "./src/index.ts", "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "bundle": "esbuild src/main.ts --bundle --platform=node --target=node20 --format=esm --outfile=../../dist/index.js --conditions=development --external:web-tree-sitter --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
+    "@testwitness/core": "workspace:*",
+    "testwitness": "workspace:*"
+  }
+}

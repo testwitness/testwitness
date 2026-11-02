@@ -1,0 +1,49 @@
+name: testwitness
+description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the JUnit XML. Java, TypeScript, JavaScript and Python. No model, no secrets, no network.
+author: Sajjad Hossain
+branding:
+  icon: eye
+  color: gray-dark
+inputs:
+  junit:
+    description: Comma separated globs of JUnit XML files written by the test job
+    required: false
+    default: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml"
+  base:
+    description: Base ref or sha (default is the pull request base)
+    required: false
+  head:
+    description: Head ref or sha (default is the pull request head)
+    required: false
+  mode:
+    description: report, require-ack or strict (overrides .testwitness.yml)
+    required: false
+  fail_on:
+    description: high, medium or low (overrides .testwitness.yml)
+    required: false
+  config:
+    description: Path to .testwitness.yml (default reads it from the base ref)
+    required: false
+  comment:
+    description: Post or update one PR comment when the token can write (true or false)
+    required: false
+    default: "true"
+  token:
+    description: Token for the PR comment. Optional. Defaults to GITHUB_TOKEN. Never required for the check itself.
+    required: false
+  output_dir:
+    description: Directory for testwitness.json and testwitness.md
+    required: false
+    default: "."
+outputs:
+  state:
+    description: pass, review or unreadable
+  report:
+    description: Path to testwitness.json
+  findings_high:
+    description: Number of open high severity findings
+  findings_medium:
+    description: Number of open medium severity findings
+runs:
+  using: node20
+  main: dist/index.js

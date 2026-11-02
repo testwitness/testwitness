@@ -1,0 +1,1 @@
+Adversarial. A new test file defines an exported function that declares tests when called and never calls it itself. Shared test functions of this shape are usually invoked from another file, and the front end cannot see call sites, so it counts the declarations and O006 stays quiet. The case pins that choice: a declaration inside a plain function still counts as a test.

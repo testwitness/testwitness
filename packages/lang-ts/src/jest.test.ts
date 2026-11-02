@@ -261,6 +261,23 @@ describe('jest assertions', () => {
     ]);
   });
 
+  it('keeps every value matcher in one family so A002 can pair toEqual with toMatchObject and toBe with toBeDefined', async () => {
+    const t = await single(src(`
+      test('families', () => {
+        expect(receipt).toEqual({ total: 11 });
+        expect(receipt).toMatchObject({ total: 11 });
+        expect(receipt.total).toBe(11);
+        expect(receipt.total).toBeGreaterThan(0);
+        expect(receipt.total).toBeDefined();
+        expect(spy).toHaveBeenCalledWith(11);
+        expect(() => f()).toThrow();
+      });
+    `));
+    expect(t.assertions.map((a) => `${a.family}:${a.strength}`)).toEqual([
+      'value:3', 'value:2', 'value:3', 'value:2', 'value:1', 'interaction:3', 'exception:1',
+    ]);
+  });
+
   it('records expect.assertions and expect.hasAssertions as count declarations', async () => {
     const t = await single(src(`
       test('count', async () => {

@@ -79,6 +79,10 @@ export const A001: Rule = {
           );
           continue;
         }
+        const baseCustom = new Set(base.assertions.filter((a) => a.kind === 'custom').map(assertionKey));
+        const newHelperCalls = head.assertions.filter((a) => a.kind === 'custom' && !baseCustom.has(assertionKey(a)));
+        // Helper extraction: the assertions now live in a helper the front end resolved to assertions; the oracle is intact.
+        if (newHelperCalls.length > 0) continue;
         if (allConsolidated) {
           out.push(
             makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${lost} assertion${lost === 1 ? '' : 's'} consolidated into an assertion on the parent expression`, {
@@ -111,6 +115,9 @@ export const A001: Rule = {
   },
 };
 
+/** Negated assertion forms. assertNotNull and isNotNull are positive smoke checks, not negations. */
+const NEGATED = /\.not\.|\.not$|\.to\.not\b|assertNot(Equals|Same|In|Contains|Thrown)|assert_not_|assertFalse|isNotEqualTo|isNotSameAs|doesNot|assertNotIn\b|\bnot_\w*called/;
+
 interface Pairing {
   base: Assertion;
   head: Assertion;
@@ -132,10 +139,8 @@ function pairBySubject(base: TestCase, head: TestCase): Pairing[] {
     if (unchangedBase.has(b)) continue;
     const s = norm(b.subject);
     if (!s || !b.family) continue;
-    const negated = /\.not\b|\bnot[A-Z_]|assert_not_|assertNot|assertFalse/.test(b.callee);
-    const h = head.assertions.find(
-      (x) => !used.has(x) && norm(x.subject) === s && x.family === b.family && /\.not\b|\bnot[A-Z_]|assert_not_|assertNot|assertFalse/.test(x.callee) === negated,
-    );
+    const negated = NEGATED.test(b.callee);
+    const h = head.assertions.find((x) => !used.has(x) && norm(x.subject) === s && x.family === b.family && NEGATED.test(x.callee) === negated);
     if (h) {
       used.add(h);
       pairs.push({ base: b, head: h });

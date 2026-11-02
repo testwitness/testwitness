@@ -1105,22 +1105,6 @@
   {
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
-    "ruleId": "A009",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "FlowableFlatMapIsolatedTest#cancelScalarDrainRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "A009",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "FlowableFlatMapIsolatedTest#cancelDrainRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
     "ruleId": "R001",
     "severity": "low",
     "verdict": "expected-low",

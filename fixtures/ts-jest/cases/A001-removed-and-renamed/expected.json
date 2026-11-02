@@ -1,1 +1,1 @@
-[{"ruleId":"R001","severity":"medium","subject":"checkout › builds a receipt with tax"}]
+[{"ruleId":"R001","severity":"low","subject":"checkout › builds a receipt with tax","label":"replaced"}]

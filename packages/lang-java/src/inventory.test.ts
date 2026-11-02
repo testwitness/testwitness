@@ -552,6 +552,40 @@ import org.testng.SkipException;
 public class FooTest { @Test public void a() { throw new SkipException("later"); } }`);
     expect(t.markers[0]).toMatchObject({ marker: 'throw new SkipException', kind: 'skip', constant: true, reason: 'later' });
   });
+
+  it('JUnit 4 @Test(expected = AssertionError.class) is an xfail marker and still an exception assertion', async () => {
+    const i = await inv(`${JUNIT4_HEADER}
+import org.junit.ComparisonFailure;
+public class FooTest {
+  @Test(expected = AssertionError.class) public void a() { assertEquals(1, svc.call()); }
+  @Test(expected = ComparisonFailure.class) public void b() { assertEquals("x", svc.name()); }
+  @Test(expected = IllegalArgumentException.class) public void c() { svc.call(null); }
+}`);
+    expect(i.tests[0]!.markers).toEqual([{ marker: '@Test(expected=AssertionError)', kind: 'xfail', constant: true, line: 8 }]);
+    expect(i.tests[0]!.assertions.map((a) => a.callee).sort()).toEqual(['@Test(expected)', 'assertEquals']);
+    expect(i.tests[1]!.markers[0]).toMatchObject({ kind: 'xfail', marker: '@Test(expected=ComparisonFailure)' });
+    expect(i.tests[2]!.markers).toEqual([]);
+  });
+
+  it('TestNG expectedExceptions containing AssertionError is an xfail marker', async () => {
+    const i = await inv(`${TESTNG_HEADER}
+public class FooTest {
+  @Test(expectedExceptions = { IOException.class, AssertionError.class }) public void a() { svc.call(null); }
+  @Test(expectedExceptions = IllegalStateException.class) public void b() { svc.call(null); }
+}`);
+    expect(i.tests[0]!.markers[0]).toMatchObject({ kind: 'xfail', marker: '@Test(expectedExceptions=AssertionError)', constant: true });
+    expect(i.tests[1]!.markers).toEqual([]);
+  });
+
+  it('@Test(expected = X.class) carries no expected operand, so it never reads as a tautology', async () => {
+    const t = await one(`${JUNIT4_HEADER}
+public class FooTest {
+  @Test(expected = IllegalArgumentException.class)
+  public void rejects() { svc.call(null); }
+}`);
+    expect(t.assertions[0]!.subject).toBe('IllegalArgumentException');
+    expect(t.assertions[0]!.expected).toBeUndefined();
+  });
 });
 
 describe('parameter counts', () => {

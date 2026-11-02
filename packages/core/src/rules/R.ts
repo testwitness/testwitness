@@ -224,7 +224,7 @@ export const R003: Rule = {
       const { base, head } = change;
       if (isSkipped(base) || !isSkipped(head)) {
         // Conditional skip newly added: low.
-        const condNew = head.markers.filter((m) => m.kind === 'conditional-skip' && !base.markers.some((b) => b.marker === m.marker));
+        const condNew = head.markers.filter((m) => m.kind === 'conditional-skip' && m.constant !== true && !base.markers.some((b) => b.marker === m.marker));
         if (!isSkipped(base) && !isSkipped(head) && condNew.length) {
           const m = condNew[0]!;
           out.push(
@@ -238,7 +238,7 @@ export const R003: Rule = {
         }
         continue;
       }
-      const marker = head.markers.find((m) => (m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false)!;
+      const marker = head.markers.find((m) => ((m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false) || (m.kind === 'conditional-skip' && m.constant === true))!;
       let sev: Severity = exercisesChangedProduction(pair.head, pair.file.path, ctx) ? 'high' : 'medium';
       let label: string | undefined;
       if (reasonReferencesIssue(marker.reason)) {

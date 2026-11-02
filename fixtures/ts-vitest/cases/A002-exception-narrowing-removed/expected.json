@@ -1,1 +1,1 @@
-[{"ruleId":"A002","severity":"medium","subject":"cart › rejects negative quantity"}]
+[{"ruleId":"A002","severity":"high","subject":"cart › rejects negative quantity"}]

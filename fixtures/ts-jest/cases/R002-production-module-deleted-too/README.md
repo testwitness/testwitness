@@ -1,1 +1,1 @@
-Adversarial. The pricing module and its test file are both deleted in the same PR. The tool has no control for a feature removal: the tests are gone and nothing covers them, so the file deletion is still reported high. The reviewer decides whether the removal is intended.
+Negative control. The pricing module and its test file are both deleted in the same PR. The tests exercised production code that no longer exists, so the file deletion is reported low with the label production removed. The reviewer still sees that a feature left with its tests.
