@@ -15,6 +15,7 @@ import type {
   SkipMarker,
   TestCase,
   TestInventory,
+  CatchAll,
 } from '@testwitness/core';
 import { parsePython } from './grammar.js';
 import {
@@ -499,6 +500,45 @@ function literalParametrizeNames(def: Node, aliases: Map<string, string>): Set<s
   return out;
 }
 
+/** True when the definition carries any pytest.mark.parametrize decorator, literal or dynamic. */
+function isParametrized(def: Node, aliases: Map<string, string>): boolean {
+  for (const d of decoratorsOf(def)) {
+    const expr = decoratorExpression(d);
+    if (!expr) continue;
+    const parts = callParts(expr, aliases);
+    if (parts && parts.chain === 'pytest.mark.parametrize') return true;
+  }
+  return false;
+}
+
+/** Catch blocks in the body that swallow exceptions: bare except, except Exception or BaseException, whose body neither raises, fails nor asserts. */
+function collectCatchAlls(body: Node | null): CatchAll[] {
+  const out: CatchAll[] = [];
+  if (!body) return out;
+  const stack: Node[] = [body];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node.type === 'function_definition' || node.type === 'lambda') continue;
+    if (node.type === 'try_statement') {
+      const first = node.childForFieldName('body')?.namedChildren.find((c) => c.type !== 'comment');
+      const snippet = normaliseText(first?.text ?? node.text).slice(0, 120);
+      for (const clause of node.namedChildren) {
+        if (clause.type !== 'except_clause') continue;
+        const typeNode = clause.namedChildren.find((c) => c.type !== 'block' && c.type !== 'comment');
+        const binding = typeNode ? typeNode.text.replace(/\s+as\s+\w+$/, '') : 'bare except';
+        const broad = !typeNode || /^(Exception|BaseException|\(.*\b(Exception|BaseException)\b.*\))$/.test(binding);
+        if (!broad) continue;
+        const block = clause.childForFieldName('body') ?? clause.namedChildren.find((c) => c.type === 'block');
+        const text = block?.text ?? '';
+        const swallows = !/\b(raise|assert|pytest\.fail|self\.fail|fail\()/.test(text);
+        out.push({ line: line(clause), binding, swallows, snippet });
+      }
+    }
+    for (const c of node.namedChildren) stack.push(c);
+  }
+  return out;
+}
+
 function parametrizeCount(def: Node, aliases: Map<string, string>): number | undefined {
   let product: number | undefined;
   let sawDynamic = false;
@@ -970,6 +1010,9 @@ export async function buildInventory(path: string, source: string, profile: Fram
       framework,
     };
     if (parameterCount !== undefined) test.parameterCount = parameterCount;
+    if (isParametrized(c.def, aliases) || c.classes.some((cls) => isParametrized(cls, aliases))) test.parameterised = true;
+    const catchAlls = collectCatchAlls(c.body);
+    if (catchAlls.length) test.catchAlls = catchAlls;
     tests.push(test);
   }
 

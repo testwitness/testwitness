@@ -1079,3 +1079,22 @@ def test_d():
     expect(only(i, 'test_d').assertions[0]!.strength).toBe(4);
   });
 });
+
+describe('parameterised flag and catch alls', () => {
+  it('marks dynamic parametrize as parameterised with no count', async () => {
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', `import pytest\nCASES = [1, 2]\n@pytest.mark.parametrize("n", CASES)\ndef test_a(n):\n    assert n\n\ndef test_b():\n    assert 1\n`, { frameworks: new Set(), extraAssertions: [] });
+    const a = inv.tests.find((t) => t.name === 'test_a')!;
+    expect(a.parameterised).toBe(true);
+    expect(a.parameterCount).toBeUndefined();
+    expect(inv.tests.find((t) => t.name === 'test_b')!.parameterised).toBeUndefined();
+  });
+  it('collects swallowing catch alls and ignores narrow or asserting ones', async () => {
+    const src = `def test_a():\n    try:\n        svc.reconcile(ledger)\n        assert ledger.drift() == 0\n    except Exception:\n        pass\n\ndef test_b():\n    try:\n        svc.run()\n    except ValueError:\n        pass\n\ndef test_c():\n    try:\n        svc.run()\n    except Exception as e:\n        assert "boom" in str(e)\n\ndef test_d():\n    try:\n        svc.run()\n    except:\n        raise\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    const by = (n: string) => inv.tests.find((t) => t.name === n)!;
+    expect(by('test_a').catchAlls).toEqual([{ line: 5, binding: 'Exception', swallows: true, snippet: 'svc.reconcile(ledger)' }]);
+    expect(by('test_b').catchAlls).toBeUndefined();
+    expect(by('test_c').catchAlls![0]!.swallows).toBe(false);
+    expect(by('test_d').catchAlls![0]!).toMatchObject({ binding: 'bare except', swallows: false });
+  });
+});
