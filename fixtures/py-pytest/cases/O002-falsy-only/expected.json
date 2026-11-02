@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "test_new_cart_has_no_items",
+    "label": "smoke"
+  }
+]

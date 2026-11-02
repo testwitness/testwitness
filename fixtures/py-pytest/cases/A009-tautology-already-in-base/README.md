@@ -1,0 +1,1 @@
+assert True was already in the base and the PR only edits a setup line. The rule reports tautologies that were added or that replaced a real assertion, not ones that were there before, so nothing fires.

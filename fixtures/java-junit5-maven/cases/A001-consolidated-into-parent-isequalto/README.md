@@ -1,0 +1,1 @@
+Negative control. Two assertions on receipt.total() and receipt.lines() become one isEqualTo on receipt itself, which compares every field. The removed subjects are sub expressions of the surviving subject, so the rule reports consolidated at low.

@@ -1,0 +1,1 @@
+The new test calls assert_receipt imported from another module. The Python front end counts any call whose name starts with assert as an assertion, the same way it treats numpy.testing.assert_array_equal or pandas assert_frame_equal, so the test has an oracle and O001 stays silent.

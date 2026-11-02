@@ -1,0 +1,1 @@
+Adversarial. The loosened assertion is split across lines with odd spacing in the subject. Whitespace is normalised before subjects are paired, so the loosening is still caught at high. A textual comparison of subjects would miss it.

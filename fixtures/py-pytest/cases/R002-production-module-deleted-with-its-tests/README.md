@@ -1,0 +1,1 @@
+The discounts feature is removed: app/discounts.py and tests/test_discounts.py are deleted together. The tests had nothing left to exercise, so deleting them alongside their only production module is not lost coverage and should not be reported.

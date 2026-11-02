@@ -1,0 +1,1 @@
+Adversarial. The body contains an empty nested block with a comment. A block is not an executable statement, so the test is empty and R006 is high. A detector that counts braces would think there is still code.

@@ -1,0 +1,1 @@
+Adversarial. The new abstract base has real @Test methods and the new subclass ArrayCartTest only supplies the newCart hook. Together they run two tests, so neither file is a test file that runs nothing and the honest expectation is no finding. The engine cannot see inheritance across files, so this case records whether O006 wrongly reports the subclass.

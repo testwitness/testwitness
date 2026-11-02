@@ -1,0 +1,1 @@
+Adversarial. it.only is added to one test while another test in the same file has a syntax error. The focus must still be found. The broken test gains no finding of its own beyond its unreadable assertion.

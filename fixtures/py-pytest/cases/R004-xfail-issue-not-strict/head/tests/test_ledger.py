@@ -1,0 +1,21 @@
+import pytest
+
+from app.ledger import Ledger
+
+
+def test_balance_starts_at_opening():
+    ledger = Ledger(opening=100)
+    assert ledger.balance() == 100
+
+
+@pytest.mark.xfail(reason="PAY-412 refund posting regressed")
+def test_post_moves_balance():
+    ledger = Ledger(opening=100)
+    ledger.post(-30, "refund")
+    assert ledger.balance() == 70
+
+
+def test_rejects_zero_amount():
+    ledger = Ledger()
+    with pytest.raises(ValueError):
+        ledger.post(0)

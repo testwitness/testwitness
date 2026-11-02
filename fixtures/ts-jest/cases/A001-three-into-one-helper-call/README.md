@@ -1,0 +1,1 @@
+Adversarial. Three expects are replaced by one call to a helper expectReceipt, defined in the same file, whose body holds the same three expects. Nothing was lost: the helper asserts on the same subjects. The documented control says helper assertions are still counted, so no finding is the honest expectation even though the raw count went from three to one.

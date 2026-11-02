@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "subject": "test_total_sums_lines",
+    "label": "tracked"
+  }
+]

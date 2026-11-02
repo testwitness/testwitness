@@ -1,0 +1,1 @@
+Negative control. Three single item tests are folded into one @ParameterizedTest with a @CsvSource of three rows. The parameter count covers the three removed tests, so each removal is reported as parameterised at low rather than as a deletion.

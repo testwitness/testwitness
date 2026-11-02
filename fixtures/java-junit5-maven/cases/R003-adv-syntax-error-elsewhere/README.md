@@ -1,0 +1,1 @@
+Adversarial. One method in the head has a missing semicolon while another test gains @Disabled. The parser recovers and the skip is reported; the broken method keeps its assertion so it produces nothing.

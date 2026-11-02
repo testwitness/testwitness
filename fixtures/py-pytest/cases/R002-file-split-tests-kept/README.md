@@ -1,0 +1,1 @@
+tests/test_ledger.py is deleted but every one of its tests is appended, body for body, to tests/test_cart.py. Git does not pair a deletion with a modification as a rename, so the rule itself finds the bodies elsewhere and reports the deletion low as moved.

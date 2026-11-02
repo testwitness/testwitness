@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "test_true_up_entry_is_balanced",
+    "label": "smoke"
+  }
+]

@@ -1,0 +1,1 @@
+Negative control. sumsLineItems is cut from CartTest and pasted unchanged into a new CartTotalsTest in the same PR. The head tree index finds the same body in the other file, so R001 reports it as moved at low, which is the documented behaviour for a move. The new file has a real assertion so no O rule fires.

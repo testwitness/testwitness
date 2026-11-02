@@ -1,0 +1,1 @@
+Adversarial. The describe block was already describe.only in the base. The head adds it.only to an existing test and adds a brand new test inside the focused block. The existing test was already focused through its describe, so only the new test is reported.

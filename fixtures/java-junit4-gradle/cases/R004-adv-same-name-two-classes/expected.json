@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "CartSummaryTest#sumsLineItems"
+  }
+]

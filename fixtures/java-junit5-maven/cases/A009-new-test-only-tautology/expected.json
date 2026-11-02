@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A009",
+    "severity": "medium",
+    "subject": "CartTest#checkoutSucceeds"
+  }
+]

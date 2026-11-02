@@ -1,0 +1,1 @@
+Three assertEqual calls on elements of ledger.entries become one assertEqual on the whole list. Every removed subject is a sub expression of the surviving subject, so this is the documented low consolidated outcome.

@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_rejects_non_positive_quantity",
+    "label": "moved"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "TestCart::test_total_of_empty_cart_is_zero"
+  }
+]

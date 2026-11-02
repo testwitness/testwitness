@@ -1,11 +1,24 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
-import { exercisesChangedProduction, headBodyHashIndex, makeFinding } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
 function snippet(t: TestCase): string {
   return `${t.qualifiedName}|${t.bodyHash}`;
+}
+
+/** Path of a changed head file that contains every assertion of the test, when the test has assertions. */
+function refactoredInto(t: TestCase, index: HeadIndex): string | undefined {
+  if (t.assertions.length === 0) return undefined;
+  let common: Set<string> | undefined;
+  for (const a of t.assertions) {
+    const owners = index.assertionOwners.get(assertionKeyOf(a.text));
+    if (!owners) return undefined;
+    common = common ? new Set([...common].filter((p) => owners.has(p))) : new Set(owners);
+    if (common.size === 0) return undefined;
+  }
+  return common ? [...common][0] : undefined;
 }
 
 /** R001 Test function deleted. */
@@ -20,19 +33,26 @@ export const R001: Rule = {
   docs: {
     summary: 'A test present in the base is absent in the head and no test with the same body exists elsewhere in the head tree.',
     falsePositives:
-      'Tests moved to another file are reported as moved (low). Tests folded into a parameterised test whose case count covers the removed tests are reported low. Renamed tests with the same body are not reported.',
+      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, or same name added elsewhere in the PR), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Precision over recall: a deletion is medium or high only when none of those signals is present.',
     example: '-  @Test\n-  void rejectsNegativeAmount() {\n-    assertThrows(IllegalArgumentException.class, () -> svc.charge(-1));\n-  }',
   },
   async run(ctx) {
     const out: Finding[] = [];
-    let index: Awaited<ReturnType<typeof headBodyHashIndex>> | undefined;
-    for (const { pair, change } of allChanges(ctx.pairs)) {
+    let index: HeadIndex | undefined;
+    const prChanges = allChanges(ctx.pairs);
+    const addedByFile = new Map<string, number>();
+    let deletedTotal = 0;
+    for (const { pair, change } of prChanges) {
+      if (change.kind === 'added') addedByFile.set(pair.file.path, (addedByFile.get(pair.file.path) ?? 0) + 1);
+      if (change.kind === 'deleted' && pair.file.status !== 'deleted') deletedTotal++;
+    }
+    for (const { pair, change } of prChanges) {
       if (change.kind !== 'deleted') continue;
       // Deleted files are reported by R002; skip here unless the file is only modified/renamed.
       if (pair.file.status === 'deleted') continue;
       const t = change.base;
-      index ??= await headBodyHashIndex(ctx, pair.file.path);
-      const moved = t.statementCount > 0 ? index.get(t.bodyHash) : undefined;
+      index ??= await headIndex(ctx);
+      const moved = t.statementCount > 0 ? index.byHash.get(t.bodyHash)?.filter((m) => m.path !== pair.file.path || m.test.qualifiedName !== t.qualifiedName) : undefined;
       if (moved && moved.length) {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was moved to ${moved[0]!.path}`, {
@@ -56,6 +76,54 @@ export const R001: Rule = {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} appears folded into parameterised test ${fold.qualifiedName}`, {
             label: 'parameterised',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Moved with edits: a test with the same name was added in another changed file of this PR.
+      const dests = [...(index.addedByName.get(t.name) ?? [])].filter((d) => d !== pair.file.path);
+      if (dests.length) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was moved to ${dests[0]} with edits`, {
+            label: 'moved',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Rewritten across files: other changed test files in this PR gained at least as many tests as the PR deleted.
+      const addedElsewhere = [...addedByFile.entries()].filter(([p]) => p !== pair.file.path).reduce((n, [, c]) => n + c, 0);
+      if (addedElsewhere >= deletedTotal && addedElsewhere > 0) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedElsewhere} new test${addedElsewhere === 1 ? '' : 's'} were added in other changed test files; likely rewritten`, {
+            label: 'rewritten',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Replacement: the same container gained at least as many new tests as it lost (rewritten tests under new names).
+      const addedInContainer = allChanges([pair]).filter((c) => c.change.kind === 'added' && c.change.head.container.join('/') === t.container.join('/')).length;
+      if (addedInContainer >= deletedInContainer && addedInContainer > 0) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedInContainer} new test${addedInContainer === 1 ? '' : 's'} were added in the same ${t.container.length ? 'class or group' : 'file'}`, {
+            label: 'replaced',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Refactor: every assertion of the deleted test survives in a test of a changed file (split, merge, rename with edits).
+      const kept = refactoredInto(t, index);
+      if (kept) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed but all ${t.assertions.length} of its assertions appear in ${kept}`, {
+            label: 'refactored',
             line: t.startLine,
             snippet: snippet(t),
           }),
@@ -96,10 +164,11 @@ export const R002: Rule = {
       if (pair.file.status !== 'deleted') continue;
       const tests = pair.base?.tests ?? [];
       if (tests.length === 0) continue;
-      const index = await headBodyHashIndex(ctx, pair.file.path);
-      const movedCount = tests.filter((t) => t.statementCount > 0 && index.has(t.bodyHash)).length;
+      const index = await headIndex(ctx, pair.file.path);
+      const movedCount = tests.filter((t) => t.statementCount > 0 && (index.byHash.has(t.bodyHash) || refactoredInto(t, index))).length;
       if (movedCount === tests.filter((t) => t.statementCount > 0).length && movedCount > 0) {
-        const dest = index.get(tests.find((t) => index.has(t.bodyHash))!.bodyHash)![0]!.path;
+        const first = tests.find((t) => index.byHash.has(t.bodyHash) || refactoredInto(t, index))!;
+        const dest = index.byHash.get(first.bodyHash)?.[0]?.path ?? refactoredInto(first, index)!;
         out.push(
           makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted; its ${tests.length} tests now live in ${dest}`, { label: 'moved' }),
         );

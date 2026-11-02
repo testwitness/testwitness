@@ -1,0 +1,1 @@
+The PR changes Cart.total in app/cart.py and in the same change deletes test_total_sums_lines, the test that covered it. The test file is named for the changed module and imports it, so the deletion is raised to high.

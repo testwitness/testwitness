@@ -1,0 +1,1 @@
+Adversarial. The deleted file had a missing semicolon in one method. The base inventory still recovers three tests, none of which exist elsewhere, so the deletion is reported at high. A parse error in the base must not hide a deleted file.

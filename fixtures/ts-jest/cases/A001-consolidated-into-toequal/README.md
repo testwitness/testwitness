@@ -1,0 +1,1 @@
+Negative control. Three assertions on receipt.subtotal, receipt.tax and receipt.total become one toEqual on the receipt object. Every removed subject is a sub expression of the surviving subject, so the loss is low with the label consolidated.

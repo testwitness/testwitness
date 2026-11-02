@@ -1,0 +1,1 @@
+A syntax error is introduced in a neighbouring test while an assertion free test is added. The parser recovers, the neighbour still counts as the same test, and only the new test without an oracle is reported.

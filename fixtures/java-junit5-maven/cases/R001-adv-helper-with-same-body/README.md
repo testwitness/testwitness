@@ -1,0 +1,1 @@
+Adversarial. handlesEmpty is deleted from CartTest. LedgerTest contains a private helper checkEmptyTotal whose body is byte for byte the same, but it is not a test and is never collected. A detector that indexes every method body would call this a move. The test is gone, so R001 reports it at medium.

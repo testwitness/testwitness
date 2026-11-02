@@ -1,0 +1,20 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "CartTest#totalsSingleApple",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "CartTest#totalsSinglePear",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "CartTest#totalsSingleFig",
+    "label": "parameterised"
+  }
+]

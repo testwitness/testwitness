@@ -1,0 +1,14 @@
+import { checkout } from './checkout';
+
+async function loadLines() {
+  return [{ sku: 'A1', qty: 2, unitPrice: 5 }];
+}
+
+describe('checkout', () => {
+  it('loads lines before building the receipt', async () => {
+    const lines = await loadLines();
+    const receipt = checkout(lines, 0.1);
+    await Promise.resolve(receipt.total);
+    expect(receipt.lines).toHaveLength(1);
+  });
+});

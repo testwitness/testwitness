@@ -1,0 +1,1 @@
+The PR deletes app/discounts.py and with it the one test that exercised it, test_percentage_discount_applies. There is nothing left to test, so a test deletion that only follows a production deletion should not be reported as lost coverage.

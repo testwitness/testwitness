@@ -75,6 +75,13 @@ describe('playwright declarations', () => {
       test('with reason only', async () => {
         test.fixme('needs backend');
       });
+      test('under an if', async ({ page, browserName }) => {
+        if (browserName === 'webkit') test.fail();
+        if (process.env.CI) {
+          test.skip('no fixtures on ci');
+        }
+        await expect(page).toHaveTitle('x');
+      });
     `), 'tests/b.spec.ts');
     const m = (name: string) => byName(inventory, name).markers.map((x) => `${x.marker}:${x.kind}:${x.constant}:${x.reason ?? ''}`);
     expect(m('unconditional')).toEqual(['test.skip:skip:true:']);
@@ -85,6 +92,7 @@ describe('playwright declarations', () => {
       'test.fail:xfail:true:',
     ]);
     expect(m('with reason only')).toEqual(['test.fixme:fixme:true:needs backend']);
+    expect(m('under an if')).toEqual(['test.fail:xfail:false:', 'test.skip:conditional-skip:false:no fixtures on ci']);
     expect(byName(inventory, 'by browser').statementCount).toBe(5);
   });
 

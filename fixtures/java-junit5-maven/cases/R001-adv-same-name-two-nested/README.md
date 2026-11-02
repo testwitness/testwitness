@@ -1,0 +1,1 @@
+Adversarial. Both nested classes declare a test named totalIsZero with different bodies. Only the one in WhenEmpty is deleted. A detector keyed on the simple method name would see totalIsZero still present and miss the deletion, or blame the wrong class. The expected subject is exactly CartTest$WhenEmpty#totalIsZero.

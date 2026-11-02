@@ -1,0 +1,1 @@
+Negative by design. toThrow('negative') becomes a bare toThrow(). The front end rates a narrowed throw as strength 2 and a bare one as 1, so this is a one step drop within the exception family and A002 reports it medium. The case records that choice: dropping the message check is a loosening.

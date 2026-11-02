@@ -1,0 +1,1 @@
+assert ledger.balance() == expected becomes != expected + 1. That is one step down the lattice (expression equality to inequality) and the new assertion is not at the bottom, so it is the documented one step medium.

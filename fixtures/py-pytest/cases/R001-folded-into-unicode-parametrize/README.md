@@ -1,0 +1,1 @@
+Three tests with accented and CJK SKUs are folded into a parametrised test whose ids are the same non ASCII strings. The literal list has three cases, which covers the three deletions, so each is reported low as parameterised. Non ASCII ids must not break parsing or counting.

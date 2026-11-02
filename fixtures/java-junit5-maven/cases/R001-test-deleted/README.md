@@ -1,0 +1,1 @@
+Positive. The PR removes rejectsNegativePrice from CartTest and nothing else. No test with the same body exists anywhere in the head tree and no production file changed, so R001 reports the deletion at medium.

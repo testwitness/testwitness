@@ -1,0 +1,1 @@
+The PR removes test_rejects_non_positive_quantity from tests/test_cart.py and touches nothing else. The body appears nowhere else in the head tree and no parametrised test absorbs it, so the deletion is reported at the default medium severity.

@@ -1,0 +1,1 @@
+Adversarial. A new test deliberately asserts that a mismatch raises AssertionError inside assertThrows. That is an assertion on an assertion, not a marker on the test, so R004 must not fire. A detector grepping for AssertionError would.

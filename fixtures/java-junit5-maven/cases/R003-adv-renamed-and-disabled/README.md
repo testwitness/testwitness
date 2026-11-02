@@ -1,0 +1,1 @@
+Adversarial. sumsLineItems is renamed to totalsTwoItems and disabled in the same change. The body hash pairs the rename, so this is a newly skipped existing test (R003, medium, under the new name), not a new test added skipped (R010).

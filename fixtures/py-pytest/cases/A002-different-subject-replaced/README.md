@@ -1,0 +1,1 @@
+The assertion on cart.total() is replaced by an equally strong assertion on len(cart.items). The subjects differ so there is no pair to compare, and the assertion count is unchanged so A001 is quiet too.

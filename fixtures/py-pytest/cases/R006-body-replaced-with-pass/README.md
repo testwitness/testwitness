@@ -1,0 +1,1 @@
+The four statement body of test_total_sums_lines is replaced with pass and a TODO comment. The test will report as passing while running nothing, so R006 fires high. A001 stays quiet because R006 owns emptied bodies.

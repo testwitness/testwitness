@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "low",
+    "subject": "src/test/java/com/example/CartTest.java",
+    "label": "moved"
+  }
+]

@@ -1,0 +1,1 @@
+A new test file has an unclosed parameter list, so the inventory sees parse errors and no collectable test. The rule deliberately stays silent on files with parse errors because the runner will fail loudly on its own.

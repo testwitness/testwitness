@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "src/test/java/com/example/CartTest.java"
+  }
+]

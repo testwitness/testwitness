@@ -1,0 +1,1 @@
+The whole dict equality on receipt becomes an is not None on receipt plus an exact equality on receipt["total"]. The move is accompanied by an assertion at least as strong on a sub expression of the same subject, which is the documented low narrowed outcome.

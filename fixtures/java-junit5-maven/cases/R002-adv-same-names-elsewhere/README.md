@@ -1,0 +1,1 @@
+Adversarial. CartTest.java is deleted and LedgerTest gains three tests with the same method names but different bodies about a different class. A detector matching on names would call this a move. The bodies differ, so none of the Cart tests exist in the head tree and the deletion is high.

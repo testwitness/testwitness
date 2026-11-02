@@ -1,0 +1,4 @@
+{
+  "title": "Fix checkout regression on empty receipts",
+  "body": "Regression test added for the receipt null bug."
+}

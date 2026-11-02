@@ -1,0 +1,4 @@
+{
+  "title": "Regression test for empty receipts",
+  "body": "Adds a regression test so the receipt bug cannot come back."
+}

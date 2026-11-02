@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "test_post_moves_balance"
+  }
+]

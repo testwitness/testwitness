@@ -1,0 +1,1 @@
+Adversarial. The removed method totalIsZeroWhenEmpty is named like a test and contains an assertion, but it has no @Test annotation, so the runner never collected it. Removing it deletes no coverage and R001 must stay quiet.

@@ -1,0 +1,1 @@
+Adversarial. The test body is untouched; the private helper it calls loses its only assertion and now just prints. The test went from one custom assertion to none while still having statements, so A001 reports it. A detector that only diffs test bodies would see nothing.

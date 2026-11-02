@@ -1,0 +1,1 @@
+Adversarial. cart.test.ts is deleted and its three tests are split between two new files with their bodies unchanged. Git rename detection pairs the deleted file with the larger half, so the engine sees a renamed file that lost one test, and that test is found in the other new file. The outcome is an R001 low move, not an R002.

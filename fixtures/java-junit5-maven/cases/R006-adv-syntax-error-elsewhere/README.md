@@ -1,0 +1,1 @@
+Adversarial. The head has a missing semicolon in appliesDiscount and an emptied sumsLineItems. The parser recovers, so the emptied test is still reported and the broken method, which keeps its assertion, produces nothing.

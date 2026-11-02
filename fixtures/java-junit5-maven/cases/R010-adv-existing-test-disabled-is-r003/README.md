@@ -1,0 +1,1 @@
+Adversarial. A diff based detector sees a removed @Test block and an added @Disabled @Test block and reports a new skipped test. The test existed in the base, so the right finding is R003 at medium and there must be no R010.

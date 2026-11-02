@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "low",
+    "subject": "LedgerTest::test_post_records_memo",
+    "label": "consolidated"
+  }
+]

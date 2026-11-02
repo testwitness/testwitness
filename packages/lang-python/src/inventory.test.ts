@@ -1048,3 +1048,34 @@ def test_b():
     expect(only(i, 'test_b').markers).toEqual([]);
   });
 });
+
+describe('parametrize arguments bound to literal values', () => {
+  it('treats == against a literal parametrize argument as a literal equality', async () => {
+    const i = await inv(`
+import pytest
+
+@pytest.mark.parametrize("lines, expected", [(1, 2), (3, 4)])
+def test_a(lines, expected):
+    assert total(lines) == expected
+    assert total(lines) == lines * 2
+
+@pytest.mark.parametrize(["n", "want"], [(1, 2)])
+def test_b(n, want):
+    assert total(n) == want
+
+@pytest.mark.parametrize("n, want", CASES)
+def test_c(n, want):
+    assert total(n) == want
+
+def test_d():
+    expected = 2
+    assert total(1) == expected
+`);
+    const a = only(i, 'test_a').assertions;
+    expect(a[0]!.strength).toBe(5);
+    expect(a[1]!.strength).toBe(4);
+    expect(only(i, 'test_b').assertions[0]!.strength).toBe(5);
+    expect(only(i, 'test_c').assertions[0]!.strength).toBe(4);
+    expect(only(i, 'test_d').assertions[0]!.strength).toBe(4);
+  });
+});

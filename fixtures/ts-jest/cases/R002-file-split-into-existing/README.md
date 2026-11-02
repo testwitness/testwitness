@@ -1,0 +1,1 @@
+Negative control. cart.test.ts is deleted and its three tests are moved, bodies unchanged, into two test files that already exist. Git cannot pair the deletion with a modification, so R002 sees a deleted file whose tests all live elsewhere and reports it low with the label moved.

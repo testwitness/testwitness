@@ -1,0 +1,1 @@
+Negative. A toBe on receipt.total is replaced by a toBeDefined on receipt.lines, a different subject, and a new toBe on receipt.total is added alongside. Pairing is by subject, so no loosening is found, and the count did not drop.

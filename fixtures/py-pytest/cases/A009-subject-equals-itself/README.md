@@ -1,0 +1,1 @@
+assert cart.total() == cart.total() compares an expression with itself. Both operands are the same expression, so it is tautological and reported high in a modified test. The same edit also moves the equality from a literal to an expression on the same subject, which A002 correctly reports as a one step medium loosening.

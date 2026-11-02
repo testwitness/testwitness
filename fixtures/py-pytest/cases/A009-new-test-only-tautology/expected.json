@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A009",
+    "severity": "medium",
+    "subject": "test_receipt_currency"
+  }
+]

@@ -1,0 +1,1 @@
+[{"ruleId":"R001","severity":"medium","subject":"pricing › discounts › applies bulk discount at ten units"},{"ruleId":"R001","severity":"medium","subject":"pricing › discounts › gives no discount below ten units"}]

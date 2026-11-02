@@ -1,0 +1,1 @@
+Adversarial. A missing semicolon in appliesDiscount sits next to a new test with no assertion. The parser recovers and the new test is reported at high; the broken method keeps its assertion and produces nothing.

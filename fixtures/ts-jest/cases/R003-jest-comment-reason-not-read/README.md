@@ -1,0 +1,1 @@
+Positive, documenting a limit. Jest has no reason argument, so the author writes describe.skip with a trailing comment that references an issue. The front end reads reasons from arguments and option strings only, never from comments, so the finding stays medium without the tracked label. If comment reasons are ever captured this case should change to low tracked.

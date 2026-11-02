@@ -1,0 +1,1 @@
+Adversarial. A for loop declares one it() per quantity with a template literal title. The loop is removed. The inventory sees one declaration whose name is the raw template source, so one finding names it with the backticks kept.

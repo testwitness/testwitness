@@ -1,0 +1,1 @@
+[{"ruleId":"R001","severity":"medium","subject":"cart › rejects negative quantity"},{"ruleId":"A001","severity":"medium","subject":"cart › sums line totals"}]

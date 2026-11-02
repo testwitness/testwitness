@@ -1,0 +1,1 @@
+Positive, JUnit 4. The issue key sits in a comment, not in a marker reason, and JUnit 4 has no strict mode. R004 stays high: the documented lowering needs a strict marker with a reason that names an issue.

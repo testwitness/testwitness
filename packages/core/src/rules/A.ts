@@ -70,6 +70,15 @@ export const A001: Rule = {
         });
         const lost = removed.length;
         const where = { line: removed[0]!.line, before: removed.map((r) => r.text).join('\n'), snippet: removed.map(assertionKey).sort().join('|') };
+        if ((head.parameterCount ?? 1) > (base.parameterCount ?? 1)) {
+          out.push(
+            makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} assertion${lost === 1 ? '' : 's'} but now runs ${head.parameterCount} parameterised cases`, {
+              ...where,
+              label: 'parameterised',
+            }),
+          );
+          continue;
+        }
         if (allConsolidated) {
           out.push(
             makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${lost} assertion${lost === 1 ? '' : 's'} consolidated into an assertion on the parent expression`, {
@@ -107,15 +116,26 @@ interface Pairing {
   head: Assertion;
 }
 
-/** Pair base and head assertions on the same normalised subject within a test. */
+/** Pair base and head assertions on the same normalised subject within a test. Textually unchanged assertions are matched first and excluded, so only edited assertions are compared. */
 function pairBySubject(base: TestCase, head: TestCase): Pairing[] {
   const used = new Set<Assertion>();
+  const unchangedBase = new Set<Assertion>();
+  for (const b of base.assertions) {
+    const same = head.assertions.find((x) => !used.has(x) && assertionKey(x) === assertionKey(b));
+    if (same) {
+      used.add(same);
+      unchangedBase.add(b);
+    }
+  }
   const pairs: Pairing[] = [];
   for (const b of base.assertions) {
+    if (unchangedBase.has(b)) continue;
     const s = norm(b.subject);
     if (!s || !b.family) continue;
-    // Prefer a head assertion with the same subject and the same family that is not textually identical.
-    const h = head.assertions.find((x) => !used.has(x) && norm(x.subject) === s && x.family === b.family && assertionKey(x) !== assertionKey(b));
+    const negated = /\.not\b|\bnot[A-Z_]|assert_not_|assertNot|assertFalse/.test(b.callee);
+    const h = head.assertions.find(
+      (x) => !used.has(x) && norm(x.subject) === s && x.family === b.family && /\.not\b|\bnot[A-Z_]|assert_not_|assertNot|assertFalse/.test(x.callee) === negated,
+    );
     if (h) {
       used.add(h);
       pairs.push({ base: b, head: h });
@@ -158,6 +178,9 @@ export const A002: Rule = {
         if (strongerSub) {
           sev = 'low';
           label = 'narrowed';
+        } else if ((head.parameterCount ?? 1) > (base.parameterCount ?? 1)) {
+          sev = 'low';
+          label = 'parameterised';
         }
         out.push(
           makeFinding(ctx, 'A002', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${p.base.callee} on ${p.base.subject ?? 'the subject'} became ${p.head.callee}`, {

@@ -1,0 +1,1 @@
+The body is replaced by a nested function that is never called. A nested def is an executable statement, so the body is not empty for R006, but the assertion inside the nested function is not the test's own; the test lost its only assertion and A001 reports that at medium.

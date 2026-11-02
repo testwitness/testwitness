@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "O006",
+    "severity": "medium",
+    "subject": "src/test/java/com/example/pricing/CartTest.java"
+  }
+]

@@ -1,0 +1,1 @@
+Adversarial. A test is renamed and loses an assertion in the same change. The body changed, so rename detection cannot pair it by hash: the old name is a deletion and the new name an addition. The honest report is R001 for the old test, because the tool cannot tell a rename with a changed body from a replacement.

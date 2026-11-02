@@ -1,0 +1,1 @@
+test_total_sums_lines is parametrised: assert cart.total() == 7 becomes assert cart.total() == expected where expected is a parametrize argument that takes literal values. The check is exactly as strict for every case, so treating a literal to argument move as a loosening would be a false positive.

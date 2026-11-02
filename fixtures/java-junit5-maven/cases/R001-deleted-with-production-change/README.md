@@ -1,0 +1,1 @@
+Positive. The PR deletes rejectsNegativePrice and also changes Cart.java, the production class CartTest exercises by name. A test removed in the same PR that touches the code under test is the worst case, so the severity is high.

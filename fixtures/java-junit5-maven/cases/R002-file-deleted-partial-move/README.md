@@ -1,0 +1,1 @@
+Positive. CartTest.java is deleted; only sumsLineItems reappears in the new CartTotalsTest. Two tests are lost, so the file deletion is still high. The moved count only lowers the severity when every test moved.

@@ -1,0 +1,1 @@
+The PR deletes test_rejects_non_positive_quantity and also leaves a syntax error in the parameter list of test_total_sums_lines. Tree sitter recovers around the error, so the broken function is still collected and only the real deletion is reported.

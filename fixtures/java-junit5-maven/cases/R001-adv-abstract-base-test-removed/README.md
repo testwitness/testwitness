@@ -1,0 +1,1 @@
+Adversarial. The tests live in an abstract base class and run through the concrete subclass ArrayCartTest. Removing totalMatchesLines from the abstract class removes it from every subclass. A detector that ignores abstract classes would miss it. The abstract hook newCart() has no body and is not a test.

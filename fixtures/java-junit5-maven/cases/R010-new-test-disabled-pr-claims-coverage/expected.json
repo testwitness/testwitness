@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "medium",
+    "subject": "CartTest#appliesPercentageDiscount"
+  }
+]

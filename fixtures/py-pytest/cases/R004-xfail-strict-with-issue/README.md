@@ -1,0 +1,1 @@
+The xfail is strict and the reason references PAY-412. This is the documented control: the failure is tracked and the suite will fail once it is fixed, so the finding is lowered to medium rather than high.

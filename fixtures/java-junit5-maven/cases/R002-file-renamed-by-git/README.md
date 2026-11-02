@@ -1,0 +1,1 @@
+Negative. CartTest.java becomes ShoppingCartTest.java with only the class name changed. Git rename detection pairs the two paths, every test pairs by body hash under its new qualified name, and nothing is deleted.

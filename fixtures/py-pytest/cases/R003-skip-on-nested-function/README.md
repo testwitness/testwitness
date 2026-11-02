@@ -1,0 +1,1 @@
+A function named test_inner_scratch is defined inside test_total_sums_lines and decorated with skip. pytest does not collect nested functions, so the skip applies to nothing that ran before; the outer test still runs with its assertion and nothing fires.

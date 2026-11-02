@@ -1,0 +1,1 @@
+The expected side changes from a local variable to a different expression over cart.items. It mirrors the implementation, which is weak, but the two operands are not the same expression, so A009 does not fire; both forms are expression equality, so A002 is quiet too.

@@ -1,0 +1,1 @@
+The base asserted receipt["lines"] == 1 twice; the PR removes the duplicate. The count drops but every base assertion text still exists in the head, so no assertion was actually lost and A001 stays silent.

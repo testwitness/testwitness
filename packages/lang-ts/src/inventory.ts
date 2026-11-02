@@ -48,6 +48,9 @@ const STATEMENT_TYPES = new Set([
   'class_declaration',
   'debugger_statement',
   'with_statement',
+  // A statement the parser could not read is still a statement the author wrote. Counting it keeps
+  // a test with a syntax error from being reported as emptied.
+  'ERROR',
 ]);
 
 const ASSERTION_ROOTS = new Set(['expect', 'expectTypeOf', 'assertType', 'assert']);
@@ -255,6 +258,11 @@ function analyseDeclaration(call: Node): Declaration | undefined {
       const name = prefix.join('.');
       if (mod.conditional && seg.args) {
         const cond = argList(seg.args)[0];
+        // skipIf(false) and runIf(true) fold to "runs": no marker at all, per the conventions.
+        const foldsToRun =
+          cond !== undefined &&
+          ((mod.conditional === 'skipIf' && cond.type === 'false') || (mod.conditional === 'runIf' && cond.type === 'true'));
+        if (foldsToRun) continue;
         const constant =
           cond !== undefined &&
           ((mod.conditional === 'skipIf' && cond.type === 'true') || (mod.conditional === 'runIf' && cond.type === 'false'));
@@ -357,6 +365,7 @@ function countIn(node: Node): number {
 }
 
 function isCountableStatement(stmt: Node): boolean {
+  if (stmt.type === 'ERROR') return stmt.text.trim().length > 0;
   if (stmt.type === 'expression_statement') {
     const expr = stmt.namedChildren.find((c): c is Node => c !== null && c.type !== 'comment');
     return expr !== undefined && isCountableExpression(expr);
@@ -429,7 +438,7 @@ function analyseAssertion(expr: Node, helpers: Set<string>): AssertionAnalysis |
     const named = segments.filter((s) => s.name !== '()');
     if (named.length === 0) {
       const arg = argList(rootArgs)[0];
-      const base: AssertionAnalysis = { callee: 'assert', kind: 'smoke', family: 'presence', strength: 1 };
+      const base: AssertionAnalysis = { callee: 'assert', kind: 'smoke', family: 'value', strength: 1 };
       if (arg) base.subject = squash(arg.text);
       return base;
     }
@@ -471,14 +480,9 @@ function withLattice(callee: string, subject: string | undefined, named: Segment
       out.kind = 'smoke';
       out.strength = 0;
     }
-  } else if (negated && entry.family === 'equality') {
-    out.strength = 1;
-    if (NULLISH_MATCHERS.has(terminal.name)) {
-      out.kind = 'smoke';
-      out.family = 'presence';
-    }
-  } else if (negated && entry.family === 'presence') {
-    out.kind = 'smoke';
+  } else if (negated && entry.family === 'value') {
+    if (entry.strength > 1) out.strength = 1;
+    if (NULLISH_MATCHERS.has(terminal.name) || entry.kind === 'smoke') out.kind = 'smoke';
   }
   return out;
 }
@@ -791,6 +795,11 @@ function analyseInlineMarker(call: Node, tests: Map<NodeId, Declaration>, contai
   const extra: Partial<SkipMarker> = {};
   if (reason !== undefined) extra.reason = reason;
   if (!cond || isStringLike(cond)) {
+    // `if (browserName === 'webkit') test.fail();` is a conditional marker, like Mocha's this.skip() under an if.
+    if (isUnderCondition(call)) {
+      extra.constant = false;
+      return markerFor(name, kind === 'skip' ? 'conditional-skip' : kind, call, extra);
+    }
     extra.constant = true;
     return markerFor(name, kind, call, extra);
   }

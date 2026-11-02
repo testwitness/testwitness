@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { shortHash } from '@testwitness/core';
-import { inv, src } from './helpers.test-util.js';
+import { byName, inv, src } from './helpers.test-util.js';
 
 describe('edge cases', () => {
   it('returns an empty inventory for an empty file', async () => {
@@ -25,6 +25,20 @@ describe('edge cases', () => {
     expect(inventory.parseErrors).toBeGreaterThan(0);
     expect(inventory.tests.map((t) => t.name)).toContain('good');
     expect(inventory.tests.map((t) => t.name)).toContain('after');
+  });
+
+  it('counts an unparseable statement so a test with a syntax error is not read as emptied', async () => {
+    const inventory = await inv(src(`
+      import { test, expect } from 'vitest';
+      test('broken', () => {
+        expect(total([1, 2]).toBe(3);
+      });
+      test('empty', () => {
+      });
+    `), 'src/broken.test.ts');
+    expect(inventory.parseErrors).toBeGreaterThan(0);
+    expect(byName(inventory, 'broken').statementCount).toBe(1);
+    expect(byName(inventory, 'empty').statementCount).toBe(0);
   });
 
   it('reports helpers and no tests for a file with only helpers', async () => {

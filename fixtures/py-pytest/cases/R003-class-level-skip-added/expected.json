@@ -1,0 +1,12 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestCart::test_total_of_empty_cart_is_zero"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestCart::test_total_sums_lines"
+  }
+]

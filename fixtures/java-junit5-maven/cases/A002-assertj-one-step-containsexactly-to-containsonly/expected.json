@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "CartTest#listsSkusInOrder"
+  }
+]

@@ -1,0 +1,1 @@
+Adversarial. cart.test.ts is deleted and its tests reappear in a new file under a different describe title. Git rename detection pairs the two files because the content is nearly identical, every test pairs by body hash under its new qualified name, and nothing is reported. The case guards that a renamed describe on a renamed file does not surface as a deletion.

@@ -1,0 +1,1 @@
+Adversarial. A helper function defined in the file contains expect(true).toBe(true) and a test calls it. Assertions inside helpers are attributed to the helper, not the test, so A009 does not fire on the test; the helper call itself is a custom assertion.

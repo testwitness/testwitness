@@ -1,0 +1,1 @@
+Adversarial. The new file has no @Test and also a syntax error. The rule skips files with parse errors because the inventory cannot be trusted, so nothing fires even though a careful reader would say the file runs nothing.

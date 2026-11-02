@@ -1,0 +1,1 @@
+Negative control. CartTest.java is deleted and its three tests are distributed unchanged between two files that already existed, so git cannot pair the deletion with a rename. Every body is found in the head tree, so R002 reports the file as moved at low, the documented outcome.

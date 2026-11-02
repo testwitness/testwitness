@@ -49,6 +49,8 @@ interface FileContext {
   aliases: Map<string, string>;
   helpers: Set<string>;
   framework: PythonFramework;
+  /** Parameter names of the current test that are bound to literal parametrize values. */
+  literalParams?: Set<string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -466,6 +468,37 @@ function firstStatementSkip(body: Node | null, aliases: Map<string, string>): Sk
 // ---------------------------------------------------------------------------
 // Parametrize
 
+/**
+ * Argument names of `@pytest.mark.parametrize` decorators whose values are a
+ * literal list or tuple. An `==` against one of these names is as strict as an
+ * `==` against the literal it stands for.
+ */
+function literalParametrizeNames(def: Node, aliases: Map<string, string>): Set<string> {
+  const out = new Set<string>();
+  for (const d of decoratorsOf(def)) {
+    const expr = decoratorExpression(d);
+    if (!expr) continue;
+    const parts = callParts(expr, aliases);
+    if (!parts || parts.chain !== 'pytest.mark.parametrize') continue;
+    const names = parts.positional[0] ?? parts.keywords.get('argnames');
+    const values = parts.positional[1] ?? parts.keywords.get('argvalues');
+    if (!names || !values) continue;
+    const v = unwrap(values);
+    if (parametrizeCaseCount(v.type, v.namedChildren.filter((c) => c.type !== 'comment').length) === undefined) continue;
+    const n = unwrap(names);
+    const text = stringValue(n);
+    if (text !== undefined) {
+      for (const part of text.split(',')) if (part.trim()) out.add(part.trim());
+    } else if (n.type === 'list' || n.type === 'tuple') {
+      for (const item of n.namedChildren) {
+        const sv = stringValue(item);
+        if (sv !== undefined && sv.trim()) out.add(sv.trim());
+      }
+    }
+  }
+  return out;
+}
+
 function parametrizeCount(def: Node, aliases: Map<string, string>): number | undefined {
   let product: number | undefined;
   let sawDynamic = false;
@@ -524,7 +557,7 @@ function withLattice(a: Assertion, key: string): Assertion {
 }
 
 /** Classify a bare `assert` statement. */
-function bareAssert(stmt: Node, aliases: Map<string, string>): Assertion {
+function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Set<string>): Assertion {
   const expr = stmt.namedChildren.find((c) => c.type !== 'comment');
   const a: Assertion = { callee: 'assert', text: headerText(stmt), line: line(stmt), kind: 'value' };
   if (!expr) return a;
@@ -555,8 +588,10 @@ function bareAssert(stmt: Node, aliases: Map<string, string>): Assertion {
     if (approx) return withLattice(a, 'assert.approx');
     if (ops.length > 1) return withLattice(a, 'assert.compare');
     switch (op) {
-      case '==':
-        return withLattice(a, right && isLiteral(right) ? 'assert.==.literal' : 'assert.==');
+      case '==': {
+        const literalRight = !!right && (isLiteral(right) || (right.type === 'identifier' && !!literalParams?.has(right.text)));
+        return withLattice(a, literalRight ? 'assert.==.literal' : 'assert.==');
+      }
       case '!=':
         return withLattice(a, 'assert.!=');
       case 'is not':
@@ -678,7 +713,7 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
   for (const stmt of statements(block)) {
     if (isDefinition(stmt)) continue;
     if (stmt.type === 'assert_statement') {
-      out.push(bareAssert(stmt, ctx.aliases));
+      out.push(bareAssert(stmt, ctx.aliases, ctx.literalParams));
       continue;
     }
     if (stmt.type === 'with_statement') {
@@ -929,7 +964,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
       endLine: endLine(c.def),
       bodyHash: shortHash(normaliseText(bodyText)),
       statementCount: countStatements(c.body),
-      assertions: collectAssertions(c.body, ctx),
+      assertions: collectAssertions(c.body, { ...ctx, literalParams: literalParametrizeNames(c.def, aliases) }),
       markers,
       mocks: collectMocks(mockNodes, grammar.queries.mocks, aliases),
       framework,

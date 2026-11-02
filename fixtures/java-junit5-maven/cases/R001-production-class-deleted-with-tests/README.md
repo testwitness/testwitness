@@ -1,0 +1,1 @@
+Negative. The Coupon feature is removed: Coupon.java and CouponTest.java are deleted together and CartTest is untouched. Nothing that still exists lost its tests, so the honest expectation is no finding. The rules do not document a control for a test file deleted with its production class, so this case records how the engine behaves today.

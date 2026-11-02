@@ -1,0 +1,1 @@
+Adversarial. The head file has a missing semicolon in appliesDiscount, and rejectsNegativePrice is deleted in the same change. Tree sitter recovers from the error, so the deletion is still reported at medium and the broken method, which keeps its assertion, produces nothing.

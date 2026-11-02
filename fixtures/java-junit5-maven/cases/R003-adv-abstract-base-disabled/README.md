@@ -1,0 +1,1 @@
+Adversarial. The disabled test lives in an abstract base class and is inherited by ArrayCartTest. Disabling it there disables it in every subclass, so R003 reports it with the abstract class as container.

@@ -1,0 +1,1 @@
+test_rejects_non_positive_quantity leaves tests/test_cart.py and reappears with the same body in the new tests/test_cart_validation.py. The rule finds the body in the head tree and reports the move at low with the moved label, which is the documented control.

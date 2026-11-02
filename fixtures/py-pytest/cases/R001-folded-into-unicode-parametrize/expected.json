@@ -1,0 +1,20 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_label_cafe",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_label_naive",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_label_nihon",
+    "label": "parameterised"
+  }
+]

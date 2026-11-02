@@ -1,0 +1,1 @@
+A syntax error is introduced in a neighbouring function while test_total_sums_lines is emptied. The parser recovers, the neighbour is still collected with its assertion, and the emptied test is reported high on its own.

@@ -1,0 +1,1 @@
+Adversarial. CartTestSupport.java sits under src/test and matches the test path pattern, but it defines no tests. Deleting it loses no coverage, so R002 must not fire. A detector that counts deleted files under src/test would report it.

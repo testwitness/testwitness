@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "O006",
+    "severity": "medium",
+    "subject": "tests/test_cart_scenarios.py"
+  }
+]

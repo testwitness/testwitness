@@ -1,0 +1,1 @@
+One test in TestReceipt loses its lines assertion while the sibling test in the same class gains one. The net count in the container is unchanged, so the loss is reported low with the assertions moved label.

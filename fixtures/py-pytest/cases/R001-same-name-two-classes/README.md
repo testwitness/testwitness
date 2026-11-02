@@ -1,0 +1,1 @@
+Two classes in one file both define test_handles_empty. Only the ledger one is deleted. The finding must name TestLedger::test_handles_empty and must not be confused with the surviving TestCart::test_handles_empty.

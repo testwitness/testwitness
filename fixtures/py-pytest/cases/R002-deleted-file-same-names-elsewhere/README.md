@@ -1,0 +1,1 @@
+tests/test_ledger.py is deleted. Another file already has a test with the same name test_balance_starts_at_opening but a different body. A name match is not a move; the bodies are gone, so the deletion is high.

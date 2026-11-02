@@ -1,0 +1,1 @@
+Negative control. The negative quantity test is cut from cart.test.ts and pasted into a new file cart-validation.test.ts with the same body. The deletion is reported low with the label moved, the documented behaviour for a move within the PR.

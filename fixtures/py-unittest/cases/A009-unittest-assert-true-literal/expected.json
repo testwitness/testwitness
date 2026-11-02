@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A009",
+    "severity": "high",
+    "subject": "LedgerTest::test_post_moves_balance"
+  }
+]

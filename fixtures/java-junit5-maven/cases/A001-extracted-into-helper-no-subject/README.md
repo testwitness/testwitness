@@ -1,0 +1,1 @@
+Negative. Both assertions move into a private helper that reads the cart from a field, so the helper call carries no cart argument. The rule documents that assertions moved into a helper in the same file are still counted, so no assertion was lost and nothing should fire.

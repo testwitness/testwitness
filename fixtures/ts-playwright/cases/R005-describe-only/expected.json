@@ -1,0 +1,1 @@
+[{"ruleId":"R005","severity":"high","subject":"checkout › shows the cart total"},{"ruleId":"R005","severity":"high","subject":"checkout › applies a promo code"},{"ruleId":"R005","severity":"high","subject":"checkout › rejects an unknown promo code"}]

@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "LedgerTest::test_balance_is_available",
+    "label": "smoke"
+  }
+]

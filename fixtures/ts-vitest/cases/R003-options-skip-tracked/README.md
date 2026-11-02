@@ -1,0 +1,1 @@
+Negative control. A Vitest test gains the options object form test(title, { skip: reason }, fn) with a reason that references an issue number. The front end reads the reason from the option string, so the finding is low with the label tracked.

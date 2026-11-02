@@ -1,0 +1,1 @@
+An empty tests/__init__.py is added to make the tests directory a package. It matches the tests/ path pattern but is never meant to hold tests; reporting it as a test file with no tests would be noise.

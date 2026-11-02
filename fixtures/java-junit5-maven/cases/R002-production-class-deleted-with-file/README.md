@@ -1,0 +1,1 @@
+Negative. Coupon.java and CouponTest.java are removed together as a feature deletion. The test file no longer has anything to test, so the honest expectation is no finding. R002 documents no control for this, so this case records the gap.

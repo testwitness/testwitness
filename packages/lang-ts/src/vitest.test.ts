@@ -10,6 +10,8 @@ describe('vitest declarations and markers', () => {
         it.skipIf(true)('always skipped', () => {});
         it.runIf(false)('never runs', () => {});
         it.runIf(isLinux)('linux only', () => {});
+        it.skipIf(false)('folds to running', () => {});
+        it.runIf(true)('also folds to running', () => {});
         test.fails('expected failure', () => { expect(1).toBe(2); });
         test.todo('later');
         test.concurrent('parallel', async () => { expect(await f()).toBe(1); });
@@ -22,6 +24,8 @@ describe('vitest declarations and markers', () => {
     expect(m('always skipped')).toEqual(['it.skipIf:conditional-skip:true']);
     expect(m('never runs')).toEqual(['it.runIf:conditional-skip:true']);
     expect(m('linux only')).toEqual(['it.runIf:conditional-skip:false']);
+    expect(m('folds to running')).toEqual([]);
+    expect(m('also folds to running')).toEqual([]);
     expect(m('expected failure')).toEqual(['test.fails:xfail:true']);
     expect(m('later')).toEqual(['test.todo:todo:true']);
     expect(m('parallel')).toEqual([]);
@@ -108,11 +112,11 @@ describe('vitest assertions and mocks', () => {
       });
     `));
     expect(t.assertions.map((a) => [a.callee, a.kind, a.family, a.strength, a.subject, a.expected])).toEqual([
-      ['assert.equal', 'value', 'equality', 3, 'a', '1'],
-      ['assert.deepEqual', 'value', 'equality', 3, 'o', '{ a: 1 }'],
-      ['assert.isTrue', 'value', 'equality', 3, 'flag', undefined],
-      ['assert.exists', 'smoke', 'presence', 1, 'thing', undefined],
-      ['assert', 'smoke', 'presence', 1, 'ok', undefined],
+      ['assert.equal', 'value', 'value', 3, 'a', '1'],
+      ['assert.deepEqual', 'value', 'value', 3, 'o', '{ a: 1 }'],
+      ['assert.isTrue', 'value', 'value', 3, 'flag', undefined],
+      ['assert.exists', 'smoke', 'value', 1, 'thing', undefined],
+      ['assert', 'smoke', 'value', 1, 'ok', undefined],
     ]);
   });
 });

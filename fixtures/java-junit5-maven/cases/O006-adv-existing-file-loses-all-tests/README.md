@@ -1,0 +1,1 @@
+Adversarial. Every @Test annotation is stripped from an existing file. O006 only looks at added files, so it must not fire; the loss shows up as three R001 deletions at medium, which is the more useful signal.

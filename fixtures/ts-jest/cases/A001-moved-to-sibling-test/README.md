@@ -1,0 +1,1 @@
+Negative control. The tax and total assertions move out of the receipt test into a new sibling test in the same describe block. The group gains as many assertions as it lost, so the loss is low with the label assertions moved.

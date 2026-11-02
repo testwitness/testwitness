@@ -1,0 +1,20 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_total_single_line",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_total_two_lines",
+    "label": "parameterised"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "subject": "test_total_three_lines",
+    "label": "parameterised"
+  }
+]

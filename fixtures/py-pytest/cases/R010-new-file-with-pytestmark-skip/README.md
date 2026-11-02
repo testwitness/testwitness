@@ -1,0 +1,1 @@
+A whole new test file is added with a module level pytestmark skip and two undecorated tests. Both inherit the module skip, so both are reported as added then skipped. The file does collect tests, so O006 stays quiet.

@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "O001",
+    "severity": "high",
+    "subject": "TestCart::test_add_accepts_fractional_price"
+  }
+]

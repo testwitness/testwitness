@@ -1,0 +1,1 @@
+Negative. expect(parse(serialise(line))).toEqual(line) compares an expression with a variable of the same name inside it. Subject and expected differ textually, so it is a real round trip assertion, not a tautology.

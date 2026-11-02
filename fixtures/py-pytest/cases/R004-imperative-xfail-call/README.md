@@ -1,0 +1,1 @@
+pytest.xfail(...) is inserted as the first statement of the body. Everything after it never runs, which is the same effect as the decorator, so the test is reported as converted to an expected failure.

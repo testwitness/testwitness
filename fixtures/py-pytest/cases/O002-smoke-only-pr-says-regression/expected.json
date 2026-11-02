@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "medium",
+    "subject": "test_receipt_is_produced",
+    "label": "smoke"
+  }
+]

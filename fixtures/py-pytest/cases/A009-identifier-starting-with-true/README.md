@@ -1,0 +1,1 @@
+A new test asserts TrueUpEntry(ledger).balanced. The subject merely starts with the letters True; it is a real property check on a ledger object and must not be mistaken for assert True, so A009 must stay silent. A bare truthiness check is a smoke oracle, so the only finding is the informational O002 low.

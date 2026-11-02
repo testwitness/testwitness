@@ -1,0 +1,1 @@
+tests/test_ledger.py is deleted. One of its three tests, test_rejects_zero_amount, is moved into tests/test_cart.py but the other two are gone. A partial move is still a loss, so the file deletion stays high.

@@ -1,0 +1,1 @@
+Negative control. toEqual on the receipt becomes toMatchObject, but a new toBe on receipt.total, a sub expression of the same subject, is at least as strong as the original. Low with the label narrowed.

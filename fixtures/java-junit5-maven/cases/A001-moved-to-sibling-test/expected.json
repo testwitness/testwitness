@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "low",
+    "subject": "CartTest#sumsLineItems",
+    "label": "assertions moved"
+  }
+]

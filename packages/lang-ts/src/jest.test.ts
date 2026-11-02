@@ -190,12 +190,12 @@ describe('jest assertions', () => {
       });
     `));
     expect(t.assertions.map((a) => [a.callee, a.kind, a.family, a.strength])).toEqual([
-      ['expect.toBe', 'value', 'equality', 3],
-      ['expect.not.toBe', 'value', 'equality', 1],
-      ['expect.resolves.toEqual', 'value', 'equality', 3],
+      ['expect.toBe', 'value', 'value', 3],
+      ['expect.not.toBe', 'value', 'value', 1],
+      ['expect.resolves.toEqual', 'value', 'value', 3],
       ['expect.rejects.toThrow', 'exception', 'exception', 2],
-      ['expect.not.toBeNull', 'smoke', 'presence', 1],
-      ['expect.resolves.toBeDefined', 'smoke', 'presence', 1],
+      ['expect.not.toBeNull', 'smoke', 'value', 1],
+      ['expect.resolves.toBeDefined', 'smoke', 'value', 1],
     ]);
     expect(t.assertions[0]!.subject).toBe('a');
     expect(t.assertions[2]!.text).toBe('await expect(p).resolves.toEqual({ a: 1 });');
@@ -257,7 +257,7 @@ describe('jest assertions', () => {
     const strengths = t.assertions.map((a) => a.strength);
     expect(strengths).toEqual([4, 3, 2, 2, 2, 2, 2, 2, 2]);
     expect(t.assertions.map((a) => a.family)).toEqual([
-      'equality', 'equality', 'partial', 'partial', 'partial', 'partial', 'partial', 'comparison', 'comparison',
+      'value', 'value', 'value', 'value', 'value', 'value', 'value', 'value', 'value',
     ]);
   });
 

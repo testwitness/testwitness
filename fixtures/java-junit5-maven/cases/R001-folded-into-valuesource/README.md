@@ -1,0 +1,1 @@
+Negative control. Three single item tests become one @ParameterizedTest with @ValueSource(ints = {120, 80, 300}). Three literal cases cover three removed tests, so R001 reports parameterised at low for each.

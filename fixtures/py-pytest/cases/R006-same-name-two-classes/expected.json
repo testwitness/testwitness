@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R006",
+    "severity": "high",
+    "subject": "TestLedger::test_handles_empty"
+  }
+]

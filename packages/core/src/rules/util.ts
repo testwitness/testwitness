@@ -70,20 +70,88 @@ export function maxSeverity(a: Severity, b: Severity): Severity {
   return SEV[a] >= SEV[b] ? a : b;
 }
 
-/** Collect the body hashes of all tests across the head tree, lazily, for move detection. */
+export interface HeadIndex {
+  byHash: Map<string, Array<{ path: string; test: TestCase }>>;
+  /** Normalised assertion text to the paths of head tests (added or modified in this PR) that contain it. */
+  assertionOwners: Map<string, Set<string>>;
+  /** Short test name to the paths of changed files where a test with that name was added in this PR. */
+  addedByName: Map<string, Set<string>>;
+}
+
+export function assertionKeyOf(text: string): string {
+  return text.replace(/\s+/g, '').replace(/;$/, '');
+}
+
+/**
+ * Index of head tests for move and refactor detection. Candidates are the head
+ * side of every changed test file plus test files in the same directories, so a
+ * monorepo with thousands of unrelated test files is never parsed in full.
+ */
 export async function headBodyHashIndex(ctx: RuleContext, excludePath?: string): Promise<Map<string, Array<{ path: string; test: TestCase }>>> {
-  const index = new Map<string, Array<{ path: string; test: TestCase }>>();
-  const files = await ctx.headTestFiles();
-  for (const path of files) {
-    if (path === excludePath) continue;
+  return (await headIndex(ctx, excludePath)).byHash;
+}
+
+const indexCache = new WeakMap<RuleContext, Promise<HeadIndex>>();
+
+export function headIndex(ctx: RuleContext, excludePath?: string): Promise<HeadIndex> {
+  // excludePath only affects lookups; the index itself is shared per context.
+  let p = indexCache.get(ctx);
+  if (!p) {
+    p = buildHeadIndex(ctx);
+    indexCache.set(ctx, p);
+  }
+  return p.then((idx) => (excludePath ? withoutPath(idx, excludePath) : idx));
+}
+
+function withoutPath(idx: HeadIndex, path: string): HeadIndex {
+  const byHash = new Map<string, Array<{ path: string; test: TestCase }>>();
+  for (const [k, arr] of idx.byHash) {
+    const kept = arr.filter((e) => e.path !== path);
+    if (kept.length) byHash.set(k, kept);
+  }
+  return { byHash, assertionOwners: idx.assertionOwners, addedByName: idx.addedByName };
+}
+
+async function buildHeadIndex(ctx: RuleContext): Promise<HeadIndex> {
+  const byHash = new Map<string, Array<{ path: string; test: TestCase }>>();
+  const assertionOwners = new Map<string, Set<string>>();
+  const addedByName = new Map<string, Set<string>>();
+  for (const p of ctx.pairs) {
+    if (!p.head) continue;
+    const baseNames = new Set((p.base?.tests ?? []).map((t) => t.name));
+    for (const t of p.head.tests) {
+      if (baseNames.has(t.name)) continue;
+      const set = addedByName.get(t.name) ?? new Set<string>();
+      set.add(p.file.path);
+      addedByName.set(t.name, set);
+    }
+  }
+  const changedDirs = new Set(ctx.pairs.map((p) => p.file.path.split('/').slice(0, -1).join('/')));
+  const candidates = new Set<string>();
+  for (const p of ctx.pairs) if (p.head) candidates.add(p.file.path);
+  for (const f of await ctx.headTestFiles()) {
+    const dir = f.split('/').slice(0, -1).join('/');
+    if (changedDirs.has(dir)) candidates.add(f);
+  }
+  const changedPaths = new Set(ctx.pairs.map((p) => p.file.path));
+  for (const path of candidates) {
     const inv = await ctx.headInventoryFor(path);
     if (!inv) continue;
     for (const t of inv.tests) {
-      if (t.statementCount === 0) continue;
-      const arr = index.get(t.bodyHash);
-      if (arr) arr.push({ path, test: t });
-      else index.set(t.bodyHash, [{ path, test: t }]);
+      if (t.statementCount > 0) {
+        const arr = byHash.get(t.bodyHash);
+        if (arr) arr.push({ path, test: t });
+        else byHash.set(t.bodyHash, [{ path, test: t }]);
+      }
+      if (changedPaths.has(path)) {
+        for (const a of t.assertions) {
+          const k = assertionKeyOf(a.text);
+          const set = assertionOwners.get(k) ?? new Set<string>();
+          set.add(path);
+          assertionOwners.set(k, set);
+        }
+      }
     }
   }
-  return index;
+  return { byHash, assertionOwners, addedByName };
 }

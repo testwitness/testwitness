@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "high",
+    "subject": "CartTest#rejectsNegativePrice"
+  }
+]

@@ -1,0 +1,1 @@
+[{"ruleId":"R001","severity":"low","subject":"cart › totals one line","label":"parameterised"},{"ruleId":"R001","severity":"low","subject":"cart › totals two lines","label":"parameterised"},{"ruleId":"R001","severity":"low","subject":"cart › totals three lines","label":"parameterised"}]

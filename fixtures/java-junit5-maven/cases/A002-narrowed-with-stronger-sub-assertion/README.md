@@ -1,0 +1,1 @@
+Negative control. isEqualTo on receipt becomes isNotNull, but the same test adds equally strong assertions on receipt.total() and receipt.lines(). The move is accompanied by stronger assertions on sub expressions of the subject, so the rule reports narrowed at low.

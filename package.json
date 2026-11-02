@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fixtures": "vitest run --project fixtures",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "corpus:report": "tsx --conditions=development corpus/runner/report.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -25,6 +26,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
     "fast-check": "^4.10.2",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.5"

@@ -1,0 +1,1 @@
+test_total_sums_lines is renamed to _total_sums_lines with the same body. The new name is not collected by pytest and nothing calls it, so this is a deletion, not a rename, and the rule must still report it at medium.

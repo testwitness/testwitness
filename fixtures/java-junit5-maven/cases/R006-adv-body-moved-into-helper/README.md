@@ -1,0 +1,1 @@
+Adversarial. The whole body moves into a private helper and the test becomes a single call to it. The body still has one statement and the helper carries the assertion, so the test is neither empty nor assertion free. A line count based detector would call it emptied.

@@ -1,0 +1,1477 @@
+[
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "KRaftClusterTest#testCreateClusterAndCreateListDeleteTopic"
+  },
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "KRaftClusterTest#testCreateClusterAndCreateAndManyTopics"
+  },
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "KRaftClusterTest#testClientQuotas"
+  },
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "KRaftClusterTest#testDefaultClientQuotas"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_is_found"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_expected_value_is_found"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_expected_value_is_missing"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_has_wrong_value"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_has_multiple_wrong_values"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_no_value"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_value"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_is_missing"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_without_value_is_found"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_value"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_multiple_values"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_missing"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_no_value"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_multiple_no_values"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_wrong"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_value_is_found"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_escaped_value_is_found"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_user_email_unicode_collision"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_user_email_domain_unicode_collision"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_custom_email_subject"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_custom_email_constructor"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_save_plaintext_email"
+  },
+  {
+    "slug": "django-django-18509",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "PasswordResetFormTest::test_save_html_email_template_name"
+  },
+  {
+    "slug": "excalidraw-excalidraw-7213",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "should bump the version of a labeled arrow when the label is updated"
+  },
+  {
+    "slug": "excalidraw-excalidraw-7213",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "textWysiwyg › should bump the version of a labeled arrow when the label is updated",
+    "label": "refactored"
+  },
+  {
+    "slug": "excalidraw-excalidraw-7213",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "textWysiwyg › start text editing › should bump the version of a labeled arrow when the label is updated"
+  },
+  {
+    "slug": "fastapi-fastapi-16545",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_embedded_union_still_rejects_a_string",
+    "label": "replaced"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should select enabled hour",
+    "label": "moved"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should select enabled minute",
+    "label": "moved"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should not select minute when hour is disabled ",
+    "label": "rewritten"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should not select disabled hour",
+    "label": "moved"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should not select disabled second",
+    "label": "rewritten"
+  },
+  {
+    "slug": "mui-material-ui-26407",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "<MobileTimePicker /> › Time validation on touch  › should select enabled second",
+    "label": "moved"
+  },
+  {
+    "slug": "netty-netty-14828",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "SingleThreadIoEventLoopTest#testSuspendingWhileRegistrationActive"
+  },
+  {
+    "slug": "pallets-click-1858",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_chaining_help",
+    "label": "parameterised"
+  },
+  {
+    "slug": "pallets-click-1858",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pipeline",
+    "label": "parameterised"
+  },
+  {
+    "slug": "pallets-click-3715",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_stream_helper_deprecated",
+    "label": "parameterised"
+  },
+  {
+    "slug": "pallets-click-3715",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_utilities_deprecated",
+    "label": "parameterised"
+  },
+  {
+    "slug": "pandas-dev-pandas-25894",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "TestTSPlot::test_time_change_xlim"
+  },
+  {
+    "slug": "pandas-dev-pandas-25894",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestTSPlot::test_time_change_xlim"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexFormat::test_date",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexFormat::test_date_explicit_date_format",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexFormat::test_date_tz",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexUnicode::test_dates",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexFormat::test_datetime",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexTimezones::test_dti_construction_ambiguous_endpoint",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexTimezones::test_dti_construction_nonexistent_endpoint",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexUnicode::test_mixed",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestStringRepTimestamp::test_no_tz",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestStringRepTimestamp::test_tz_dateutil",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestStringRepTimestamp::test_tz_pytz",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestGrouping::test_grouper_creation_bug",
+    "label": "assertions moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestTimezoneConcat::test_concat_tz_series",
+    "label": "consolidated"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeArray::test_date_range_frequency_M_deprecated",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestTimeSeries::test_date_range_tuple_freq_raises",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexTimezones::test_dti_intersection",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexTimezones::test_dti_setop_aware",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestDatetimeIndexTimezones::test_dti_union_mixed",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestFactorize::test_factorize",
+    "label": "rewritten"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestFactorize::test_factorize_complex",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestNaTFormatting::test_repr",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestNaTFormatting::test_str",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexFormat::test_period_format_and_strftime_default",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexFormat::test_period_custom",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexFormat::test_period_tz",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexFormat::test_period_non_ascii_fmt",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexFormat::test_period_custom_locale_directive",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestStringRepTimestamp::test_nat_representations",
+    "label": "rewritten"
+  },
+  {
+    "slug": "pandas-dev-pandas-55603",
+    "split": "heldout",
+    "ruleId": "R002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "pandas/tests/indexes/datetimes/test_datetimelike.py",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_eq_all_na",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add_2d",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add_sequence",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_mul",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add_strings",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add_frame",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_scalar",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_scalar_pd_na",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_scalar_not_string",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_array",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_array_arrow_extension",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_comparison_methods_list",
+    "label": "moved"
+  },
+  {
+    "slug": "pandas-dev-pandas-62869",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_add_frame"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestComparison::test_index_series_compat",
+    "label": "parameterised"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period_nat"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexComparisons::test_parr_cmp_period_scalar2",
+    "label": "refactored"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPeriodIndexComparisons::test_comp_nat",
+    "label": "refactored"
+  },
+  {
+    "slug": "pandas-dev-pandas-69986",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_encoding_detected",
+    "label": "conditional"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_basic_uninstall"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_basic_uninstall_namespace_package"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_uninstall_overlapping_package"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_uninstall_console_scripts"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_uninstall_easy_installed_console_scripts"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_uninstall_wheel"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_success"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_build_cache"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_basic_pip_wheel_downloads_wheels"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_builds_editable_deps"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_builds_editable"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_fail"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_source_deps"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_with_pep518_build_reqs"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pip_wheel_with_pep518_build_reqs_no_isolation"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_pep517_wheels_are_not_confused_with_other_files"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_legacy_wheels_are_not_confused_with_other_files"
+  },
+  {
+    "slug": "pytest-dev-pytest-14292",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_node_ctor_fspath_argument_is_deprecated",
+    "label": "refactored"
+  },
+  {
+    "slug": "pytest-dev-pytest-14293",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestImportOrSkipExcType::test_no_warning",
+    "label": "replaced"
+  },
+  {
+    "slug": "pytest-dev-pytest-14293",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestImportOrSkipExcType::test_import_error_with_warning",
+    "label": "replaced"
+  },
+  {
+    "slug": "pytest-dev-pytest-14293",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestImportOrSkipExcType::test_import_error_suppress_warning",
+    "label": "replaced"
+  },
+  {
+    "slug": "pytest-dev-pytest-14293",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestImportOrSkipExcType::test_warning_integration",
+    "label": "replaced"
+  },
+  {
+    "slug": "quarkusio-quarkus-55429",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "AccessLogTestCase"
+  },
+  {
+    "slug": "quarkusio-quarkus-55429",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "AccessLogTestCase#testAccessLogContent"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapIsolatedTest#innerCompleteCancelRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapMaybeIsolatedTest#requestCancelRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapMaybeIsolatedTest#successRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapMaybeIsolatedTest#successCompleteRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapSingleIsolatedTest#requestCancelRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapSingleIsolatedTest#successRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithCompletableIsolatedTest#completeRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithMaybeIsolatedTest#completeRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithMaybeIsolatedTest#onSuccessFastPathBackpressuredRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithMaybeIsolatedTest#onNextRequestRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithSingleIsolatedTest#completeRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithSingleIsolatedTest#onSuccessFastPathBackpressuredRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "FlowableMergeWithSingleIsolatedTest#onNextRequestRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "A009",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapIsolatedTest#cancelScalarDrainRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "A009",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "FlowableFlatMapIsolatedTest#cancelDrainRace"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapMaybeTest#requestCancelRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapMaybeTest#successRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapMaybeTest#successCompleteRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapSingleTest#requestCancelRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapSingleTest#successRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapTest#innerCompleteCancelRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapTest#cancelScalarDrainRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableFlatMapTest#cancelDrainRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithCompletableTest#completeRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithMaybeTest#completeRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithMaybeTest#onSuccessFastPathBackpressuredRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithMaybeTest#onNextRequestRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithSingleTest#completeRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithSingleTest#onSuccessFastPathBackpressuredRace",
+    "label": "moved"
+  },
+  {
+    "slug": "reactivex-rxjava-8253",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "FlowableMergeWithSingleTest#onNextRequestRace",
+    "label": "moved"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_k_means_fortran_aligned_data",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_k_means_init",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_k_means_new_centers",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_labels_assignment_and_inertia",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_mb_kmeans_verbose",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_minibatch_k_means_init",
+    "label": "parameterised"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-17850",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "test_verbose"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_display_from_cv_results_curve_kwargs",
+    "label": "smoke"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_validate_plot_params",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_roc_curve_from_cv_results_param_validation",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_roc_curve_display_from_cv_results_curve_kwargs",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_roc_curve_plot_legend_label",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_roc_curve_from_cv_results_legend_label",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33218",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_roc_curve_from_cv_results_pos_label_inferred",
+    "label": "rewritten"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33223",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_plot_roc_curve_pos_label"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-33761",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "test_fowlkes_mallows_sparse_deprecated"
+  },
+  {
+    "slug": "tanstack-query-11250",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "packages/vue-query/src/__tests__/suspense.test.ts",
+    "label": "moved"
+  },
+  {
+    "slug": "tanstack-query-11734",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "packages/lit-query/src/__tests__/client-switch-controllers.test.ts",
+    "label": "moved"
+  },
+  {
+    "slug": "tox-dev-tox-4078",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_build_wheel_in_non_base_pkg_env",
+    "label": "conditional"
+  },
+  {
+    "slug": "tox-dev-tox-4078",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_build_wheel_in_free_threaded_pkg_env",
+    "label": "conditional"
+  },
+  {
+    "slug": "tox-dev-tox-4078",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_build_wheel_in_debug_pkg_env",
+    "label": "conditional"
+  },
+  {
+    "slug": "trpc-trpc-1709",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "$subscription() - server randomly stop and restart (this test might be flaky, try re-running)"
+  },
+  {
+    "slug": "vitejs-vite-15096",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "full-reload encodeURI path",
+    "label": "conditional"
+  },
+  {
+    "slug": "vitejs-vite-15096",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Unicode path › direct access",
+    "label": "conditional"
+  },
+  {
+    "slug": "vitejs-vite-15096",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Unicode path › spa fallback",
+    "label": "conditional"
+  }
+]

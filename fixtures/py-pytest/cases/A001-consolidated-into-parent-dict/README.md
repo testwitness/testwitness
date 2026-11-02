@@ -1,0 +1,1 @@
+Three field assertions become one equality on the whole receipt dict. Every removed subject is a sub expression of the surviving subject, which is the consolidation control: reported low with the consolidated label, and A002 has nothing to pair because the subjects differ.

@@ -1,0 +1,6 @@
+{
+  "name": "@testwitness/corpus",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@testwitness/core": "workspace:*", "testwitness": "workspace:*" }
+}

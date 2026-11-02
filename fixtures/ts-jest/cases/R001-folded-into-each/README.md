@@ -1,0 +1,1 @@
+Negative control. Three single case tests are replaced by one test.each with three rows in the same describe block. Each deletion is reported low with the label parameterised because the new table covers the removed count.

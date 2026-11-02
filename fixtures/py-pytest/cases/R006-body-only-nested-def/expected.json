@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "test_total_sums_lines"
+  }
+]

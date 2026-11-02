@@ -1,0 +1,1 @@
+Adversarial. The deleted test body survives verbatim as a plain function checkNegativeQuantity that no test calls. A helper is not a test, so the move control must not match it and the deletion stays medium.

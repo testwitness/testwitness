@@ -1,0 +1,1 @@
+Adversarial. The abstract base class that holds the actual @Test methods is deleted; the concrete subclass survives but now inherits nothing. Both tests are lost, so R002 is high on the abstract file. The surviving subclass is a modified test file with no tests before or after, and O006 only looks at added files.

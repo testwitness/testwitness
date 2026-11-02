@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "test_entries_recorded",
+    "label": "smoke"
+  }
+]

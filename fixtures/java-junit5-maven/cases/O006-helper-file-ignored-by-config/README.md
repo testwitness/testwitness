@@ -1,0 +1,1 @@
+Negative control. A fixtures file is added under src/test/java/com/example/support, which the repository .testwitness.yml lists in paths.ignore. The documented way to keep shared helpers out of O006 is exactly that, so nothing fires.

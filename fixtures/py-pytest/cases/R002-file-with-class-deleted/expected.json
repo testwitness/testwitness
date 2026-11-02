@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "tests/test_ledger.py"
+  }
+]

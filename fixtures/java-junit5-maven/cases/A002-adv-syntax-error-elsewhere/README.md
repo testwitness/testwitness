@@ -1,0 +1,1 @@
+Adversarial. A missing semicolon in appliesDiscount sits next to a real loosening in sumsLineItems. The parser recovers and the loosening is reported; the broken method keeps its assertion and produces nothing.

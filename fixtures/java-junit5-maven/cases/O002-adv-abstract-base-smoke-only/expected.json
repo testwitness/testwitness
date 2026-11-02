@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "AbstractCartContractTest#checkoutProducesReceipt",
+    "label": "smoke"
+  }
+]

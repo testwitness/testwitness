@@ -1,0 +1,1 @@
+Three near identical tests are folded into one parametrised test with three literal cases. The case count covers the three deletions in the same container, so each deletion is reported low with the parameterised label and nothing else fires.
