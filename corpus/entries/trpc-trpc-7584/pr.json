@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trpc/trpc/pull/7584",
+  "repo": "trpc/trpc",
+  "number": 7584,
+  "title": "chore(deps): bump vitest from 4.0.18 to 4.1.11",
+  "merged_at": "2026-09-12T18:51:08Z",
+  "stars": 40758,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "deps",
+  "split": "heldout",
+  "base_sha": "d1a9ec68cea9740a5a46dcf98399d9a876f2313a",
+  "head_sha": "dd2476245fcc88715235d489f86da98b19bc37f7",
+  "files_changed": 1,
+  "additions": 721,
+  "deletions": 261
+}

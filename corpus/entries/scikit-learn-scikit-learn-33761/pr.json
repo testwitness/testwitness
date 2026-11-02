@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/33761",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 33761,
+  "title": "Remove deprecated sparse parameter from fowlkes_mallows_score",
+  "merged_at": "2026-04-17T10:43:57Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "deleted",
+  "split": "heldout",
+  "base_sha": "20c0129906b26803f810e41936e5487d5becfcf4",
+  "head_sha": "7667c23431ba796bebc08360053981d1133ccdf0",
+  "files_changed": 2,
+  "additions": 1,
+  "deletions": 27
+}

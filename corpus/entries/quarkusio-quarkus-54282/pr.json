@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/quarkusio/quarkus/pull/54282",
+  "repo": "quarkusio/quarkus",
+  "number": 54282,
+  "title": "Remove deprecated `GlobUtil` and constructors of build items",
+  "merged_at": "2026-05-19T09:49:06Z",
+  "stars": 15973,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "deleted",
+  "split": "heldout",
+  "base_sha": "f72e3c41176de398a69200c0cf712759547894ba",
+  "head_sha": "fb6cd4cff208cbb68fc84e6c0bc62561872d9479",
+  "files_changed": 4,
+  "additions": 0,
+  "deletions": 115
+}

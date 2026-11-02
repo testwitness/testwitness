@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/commons-lang/pull/355",
+  "repo": "apache/commons-lang",
+  "number": 355,
+  "title": "Use @ParameterizedTest to iterate over available locales",
+  "merged_at": "2018-09-06T07:56:22Z",
+  "stars": 3017,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "bce28f99f383051b419510ef72531e0f6fa67352",
+  "head_sha": "7e440785d9ccdafc84ae7a50022097dc3dd422e8",
+  "files_changed": 2,
+  "additions": 33,
+  "deletions": 27
+}

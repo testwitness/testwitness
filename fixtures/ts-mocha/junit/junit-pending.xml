@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="0.006" tests="8" failures="1" skipped="3">
+  <testsuite name="Root Suite" timestamp="2026-11-01T19:32:27" tests="0" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Text" timestamp="2026-11-01T19:32:27" tests="0" file="/home/claude/testwitness/fixtures/ts-mocha/project/test/lib.test.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="slugify" timestamp="2026-11-01T19:32:27" tests="5" file="/home/claude/testwitness/fixtures/ts-mocha/project/test/lib.test.js" time="0.005" failures="1" skipped="2">
+    <testcase name="Text slugify lowercases and joins with dashes" time="0.000" classname="lowercases and joins with dashes">
+    </testcase>
+    <testcase name="Text slugify strips leading and trailing separators" time="0.000" classname="strips leading and trailing separators">
+    </testcase>
+    <testcase name="Text slugify handles unicode" time="0.000" classname="handles unicode">
+      <skipped/>
+    </testcase>
+    <testcase name="Text slugify is pending without a callback" time="0.000" classname="is pending without a callback">
+      <skipped/>
+    </testcase>
+    <testcase name="Text slugify fails on purpose" time="0.001" classname="fails on purpose">
+      <failure message="Expected values to be strictly equal:
+
+&apos;a-b&apos; !== &apos;a_b&apos;
+" type="AssertionError"><![CDATA[AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'a-b' !== 'a_b'
+
+    at Context.<anonymous> (test/lib.test.js:21:14)
+    at process.processImmediate (node:internal/timers:484:21)
+
+      + expected - actual
+
+      -a-b
+      +a_b
+      ]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="future work" timestamp="2026-11-01T19:32:27" tests="1" file="/home/claude/testwitness/fixtures/ts-mocha/project/test/lib.test.js" time="0.000" failures="0" skipped="1">
+    <testcase name="Text future work will be implemented later" time="0.000" classname="will be implemented later">
+      <skipped/>
+    </testcase>
+  </testsuite>
+  <testsuite name="Numbers" timestamp="2026-11-01T19:32:27" tests="2" file="/home/claude/testwitness/fixtures/ts-mocha/project/test/lib.test.js" time="0.000" failures="0">
+    <testcase name="Numbers clamps below the range" time="0.000" classname="clamps below the range">
+    </testcase>
+    <testcase name="Numbers clamps above the range" time="0.000" classname="clamps above the range">
+    </testcase>
+  </testsuite>
+</testsuites>

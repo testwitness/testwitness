@@ -1,0 +1,18 @@
+diff --git a/e2e/__tests__/watchModeNoAccess.test.ts b/e2e/__tests__/watchModeNoAccess.test.ts
+index d7e4ef6..9a03c8c 100644
+--- a/e2e/__tests__/watchModeNoAccess.test.ts
++++ b/e2e/__tests__/watchModeNoAccess.test.ts
+@@ -9,9 +9,13 @@
+ import * as os from 'os';
+ import * as path from 'path';
+ import * as fs from 'graceful-fs';
++import {skipSuiteOnWindows} from '@jest/test-utils';
+ import {cleanup, writeFiles} from '../Utils';
+ import {runContinuous} from '../runJest';
+ 
++// Until https://github.com/nodejs/node/issues/33227 is solved somehow
++skipSuiteOnWindows();
++
+ const DIR = path.resolve(os.tmpdir(), 'watch_mode_no_access');
+ 
+ const sleep = (time: number) =>

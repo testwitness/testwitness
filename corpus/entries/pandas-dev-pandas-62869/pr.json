@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/62869",
+  "repo": "pandas-dev/pandas",
+  "number": 62869,
+  "title": "REF: move string arithmetic tests to tests.arithmetic.test_string",
+  "merged_at": "2025-10-27T17:38:35Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "ea75dd7b3bf9b29837afc2bc0693b728382b80ef",
+  "head_sha": "21638d7f9531b884df604d7df33b383098f64b60",
+  "files_changed": 5,
+  "additions": 312,
+  "deletions": 268
+}

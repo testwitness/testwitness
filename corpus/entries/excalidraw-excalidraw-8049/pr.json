@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/excalidraw/excalidraw/pull/8049",
+  "repo": "excalidraw/excalidraw",
+  "number": 8049,
+  "title": "fix: flaky snapshot tests precision issues for floating point numbers",
+  "merged_at": "2024-05-23T09:51:01Z",
+  "stars": 134975,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "tuning",
+  "base_sha": "defd34923a419ebe8adeb21c2799cbd2ab441b7f",
+  "head_sha": "b4e39a54b88d171d68288292f8b5ae4c8eb50f8e",
+  "files_changed": 8,
+  "additions": 205,
+  "deletions": 188
+}

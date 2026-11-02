@@ -1,0 +1,26 @@
+diff --git a/components/input/__tests__/__snapshots__/textarea.test.tsx.snap b/components/input/__tests__/__snapshots__/textarea.test.tsx.snap
+index 08979f8f..114c77bd 100644
+--- a/components/input/__tests__/__snapshots__/textarea.test.tsx.snap
++++ b/components/input/__tests__/__snapshots__/textarea.test.tsx.snap
+@@ -43,7 +43,7 @@ exports[`TextArea allowClear should change type when click 1`] = `
+ 
+ exports[`TextArea allowClear should change type when click 2`] = `
+ <span
+-  class="ant-input-affix-wrapper ant-input-textarea-affix-wrapper"
++  class="ant-input-affix-wrapper ant-input-affix-wrapper-focused ant-input-textarea-affix-wrapper"
+ >
+   <textarea
+     class="ant-input"
+diff --git a/package.json b/package.json
+index ad9a7d12..48659cf0 100644
+--- a/package.json
++++ b/package.json
+@@ -146,7 +146,7 @@
+     "rc-switch": "~4.0.0",
+     "rc-table": "~7.31.0",
+     "rc-tabs": "~12.5.6",
+-    "rc-textarea": "~1.0.0",
++    "rc-textarea": "~1.1.0",
+     "rc-tooltip": "~6.0.0",
+     "rc-tree": "~5.7.0",
+     "rc-tree-select": "~5.7.0",

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/colinhacks/zod/pull/5093",
+  "repo": "colinhacks/zod",
+  "number": 5093,
+  "title": "fix(v4): make size-based Set/File min/max inclusive; update snapshots",
+  "merged_at": "2025-08-13T05:11:56Z",
+  "stars": 44242,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "heldout",
+  "base_sha": "592b7b5553b5ef64474ec4ff6d4a9a5fc3c9d409",
+  "head_sha": "66fa3eef5c4eb42523215bf7cc0d20cb79629a6a",
+  "files_changed": 3,
+  "additions": 10,
+  "deletions": 4
+}

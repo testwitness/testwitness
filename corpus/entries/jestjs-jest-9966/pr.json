@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jestjs/jest/pull/9966",
+  "repo": "jestjs/jest",
+  "number": 9966,
+  "title": "chore: skip broken test on windows",
+  "merged_at": "2020-05-04T09:05:33Z",
+  "stars": 45471,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "tp",
+  "split": "tuning",
+  "base_sha": "e8e8146ef6feacc56f9153a16c69f627cfa34d49",
+  "head_sha": "e44347bc083664a934d51bb84339496486116313",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 0
+}

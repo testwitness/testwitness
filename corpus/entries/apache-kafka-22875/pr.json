@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/kafka/pull/22875",
+  "repo": "apache/kafka",
+  "number": 22875,
+  "title": "KAFKA-20812 Move Admin tests from KRaftClusterTest to clients-integration-tests",
+  "merged_at": "2026-09-26T00:27:15Z",
+  "stars": 34109,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "f7143734e4acebc3345b895e74e24abebe4e9f9e",
+  "head_sha": "0da174e0e59149be7598185f125f7b9a6f92daa1",
+  "files_changed": 4,
+  "additions": 71,
+  "deletions": 214
+}

@@ -1,0 +1,30 @@
+// Fallback build used to produce the committed XML because this workspace
+// cannot reach Maven Central (see ../junit/PRODUCER.md). pom.xml is the
+// intended surefire build and runs the same sources where Central is reachable.
+plugins {
+    id 'java'
+}
+
+def libDir = project.findProperty('testngJarDir') ?: "${gradle.gradleHomeDir}/lib/plugins"
+
+dependencies {
+    testImplementation files(
+        "${libDir}/testng-6.3.1.jar",
+        "${libDir}/jcommander-1.78.jar",
+        "${libDir}/bsh-2.0b6.jar",
+        "${libDir}/snakeyaml-2.0.jar"
+    )
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+test {
+    useTestNG {
+        useDefaultListeners = true
+    }
+    ignoreFailures = true
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/django/django/pull/18509",
+  "repo": "django/django",
+  "number": 18509,
+  "title": "Added helper and refactored PasswordResetFormTest to unify email sending tests.",
+  "merged_at": "2024-08-23T14:13:31Z",
+  "stars": 91705,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "7adb6dd98d50a238f3eca8c15b16b5aec12575fd",
+  "head_sha": "61a975d4ffd849c3854c808eac10afe34559d6ad",
+  "files_changed": 1,
+  "additions": 23,
+  "deletions": 17
+}

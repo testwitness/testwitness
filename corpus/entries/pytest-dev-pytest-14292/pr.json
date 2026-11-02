@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pytest-dev/pytest/pull/14292",
+  "repo": "pytest-dev/pytest",
+  "number": 14292,
+  "title": "nodes: remove deprecated `fspath` Node constructor parameter",
+  "merged_at": "2026-03-15T18:08:12Z",
+  "stars": 14660,
+  "license": "MIT",
+  "language": "python",
+  "category": "deleted",
+  "split": "heldout",
+  "base_sha": "d889ca0f3b8c45f92ef90f34e67ddbaa2c988134",
+  "head_sha": "d4907e8499fc4c36493b61437b56cf2eabfdcebf",
+  "files_changed": 7,
+  "additions": 58,
+  "deletions": 130
+}

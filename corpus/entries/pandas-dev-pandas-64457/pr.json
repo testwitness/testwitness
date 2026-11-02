@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/64457",
+  "repo": "pandas-dev/pandas",
+  "number": 64457,
+  "title": "TST: parametrize period, interval arithmetic tests over box_with_array",
+  "merged_at": "2026-03-09T16:54:30Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "c2b074e7f9bb9edfbc5eed9feb34ff11986aee1b",
+  "head_sha": "bb12fadfc259eb0f455bdbad336d19029aeff66d",
+  "files_changed": 3,
+  "additions": 138,
+  "deletions": 241
+}

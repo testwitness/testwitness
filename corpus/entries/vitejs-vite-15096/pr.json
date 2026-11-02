@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vitejs/vite/pull/15096",
+  "repo": "vitejs/vite",
+  "number": 15096,
+  "title": "test: skip unicode test on windows instead of lowering the Node version",
+  "merged_at": "2023-11-22T10:15:57Z",
+  "stars": 83652,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "skip",
+  "split": "heldout",
+  "base_sha": "bcc4a6113521543ac17552c3b3cbda80514f0c04",
+  "head_sha": "ecf490e91fdf0aa79c83de540a0185da6d960294",
+  "files_changed": 6,
+  "additions": 45,
+  "deletions": 21
+}

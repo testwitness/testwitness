@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ant-design/ant-design/pull/41228",
+  "repo": "ant-design/ant-design",
+  "number": 41228,
+  "title": "chore: bump rc-textarea version & update snapshot",
+  "merged_at": "2023-03-15T09:53:31Z",
+  "stars": 100028,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "deps",
+  "split": "heldout",
+  "base_sha": "31555161e990f4eef178b48f90a15190c47a48c4",
+  "head_sha": "9477809145c7bf4555f68a2ca040c892f8316e99",
+  "files_changed": 2,
+  "additions": 2,
+  "deletions": 2
+}

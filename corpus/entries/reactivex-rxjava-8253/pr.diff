@@ -1,0 +1,919 @@
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapIsolatedTest.java
+new file mode 100644
+index 0000000..a4f90fa
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapIsolatedTest.java
+@@ -0,0 +1,100 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import java.util.List;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.Flowable;
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.internal.functions.Functions;
++import io.reactivex.rxjava4.plugins.RxJavaPlugins;
++import io.reactivex.rxjava4.processors.PublishProcessor;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableFlatMapIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void innerCompleteCancelRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++
++            final TestSubscriber<Integer> ts = Flowable.merge(Flowable.just(pp)).test();
++
++            Runnable r1 = pp::onComplete;
++
++            Runnable r2 = ts::cancel;
++
++            TestHelper.race(r1, r2);
++        }
++    }
++
++    @Test
++    public void cancelScalarDrainRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            List<Throwable> errors = TestHelper.trackPluginErrors();
++            try {
++
++                final PublishProcessor<Flowable<Integer>> pp = PublishProcessor.create();
++
++                final TestSubscriber<Integer> ts = pp.flatMap(Functions.<Flowable<Integer>>identity()).test(0);
++
++                Runnable r1 = ts::cancel;
++                Runnable r2 = pp::onComplete;
++
++                TestHelper.race(r1, r2);
++
++                assertTrue(errors.isEmpty(), errors.toString());
++            } finally {
++                RxJavaPlugins.reset();
++            }
++        }
++    }
++
++    @Test
++    public void cancelDrainRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            for (int j = 1; j < 50; j += 5) {
++                List<Throwable> errors = TestHelper.trackPluginErrors();
++                try {
++
++                    final PublishProcessor<Flowable<Integer>> pp = PublishProcessor.create();
++
++                    final TestSubscriber<Integer> ts = pp.flatMap(Functions.<Flowable<Integer>>identity()).test(0);
++
++                    final PublishProcessor<Integer> just = PublishProcessor.create();
++                    pp.onNext(just);
++
++                    Runnable r1 = () -> {
++                        ts.request(1);
++                        ts.cancel();
++                    };
++                    Runnable r2 = () -> just.onNext(1);
++
++                    TestHelper.race(r1, r2);
++
++                    assertTrue(errors.isEmpty(), errors.toString());
++                } finally {
++                    RxJavaPlugins.reset();
++                }
++            }
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeIsolatedTest.java
+new file mode 100644
+index 0000000..6cf4bbb
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeIsolatedTest.java
+@@ -0,0 +1,78 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.Flowable;
++import io.reactivex.rxjava4.core.Maybe;
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.internal.functions.Functions;
++import io.reactivex.rxjava4.subjects.MaybeSubject;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableFlatMapMaybeIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void requestCancelRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            final TestSubscriber<Integer> ts = Flowable.just(1).concatWith(Flowable.<Integer>never())
++            .flatMapMaybe(Functions.justFunction(Maybe.just(2))).test(0);
++
++            Runnable r1 = () -> ts.request(1);
++            Runnable r2 = ts::cancel;
++
++            TestHelper.race(r1, r2);
++        }
++    }
++
++    @Test
++    public void successRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            MaybeSubject<Integer> ms1 = MaybeSubject.create();
++            MaybeSubject<Integer> ms2 = MaybeSubject.create();
++
++            TestSubscriber<Integer> ts = Flowable.just(ms1, ms2).flatMapMaybe(v -> v)
++            .test();
++
++            TestHelper.race(
++                    () -> ms1.onSuccess(1),
++                    () -> ms2.onSuccess(1)
++            );
++
++            ts.assertResult(1, 1);
++        }
++    }
++
++    @Test
++    public void successCompleteRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            MaybeSubject<Integer> ms1 = MaybeSubject.create();
++            MaybeSubject<Integer> ms2 = MaybeSubject.create();
++
++            TestSubscriber<Integer> ts = Flowable.just(ms1, ms2).flatMapMaybe(v -> v)
++            .test();
++
++            TestHelper.race(
++                    () -> ms1.onSuccess(1),
++                    ms2::onComplete
++            );
++
++            ts.assertResult(1);
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeTest.java
+index ca83f72..0dc4558 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapMaybeTest.java
+@@ -471,19 +471,6 @@ public class FlowableFlatMapMaybeTest extends RxJavaTest {
+         .assertFailure(TestException.class);
+     }
+ 
+-    @Test
+-    public void requestCancelRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            final TestSubscriber<Integer> ts = Flowable.just(1).concatWith(Flowable.<Integer>never())
+-            .flatMapMaybe(Functions.justFunction(Maybe.just(2))).test(0);
+-
+-            Runnable r1 = () -> ts.request(1);
+-            Runnable r2 = ts::cancel;
+-
+-            TestHelper.race(r1, r2);
+-        }
+-    }
+-
+     @Test
+     public void undeliverableUponCancel() {
+         TestHelper.checkUndeliverableUponCancel((FlowableConverter<Integer, Flowable<Integer>>) upstream ->
+@@ -502,42 +489,6 @@ public class FlowableFlatMapMaybeTest extends RxJavaTest {
+         TestHelper.assertBadRequestReported(Flowable.never().flatMapMaybe(_ -> Maybe.never()));
+     }
+ 
+-    @Test
+-    public void successRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            MaybeSubject<Integer> ms1 = MaybeSubject.create();
+-            MaybeSubject<Integer> ms2 = MaybeSubject.create();
+-
+-            TestSubscriber<Integer> ts = Flowable.just(ms1, ms2).flatMapMaybe(v -> v)
+-            .test();
+-
+-            TestHelper.race(
+-                    () -> ms1.onSuccess(1),
+-                    () -> ms2.onSuccess(1)
+-            );
+-
+-            ts.assertResult(1, 1);
+-        }
+-    }
+-
+-    @Test
+-    public void successCompleteRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            MaybeSubject<Integer> ms1 = MaybeSubject.create();
+-            MaybeSubject<Integer> ms2 = MaybeSubject.create();
+-
+-            TestSubscriber<Integer> ts = Flowable.just(ms1, ms2).flatMapMaybe(v -> v)
+-            .test();
+-
+-            TestHelper.race(
+-                    () -> ms1.onSuccess(1),
+-                    ms2::onComplete
+-            );
+-
+-            ts.assertResult(1);
+-        }
+-    }
+-
+     @Test
+     public void successShortcut() {
+         MaybeSubject<Integer> ms1 = MaybeSubject.create();
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleIsolatedTest.java
+new file mode 100644
+index 0000000..1c6fe78
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleIsolatedTest.java
+@@ -0,0 +1,60 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.Flowable;
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.core.Single;
++import io.reactivex.rxjava4.internal.functions.Functions;
++import io.reactivex.rxjava4.subjects.SingleSubject;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableFlatMapSingleIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void requestCancelRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            final TestSubscriber<Integer> ts = Flowable.just(1).concatWith(Flowable.<Integer>never())
++            .flatMapSingle(Functions.justFunction(Single.just(2))).test(0);
++
++            Runnable r1 = () -> ts.request(1);
++            Runnable r2 = ts::cancel;
++
++            TestHelper.race(r1, r2);
++        }
++    }
++
++    @Test
++    public void successRace() {
++        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
++            SingleSubject<Integer> ss1 = SingleSubject.create();
++            SingleSubject<Integer> ss2 = SingleSubject.create();
++
++            TestSubscriber<Integer> ts = Flowable.just(ss1, ss2).flatMapSingle(v -> v)
++            .test();
++
++            TestHelper.race(
++                    () -> ss1.onSuccess(1),
++                    () -> ss2.onSuccess(1)
++            );
++
++            ts.assertResult(1, 1);
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleTest.java
+index 9d6b443..fffeb29 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapSingleTest.java
+@@ -382,19 +382,6 @@ public class FlowableFlatMapSingleTest extends RxJavaTest {
+         .assertFailure(TestException.class);
+     }
+ 
+-    @Test
+-    public void requestCancelRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            final TestSubscriber<Integer> ts = Flowable.just(1).concatWith(Flowable.<Integer>never())
+-            .flatMapSingle(Functions.justFunction(Single.just(2))).test(0);
+-
+-            Runnable r1 = () -> ts.request(1);
+-            Runnable r2 = ts::cancel;
+-
+-            TestHelper.race(r1, r2);
+-        }
+-    }
+-
+     @Test
+     public void asyncFlattenErrorMaxConcurrency() {
+         Flowable.range(1, 1000)
+@@ -425,24 +412,6 @@ public class FlowableFlatMapSingleTest extends RxJavaTest {
+         TestHelper.assertBadRequestReported(Flowable.never().flatMapSingle(_ -> Single.never()));
+     }
+ 
+-    @Test
+-    public void successRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            SingleSubject<Integer> ss1 = SingleSubject.create();
+-            SingleSubject<Integer> ss2 = SingleSubject.create();
+-
+-            TestSubscriber<Integer> ts = Flowable.just(ss1, ss2).flatMapSingle(v -> v)
+-            .test();
+-
+-            TestHelper.race(
+-                    () -> ss1.onSuccess(1),
+-                    () -> ss2.onSuccess(1)
+-            );
+-
+-            ts.assertResult(1, 1);
+-        }
+-    }
+-
+     @Test
+     public void successShortcut() {
+         SingleSubject<Integer> ss1 = SingleSubject.create();
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapTest.java
+index af0ba9b..3ec265c 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableFlatMapTest.java
+@@ -648,21 +648,6 @@ public class FlowableFlatMapTest extends RxJavaTest {
+         ts.assertResult(1, 2);
+     }
+ 
+-    @Test
+-    public void innerCompleteCancelRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-
+-            final TestSubscriber<Integer> ts = Flowable.merge(Flowable.just(pp)).test();
+-
+-            Runnable r1 = pp::onComplete;
+-
+-            Runnable r2 = ts::cancel;
+-
+-            TestHelper.race(r1, r2);
+-        }
+-    }
+-
+     @Test
+     public void fusedInnerThrows() {
+         Flowable.just(1).hide()
+@@ -715,58 +700,6 @@ public class FlowableFlatMapTest extends RxJavaTest {
+         }
+     }
+ 
+-    @Test
+-    public void cancelScalarDrainRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            List<Throwable> errors = TestHelper.trackPluginErrors();
+-            try {
+-
+-                final PublishProcessor<Flowable<Integer>> pp = PublishProcessor.create();
+-
+-                final TestSubscriber<Integer> ts = pp.flatMap(Functions.<Flowable<Integer>>identity()).test(0);
+-
+-                Runnable r1 = ts::cancel;
+-                Runnable r2 = pp::onComplete;
+-
+-                TestHelper.race(r1, r2);
+-
+-                assertTrue(errors.isEmpty(), errors.toString());
+-            } finally {
+-                RxJavaPlugins.reset();
+-            }
+-        }
+-    }
+-
+-    @Test
+-    public void cancelDrainRace() {
+-        for (int i = 0; i < TestHelper.RACE_DEFAULT_LOOPS; i++) {
+-            for (int j = 1; j < 50; j += 5) {
+-                List<Throwable> errors = TestHelper.trackPluginErrors();
+-                try {
+-
+-                    final PublishProcessor<Flowable<Integer>> pp = PublishProcessor.create();
+-
+-                    final TestSubscriber<Integer> ts = pp.flatMap(Functions.<Flowable<Integer>>identity()).test(0);
+-
+-                    final PublishProcessor<Integer> just = PublishProcessor.create();
+-                    pp.onNext(just);
+-
+-                    Runnable r1 = () -> {
+-                        ts.request(1);
+-                        ts.cancel();
+-                    };
+-                    Runnable r2 = () -> just.onNext(1);
+-
+-                    TestHelper.race(r1, r2);
+-
+-                    assertTrue(errors.isEmpty(), errors.toString());
+-                } finally {
+-                    RxJavaPlugins.reset();
+-                }
+-            }
+-        }
+-    }
+-
+     @Test
+     public void iterableMapperFunctionReturnsNull() {
+         Flowable.just(1)
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableIsolatedTest.java
+new file mode 100644
+index 0000000..8592955
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableIsolatedTest.java
+@@ -0,0 +1,48 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.processors.PublishProcessor;
++import io.reactivex.rxjava4.subjects.CompletableSubject;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableMergeWithCompletableIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void completeRace() {
++        for (int i = 0; i < 1000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final CompletableSubject cs = CompletableSubject.create();
++
++            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
++
++            Runnable r1 = () -> {
++                pp.onNext(1);
++                pp.onComplete();
++            };
++
++            Runnable r2 = cs::onComplete;
++
++            TestHelper.race(r1, r2);
++
++            ts.assertResult(1);
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableTest.java
+index d0f9b45..2f7038c 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithCompletableTest.java
+@@ -98,27 +98,6 @@ public class FlowableMergeWithCompletableTest extends RxJavaTest {
+         .assertFailure(TestException.class);
+     }
+ 
+-    @Test
+-    public void completeRace() {
+-        for (int i = 0; i < 1000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final CompletableSubject cs = CompletableSubject.create();
+-
+-            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
+-
+-            Runnable r1 = () -> {
+-                pp.onNext(1);
+-                pp.onComplete();
+-            };
+-
+-            Runnable r2 = cs::onComplete;
+-
+-            TestHelper.race(r1, r2);
+-
+-            ts.assertResult(1);
+-        }
+-    }
+-
+     @Test
+     public void cancelOtherOnMainError() {
+         PublishProcessor<Integer> pp = PublishProcessor.create();
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeIsolatedTest.java
+new file mode 100644
+index 0000000..e56d7cc
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeIsolatedTest.java
+@@ -0,0 +1,92 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.processors.PublishProcessor;
++import io.reactivex.rxjava4.subjects.MaybeSubject;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableMergeWithMaybeIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void completeRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final MaybeSubject<Integer> cs = MaybeSubject.create();
++
++            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
++
++            Runnable r1 = () -> {
++                pp.onNext(1);
++                pp.onComplete();
++            };
++
++            Runnable r2 = () -> cs.onSuccess(1);
++
++            TestHelper.race(r1, r2);
++
++            ts.assertResult(1, 1);
++        }
++    }
++
++    @Test
++    public void onSuccessFastPathBackpressuredRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final MaybeSubject<Integer> cs = MaybeSubject.create();
++
++            final TestSubscriber<Integer> ts = pp.mergeWith(cs).subscribeWith(new TestSubscriber<>(0));
++
++            Runnable r1 = () -> cs.onSuccess(1);
++
++            Runnable r2 = () -> ts.request(2);
++
++            TestHelper.race(r1, r2);
++
++            pp.onNext(2);
++            pp.onComplete();
++
++            ts.assertResult(1, 2);
++        }
++    }
++
++    @Test
++    public void onNextRequestRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final MaybeSubject<Integer> cs = MaybeSubject.create();
++
++            final TestSubscriber<Integer> ts = pp.mergeWith(cs).test(0);
++
++            pp.onNext(0);
++
++            Runnable r1 = () -> pp.onNext(1);
++
++            Runnable r2 = () -> ts.request(3);
++
++            TestHelper.race(r1, r2);
++
++            cs.onSuccess(1);
++            pp.onComplete();
++
++            ts.assertResult(0, 1, 1);
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeTest.java
+index aa29285..53d4333 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithMaybeTest.java
+@@ -123,27 +123,6 @@ public class FlowableMergeWithMaybeTest extends RxJavaTest {
+         .assertFailure(TestException.class);
+     }
+ 
+-    @Test
+-    public void completeRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final MaybeSubject<Integer> cs = MaybeSubject.create();
+-
+-            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
+-
+-            Runnable r1 = () -> {
+-                pp.onNext(1);
+-                pp.onComplete();
+-            };
+-
+-            Runnable r2 = () -> cs.onSuccess(1);
+-
+-            TestHelper.race(r1, r2);
+-
+-            ts.assertResult(1, 1);
+-        }
+-    }
+-
+     @Test
+     public void onNextSlowPath() {
+         final PublishProcessor<Integer> pp = PublishProcessor.create();
+@@ -215,27 +194,6 @@ public class FlowableMergeWithMaybeTest extends RxJavaTest {
+         ts.assertResult(1, 2, 3);
+     }
+ 
+-    @Test
+-    public void onSuccessFastPathBackpressuredRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final MaybeSubject<Integer> cs = MaybeSubject.create();
+-
+-            final TestSubscriber<Integer> ts = pp.mergeWith(cs).subscribeWith(new TestSubscriber<>(0));
+-
+-            Runnable r1 = () -> cs.onSuccess(1);
+-
+-            Runnable r2 = () -> ts.request(2);
+-
+-            TestHelper.race(r1, r2);
+-
+-            pp.onNext(2);
+-            pp.onComplete();
+-
+-            ts.assertResult(1, 2);
+-        }
+-    }
+-
+     @Test
+     public void onErrorMainOverflow() {
+         List<Throwable> errors = TestHelper.trackPluginErrors();
+@@ -278,29 +236,6 @@ public class FlowableMergeWithMaybeTest extends RxJavaTest {
+         }
+     }
+ 
+-    @Test
+-    public void onNextRequestRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final MaybeSubject<Integer> cs = MaybeSubject.create();
+-
+-            final TestSubscriber<Integer> ts = pp.mergeWith(cs).test(0);
+-
+-            pp.onNext(0);
+-
+-            Runnable r1 = () -> pp.onNext(1);
+-
+-            Runnable r2 = () -> ts.request(3);
+-
+-            TestHelper.race(r1, r2);
+-
+-            cs.onSuccess(1);
+-            pp.onComplete();
+-
+-            ts.assertResult(0, 1, 1);
+-        }
+-    }
+-
+     @Test
+     public void doubleOnSubscribeMain() {
+         TestHelper.checkDoubleOnSubscribeFlowable(
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleIsolatedTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleIsolatedTest.java
+new file mode 100644
+index 0000000..7859f7a
+--- /dev/null
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleIsolatedTest.java
+@@ -0,0 +1,92 @@
++/*
++ * Copyright (c) 2016-present, RxJava Contributors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
++ * compliance with the License. You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the License is
++ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
++ * the License for the specific language governing permissions and limitations under the License.
++ */
++
++package io.reactivex.rxjava4.internal.operators.flowable;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.parallel.Isolated;
++
++import io.reactivex.rxjava4.core.RxJavaTest;
++import io.reactivex.rxjava4.processors.PublishProcessor;
++import io.reactivex.rxjava4.subjects.SingleSubject;
++import io.reactivex.rxjava4.subscribers.TestSubscriber;
++import io.reactivex.rxjava4.testsupport.TestHelper;
++
++@Isolated
++public class FlowableMergeWithSingleIsolatedTest extends RxJavaTest {
++
++    @Test
++    public void completeRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final SingleSubject<Integer> cs = SingleSubject.create();
++
++            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
++
++            Runnable r1 = () -> {
++                pp.onNext(1);
++                pp.onComplete();
++            };
++
++            Runnable r2 = () -> cs.onSuccess(1);
++
++            TestHelper.race(r1, r2);
++
++            ts.assertResult(1, 1);
++        }
++    }
++
++    @Test
++    public void onSuccessFastPathBackpressuredRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final SingleSubject<Integer> cs = SingleSubject.create();
++
++            final TestSubscriber<Integer> ts = pp.mergeWith(cs).subscribeWith(new TestSubscriber<>(0));
++
++            Runnable r1 = () -> cs.onSuccess(1);
++
++            Runnable r2 = () -> ts.request(2);
++
++            TestHelper.race(r1, r2);
++
++            pp.onNext(2);
++            pp.onComplete();
++
++            ts.assertResult(1, 2);
++        }
++    }
++
++    @Test
++    public void onNextRequestRace() {
++        for (int i = 0; i < 10000; i++) {
++            final PublishProcessor<Integer> pp = PublishProcessor.create();
++            final SingleSubject<Integer> cs = SingleSubject.create();
++
++            final TestSubscriber<Integer> ts = pp.mergeWith(cs).test(0);
++
++            pp.onNext(0);
++
++            Runnable r1 = () -> pp.onNext(1);
++
++            Runnable r2 = () -> ts.request(3);
++
++            TestHelper.race(r1, r2);
++
++            cs.onSuccess(1);
++            pp.onComplete();
++
++            ts.assertResult(0, 1, 1);
++        }
++    }
++}
+diff --git a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleTest.java b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleTest.java
+index 269ed54..45e0059 100644
+--- a/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleTest.java
++++ b/src/test/java/io/reactivex/rxjava4/internal/operators/flowable/FlowableMergeWithSingleTest.java
+@@ -119,27 +119,6 @@ public class FlowableMergeWithSingleTest extends RxJavaTest {
+         .assertFailure(TestException.class);
+     }
+ 
+-    @Test
+-    public void completeRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final SingleSubject<Integer> cs = SingleSubject.create();
+-
+-            TestSubscriber<Integer> ts = pp.mergeWith(cs).test();
+-
+-            Runnable r1 = () -> {
+-                pp.onNext(1);
+-                pp.onComplete();
+-            };
+-
+-            Runnable r2 = () -> cs.onSuccess(1);
+-
+-            TestHelper.race(r1, r2);
+-
+-            ts.assertResult(1, 1);
+-        }
+-    }
+-
+     @Test
+     public void onNextSlowPath() {
+         final PublishProcessor<Integer> pp = PublishProcessor.create();
+@@ -211,27 +190,6 @@ public class FlowableMergeWithSingleTest extends RxJavaTest {
+         ts.assertResult(1, 2, 3);
+     }
+ 
+-    @Test
+-    public void onSuccessFastPathBackpressuredRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final SingleSubject<Integer> cs = SingleSubject.create();
+-
+-            final TestSubscriber<Integer> ts = pp.mergeWith(cs).subscribeWith(new TestSubscriber<>(0));
+-
+-            Runnable r1 = () -> cs.onSuccess(1);
+-
+-            Runnable r2 = () -> ts.request(2);
+-
+-            TestHelper.race(r1, r2);
+-
+-            pp.onNext(2);
+-            pp.onComplete();
+-
+-            ts.assertResult(1, 2);
+-        }
+-    }
+-
+     @Test
+     public void onErrorMainOverflow() {
+         List<Throwable> errors = TestHelper.trackPluginErrors();
+@@ -274,29 +232,6 @@ public class FlowableMergeWithSingleTest extends RxJavaTest {
+         }
+     }
+ 
+-    @Test
+-    public void onNextRequestRace() {
+-        for (int i = 0; i < 10000; i++) {
+-            final PublishProcessor<Integer> pp = PublishProcessor.create();
+-            final SingleSubject<Integer> cs = SingleSubject.create();
+-
+-            final TestSubscriber<Integer> ts = pp.mergeWith(cs).test(0);
+-
+-            pp.onNext(0);
+-
+-            Runnable r1 = () -> pp.onNext(1);
+-
+-            Runnable r2 = () -> ts.request(3);
+-
+-            TestHelper.race(r1, r2);
+-
+-            cs.onSuccess(1);
+-            pp.onComplete();
+-
+-            ts.assertResult(0, 1, 1);
+-        }
+-    }
+-
+     @Test
+     public void doubleOnSubscribeMain() {
+         TestHelper.checkDoubleOnSubscribeFlowable(

@@ -1,0 +1,273 @@
+import picomatch from 'picomatch';
+import type {
+  ChangedFile,
+  CheckState,
+  Evidence,
+  Finding,
+  FrameworkProfile,
+  InventoryPair,
+  LanguageFrontEnd,
+  LanguageId,
+  ProvenanceInfo,
+  PullRequestText,
+  Report,
+  ResolvedConfig,
+  Rule,
+  RuleContext,
+  Severity,
+  TestInventory,
+} from './types.js';
+import { commitMessages, listTree, mergeBase, numstat, rawDiff, revParse, showFile } from './git.js';
+import { parseUnifiedDiff } from './diff/parse.js';
+import { classifyFiles, classifyPath } from './diff/classify.js';
+import { applyConfiguredSeverity, effectiveSeverity, SEVERITY_RANK } from './config.js';
+import { fingerprint as makeFingerprint } from './hash.js';
+import { builtinRules } from './rules/index.js';
+import { detectProvenance } from './provenance.js';
+
+export const REPORT_SCHEMA = 'https://testwitness.dev/schema/report/v1.json';
+export const TOOL_VERSION = '0.1.0';
+
+export interface EngineOptions {
+  cwd: string;
+  base: string;
+  head: string;
+  frontEnds: LanguageFrontEnd[];
+  config: ResolvedConfig;
+  rules?: Rule[];
+  evidence?: Evidence | undefined;
+  /** Why evidence is missing or partial, for the report. */
+  evidenceNotes?: string[];
+  prText?: PullRequestText | undefined;
+  /** Already resolved: skip merge base computation (used by fixtures). */
+  resolved?: boolean;
+  log?: (msg: string) => void;
+}
+
+export interface EngineResult {
+  report: Report;
+  files: ChangedFile[];
+  pairs: InventoryPair[];
+}
+
+export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
+  const t0 = performance.now();
+  const git = { cwd: opts.cwd };
+  const log = opts.log ?? (() => {});
+
+  const headSha = await revParse(opts.head, git);
+  const baseSha = opts.resolved ? await revParse(opts.base, git) : await mergeBase(opts.base, headSha, git);
+  log(`base ${baseSha.slice(0, 10)} head ${headSha.slice(0, 10)}`);
+
+  // Diff
+  const diffText = await rawDiff(baseSha, headSha, git);
+  const files = parseUnifiedDiff(diffText);
+  const stats = await numstat(baseSha, headSha, git);
+  for (const f of files) {
+    const s = stats.get(f.path);
+    if (s && s.added === null) f.binary = true;
+  }
+
+  const readCache = new Map<string, Promise<string | undefined>>();
+  const read = (ref: string, path: string): Promise<string | undefined> => {
+    const k = `${ref}:${path}`;
+    let p = readCache.get(k);
+    if (!p) {
+      p = showFile(ref, path, git);
+      readCache.set(k, p);
+    }
+    return p;
+  };
+
+  // Classification needs a content sniff for source files in unusual paths; read head (or base for deletions) lazily.
+  const sniff = new Map<string, string | undefined>();
+  for (const f of files) {
+    if (f.binary) continue;
+    const lang = classifyPath(f.path, undefined, { testGlobs: opts.config.paths.tests, ignoreGlobs: opts.config.paths.ignore });
+    if (lang.language && lang.kind === 'production') {
+      const content = await read(f.status === 'deleted' ? baseSha : headSha, f.path);
+      sniff.set(f.path, content);
+    }
+  }
+  classifyFiles(files, (f) => sniff.get(f.path), { testGlobs: opts.config.paths.tests, ignoreGlobs: opts.config.paths.ignore });
+
+  // Language filter
+  const wanted: Set<LanguageId> | undefined = opts.config.languages === 'auto' ? undefined : new Set(opts.config.languages);
+  const frontEndFor = (lang: LanguageId | undefined): LanguageFrontEnd | undefined => {
+    if (!lang) return undefined;
+    if (wanted && !wanted.has(lang)) return undefined;
+    return opts.frontEnds.find((fe) => fe.id === lang || (fe.id === 'typescript' && lang === 'javascript'));
+  };
+
+  const profile: FrameworkProfile = { frameworks: new Set(), extraAssertions: opts.config.assertions.extra };
+
+  // Inventories for changed test files
+  const tParse0 = performance.now();
+  const pairs: InventoryPair[] = [];
+  const invCache = new Map<string, Promise<TestInventory | undefined>>();
+  const inventory = async (ref: string, path: string, lang: LanguageId | undefined): Promise<TestInventory | undefined> => {
+    const fe = frontEndFor(lang);
+    if (!fe) return undefined;
+    const k = `${ref}:${path}`;
+    let p = invCache.get(k);
+    if (!p) {
+      p = (async () => {
+        const src = await read(ref, path);
+        if (src === undefined) return undefined;
+        try {
+          return await fe.inventory(path, src, profile);
+        } catch (err) {
+          log(`inventory failed for ${path}: ${(err as Error).message}`);
+          return undefined;
+        }
+      })();
+      invCache.set(k, p);
+    }
+    return p;
+  };
+
+  for (const f of files) {
+    if (f.kind !== 'test' || f.binary) continue;
+    const basePath = f.oldPath ?? f.path;
+    const base = f.status === 'added' ? undefined : await inventory(baseSha, basePath, f.language);
+    const head = f.status === 'deleted' ? undefined : await inventory(headSha, f.path, f.language);
+    const pair: InventoryPair = { file: f };
+    if (base) pair.base = base;
+    if (head) pair.head = head;
+    pairs.push(pair);
+  }
+  const parseMs = performance.now() - tParse0;
+
+  // Head test files, lazily listed, for move detection.
+  let headTestFilesP: Promise<string[]> | undefined;
+  const ignore = picomatch(opts.config.paths.ignore, { dot: true });
+  const headTestFiles = (): Promise<string[]> => {
+    headTestFilesP ??= (async () => {
+      const all = await listTree(headSha, git);
+      return all.filter((p) => !ignore(p) && classifyPath(p, undefined, { testGlobs: opts.config.paths.tests }).kind === 'test');
+    })();
+    return headTestFilesP;
+  };
+
+  const changedProductionFiles = new Set(files.filter((f) => f.kind === 'production').map((f) => f.path));
+
+  const ctx: RuleContext = {
+    files,
+    pairs,
+    headInventoryFor: async (path) => {
+      const lang = classifyPath(path, undefined).language;
+      return inventory(headSha, path, lang);
+    },
+    headTestFiles,
+    readBase: (p) => read(baseSha, p),
+    readHead: (p) => read(headSha, p),
+    ...(opts.evidence ? { evidence: opts.evidence } : {}),
+    ...(opts.prText ? { prText: opts.prText } : {}),
+    profile,
+    config: opts.config,
+    fingerprint: makeFingerprint,
+    changedProductionFiles,
+  };
+
+  // Rules
+  const tRules0 = performance.now();
+  const rules = opts.rules ?? builtinRules();
+  const findings: Finding[] = [];
+  for (const rule of rules) {
+    const configured = effectiveSeverity(rule, opts.config);
+    if (configured === 'off') continue;
+    if (rule.needs.includes('junit') && !opts.evidence) continue;
+    const options = { ...(rule.defaultOptions ?? {}), ...(opts.config.rules[rule.id]?.options ?? {}) };
+    let result: Finding[];
+    try {
+      result = await rule.run(ctx, options);
+    } catch (err) {
+      log(`rule ${rule.id} failed: ${(err as Error).stack ?? (err as Error).message}`);
+      continue;
+    }
+    for (const f of result) {
+      f.severity = applyConfiguredSeverity(f.severity, configured, rule.defaultSeverity);
+      findings.push(f);
+    }
+  }
+  const rulesMs = performance.now() - tRules0;
+
+  // Acknowledgements from config
+  const acks = new Map(opts.config.acknowledge.map((a) => [a.fingerprint, a]));
+  for (const f of findings) {
+    const a = acks.get(f.fingerprint);
+    if (a) f.acknowledged = { by: a.by, reason: a.reason, at: a.date, via: 'config' };
+  }
+  findings.sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || a.ruleId.localeCompare(b.ruleId) || a.location.path.localeCompare(b.location.path));
+
+  // Provenance
+  let provenance: ProvenanceInfo = { agents: [] };
+  try {
+    const msgs = await commitMessages(baseSha, headSha, git);
+    provenance = detectProvenance(msgs, opts.prText);
+  } catch {
+    /* shallow clones may not have history; provenance is optional */
+  }
+
+  const state = computeState(findings, opts.config, opts.evidence, files);
+  const counts = { high: 0, medium: 0, low: 0 };
+  for (const f of findings) if (!f.acknowledged) counts[f.severity]++;
+
+  const report: Report = {
+    $schema: REPORT_SCHEMA,
+    tool: { name: 'testwitness', version: TOOL_VERSION },
+    generatedAt: new Date().toISOString(),
+    state,
+    mode: opts.config.mode,
+    summary: {
+      testsDeleted: findings.filter((f) => (f.ruleId === 'R001' || f.ruleId === 'R002') && f.severity !== 'low').length,
+      testsSkipped: findings.filter((f) => (f.ruleId === 'R003' || f.ruleId === 'R004') && f.severity !== 'low').length,
+      assertionsWeakened: findings.filter((f) => f.ruleId.startsWith('A') && f.severity !== 'low').length,
+      changedTestsNotRun: findings.filter((f) => f.ruleId === 'V003').length,
+      findings: counts,
+    },
+    findings,
+    evidence: {
+      state: opts.evidence ? (opts.evidenceNotes?.some((n) => /partial/i.test(n)) ? 'partial' : 'read') : 'unreadable',
+      sources: opts.evidence?.sources ?? [],
+      total: opts.evidence?.total ?? 0,
+      passed: opts.evidence?.passed ?? 0,
+      failed: opts.evidence?.failed ?? 0,
+      errored: opts.evidence?.errored ?? 0,
+      skipped: opts.evidence?.skipped ?? 0,
+      flaky: opts.evidence?.flaky ?? 0,
+      notes: opts.evidenceNotes ?? (opts.evidence ? [] : ['No JUnit XML was found. Add a reporter so changed tests can be checked against what ran.']),
+    },
+    provenance,
+    files: {
+      changed: files.length,
+      tests: files.filter((f) => f.kind === 'test').length,
+      production: files.filter((f) => f.kind === 'production').length,
+      config: files.filter((f) => f.kind === 'runner-config' || f.kind === 'coverage-config').length,
+      workflows: files.filter((f) => f.kind === 'ci-workflow').length,
+      snapshots: files.filter((f) => f.kind === 'snapshot').length,
+    },
+    timing: { totalMs: Math.round(performance.now() - t0), parseMs: Math.round(parseMs), rulesMs: Math.round(rulesMs), evidenceMs: 0 },
+    base: baseSha,
+    head: headSha,
+  };
+  return { report, files, pairs };
+}
+
+/** pass, review or unreadable. */
+export function computeState(findings: Finding[], cfg: ResolvedConfig, evidence: Evidence | undefined, files: ChangedFile[]): CheckState {
+  const threshold: Severity = cfg.failOn;
+  const open = findings.filter((f) => !f.acknowledged && SEVERITY_RANK[f.severity] >= SEVERITY_RANK[threshold]);
+  const touchesTests = files.some((f) => f.kind === 'test' || f.kind === 'runner-config' || f.kind === 'ci-workflow');
+  if (open.length > 0) return 'review';
+  if (!evidence && touchesTests) return 'unreadable';
+  return 'pass';
+}
+
+/** Exit code per spec 4.4. */
+export function exitCodeFor(report: Report, cfg: ResolvedConfig): number {
+  if (cfg.mode === 'report') return 0;
+  if (report.state === 'review') return 1;
+  if (report.state === 'unreadable' && cfg.mode === 'strict' && cfg.requireEvidence) return 3;
+  return 0;
+}

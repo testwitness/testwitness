@@ -1,0 +1,12 @@
+{
+  "name": "ts-mocha-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "mocha --reporter mocha-junit-reporter --reporter-options mochaFile=../junit/junit.xml"
+  },
+  "devDependencies": {
+    "mocha": "^11.8.0",
+    "mocha-junit-reporter": "^2.2.1"
+  }
+}

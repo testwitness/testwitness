@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/assertj/assertj/pull/1729",
+  "repo": "assertj/assertj",
+  "number": 1729,
+  "title": "Use parameterized tests for assertHasParameter()",
+  "merged_at": "2019-12-15T00:59:34Z",
+  "stars": 2854,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "7b0b49d79df2978b219969c9835bec572ae84312",
+  "head_sha": "95b94b09a5c5697689b179f1992d35e69b329fe0",
+  "files_changed": 1,
+  "additions": 59,
+  "deletions": 113
+}

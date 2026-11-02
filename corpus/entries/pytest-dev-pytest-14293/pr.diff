@@ -1,0 +1,252 @@
+diff --git a/doc/en/deprecations.rst b/doc/en/deprecations.rst
+index 048c99ce..5207af0c 100644
+--- a/doc/en/deprecations.rst
++++ b/doc/en/deprecations.rst
+@@ -148,41 +148,6 @@ Simply remove the ``__init__.py`` file entirely.
+ Python 3.3+ natively supports namespace packages without ``__init__.py``.
+ 
+ 
+-.. _import-or-skip-import-error:
+-
+-``pytest.importorskip`` default behavior regarding :class:`ImportError`
+-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-
+-.. deprecated:: 8.2
+-
+-Traditionally :func:`pytest.importorskip` will capture :class:`ImportError`, with the original intent being to skip
+-tests where a dependent module is not installed, for example testing with different dependencies.
+-
+-However some packages might be installed in the system, but are not importable due to
+-some other issue, for example, a compilation error or a broken installation. In those cases :func:`pytest.importorskip`
+-would still silently skip the test, but more often than not users would like to see the unexpected
+-error so the underlying issue can be fixed.
+-
+-In ``8.2`` the ``exc_type`` parameter has been added, giving users the ability of passing :class:`ModuleNotFoundError`
+-to skip tests only if the module cannot really be found, and not because of some other error.
+-
+-Catching only :class:`ModuleNotFoundError` by default (and letting other errors propagate) would be the best solution,
+-however for backward compatibility, pytest will keep the existing behavior but raise a warning if:
+-
+-1. The captured exception is of type :class:`ImportError`, and:
+-2. The user does not pass ``exc_type`` explicitly.
+-
+-If the import attempt raises :class:`ModuleNotFoundError` (the usual case), then the module is skipped and no
+-warning is emitted.
+-
+-This way, the usual cases will keep working the same way, while unexpected errors will now issue a warning, with
+-users being able to suppress the warning by passing ``exc_type=ImportError`` explicitly.
+-
+-In ``9.0``, the warning will turn into an error, and in ``9.1`` :func:`pytest.importorskip` will only capture
+-:class:`ModuleNotFoundError` by default and no warnings will be issued anymore -- but users can still capture
+-:class:`ImportError` by passing it to ``exc_type``.
+-
+-
+ Configuring hook specs/impls using markers
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+@@ -314,6 +279,30 @@ an appropriate period of deprecation has passed.
+ Some breaking changes which could not be deprecated are also listed.
+ 
+ 
++.. _import-or-skip-import-error:
++
++``pytest.importorskip`` default behavior regarding :class:`ImportError`
++~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++.. deprecated:: 8.2
++.. versionremoved:: 9.1
++
++Traditionally :func:`pytest.importorskip` captured :class:`ImportError`, with the original intent being to skip
++tests where a dependent module is not installed, for example testing with different dependencies.
++
++However, some packages might be installed in the system but not importable due to some other issue, for example
++a compilation error or a broken installation. In those cases, :func:`pytest.importorskip` would still silently skip
++the test, but more often than not users would rather see the unexpected error so the underlying issue can be fixed.
++
++In ``8.2``, the ``exc_type`` parameter was added, giving users the ability to pass
++:class:`ModuleNotFoundError` to skip tests only if the module cannot really be found, and not because of some other
++error.
++
++As of ``9.1``, :func:`pytest.importorskip` only captures :class:`ModuleNotFoundError` by default.
++If you want to preserve the previous behavior and skip on other :class:`ImportError` exceptions during import,
++pass ``exc_type=ImportError`` explicitly.
++
++
+ .. _node-ctor-fspath-deprecation:
+ 
+ ``fspath`` argument for Node constructors replaced with ``pathlib.Path``
+diff --git a/src/_pytest/outcomes.py b/src/_pytest/outcomes.py
+index 09d0a6ec..257b95cf 100644
+--- a/src/_pytest/outcomes.py
++++ b/src/_pytest/outcomes.py
+@@ -9,8 +9,6 @@ from typing import Any
+ from typing import ClassVar
+ from typing import NoReturn
+ 
+-from .warning_types import PytestDeprecationWarning
+-
+ 
+ class OutcomeException(BaseException):
+     """OutcomeException and its subclass instances indicate and contain info
+@@ -219,11 +217,10 @@ def importorskip(
+         The exception that should be captured in order to skip modules.
+         Must be :py:class:`ImportError` or a subclass.
+ 
+-        If the module can be imported but raises :class:`ImportError`, pytest will
+-        issue a warning to the user, as often users expect the module not to be
+-        found (which would raise :class:`ModuleNotFoundError` instead).
+-
+-        This warning can be suppressed by passing ``exc_type=ImportError`` explicitly.
++        Defaults to :class:`ModuleNotFoundError` when not given, which means
++        the module must be missing for the test to be skipped.
++        Pass ``exc_type=ImportError`` to also skip modules that raise
++        :class:`ImportError` during import.
+ 
+         See :ref:`import-or-skip-import-error` for details.
+ 
+@@ -241,26 +238,21 @@ def importorskip(
+     .. versionadded:: 8.2
+ 
+         The ``exc_type`` parameter.
++
++    .. versionchanged:: 9.1
++
++        The default for ``exc_type`` is now :class:`ModuleNotFoundError`.
+     """
+     import warnings
+ 
+     __tracebackhide__ = True
+     compile(modname, "", "eval")  # to catch syntaxerrors
+ 
+-    # Until pytest 9.1, we will warn the user if we catch ImportError (instead of ModuleNotFoundError),
+-    # as this might be hiding an installation/environment problem, which is not usually what is intended
+-    # when using importorskip() (#11523).
+-    # In 9.1, to keep the function signature compatible, we just change the code below to:
+-    # 1. Use `exc_type = ModuleNotFoundError` if `exc_type` is not given.
+-    # 2. Remove `warn_on_import` and the warning handling.
++    # Keep the public signature compatible while using the pytest 9.1 default behavior.
+     if exc_type is None:
+-        exc_type = ImportError
+-        warn_on_import_error = True
+-    else:
+-        warn_on_import_error = False
++        exc_type = ModuleNotFoundError
+ 
+     skipped: Skipped | None = None
+-    warning: Warning | None = None
+ 
+     with warnings.catch_warnings():
+         # Make sure to ignore ImportWarnings that might happen because
+@@ -275,21 +267,6 @@ def importorskip(
+             if reason is None:
+                 reason = f"could not import {modname!r}: {exc}"
+             skipped = Skipped(reason, allow_module_level=True)
+-
+-            if warn_on_import_error and not isinstance(exc, ModuleNotFoundError):
+-                lines = [
+-                    "",
+-                    f"Module '{modname}' was found, but when imported by pytest it raised:",
+-                    f"    {exc!r}",
+-                    "In pytest 9.1 this warning will become an error by default.",
+-                    "You can fix the underlying problem, or alternatively overwrite this behavior and silence this "
+-                    "warning by passing exc_type=ImportError explicitly.",
+-                    "See https://docs.pytest.org/en/stable/deprecations.html#pytest-importorskip-default-behavior-regarding-importerror",
+-                ]
+-                warning = PytestDeprecationWarning("\n".join(lines))
+-
+-    if warning:
+-        warnings.warn(warning, stacklevel=2)
+     if skipped:
+         raise skipped
+ 
+diff --git a/testing/test_runner.py b/testing/test_runner.py
+index 0245438a..6ecdfe7e 100644
+--- a/testing/test_runner.py
++++ b/testing/test_runner.py
+@@ -7,7 +7,6 @@ import os
+ from pathlib import Path
+ import sys
+ import types
+-import warnings
+ 
+ from _pytest import outcomes
+ from _pytest import reports
+@@ -799,50 +798,29 @@ def test_importorskip_imports_last_module_part() -> None:
+ 
+ 
+ class TestImportOrSkipExcType:
+-    """Tests for #11523."""
++    """Tests for importorskip's exc_type behavior."""
+ 
+-    def test_no_warning(self) -> None:
+-        # An attempt on a module which does not exist will raise ModuleNotFoundError, so it will
+-        # be skipped normally and no warning will be issued.
+-        with warnings.catch_warnings(record=True) as captured:
+-            warnings.simplefilter("always")
+-
+-            with pytest.raises(pytest.skip.Exception):
+-                pytest.importorskip("TestImportOrSkipExcType_test_no_warning")
+-
+-        assert captured == []
++    def test_module_not_found_skips_by_default(self) -> None:
++        with pytest.raises(pytest.skip.Exception):
++            pytest.importorskip(
++                "TestImportOrSkipExcType_test_module_not_found_skips_without_warning"
++            )
+ 
+-    def test_import_error_with_warning(self, pytester: Pytester) -> None:
+-        # Create a module which exists and can be imported, however it raises
+-        # ImportError due to some other problem. In this case we will issue a warning
+-        # about the future behavior change.
++    def test_import_error_is_propagated_by_default(self, pytester: Pytester) -> None:
+         fn = pytester.makepyfile("raise ImportError('some specific problem')")
+         pytester.syspathinsert()
+ 
+-        with warnings.catch_warnings(record=True) as captured:
+-            warnings.simplefilter("always")
+-
+-            with pytest.raises(pytest.skip.Exception):
+-                pytest.importorskip(fn.stem)
++        with pytest.raises(ImportError, match="some specific problem"):
++            pytest.importorskip(fn.stem)
+ 
+-        [warning] = captured
+-        assert warning.category is pytest.PytestDeprecationWarning
+-
+-    def test_import_error_suppress_warning(self, pytester: Pytester) -> None:
+-        # Same as test_import_error_with_warning, but we can suppress the warning
+-        # by passing ImportError as exc_type.
++    def test_import_error_can_be_captured_explicitly(self, pytester: Pytester) -> None:
+         fn = pytester.makepyfile("raise ImportError('some specific problem')")
+         pytester.syspathinsert()
+ 
+-        with warnings.catch_warnings(record=True) as captured:
+-            warnings.simplefilter("always")
+-
+-            with pytest.raises(pytest.skip.Exception):
+-                pytest.importorskip(fn.stem, exc_type=ImportError)
+-
+-        assert captured == []
++        with pytest.raises(pytest.skip.Exception):
++            pytest.importorskip(fn.stem, exc_type=ImportError)
+ 
+-    def test_warning_integration(self, pytester: Pytester) -> None:
++    def test_import_error_integration(self, pytester: Pytester) -> None:
+         pytester.makepyfile(
+             """
+             import pytest
+@@ -857,12 +835,9 @@ class TestImportOrSkipExcType:
+         )
+         result = pytester.runpytest()
+         result.stdout.fnmatch_lines(
+-            [
+-                "*Module 'warning_integration_module' was found, but when imported by pytest it raised:",
+-                "*      ImportError('required library foobar not compiled properly')",
+-                "*1 skipped, 1 warning*",
+-            ]
++            ["*ImportError: required library foobar not compiled properly*"]
+         )
++        result.assert_outcomes(failed=1)
+ 
+ 
+ def test_importorskip_dev_module(monkeypatch) -> None:

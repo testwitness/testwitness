@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/17850",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 17850,
+  "title": "MNT small clean up and parametrization in KMeans Tests",
+  "merged_at": "2020-07-08T09:21:53Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "3a49e5f209f08c00f73d8895cf27d228fbae25f1",
+  "head_sha": "d332909138466b320f4bc67345aa2c1dde346f2d",
+  "files_changed": 1,
+  "additions": 27,
+  "deletions": 85
+}

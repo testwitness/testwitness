@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/typescript-eslint/typescript-eslint/pull/11976",
+  "repo": "typescript-eslint/typescript-eslint",
+  "number": 11976,
+  "title": "chore: update snapshots for no-unused-vars identifier",
+  "merged_at": "2026-01-19T20:15:10Z",
+  "stars": 16462,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "heldout",
+  "base_sha": "e6c051300befe5ec619c02da4f1382e78976dccb",
+  "head_sha": "ac9ac37e353b0a79409a1370acaf555ee0bd8dde",
+  "files_changed": 3,
+  "additions": 3,
+  "deletions": 3
+}

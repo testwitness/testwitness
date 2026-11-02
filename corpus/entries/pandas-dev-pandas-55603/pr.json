@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/55603",
+  "repo": "pandas-dev/pandas",
+  "number": 55603,
+  "title": "TST: move misplaced tests",
+  "merged_at": "2023-10-20T16:43:44Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "a5e55fb563b1c8ebf615c14c10229dcf48211b80",
+  "head_sha": "10476ae2a049803e5a59dbd1bb94bcbe32db20f1",
+  "files_changed": 19,
+  "additions": 417,
+  "deletions": 416
+}

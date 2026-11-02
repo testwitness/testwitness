@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/40233",
+  "repo": "pandas-dev/pandas",
+  "number": 40233,
+  "title": "DEPS: skip html tests if html5lib is not installed #40198",
+  "merged_at": "2021-03-05T13:55:57Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "skip",
+  "split": "heldout",
+  "base_sha": "ec56dd272016491b58b2a53a720a05b0a1019156",
+  "head_sha": "6ed146b05c6bdb186ab13e74a8080d915ce87463",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 1
+}

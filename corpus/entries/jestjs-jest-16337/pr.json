@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jestjs/jest/pull/16337",
+  "repo": "jestjs/jest",
+  "number": 16337,
+  "title": "chore(deps): bump nanoid from 3.3.17 to 3.3.18 in the npm_and_yarn group across 1 directory",
+  "merged_at": "2026-08-14T09:27:27Z",
+  "stars": 45471,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "deps",
+  "split": "tuning",
+  "base_sha": "d067e24dfaaec52dc4844d25acf7145144926f32",
+  "head_sha": "ef3a6c131c2025f1c9a02b9e996f2282feb7123d",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

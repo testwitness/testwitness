@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pypa/pip/pull/8366",
+  "repo": "pypa/pip",
+  "number": 8366,
+  "title": "Add helper methods for path lookups to test_{uninstall, wheel}.py",
+  "merged_at": "2020-06-09T20:20:26Z",
+  "stars": 10307,
+  "license": "MIT",
+  "language": "python",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "d01bfcfaa13a4f06fa0ce61fa18cf06012f2e78f",
+  "head_sha": "c51c5a74cfa12da5b699df8d1ea55aa8ab3cd533",
+  "files_changed": 3,
+  "additions": 23,
+  "deletions": 38
+}

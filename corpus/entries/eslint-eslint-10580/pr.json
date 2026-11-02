@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/eslint/eslint/pull/10580",
+  "repo": "eslint/eslint",
+  "number": 10580,
+  "title": "Chore: Simplify helper method in Linter tests",
+  "merged_at": "2018-07-09T00:07:03Z",
+  "stars": 27603,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "967968df3e270b264a53464f0526ef0c9fdce926",
+  "head_sha": "4462295522d77f61821d69856a9ab730895ccafd",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 11
+}

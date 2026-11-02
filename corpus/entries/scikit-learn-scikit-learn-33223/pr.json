@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/33223",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 33223,
+  "title": "TST Refactor out helper in `pos_label` display curve tests",
+  "merged_at": "2026-02-10T10:09:01Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "f3bc33252152c283b1a3ae53840467436f8c0531",
+  "head_sha": "624832a05913fbe490343075854e89b042ac8274",
+  "files_changed": 2,
+  "additions": 115,
+  "deletions": 102
+}

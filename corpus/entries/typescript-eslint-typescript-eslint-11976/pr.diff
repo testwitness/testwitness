@@ -1,0 +1,39 @@
+diff --git a/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v8.test.ts.snap b/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v8.test.ts.snap
+index 7592f93..b7ed153 100644
+--- a/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v8.test.ts.snap
++++ b/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v8.test.ts.snap
+@@ -16,7 +16,7 @@ exports[`flat-config-types-@types__eslint-v8 > eslint > should work successfully
+         "line": 38,
+         "message": "'_otherCases' is defined but never used.",
+         "messageId": "unusedVar",
+-        "nodeType": null,
++        "nodeType": "Identifier",
+         "ruleId": "@typescript-eslint/no-unused-vars",
+         "severity": 2,
+       },
+diff --git a/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v9.test.ts.snap b/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v9.test.ts.snap
+index 6360f2c..86377ce 100644
+--- a/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v9.test.ts.snap
++++ b/packages/integration-tests/tests/__snapshots__/flat-config-types-@types__eslint-v9.test.ts.snap
+@@ -16,7 +16,7 @@ exports[`flat-config-types-@types__eslint-v9 > eslint > should work successfully
+         "line": 38,
+         "message": "'_otherCases' is defined but never used.",
+         "messageId": "unusedVar",
+-        "nodeType": null,
++        "nodeType": "Identifier",
+         "ruleId": "@typescript-eslint/no-unused-vars",
+         "severity": 2,
+       },
+diff --git a/packages/integration-tests/tests/__snapshots__/recommended-does-not-require-program.test.ts.snap b/packages/integration-tests/tests/__snapshots__/recommended-does-not-require-program.test.ts.snap
+index a8bb9c1..1168f36 100644
+--- a/packages/integration-tests/tests/__snapshots__/recommended-does-not-require-program.test.ts.snap
++++ b/packages/integration-tests/tests/__snapshots__/recommended-does-not-require-program.test.ts.snap
+@@ -16,7 +16,7 @@ exports[`recommended-does-not-require-program > eslint > should work successfull
+         "line": 1,
+         "message": "'foo' is assigned a value but never used.",
+         "messageId": "unusedVar",
+-        "nodeType": null,
++        "nodeType": "Identifier",
+         "ruleId": "@typescript-eslint/no-unused-vars",
+         "severity": 2,
+       },

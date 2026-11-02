@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "picomatch": "^4.0.2",
-    "web-tree-sitter": "^0.27.1"
-  },
-  "devDependencies": {}
+    "web-tree-sitter": "^0.27.1",
+    "yaml": "^2.9.1"
+  }
 }

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/fastapi/fastapi/pull/16545",
+  "repo": "fastapi/fastapi",
+  "number": 16545,
+  "title": "\ud83d\udd25 Remove deprecated `**extra` from request parameters",
+  "merged_at": "2026-10-20T16:34:47Z",
+  "stars": 104534,
+  "license": "MIT",
+  "language": "python",
+  "category": "deleted",
+  "split": "heldout",
+  "base_sha": "6f288521eb6bd52dfcdfd0b0fc3a1e0f05892331",
+  "head_sha": "a92035f154782dd4935be34d736f857e73d27f3a",
+  "files_changed": 5,
+  "additions": 55,
+  "deletions": 166
+}

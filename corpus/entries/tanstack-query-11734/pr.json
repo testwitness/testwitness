@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/11734",
+  "repo": "TanStack/query",
+  "number": 11734,
+  "title": "test(lit-query): move 'client-switch-controllers.test.ts' tests into the test file of each controller",
+  "merged_at": "2026-09-29T07:23:22Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "50db43049f7753df465752fd7d8f452938d61acb",
+  "head_sha": "20f8cd78ee218205a7e39d247452e7a2683c110a",
+  "files_changed": 4,
+  "additions": 423,
+  "deletions": 450
+}

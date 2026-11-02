@@ -34,11 +34,11 @@
     "@testwitness/core": "workspace:*",
     "@testwitness/junit": "workspace:*",
     "@testwitness/lang-java": "workspace:*",
-    "@testwitness/lang-ts": "workspace:*",
     "@testwitness/lang-python": "workspace:*",
-    "commander": "^14.0.0"
+    "@testwitness/lang-ts": "workspace:*",
+    "commander": "^14.0.0",
+    "fast-glob": "^3.3.3"
   },
-  "devDependencies": {},
   "bin": {
     "testwitness": "./bin/testwitness.js"
   }

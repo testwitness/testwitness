@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/shadcn-ui/ui/pull/5801",
+  "repo": "shadcn-ui/ui",
+  "number": 5801,
+  "title": "test(snapshots): update input & command for consistency",
+  "merged_at": "2024-11-12T08:54:31Z",
+  "stars": 127113,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "tuning",
+  "base_sha": "8d520c8d4998eb5a2ad19730fcda6a2704c0cdef",
+  "head_sha": "248c7e751617719d9e66c747a8de772e3ffb6093",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 7
+}

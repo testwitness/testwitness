@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pydantic/pydantic/pull/11089",
+  "repo": "pydantic/pydantic",
+  "number": 11089,
+  "title": "Simplify test parametrization in `test_types_self.py`",
+  "merged_at": "2024-12-12T13:18:09Z",
+  "stars": 29260,
+  "license": "MIT",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "cc01258e6c19d42fa0230e922b939d5eb7c77492",
+  "head_sha": "f61dc4aeb967f935637ab021a9d9e0aac27933d9",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 12
+}

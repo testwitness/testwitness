@@ -1,0 +1,110 @@
+diff --git a/components/card/Card.tsx b/components/card/Card.tsx
+index 70f6937d..36811aa0 100644
+--- a/components/card/Card.tsx
++++ b/components/card/Card.tsx
+@@ -118,11 +118,12 @@ const Card = React.forwardRef((props: CardProps, ref: React.Ref<HTMLDivElement>)
+         {...extraProps}
+         className={`${prefixCls}-head-tabs`}
+         onChange={onTabChange}
+-      >
+-        {tabList.map(item => (
+-          <Tabs.TabPane tab={item.tab} disabled={item.disabled} key={item.key} />
+-        ))}
+-      </Tabs>
++        items={tabList.map(item => ({
++          label: item.tab,
++          key: item.key,
++          disabled: item.disabled ?? false,
++        }))}
++      />
+     ) : null;
+   if (title || extra || tabs) {
+     head = (
+diff --git a/components/card/__tests__/__snapshots__/demo-extend.test.ts.snap b/components/card/__tests__/__snapshots__/demo-extend.test.ts.snap
+index 35b5d984..9b168997 100644
+--- a/components/card/__tests__/__snapshots__/demo-extend.test.ts.snap
++++ b/components/card/__tests__/__snapshots__/demo-extend.test.ts.snap
+@@ -760,6 +760,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-tabtest"
++                  aria-disabled="false"
+                   aria-selected="true"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-tabtest"
+@@ -774,6 +775,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-tabtest"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-tabtest"
+@@ -900,6 +902,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-article"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-article"
+@@ -914,6 +917,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-app"
++                  aria-disabled="false"
+                   aria-selected="true"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-app"
+@@ -928,6 +932,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-project"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-project"
+diff --git a/components/card/__tests__/__snapshots__/demo.test.ts.snap b/components/card/__tests__/__snapshots__/demo.test.ts.snap
+index b40416a2..079eb4e7 100644
+--- a/components/card/__tests__/__snapshots__/demo.test.ts.snap
++++ b/components/card/__tests__/__snapshots__/demo.test.ts.snap
+@@ -760,6 +760,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-tabtest"
++                  aria-disabled="false"
+                   aria-selected="true"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-tabtest"
+@@ -774,6 +775,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-tabtest"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-tabtest"
+@@ -881,6 +883,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-article"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-article"
+@@ -895,6 +898,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-app"
++                  aria-disabled="false"
+                   aria-selected="true"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-app"
+@@ -909,6 +913,7 @@ Array [
+               >
+                 <div
+                   aria-controls="rc-tabs-test-panel-project"
++                  aria-disabled="false"
+                   aria-selected="false"
+                   class="ant-tabs-tab-btn"
+                   id="rc-tabs-test-tab-project"

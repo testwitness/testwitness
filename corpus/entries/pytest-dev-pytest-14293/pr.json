@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pytest-dev/pytest/pull/14293",
+  "repo": "pytest-dev/pytest",
+  "number": 14293,
+  "title": "outcomes: remove deprecated `importorskip` `ImportError` behavior",
+  "merged_at": "2026-03-17T10:34:36Z",
+  "stars": 14660,
+  "license": "MIT",
+  "language": "python",
+  "category": "deleted",
+  "split": "tuning",
+  "base_sha": "e95f7f19aa11be55adc5d5e80550699672d69957",
+  "head_sha": "10929dcd8ac8484331be9f686a85ce02d09fefdf",
+  "files_changed": 3,
+  "additions": 49,
+  "deletions": 108
+}

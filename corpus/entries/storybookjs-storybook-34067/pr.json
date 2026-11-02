@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/storybookjs/storybook/pull/34067",
+  "repo": "storybookjs/storybook",
+  "number": 34067,
+  "title": "Svelte: Update portable-stories snapshots",
+  "merged_at": "2026-03-10T09:17:16Z",
+  "stars": 91421,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "heldout",
+  "base_sha": "282c04920b40e8580c2e8cde965693556b612c22",
+  "head_sha": "35ea138f6a3240c52e834fb223afbae66cea1e10",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 16
+}

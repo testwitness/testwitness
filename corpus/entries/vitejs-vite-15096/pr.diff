@@ -1,0 +1,150 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 1d5df76..6a5b986 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -45,7 +45,7 @@ jobs:
+           - os: macos-latest
+             node_version: 20
+           - os: windows-latest
+-            node_version: 20.3.1 # https://github.com/nodejs/node/issues/48673
++            node_version: 20
+       fail-fast: false
+ 
+     name: "Build&Test: node-${{ matrix.node_version }}, ${{ matrix.os }}"
+diff --git a/playground/hasWindowsUnicodeFsBug.js b/playground/hasWindowsUnicodeFsBug.js
+new file mode 100644
+index 0000000..c46dd2a
+--- /dev/null
++++ b/playground/hasWindowsUnicodeFsBug.js
+@@ -0,0 +1,10 @@
++import os from 'node:os'
++
++const isWindows = os.platform() === 'win32'
++const nodeVersionArray = process.versions.node.split('.')
++// ignore some files due to https://github.com/nodejs/node/issues/48673
++// node <=21.0.0 and ^20.4.0 has the bug
++export const hasWindowsUnicodeFsBug =
++  isWindows &&
++  (+nodeVersionArray[0] > 20 ||
++    (+nodeVersionArray[0] === 20 && +nodeVersionArray[1] >= 4))
+diff --git a/playground/hmr/__tests__/hmr.spec.ts b/playground/hmr/__tests__/hmr.spec.ts
+index 7a8b721..2ff737f 100644
+--- a/playground/hmr/__tests__/hmr.spec.ts
++++ b/playground/hmr/__tests__/hmr.spec.ts
+@@ -1,4 +1,5 @@
+ import { beforeAll, describe, expect, it, test } from 'vitest'
++import { hasWindowsUnicodeFsBug } from '../../hasWindowsUnicodeFsBug'
+ import {
+   addFile,
+   browserLogs,
+@@ -205,21 +206,24 @@ if (!isBuild) {
+     await untilUpdated(() => el.textContent(), '3')
+   })
+ 
+-  test('full-reload encodeURI path', async () => {
+-    await page.goto(
+-      viteTestUrl + '/unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html',
+-    )
+-    const el = await page.$('#app')
+-    expect(await el.textContent()).toBe('title')
+-    editFile('unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html', (code) =>
+-      code.replace('title', 'title2'),
+-    )
+-    await page.waitForEvent('load')
+-    await untilUpdated(
+-      async () => (await page.$('#app')).textContent(),
+-      'title2',
+-    )
+-  })
++  test.skipIf(hasWindowsUnicodeFsBug)(
++    'full-reload encodeURI path',
++    async () => {
++      await page.goto(
++        viteTestUrl + '/unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html',
++      )
++      const el = await page.$('#app')
++      expect(await el.textContent()).toBe('title')
++      editFile('unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html', (code) =>
++        code.replace('title', 'title2'),
++      )
++      await page.waitForEvent('load')
++      await untilUpdated(
++        async () => (await page.$('#app')).textContent(),
++        'title2',
++      )
++    },
++  )
+ 
+   test('CSS update preserves query params', async () => {
+     await page.goto(viteTestUrl)
+diff --git a/playground/html/__tests__/html.spec.ts b/playground/html/__tests__/html.spec.ts
+index a026ce7..1baab83 100644
+--- a/playground/html/__tests__/html.spec.ts
++++ b/playground/html/__tests__/html.spec.ts
+@@ -1,4 +1,5 @@
+ import { beforeAll, describe, expect, test } from 'vitest'
++import { hasWindowsUnicodeFsBug } from '../../hasWindowsUnicodeFsBug'
+ import {
+   browserLogs,
+   editFile,
+@@ -218,7 +219,7 @@ describe('noBody', () => {
+   })
+ })
+ 
+-describe('Unicode path', () => {
++describe.skipIf(hasWindowsUnicodeFsBug)('Unicode path', () => {
+   test('direct access', async () => {
+     await page.goto(
+       viteTestUrl + '/unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html',
+diff --git a/playground/html/vite.config.js b/playground/html/vite.config.js
+index 6bcfebd..625a990 100644
+--- a/playground/html/vite.config.js
++++ b/playground/html/vite.config.js
+@@ -1,5 +1,6 @@
+ import { resolve } from 'node:path'
+ import { defineConfig } from 'vite'
++import { hasWindowsUnicodeFsBug } from '../hasWindowsUnicodeFsBug'
+ 
+ export default defineConfig({
+   base: './',
+@@ -20,10 +21,14 @@ export default defineConfig({
+         inline1: resolve(__dirname, 'inline/shared-1.html'),
+         inline2: resolve(__dirname, 'inline/shared-2.html'),
+         inline3: resolve(__dirname, 'inline/unique.html'),
+-        unicodePath: resolve(
+-          __dirname,
+-          'unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html',
+-        ),
++        ...(hasWindowsUnicodeFsBug
++          ? {}
++          : {
++              unicodePath: resolve(
++                __dirname,
++                'unicode-path/中文-にほんご-한글-🌕🌖🌗/index.html',
++              ),
++            }),
+         linkProps: resolve(__dirname, 'link-props/index.html'),
+         valid: resolve(__dirname, 'valid.html'),
+         importmapOrder: resolve(__dirname, 'importmapOrder.html'),
+diff --git a/playground/vitestGlobalSetup.ts b/playground/vitestGlobalSetup.ts
+index 7a63d6d..ff1cb80 100644
+--- a/playground/vitestGlobalSetup.ts
++++ b/playground/vitestGlobalSetup.ts
+@@ -3,6 +3,7 @@ import path from 'node:path'
+ import fs from 'fs-extra'
+ import type { BrowserServer } from 'playwright-chromium'
+ import { chromium } from 'playwright-chromium'
++import { hasWindowsUnicodeFsBug } from './hasWindowsUnicodeFsBug'
+ 
+ const DIR = path.join(os.tmpdir(), 'vitest_playwright_global_setup')
+ 
+@@ -30,6 +31,9 @@ export async function setup(): Promise<void> {
+     .copy(path.resolve(__dirname, '../playground'), tempDir, {
+       dereference: false,
+       filter(file) {
++        if (file.includes('中文-にほんご-한글-🌕🌖🌗')) {
++          return !hasWindowsUnicodeFsBug
++        }
+         file = file.replace(/\\/g, '/')
+         return !file.includes('__tests__') && !file.match(/dist(\/|$)/)
+       },

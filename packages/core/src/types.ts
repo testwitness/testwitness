@@ -63,6 +63,8 @@ export interface Assertion {
   callee: string;
   /** Normalised subject expression text if identifiable. */
   subject?: string;
+  /** Normalised expected operand text if identifiable (matcher argument, expected side of assertEquals, right side of pytest ==). */
+  expected?: string;
   /** Raw source text of the full statement, trimmed. */
   text: string;
   line: number;
@@ -165,7 +167,7 @@ export interface Rule<Options = Record<string, unknown>> {
   needs: Need[];
   optionsSchema?: Record<string, unknown>;
   defaultOptions?: Options;
-  run(ctx: RuleContext, options: Options): Iterable<Finding>;
+  run(ctx: RuleContext, options: Options): Finding[] | Promise<Finding[]>;
   docs: {
     summary: string;
     falsePositives: string;

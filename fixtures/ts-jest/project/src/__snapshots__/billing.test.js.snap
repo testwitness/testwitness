@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Billing formatInvoice matches the invoice snapshot 1`] = `
+{
+  "lines": [
+    "Widget x4",
+    "Gadget x1",
+  ],
+  "total": 20,
+}
+`;

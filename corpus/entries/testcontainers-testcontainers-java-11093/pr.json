@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/testcontainers/testcontainers-java/pull/11093",
+  "repo": "testcontainers/testcontainers-java",
+  "number": 11093,
+  "title": "Move TiDB tests under org.testcontainers.tidb",
+  "merged_at": "2025-10-09T23:16:34Z",
+  "stars": 8758,
+  "license": "MIT",
+  "language": "java",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "231c41b27ad567e99f5b915fbcdd33677281b870",
+  "head_sha": "9d574905c4b14ac33714fb9968bd01d500fd84bb",
+  "files_changed": 2,
+  "additions": 3,
+  "deletions": 4
+}

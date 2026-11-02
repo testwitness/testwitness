@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/11250",
+  "repo": "TanStack/query",
+  "number": 11250,
+  "title": "test(vue-query/useQuery): move suspense regression tests into 'useQuery.test.ts'",
+  "merged_at": "2026-08-22T03:28:00Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "eeb982095219cc39ad55b99555ff49ed26d2ca4f",
+  "head_sha": "a79d0fa4a15cb3e2b9cf2e3910c44478cd215182",
+  "files_changed": 2,
+  "additions": 46,
+  "deletions": 62
+}

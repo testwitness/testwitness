@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pallets/click/pull/3715",
+  "repo": "pallets/click",
+  "number": 3715,
+  "title": "Parametrize deprecation tests and check targets",
+  "merged_at": "2026-07-22T22:29:11Z",
+  "stars": 17812,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "cfa01eeb7894a408af70b29d28c0b24f8680f9fb",
+  "head_sha": "10b43c211b825181cb81ef383e8091fd41750150",
+  "files_changed": 1,
+  "additions": 57,
+  "deletions": 15
+}

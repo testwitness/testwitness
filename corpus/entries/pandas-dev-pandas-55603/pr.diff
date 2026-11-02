@@ -1,0 +1,1300 @@
+diff --git a/pandas/tests/arrays/test_datetimes.py b/pandas/tests/arrays/test_datetimes.py
+index fc46e5a3..c2d68a79 100644
+--- a/pandas/tests/arrays/test_datetimes.py
++++ b/pandas/tests/arrays/test_datetimes.py
+@@ -746,14 +746,6 @@ class TestDatetimeArray:
+         assert str(left) == str(right2)
+         assert left.utcoffset() == right2.utcoffset()
+ 
+-    def test_date_range_frequency_M_deprecated(self):
+-        depr_msg = "'M' will be deprecated, please use 'ME' instead."
+-
+-        expected = pd.date_range("1/1/2000", periods=4, freq="2ME")
+-        with tm.assert_produces_warning(UserWarning, match=depr_msg):
+-            result = pd.date_range("1/1/2000", periods=4, freq="2M")
+-        tm.assert_index_equal(result, expected)
+-
+ 
+ def test_factorize_sort_without_freq():
+     dta = DatetimeArray._from_sequence([0, 2, 1])
+diff --git a/pandas/tests/frame/methods/test_map.py b/pandas/tests/frame/methods/test_map.py
+index 0de88114..03681c3d 100644
+--- a/pandas/tests/frame/methods/test_map.py
++++ b/pandas/tests/frame/methods/test_map.py
+@@ -12,6 +12,8 @@ from pandas import (
+ )
+ import pandas._testing as tm
+ 
++from pandas.tseries.offsets import BDay
++
+ 
+ def test_map(float_frame):
+     result = float_frame.map(lambda x: x * 2)
+@@ -158,8 +160,6 @@ def test_map_box():
+ 
+ 
+ def test_frame_map_dont_convert_datetime64():
+-    from pandas.tseries.offsets import BDay
+-
+     df = DataFrame({"x1": [datetime(1996, 1, 1)]})
+ 
+     df = df.map(lambda x: x + BDay())
+diff --git a/pandas/tests/groupby/test_grouping.py b/pandas/tests/groupby/test_grouping.py
+index 76a54305..8c2b95ba 100644
+--- a/pandas/tests/groupby/test_grouping.py
++++ b/pandas/tests/groupby/test_grouping.py
+@@ -245,6 +245,7 @@ class TestGrouping:
+         expected = expected.loc[:, ["A", "B"]]
+         tm.assert_frame_equal(result, expected)
+ 
++    def test_grouper_creation_bug2(self):
+         # GH14334
+         # Grouper(key=...) may be passed in a list
+         df = DataFrame(
+@@ -275,15 +276,16 @@ class TestGrouping:
+         result = g.sum()
+         tm.assert_frame_equal(result, expected)
+ 
++    def test_grouper_creation_bug3(self):
+         # GH8866
+-        s = Series(
++        ser = Series(
+             np.arange(8, dtype="int64"),
+             index=MultiIndex.from_product(
+                 [list("ab"), range(2), date_range("20130101", periods=2)],
+                 names=["one", "two", "three"],
+             ),
+         )
+-        result = s.groupby(Grouper(level="three", freq="ME")).sum()
++        result = ser.groupby(Grouper(level="three", freq="ME")).sum()
+         expected = Series(
+             [28],
+             index=pd.DatetimeIndex([Timestamp("2013-01-31")], freq="ME", name="three"),
+@@ -291,8 +293,8 @@ class TestGrouping:
+         tm.assert_series_equal(result, expected)
+ 
+         # just specifying a level breaks
+-        result = s.groupby(Grouper(level="one")).sum()
+-        expected = s.groupby(level="one").sum()
++        result = ser.groupby(Grouper(level="one")).sum()
++        expected = ser.groupby(level="one").sum()
+         tm.assert_series_equal(result, expected)
+ 
+     def test_grouper_column_and_index(self):
+diff --git a/pandas/tests/indexes/datetimes/test_constructors.py b/pandas/tests/indexes/datetimes/test_constructors.py
+index 077b4fa5..59884547 100644
+--- a/pandas/tests/indexes/datetimes/test_constructors.py
++++ b/pandas/tests/indexes/datetimes/test_constructors.py
+@@ -1110,9 +1110,3 @@ class TestTimeSeries:
+         expected = Index(rng.to_pydatetime(), dtype=object)
+ 
+         tm.assert_numpy_array_equal(idx.values, expected.values)
+-
+-    def test_date_range_tuple_freq_raises(self):
+-        # GH#34703
+-        edate = datetime(2000, 1, 1)
+-        with pytest.raises(TypeError, match="pass as a string instead"):
+-            date_range(end=edate, freq=("D", 5), periods=20)
+diff --git a/pandas/tests/indexes/datetimes/test_date_range.py b/pandas/tests/indexes/datetimes/test_date_range.py
+index a74d3174..e8113b85 100644
+--- a/pandas/tests/indexes/datetimes/test_date_range.py
++++ b/pandas/tests/indexes/datetimes/test_date_range.py
+@@ -124,6 +124,20 @@ class TestTimestampEquivDateRange:
+ 
+ 
+ class TestDateRanges:
++    def test_date_range_frequency_M_deprecated(self):
++        depr_msg = "'M' will be deprecated, please use 'ME' instead."
++
++        expected = date_range("1/1/2000", periods=4, freq="2ME")
++        with tm.assert_produces_warning(UserWarning, match=depr_msg):
++            result = date_range("1/1/2000", periods=4, freq="2M")
++        tm.assert_index_equal(result, expected)
++
++    def test_date_range_tuple_freq_raises(self):
++        # GH#34703
++        edate = datetime(2000, 1, 1)
++        with pytest.raises(TypeError, match="pass as a string instead"):
++            date_range(end=edate, freq=("D", 5), periods=20)
++
+     @pytest.mark.parametrize("freq", ["ns", "us", "ms", "min", "s", "h", "D"])
+     def test_date_range_edges(self, freq):
+         # GH#13672
+@@ -911,6 +925,45 @@ class TestDateRangeTZ:
+ 
+         assert stamp == rng[1]
+ 
++    @pytest.mark.parametrize("tz", ["Europe/London", "dateutil/Europe/London"])
++    def test_date_range_ambiguous_endpoint(self, tz):
++        # construction with an ambiguous end-point
++        # GH#11626
++
++        with pytest.raises(pytz.AmbiguousTimeError, match="Cannot infer dst time"):
++            date_range(
++                "2013-10-26 23:00", "2013-10-27 01:00", tz="Europe/London", freq="h"
++            )
++
++        times = date_range(
++            "2013-10-26 23:00", "2013-10-27 01:00", freq="h", tz=tz, ambiguous="infer"
++        )
++        assert times[0] == Timestamp("2013-10-26 23:00", tz=tz)
++        assert times[-1] == Timestamp("2013-10-27 01:00:00+0000", tz=tz)
++
++    @pytest.mark.parametrize(
++        "tz, option, expected",
++        [
++            ["US/Pacific", "shift_forward", "2019-03-10 03:00"],
++            ["dateutil/US/Pacific", "shift_forward", "2019-03-10 03:00"],
++            ["US/Pacific", "shift_backward", "2019-03-10 01:00"],
++            ["dateutil/US/Pacific", "shift_backward", "2019-03-10 01:00"],
++            ["US/Pacific", timedelta(hours=1), "2019-03-10 03:00"],
++        ],
++    )
++    def test_date_range_nonexistent_endpoint(self, tz, option, expected):
++        # construction with an nonexistent end-point
++
++        with pytest.raises(pytz.NonExistentTimeError, match="2019-03-10 02:00:00"):
++            date_range(
++                "2019-03-10 00:00", "2019-03-10 02:00", tz="US/Pacific", freq="h"
++            )
++
++        times = date_range(
++            "2019-03-10 00:00", "2019-03-10 02:00", freq="h", tz=tz, nonexistent=option
++        )
++        assert times[-1] == Timestamp(expected, tz=tz)
++
+ 
+ class TestGenRangeGeneration:
+     def test_generate(self):
+diff --git a/pandas/tests/indexes/datetimes/test_datetimelike.py b/pandas/tests/indexes/datetimes/test_datetimelike.py
+deleted file mode 100644
+index a012a298..00000000
+--- a/pandas/tests/indexes/datetimes/test_datetimelike.py
++++ /dev/null
+@@ -1,13 +0,0 @@
+-""" generic tests from the Datetimelike class """
+-from pandas import date_range
+-import pandas._testing as tm
+-
+-
+-class TestDatetimeIndex:
+-    def test_format(self):
+-        # GH35439
+-        idx = date_range("20130101", periods=5)
+-        expected = [f"{x:%Y-%m-%d}" for x in idx]
+-        msg = r"DatetimeIndex\.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            assert idx.format() == expected
+diff --git a/pandas/tests/indexes/datetimes/test_formats.py b/pandas/tests/indexes/datetimes/test_formats.py
+index 6f75ac1b..deed5926 100644
+--- a/pandas/tests/indexes/datetimes/test_formats.py
++++ b/pandas/tests/indexes/datetimes/test_formats.py
+@@ -8,6 +8,7 @@ import pytz
+ import pandas as pd
+ from pandas import (
+     DatetimeIndex,
++    NaT,
+     Series,
+ )
+ import pandas._testing as tm
+@@ -33,7 +34,7 @@ def test_get_values_for_csv():
+     tm.assert_numpy_array_equal(result, expected)
+ 
+     # NULL object handling should work
+-    index = DatetimeIndex(["2017-01-01", pd.NaT, "2017-01-03"])
++    index = DatetimeIndex(["2017-01-01", NaT, "2017-01-03"])
+     expected = np.array(["2017-01-01", "NaT", "2017-01-03"], dtype=object)
+ 
+     result = index._get_values_for_csv(na_rep="NaT")
+@@ -58,6 +59,20 @@ def test_get_values_for_csv():
+ 
+ 
+ class TestDatetimeIndexRendering:
++    def test_dti_repr_dates(self):
++        text = str(pd.to_datetime([datetime(2013, 1, 1), datetime(2014, 1, 1)]))
++        assert "['2013-01-01'," in text
++        assert ", '2014-01-01']" in text
++
++    def test_dti_repr_mixed(self):
++        text = str(
++            pd.to_datetime(
++                [datetime(2013, 1, 1), datetime(2014, 1, 1, 12), datetime(2014, 1, 1)]
++            )
++        )
++        assert "'2013-01-01 00:00:00'," in text
++        assert "'2014-01-01 00:00:00']" in text
++
+     def test_dti_repr_short(self):
+         dr = pd.date_range(start="1/1/2012", periods=1)
+         repr(dr)
+@@ -114,11 +129,11 @@ class TestDatetimeIndexRendering:
+         )
+         idxs.append(
+             DatetimeIndex(
+-                ["2011-01-01 09:00", "2011-01-01 10:00", pd.NaT], tz="US/Eastern"
++                ["2011-01-01 09:00", "2011-01-01 10:00", NaT], tz="US/Eastern"
+             )
+         )
+         idxs.append(
+-            DatetimeIndex(["2011-01-01 09:00", "2011-01-01 10:00", pd.NaT], tz="UTC")
++            DatetimeIndex(["2011-01-01 09:00", "2011-01-01 10:00", NaT], tz="UTC")
+         )
+ 
+         exp = []
+@@ -165,7 +180,7 @@ class TestDatetimeIndexRendering:
+             tz="Asia/Tokyo",
+         )
+         idx6 = DatetimeIndex(
+-            ["2011-01-01 09:00", "2011-01-01 10:00", pd.NaT], tz="US/Eastern"
++            ["2011-01-01 09:00", "2011-01-01 10:00", NaT], tz="US/Eastern"
+         )
+         idx7 = DatetimeIndex(["2011-01-01 09:00", "2011-01-02 10:15"])
+ 
+@@ -222,7 +237,7 @@ class TestDatetimeIndexRendering:
+             tz="Asia/Tokyo",
+         )
+         idx6 = DatetimeIndex(
+-            ["2011-01-01 09:00", "2011-01-01 10:00", pd.NaT], tz="US/Eastern"
++            ["2011-01-01 09:00", "2011-01-01 10:00", NaT], tz="US/Eastern"
+         )
+ 
+         exp1 = "DatetimeIndex: 0 entries\nFreq: D"
+@@ -281,6 +296,14 @@ class TestDatetimeIndexRendering:
+ 
+ 
+ class TestFormat:
++    def test_format(self):
++        # GH#35439
++        idx = pd.date_range("20130101", periods=5)
++        expected = [f"{x:%Y-%m-%d}" for x in idx]
++        msg = r"DatetimeIndex\.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            assert idx.format() == expected
++
+     def test_format_with_name_time_info(self):
+         # bug I fixed 12/20/2011
+         dates = pd.date_range("2011-01-01 04:00:00", periods=10, name="something")
+@@ -299,3 +322,37 @@ class TestFormat:
+         expected = ["2012-02-07 00:00:00", "2012-02-07 23:00:00"]
+         assert len(result) == 2
+         assert result == expected
++
++    def test_format_datetime(self):
++        msg = "DatetimeIndex.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = pd.to_datetime([datetime(2003, 1, 1, 12), NaT]).format()
++        assert formatted[0] == "2003-01-01 12:00:00"
++        assert formatted[1] == "NaT"
++
++    def test_format_date(self):
++        msg = "DatetimeIndex.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = pd.to_datetime([datetime(2003, 1, 1), NaT]).format()
++        assert formatted[0] == "2003-01-01"
++        assert formatted[1] == "NaT"
++
++    def test_format_date_tz(self):
++        dti = pd.to_datetime([datetime(2013, 1, 1)], utc=True)
++        msg = "DatetimeIndex.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = dti.format()
++        assert formatted[0] == "2013-01-01 00:00:00+00:00"
++
++        dti = pd.to_datetime([datetime(2013, 1, 1), NaT], utc=True)
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = dti.format()
++        assert formatted[0] == "2013-01-01 00:00:00+00:00"
++
++    def test_format_date_explicit_date_format(self):
++        dti = pd.to_datetime([datetime(2003, 2, 1), NaT])
++        msg = "DatetimeIndex.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = dti.format(date_format="%m-%d-%Y", na_rep="UT")
++        assert formatted[0] == "02-01-2003"
++        assert formatted[1] == "UT"
+diff --git a/pandas/tests/indexes/datetimes/test_setops.py b/pandas/tests/indexes/datetimes/test_setops.py
+index 6071c7fa..4f86e3c7 100644
+--- a/pandas/tests/indexes/datetimes/test_setops.py
++++ b/pandas/tests/indexes/datetimes/test_setops.py
+@@ -1,4 +1,7 @@
+-from datetime import datetime
++from datetime import (
++    datetime,
++    timezone,
++)
+ 
+ import numpy as np
+ import pytest
+@@ -12,6 +15,7 @@ from pandas import (
+     DatetimeIndex,
+     Index,
+     Series,
++    Timestamp,
+     bdate_range,
+     date_range,
+ )
+@@ -416,6 +420,52 @@ class TestDatetimeIndexSetOps:
+         expected = dti[:0]
+         tm.assert_index_equal(result, expected)
+ 
++    def test_dti_intersection(self):
++        rng = date_range("1/1/2011", periods=100, freq="h", tz="utc")
++
++        left = rng[10:90][::-1]
++        right = rng[20:80][::-1]
++
++        assert left.tz == rng.tz
++        result = left.intersection(right)
++        assert result.tz == left.tz
++
++    # Note: not difference, as there is no symmetry requirement there
++    @pytest.mark.parametrize("setop", ["union", "intersection", "symmetric_difference"])
++    def test_dti_setop_aware(self, setop):
++        # non-overlapping
++        # GH#39328 as of 2.0 we cast these to UTC instead of object
++        rng = date_range("2012-11-15 00:00:00", periods=6, freq="h", tz="US/Central")
++
++        rng2 = date_range("2012-11-15 12:00:00", periods=6, freq="h", tz="US/Eastern")
++
++        result = getattr(rng, setop)(rng2)
++
++        left = rng.tz_convert("UTC")
++        right = rng2.tz_convert("UTC")
++        expected = getattr(left, setop)(right)
++        tm.assert_index_equal(result, expected)
++        assert result.tz == left.tz
++        if len(result):
++            assert result[0].tz is timezone.utc
++            assert result[-1].tz is timezone.utc
++
++    def test_dti_union_mixed(self):
++        # GH#21671
++        rng = DatetimeIndex([Timestamp("2011-01-01"), pd.NaT])
++        rng2 = DatetimeIndex(["2012-01-01", "2012-01-02"], tz="Asia/Tokyo")
++        result = rng.union(rng2)
++        expected = Index(
++            [
++                Timestamp("2011-01-01"),
++                pd.NaT,
++                Timestamp("2012-01-01", tz="Asia/Tokyo"),
++                Timestamp("2012-01-02", tz="Asia/Tokyo"),
++            ],
++            dtype=object,
++        )
++        tm.assert_index_equal(result, expected)
++
+ 
+ class TestBusinessDatetimeIndex:
+     def test_union(self, sort):
+@@ -500,15 +550,13 @@ class TestBusinessDatetimeIndex:
+     def test_intersection_list(self):
+         # GH#35876
+         # values is not an Index -> no name -> retain "a"
+-        values = [pd.Timestamp("2020-01-01"), pd.Timestamp("2020-02-01")]
++        values = [Timestamp("2020-01-01"), Timestamp("2020-02-01")]
+         idx = DatetimeIndex(values, name="a")
+         res = idx.intersection(values)
+         tm.assert_index_equal(res, idx)
+ 
+     def test_month_range_union_tz_pytz(self, sort):
+-        from pytz import timezone
+-
+-        tz = timezone("US/Eastern")
++        tz = pytz.timezone("US/Eastern")
+ 
+         early_start = datetime(2011, 1, 1)
+         early_end = datetime(2011, 3, 1)
+@@ -543,13 +591,13 @@ class TestBusinessDatetimeIndex:
+         # GH#38196
+         idx1 = Index(
+             [
+-                pd.Timestamp("2019-12-13"),
+-                pd.Timestamp("2019-12-12"),
+-                pd.Timestamp("2019-12-12"),
++                Timestamp("2019-12-13"),
++                Timestamp("2019-12-12"),
++                Timestamp("2019-12-12"),
+             ]
+         )
+         result = idx1.intersection(idx1, sort=sort)
+-        expected = Index([pd.Timestamp("2019-12-13"), pd.Timestamp("2019-12-12")])
++        expected = Index([Timestamp("2019-12-13"), Timestamp("2019-12-12")])
+         tm.assert_index_equal(result, expected)
+ 
+ 
+diff --git a/pandas/tests/indexes/datetimes/test_timezones.py b/pandas/tests/indexes/datetimes/test_timezones.py
+index eb54ea8e..8590a254 100644
+--- a/pandas/tests/indexes/datetimes/test_timezones.py
++++ b/pandas/tests/indexes/datetimes/test_timezones.py
+@@ -605,46 +605,6 @@ class TestDatetimeIndexTimezones:
+         localized_is_dst = dr.tz_localize(tz, ambiguous=is_dst)
+         tm.assert_index_equal(localized, localized_is_dst)
+ 
+-    # TODO: belongs outside tz_localize tests?
+-    @pytest.mark.parametrize("tz", ["Europe/London", "dateutil/Europe/London"])
+-    def test_dti_construction_ambiguous_endpoint(self, tz):
+-        # construction with an ambiguous end-point
+-        # GH#11626
+-
+-        with pytest.raises(pytz.AmbiguousTimeError, match="Cannot infer dst time"):
+-            date_range(
+-                "2013-10-26 23:00", "2013-10-27 01:00", tz="Europe/London", freq="h"
+-            )
+-
+-        times = date_range(
+-            "2013-10-26 23:00", "2013-10-27 01:00", freq="h", tz=tz, ambiguous="infer"
+-        )
+-        assert times[0] == Timestamp("2013-10-26 23:00", tz=tz)
+-        assert times[-1] == Timestamp("2013-10-27 01:00:00+0000", tz=tz)
+-
+-    @pytest.mark.parametrize(
+-        "tz, option, expected",
+-        [
+-            ["US/Pacific", "shift_forward", "2019-03-10 03:00"],
+-            ["dateutil/US/Pacific", "shift_forward", "2019-03-10 03:00"],
+-            ["US/Pacific", "shift_backward", "2019-03-10 01:00"],
+-            ["dateutil/US/Pacific", "shift_backward", "2019-03-10 01:00"],
+-            ["US/Pacific", timedelta(hours=1), "2019-03-10 03:00"],
+-        ],
+-    )
+-    def test_dti_construction_nonexistent_endpoint(self, tz, option, expected):
+-        # construction with an nonexistent end-point
+-
+-        with pytest.raises(pytz.NonExistentTimeError, match="2019-03-10 02:00:00"):
+-            date_range(
+-                "2019-03-10 00:00", "2019-03-10 02:00", tz="US/Pacific", freq="h"
+-            )
+-
+-        times = date_range(
+-            "2019-03-10 00:00", "2019-03-10 02:00", freq="h", tz=tz, nonexistent=option
+-        )
+-        assert times[-1] == Timestamp(expected, tz=tz)
+-
+     def test_dti_tz_localize_bdate_range(self):
+         dr = bdate_range("1/1/2009", "1/1/2010")
+         dr_utc = bdate_range("1/1/2009", "1/1/2010", tz=pytz.utc)
+@@ -973,16 +933,6 @@ class TestDatetimeIndexTimezones:
+         assert (utc_range == berlin_range).all()
+         assert (berlin_range == eastern_range).all()
+ 
+-    def test_dti_intersection(self):
+-        rng = date_range("1/1/2011", periods=100, freq="h", tz="utc")
+-
+-        left = rng[10:90][::-1]
+-        right = rng[20:80][::-1]
+-
+-        assert left.tz == rng.tz
+-        result = left.intersection(right)
+-        assert result.tz == left.tz
+-
+     def test_dti_equals_with_tz(self):
+         left = date_range("1/1/2011", periods=100, freq="h", tz="utc")
+         right = date_range("1/1/2011", periods=100, freq="h", tz="US/Eastern")
+@@ -1143,42 +1093,6 @@ class TestDatetimeIndexTimezones:
+         tm.assert_numpy_array_equal(converted.asi8, ex_vals)
+         assert converted.tz is timezone.utc
+ 
+-    # Note: not difference, as there is no symmetry requirement there
+-    @pytest.mark.parametrize("setop", ["union", "intersection", "symmetric_difference"])
+-    def test_dti_setop_aware(self, setop):
+-        # non-overlapping
+-        # GH#39328 as of 2.0 we cast these to UTC instead of object
+-        rng = date_range("2012-11-15 00:00:00", periods=6, freq="h", tz="US/Central")
+-
+-        rng2 = date_range("2012-11-15 12:00:00", periods=6, freq="h", tz="US/Eastern")
+-
+-        result = getattr(rng, setop)(rng2)
+-
+-        left = rng.tz_convert("UTC")
+-        right = rng2.tz_convert("UTC")
+-        expected = getattr(left, setop)(right)
+-        tm.assert_index_equal(result, expected)
+-        assert result.tz == left.tz
+-        if len(result):
+-            assert result[0].tz is timezone.utc
+-            assert result[-1].tz is timezone.utc
+-
+-    def test_dti_union_mixed(self):
+-        # GH 21671
+-        rng = DatetimeIndex([Timestamp("2011-01-01"), pd.NaT])
+-        rng2 = DatetimeIndex(["2012-01-01", "2012-01-02"], tz="Asia/Tokyo")
+-        result = rng.union(rng2)
+-        expected = Index(
+-            [
+-                Timestamp("2011-01-01"),
+-                pd.NaT,
+-                Timestamp("2012-01-01", tz="Asia/Tokyo"),
+-                Timestamp("2012-01-02", tz="Asia/Tokyo"),
+-            ],
+-            dtype=object,
+-        )
+-        tm.assert_index_equal(result, expected)
+-
+     @pytest.mark.parametrize(
+         "tz", [None, "UTC", "US/Central", dateutil.tz.tzoffset(None, -28800)]
+     )
+diff --git a/pandas/tests/indexes/multi/test_setops.py b/pandas/tests/indexes/multi/test_setops.py
+index c951403f..2b4107ac 100644
+--- a/pandas/tests/indexes/multi/test_setops.py
++++ b/pandas/tests/indexes/multi/test_setops.py
+@@ -204,7 +204,6 @@ def test_difference_sort_special():
+ 
+ 
+ def test_difference_sort_special_true():
+-    # TODO(GH#25151): decide on True behaviour
+     idx = MultiIndex.from_product([[1, 0], ["a", "b"]])
+     result = idx.difference([], sort=True)
+     expected = MultiIndex.from_product([[0, 1], ["a", "b"]])
+@@ -366,8 +365,6 @@ def test_union_sort_other_empty(slice_):
+ 
+ 
+ def test_union_sort_other_empty_sort():
+-    # TODO(GH#25151): decide on True behaviour
+-    # # sort=True
+     idx = MultiIndex.from_product([[1, 0], ["a", "b"]])
+     other = idx[:0]
+     result = idx.union(other, sort=True)
+diff --git a/pandas/tests/indexes/period/methods/test_factorize.py b/pandas/tests/indexes/period/methods/test_factorize.py
+index ac3d09d7..1239eae6 100644
+--- a/pandas/tests/indexes/period/methods/test_factorize.py
++++ b/pandas/tests/indexes/period/methods/test_factorize.py
+@@ -1,14 +1,11 @@
+ import numpy as np
+ 
+-from pandas import (
+-    PeriodIndex,
+-    factorize,
+-)
++from pandas import PeriodIndex
+ import pandas._testing as tm
+ 
+ 
+ class TestFactorize:
+-    def test_factorize(self):
++    def test_factorize_period(self):
+         idx1 = PeriodIndex(
+             ["2014-01", "2014-01", "2014-02", "2014-02", "2014-03", "2014-03"],
+             freq="M",
+@@ -25,10 +22,12 @@ class TestFactorize:
+         tm.assert_numpy_array_equal(arr, exp_arr)
+         tm.assert_index_equal(idx, exp_idx)
+ 
++    def test_factorize_period_nonmonotonic(self):
+         idx2 = PeriodIndex(
+             ["2014-03", "2014-03", "2014-02", "2014-01", "2014-03", "2014-01"],
+             freq="M",
+         )
++        exp_idx = PeriodIndex(["2014-01", "2014-02", "2014-03"], freq="M")
+ 
+         exp_arr = np.array([2, 2, 1, 0, 2, 0], dtype=np.intp)
+         arr, idx = idx2.factorize(sort=True)
+@@ -40,17 +39,3 @@ class TestFactorize:
+         arr, idx = idx2.factorize()
+         tm.assert_numpy_array_equal(arr, exp_arr)
+         tm.assert_index_equal(idx, exp_idx)
+-
+-    def test_factorize_complex(self):  # TODO: WTF is this test doing here?s
+-        # GH 17927
+-        array = [1, 2, 2 + 1j]
+-        msg = "factorize with argument that is not not a Series"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            labels, uniques = factorize(array)
+-
+-        expected_labels = np.array([0, 1, 2], dtype=np.intp)
+-        tm.assert_numpy_array_equal(labels, expected_labels)
+-
+-        # Should return a complex dtype in the future
+-        expected_uniques = np.array([(1 + 0j), (2 + 0j), (2 + 1j)], dtype=object)
+-        tm.assert_numpy_array_equal(uniques, expected_uniques)
+diff --git a/pandas/tests/indexes/period/test_formats.py b/pandas/tests/indexes/period/test_formats.py
+index 7245c6a7..723777fa 100644
+--- a/pandas/tests/indexes/period/test_formats.py
++++ b/pandas/tests/indexes/period/test_formats.py
+@@ -1,3 +1,10 @@
++from contextlib import nullcontext
++from datetime import (
++    datetime,
++    time,
++)
++import locale
++
+ import numpy as np
+ import pytest
+ 
+@@ -9,7 +16,14 @@ from pandas import (
+ import pandas._testing as tm
+ 
+ 
+-def test_to_native_types():
++def get_local_am_pm():
++    """Return the AM and PM strings returned by strftime in current locale."""
++    am_local = time(1).strftime("%p")
++    pm_local = time(13).strftime("%p")
++    return am_local, pm_local
++
++
++def test_get_values_for_csv():
+     index = PeriodIndex(["2017-01-01", "2017-01-02", "2017-01-03"], freq="D")
+ 
+     # First, with no arguments.
+@@ -197,3 +211,136 @@ Freq: Q-DEC"""
+         ):
+             result = idx._summary()
+             assert result == expected
++
++
++class TestPeriodIndexFormat:
++    def test_period_format_and_strftime_default(self):
++        per = PeriodIndex([datetime(2003, 1, 1, 12), None], freq="h")
++
++        # Default formatting
++        msg = "PeriodIndex.format is deprecated"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = per.format()
++        assert formatted[0] == "2003-01-01 12:00"  # default: minutes not shown
++        assert formatted[1] == "NaT"
++        # format is equivalent to strftime(None)...
++        assert formatted[0] == per.strftime(None)[0]
++        assert per.strftime(None)[1] is np.nan  # ...except for NaTs
++
++        # Same test with nanoseconds freq
++        per = pd.period_range("2003-01-01 12:01:01.123456789", periods=2, freq="ns")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = per.format()
++        assert (formatted == per.strftime(None)).all()
++        assert formatted[0] == "2003-01-01 12:01:01.123456789"
++        assert formatted[1] == "2003-01-01 12:01:01.123456790"
++
++    def test_period_custom(self):
++        # GH#46252 custom formatting directives %l (ms) and %u (us)
++        msg = "PeriodIndex.format is deprecated"
++
++        # 3 digits
++        per = pd.period_range("2003-01-01 12:01:01.123", periods=2, freq="ms")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
++        assert formatted[0] == "03 12:01:01 (ms=123 us=123000 ns=123000000)"
++        assert formatted[1] == "03 12:01:01 (ms=124 us=124000 ns=124000000)"
++
++        # 6 digits
++        per = pd.period_range("2003-01-01 12:01:01.123456", periods=2, freq="us")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
++        assert formatted[0] == "03 12:01:01 (ms=123 us=123456 ns=123456000)"
++        assert formatted[1] == "03 12:01:01 (ms=123 us=123457 ns=123457000)"
++
++        # 9 digits
++        per = pd.period_range("2003-01-01 12:01:01.123456789", periods=2, freq="ns")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
++        assert formatted[0] == "03 12:01:01 (ms=123 us=123456 ns=123456789)"
++        assert formatted[1] == "03 12:01:01 (ms=123 us=123456 ns=123456790)"
++
++    def test_period_tz(self):
++        # Formatting periods created from a datetime with timezone.
++        msg = r"PeriodIndex\.format is deprecated"
++        # This timestamp is in 2013 in Europe/Paris but is 2012 in UTC
++        dt = pd.to_datetime(["2013-01-01 00:00:00+01:00"], utc=True)
++
++        # Converting to a period looses the timezone information
++        # Since tz is currently set as utc, we'll see 2012
++        with tm.assert_produces_warning(UserWarning, match="will drop timezone"):
++            per = dt.to_period(freq="h")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            assert per.format()[0] == "2012-12-31 23:00"
++
++        # If tz is currently set as paris before conversion, we'll see 2013
++        dt = dt.tz_convert("Europe/Paris")
++        with tm.assert_produces_warning(UserWarning, match="will drop timezone"):
++            per = dt.to_period(freq="h")
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            assert per.format()[0] == "2013-01-01 00:00"
++
++    @pytest.mark.parametrize(
++        "locale_str",
++        [
++            pytest.param(None, id=str(locale.getlocale())),
++            "it_IT.utf8",
++            "it_IT",  # Note: encoding will be 'ISO8859-1'
++            "zh_CN.utf8",
++            "zh_CN",  # Note: encoding will be 'gb2312'
++        ],
++    )
++    def test_period_non_ascii_fmt(self, locale_str):
++        # GH#46468 non-ascii char in input format string leads to wrong output
++
++        # Skip if locale cannot be set
++        if locale_str is not None and not tm.can_set_locale(locale_str, locale.LC_ALL):
++            pytest.skip(f"Skipping as locale '{locale_str}' cannot be set on host.")
++
++        # Change locale temporarily for this test.
++        with tm.set_locale(locale_str, locale.LC_ALL) if locale_str else nullcontext():
++            # Scalar
++            per = pd.Period("2018-03-11 13:00", freq="h")
++            assert per.strftime("%y é") == "18 é"
++
++            # Index
++            per = pd.period_range("2003-01-01 01:00:00", periods=2, freq="12h")
++            msg = "PeriodIndex.format is deprecated"
++            with tm.assert_produces_warning(FutureWarning, match=msg):
++                formatted = per.format(date_format="%y é")
++            assert formatted[0] == "03 é"
++            assert formatted[1] == "03 é"
++
++    @pytest.mark.parametrize(
++        "locale_str",
++        [
++            pytest.param(None, id=str(locale.getlocale())),
++            "it_IT.utf8",
++            "it_IT",  # Note: encoding will be 'ISO8859-1'
++            "zh_CN.utf8",
++            "zh_CN",  # Note: encoding will be 'gb2312'
++        ],
++    )
++    def test_period_custom_locale_directive(self, locale_str):
++        # GH#46319 locale-specific directive leads to non-utf8 c strftime char* result
++
++        # Skip if locale cannot be set
++        if locale_str is not None and not tm.can_set_locale(locale_str, locale.LC_ALL):
++            pytest.skip(f"Skipping as locale '{locale_str}' cannot be set on host.")
++
++        # Change locale temporarily for this test.
++        with tm.set_locale(locale_str, locale.LC_ALL) if locale_str else nullcontext():
++            # Get locale-specific reference
++            am_local, pm_local = get_local_am_pm()
++
++            # Scalar
++            per = pd.Period("2018-03-11 13:00", freq="h")
++            assert per.strftime("%p") == pm_local
++
++            # Index
++            per = pd.period_range("2003-01-01 01:00:00", periods=2, freq="12h")
++            msg = "PeriodIndex.format is deprecated"
++            with tm.assert_produces_warning(FutureWarning, match=msg):
++                formatted = per.format(date_format="%y %I:%M:%S%p")
++            assert formatted[0] == f"03 01:00:00{am_local}"
++            assert formatted[1] == f"03 01:00:00{pm_local}"
+diff --git a/pandas/tests/indexing/test_coercion.py b/pandas/tests/indexing/test_coercion.py
+index 82368c67..c7431660 100644
+--- a/pandas/tests/indexing/test_coercion.py
++++ b/pandas/tests/indexing/test_coercion.py
+@@ -442,8 +442,8 @@ class TestWhereCoercion(CoercionBase):
+         "fill_val,exp_dtype",
+         [(1, object), (1.1, object), (1 + 1j, object), (True, np.bool_)],
+     )
+-    def test_where_series_bool(self, fill_val, exp_dtype):
+-        klass = pd.Series  # TODO: use index_or_series once we have Index[bool]
++    def test_where_series_bool(self, index_or_series, fill_val, exp_dtype):
++        klass = index_or_series
+ 
+         obj = klass([True, False, True, False])
+         assert obj.dtype == np.bool_
+diff --git a/pandas/tests/io/formats/test_format.py b/pandas/tests/io/formats/test_format.py
+index d18c333d..231beb4a 100644
+--- a/pandas/tests/io/formats/test_format.py
++++ b/pandas/tests/io/formats/test_format.py
+@@ -1,26 +1,20 @@
+ """
+ Test output formatting for Series/DataFrame, including to_string & reprs
+ """
+-from contextlib import nullcontext
+ from datetime import (
+     datetime,
+-    time,
+     timedelta,
+ )
+ from io import StringIO
+ import itertools
+-import locale
+-from operator import methodcaller
+ from pathlib import Path
+ import re
+ from shutil import get_terminal_size
+ import sys
+ import textwrap
+ 
+-import dateutil
+ import numpy as np
+ import pytest
+-import pytz
+ 
+ import pandas as pd
+ from pandas import (
+@@ -42,13 +36,6 @@ from pandas.io.formats import printing
+ import pandas.io.formats.format as fmt
+ 
+ 
+-def get_local_am_pm():
+-    """Return the AM and PM strings returned by strftime in current locale."""
+-    am_local = time(1).strftime("%p")
+-    pm_local = time(13).strftime("%p")
+-    return am_local, pm_local
+-
+-
+ @pytest.fixture(params=["string", "pathlike", "buffer"])
+ def filepath_or_buffer_id(request):
+     """
+@@ -3320,243 +3307,6 @@ class TestDatetime64Formatter:
+         assert result[1].strip() == "2999-01-02 00:00:00-08:00"
+ 
+ 
+-class TestNaTFormatting:
+-    def test_repr(self):
+-        assert repr(NaT) == "NaT"
+-
+-    def test_str(self):
+-        assert str(NaT) == "NaT"
+-
+-
+-class TestPeriodIndexFormat:
+-    def test_period_format_and_strftime_default(self):
+-        per = pd.PeriodIndex([datetime(2003, 1, 1, 12), None], freq="h")
+-
+-        # Default formatting
+-        msg = "PeriodIndex.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = per.format()
+-        assert formatted[0] == "2003-01-01 12:00"  # default: minutes not shown
+-        assert formatted[1] == "NaT"
+-        # format is equivalent to strftime(None)...
+-        assert formatted[0] == per.strftime(None)[0]
+-        assert per.strftime(None)[1] is np.nan  # ...except for NaTs
+-
+-        # Same test with nanoseconds freq
+-        per = pd.period_range("2003-01-01 12:01:01.123456789", periods=2, freq="ns")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = per.format()
+-        assert (formatted == per.strftime(None)).all()
+-        assert formatted[0] == "2003-01-01 12:01:01.123456789"
+-        assert formatted[1] == "2003-01-01 12:01:01.123456790"
+-
+-    def test_period_custom(self):
+-        # GH#46252 custom formatting directives %l (ms) and %u (us)
+-        msg = "PeriodIndex.format is deprecated"
+-
+-        # 3 digits
+-        per = pd.period_range("2003-01-01 12:01:01.123", periods=2, freq="ms")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
+-        assert formatted[0] == "03 12:01:01 (ms=123 us=123000 ns=123000000)"
+-        assert formatted[1] == "03 12:01:01 (ms=124 us=124000 ns=124000000)"
+-
+-        # 6 digits
+-        per = pd.period_range("2003-01-01 12:01:01.123456", periods=2, freq="us")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
+-        assert formatted[0] == "03 12:01:01 (ms=123 us=123456 ns=123456000)"
+-        assert formatted[1] == "03 12:01:01 (ms=123 us=123457 ns=123457000)"
+-
+-        # 9 digits
+-        per = pd.period_range("2003-01-01 12:01:01.123456789", periods=2, freq="ns")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = per.format(date_format="%y %I:%M:%S (ms=%l us=%u ns=%n)")
+-        assert formatted[0] == "03 12:01:01 (ms=123 us=123456 ns=123456789)"
+-        assert formatted[1] == "03 12:01:01 (ms=123 us=123456 ns=123456790)"
+-
+-    def test_period_tz(self):
+-        # Formatting periods created from a datetime with timezone.
+-        msg = r"PeriodIndex\.format is deprecated"
+-        # This timestamp is in 2013 in Europe/Paris but is 2012 in UTC
+-        dt = pd.to_datetime(["2013-01-01 00:00:00+01:00"], utc=True)
+-
+-        # Converting to a period looses the timezone information
+-        # Since tz is currently set as utc, we'll see 2012
+-        with tm.assert_produces_warning(UserWarning, match="will drop timezone"):
+-            per = dt.to_period(freq="h")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            assert per.format()[0] == "2012-12-31 23:00"
+-
+-        # If tz is currently set as paris before conversion, we'll see 2013
+-        dt = dt.tz_convert("Europe/Paris")
+-        with tm.assert_produces_warning(UserWarning, match="will drop timezone"):
+-            per = dt.to_period(freq="h")
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            assert per.format()[0] == "2013-01-01 00:00"
+-
+-    @pytest.mark.parametrize(
+-        "locale_str",
+-        [
+-            pytest.param(None, id=str(locale.getlocale())),
+-            "it_IT.utf8",
+-            "it_IT",  # Note: encoding will be 'ISO8859-1'
+-            "zh_CN.utf8",
+-            "zh_CN",  # Note: encoding will be 'gb2312'
+-        ],
+-    )
+-    def test_period_non_ascii_fmt(self, locale_str):
+-        # GH#46468 non-ascii char in input format string leads to wrong output
+-
+-        # Skip if locale cannot be set
+-        if locale_str is not None and not tm.can_set_locale(locale_str, locale.LC_ALL):
+-            pytest.skip(f"Skipping as locale '{locale_str}' cannot be set on host.")
+-
+-        # Change locale temporarily for this test.
+-        with tm.set_locale(locale_str, locale.LC_ALL) if locale_str else nullcontext():
+-            # Scalar
+-            per = pd.Period("2018-03-11 13:00", freq="h")
+-            assert per.strftime("%y é") == "18 é"
+-
+-            # Index
+-            per = pd.period_range("2003-01-01 01:00:00", periods=2, freq="12h")
+-            msg = "PeriodIndex.format is deprecated"
+-            with tm.assert_produces_warning(FutureWarning, match=msg):
+-                formatted = per.format(date_format="%y é")
+-            assert formatted[0] == "03 é"
+-            assert formatted[1] == "03 é"
+-
+-    @pytest.mark.parametrize(
+-        "locale_str",
+-        [
+-            pytest.param(None, id=str(locale.getlocale())),
+-            "it_IT.utf8",
+-            "it_IT",  # Note: encoding will be 'ISO8859-1'
+-            "zh_CN.utf8",
+-            "zh_CN",  # Note: encoding will be 'gb2312'
+-        ],
+-    )
+-    def test_period_custom_locale_directive(self, locale_str):
+-        # GH#46319 locale-specific directive leads to non-utf8 c strftime char* result
+-
+-        # Skip if locale cannot be set
+-        if locale_str is not None and not tm.can_set_locale(locale_str, locale.LC_ALL):
+-            pytest.skip(f"Skipping as locale '{locale_str}' cannot be set on host.")
+-
+-        # Change locale temporarily for this test.
+-        with tm.set_locale(locale_str, locale.LC_ALL) if locale_str else nullcontext():
+-            # Get locale-specific reference
+-            am_local, pm_local = get_local_am_pm()
+-
+-            # Scalar
+-            per = pd.Period("2018-03-11 13:00", freq="h")
+-            assert per.strftime("%p") == pm_local
+-
+-            # Index
+-            per = pd.period_range("2003-01-01 01:00:00", periods=2, freq="12h")
+-            msg = "PeriodIndex.format is deprecated"
+-            with tm.assert_produces_warning(FutureWarning, match=msg):
+-                formatted = per.format(date_format="%y %I:%M:%S%p")
+-            assert formatted[0] == f"03 01:00:00{am_local}"
+-            assert formatted[1] == f"03 01:00:00{pm_local}"
+-
+-
+-class TestDatetimeIndexFormat:
+-    def test_datetime(self):
+-        msg = "DatetimeIndex.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = pd.to_datetime([datetime(2003, 1, 1, 12), NaT]).format()
+-        assert formatted[0] == "2003-01-01 12:00:00"
+-        assert formatted[1] == "NaT"
+-
+-    def test_date(self):
+-        msg = "DatetimeIndex.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = pd.to_datetime([datetime(2003, 1, 1), NaT]).format()
+-        assert formatted[0] == "2003-01-01"
+-        assert formatted[1] == "NaT"
+-
+-    def test_date_tz(self):
+-        dti = pd.to_datetime([datetime(2013, 1, 1)], utc=True)
+-        msg = "DatetimeIndex.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = dti.format()
+-        assert formatted[0] == "2013-01-01 00:00:00+00:00"
+-
+-        dti = pd.to_datetime([datetime(2013, 1, 1), NaT], utc=True)
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = dti.format()
+-        assert formatted[0] == "2013-01-01 00:00:00+00:00"
+-
+-    def test_date_explicit_date_format(self):
+-        dti = pd.to_datetime([datetime(2003, 2, 1), NaT])
+-        msg = "DatetimeIndex.format is deprecated"
+-        with tm.assert_produces_warning(FutureWarning, match=msg):
+-            formatted = dti.format(date_format="%m-%d-%Y", na_rep="UT")
+-        assert formatted[0] == "02-01-2003"
+-        assert formatted[1] == "UT"
+-
+-
+-class TestDatetimeIndexUnicode:
+-    def test_dates(self):
+-        text = str(pd.to_datetime([datetime(2013, 1, 1), datetime(2014, 1, 1)]))
+-        assert "['2013-01-01'," in text
+-        assert ", '2014-01-01']" in text
+-
+-    def test_mixed(self):
+-        text = str(
+-            pd.to_datetime(
+-                [datetime(2013, 1, 1), datetime(2014, 1, 1, 12), datetime(2014, 1, 1)]
+-            )
+-        )
+-        assert "'2013-01-01 00:00:00'," in text
+-        assert "'2014-01-01 00:00:00']" in text
+-
+-
+-class TestStringRepTimestamp:
+-    def test_no_tz(self):
+-        dt_date = datetime(2013, 1, 2)
+-        assert str(dt_date) == str(Timestamp(dt_date))
+-
+-        dt_datetime = datetime(2013, 1, 2, 12, 1, 3)
+-        assert str(dt_datetime) == str(Timestamp(dt_datetime))
+-
+-        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45)
+-        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
+-
+-        ts_nanos_only = Timestamp(200)
+-        assert str(ts_nanos_only) == "1970-01-01 00:00:00.000000200"
+-
+-        ts_nanos_micros = Timestamp(1200)
+-        assert str(ts_nanos_micros) == "1970-01-01 00:00:00.000001200"
+-
+-    def test_tz_pytz(self):
+-        dt_date = datetime(2013, 1, 2, tzinfo=pytz.utc)
+-        assert str(dt_date) == str(Timestamp(dt_date))
+-
+-        dt_datetime = datetime(2013, 1, 2, 12, 1, 3, tzinfo=pytz.utc)
+-        assert str(dt_datetime) == str(Timestamp(dt_datetime))
+-
+-        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45, tzinfo=pytz.utc)
+-        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
+-
+-    def test_tz_dateutil(self):
+-        utc = dateutil.tz.tzutc()
+-
+-        dt_date = datetime(2013, 1, 2, tzinfo=utc)
+-        assert str(dt_date) == str(Timestamp(dt_date))
+-
+-        dt_datetime = datetime(2013, 1, 2, 12, 1, 3, tzinfo=utc)
+-        assert str(dt_datetime) == str(Timestamp(dt_datetime))
+-
+-        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45, tzinfo=utc)
+-        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
+-
+-    def test_nat_representations(self):
+-        for f in (str, repr, methodcaller("isoformat")):
+-            assert f(NaT) == "NaT"
+-
+-
+ @pytest.mark.parametrize(
+     "percentiles, expected",
+     [
+diff --git a/pandas/tests/reshape/concat/test_datetimes.py b/pandas/tests/reshape/concat/test_datetimes.py
+index 51398acd..71606fb7 100644
+--- a/pandas/tests/reshape/concat/test_datetimes.py
++++ b/pandas/tests/reshape/concat/test_datetimes.py
+@@ -178,6 +178,7 @@ class TestDatetimeConcat:
+         result = concat([y, y], ignore_index=True)
+         tm.assert_series_equal(result, expected)
+ 
++    def test_concat_NaT_series2(self):
+         # without tz
+         x = Series(date_range("20151124 08:00", "20151124 09:00", freq="1h"))
+         y = Series(date_range("20151124 10:00", "20151124 11:00", freq="1h"))
+@@ -298,6 +299,7 @@ class TestTimezoneConcat:
+         result = concat([x, y], ignore_index=True)
+         tm.assert_series_equal(result, expected)
+ 
++    def test_concat_tz_series2(self):
+         # gh-11887: concat tz and object
+         x = Series(date_range("20151124 08:00", "20151124 09:00", freq="1h", tz="UTC"))
+         y = Series(["a", "b"])
+@@ -305,6 +307,7 @@ class TestTimezoneConcat:
+         result = concat([x, y], ignore_index=True)
+         tm.assert_series_equal(result, expected)
+ 
++    def test_concat_tz_series3(self):
+         # see gh-12217 and gh-12306
+         # Concatenating two UTC times
+         first = DataFrame([[datetime(2016, 1, 1)]])
+@@ -316,6 +319,7 @@ class TestTimezoneConcat:
+         result = concat([first, second])
+         assert result[0].dtype == "datetime64[ns, UTC]"
+ 
++    def test_concat_tz_series4(self):
+         # Concatenating two London times
+         first = DataFrame([[datetime(2016, 1, 1)]])
+         first[0] = first[0].dt.tz_localize("Europe/London")
+@@ -326,6 +330,7 @@ class TestTimezoneConcat:
+         result = concat([first, second])
+         assert result[0].dtype == "datetime64[ns, Europe/London]"
+ 
++    def test_concat_tz_series5(self):
+         # Concatenating 2+1 London times
+         first = DataFrame([[datetime(2016, 1, 1)], [datetime(2016, 1, 2)]])
+         first[0] = first[0].dt.tz_localize("Europe/London")
+@@ -336,6 +341,7 @@ class TestTimezoneConcat:
+         result = concat([first, second])
+         assert result[0].dtype == "datetime64[ns, Europe/London]"
+ 
++    def test_concat_tz_series6(self):
+         # Concat'ing 1+2 London times
+         first = DataFrame([[datetime(2016, 1, 1)]])
+         first[0] = first[0].dt.tz_localize("Europe/London")
+@@ -512,6 +518,7 @@ class TestPeriodConcat:
+         tm.assert_series_equal(result, expected)
+         assert result.dtype == "object"
+ 
++    def test_concat_period_other_series2(self):
+         # non-period
+         x = Series(pd.PeriodIndex(["2015-11-01", "2015-12-01"], freq="D"))
+         y = Series(DatetimeIndex(["2015-11-01", "2015-12-01"]))
+@@ -520,6 +527,7 @@ class TestPeriodConcat:
+         tm.assert_series_equal(result, expected)
+         assert result.dtype == "object"
+ 
++    def test_concat_period_other_series3(self):
+         x = Series(pd.PeriodIndex(["2015-11-01", "2015-12-01"], freq="D"))
+         y = Series(["A", "B"])
+         expected = Series([x[0], x[1], y[0], y[1]], dtype="object")
+diff --git a/pandas/tests/scalar/test_nat.py b/pandas/tests/scalar/test_nat.py
+index f5a94099..2df090e5 100644
+--- a/pandas/tests/scalar/test_nat.py
++++ b/pandas/tests/scalar/test_nat.py
+@@ -33,6 +33,17 @@ from pandas.core.arrays import (
+ )
+ 
+ 
++class TestNaTFormatting:
++    def test_repr(self):
++        assert repr(NaT) == "NaT"
++
++    def test_str(self):
++        assert str(NaT) == "NaT"
++
++    def test_isoformat(self):
++        assert NaT.isoformat() == "NaT"
++
++
+ @pytest.mark.parametrize(
+     "nat,idx",
+     [
+@@ -529,6 +540,8 @@ def test_to_numpy_alias():
+             marks=pytest.mark.xfail(
+                 not np_version_gte1p24p3,
+                 reason="td64 doesn't return NotImplemented, see numpy#17017",
++                # When this xfail is fixed, test_nat_comparisons_numpy
++                #  can be removed.
+             ),
+         ),
+         Timestamp(0),
+diff --git a/pandas/tests/scalar/timestamp/test_rendering.py b/pandas/tests/scalar/timestamp/test_rendering.py
+index c351fb23..ec1df290 100644
+--- a/pandas/tests/scalar/timestamp/test_rendering.py
++++ b/pandas/tests/scalar/timestamp/test_rendering.py
+@@ -1,7 +1,9 @@
++from datetime import datetime
+ import pprint
+ 
++import dateutil.tz
+ import pytest
+-import pytz  # noqa: F401  # a test below uses pytz but only inside a `eval` call
++import pytz  # a test below uses pytz but only inside a `eval` call
+ 
+ from pandas import Timestamp
+ 
+@@ -80,3 +82,41 @@ class TestTimestampRendering:
+         ]
+         for z in zs:
+             assert eval(repr(z)) == z
++
++    def test_repr_matches_pydatetime_no_tz(self):
++        dt_date = datetime(2013, 1, 2)
++        assert str(dt_date) == str(Timestamp(dt_date))
++
++        dt_datetime = datetime(2013, 1, 2, 12, 1, 3)
++        assert str(dt_datetime) == str(Timestamp(dt_datetime))
++
++        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45)
++        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
++
++        ts_nanos_only = Timestamp(200)
++        assert str(ts_nanos_only) == "1970-01-01 00:00:00.000000200"
++
++        ts_nanos_micros = Timestamp(1200)
++        assert str(ts_nanos_micros) == "1970-01-01 00:00:00.000001200"
++
++    def test_repr_matches_pydatetime_tz_pytz(self):
++        dt_date = datetime(2013, 1, 2, tzinfo=pytz.utc)
++        assert str(dt_date) == str(Timestamp(dt_date))
++
++        dt_datetime = datetime(2013, 1, 2, 12, 1, 3, tzinfo=pytz.utc)
++        assert str(dt_datetime) == str(Timestamp(dt_datetime))
++
++        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45, tzinfo=pytz.utc)
++        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
++
++    def test_repr_matches_pydatetime_tz_dateutil(self):
++        utc = dateutil.tz.tzutc()
++
++        dt_date = datetime(2013, 1, 2, tzinfo=utc)
++        assert str(dt_date) == str(Timestamp(dt_date))
++
++        dt_datetime = datetime(2013, 1, 2, 12, 1, 3, tzinfo=utc)
++        assert str(dt_datetime) == str(Timestamp(dt_datetime))
++
++        dt_datetime_us = datetime(2013, 1, 2, 12, 1, 3, 45, tzinfo=utc)
++        assert str(dt_datetime_us) == str(Timestamp(dt_datetime_us))
+diff --git a/pandas/tests/test_algos.py b/pandas/tests/test_algos.py
+index 661290fb..918353c9 100644
+--- a/pandas/tests/test_algos.py
++++ b/pandas/tests/test_algos.py
+@@ -50,6 +50,20 @@ import pandas.core.common as com
+ 
+ 
+ class TestFactorize:
++    def test_factorize_complex(self):
++        # GH#17927
++        array = [1, 2, 2 + 1j]
++        msg = "factorize with argument that is not not a Series"
++        with tm.assert_produces_warning(FutureWarning, match=msg):
++            labels, uniques = algos.factorize(array)
++
++        expected_labels = np.array([0, 1, 2], dtype=np.intp)
++        tm.assert_numpy_array_equal(labels, expected_labels)
++
++        # Should return a complex dtype in the future
++        expected_uniques = np.array([(1 + 0j), (2 + 0j), (2 + 1j)], dtype=object)
++        tm.assert_numpy_array_equal(uniques, expected_uniques)
++
+     @pytest.mark.parametrize("sort", [True, False])
+     def test_factorize(self, index_or_series_obj, sort):
+         obj = index_or_series_obj
+diff --git a/pandas/tests/tseries/offsets/test_offsets.py b/pandas/tests/tseries/offsets/test_offsets.py
+index f6b7c08f..45103394 100644
+--- a/pandas/tests/tseries/offsets/test_offsets.py
++++ b/pandas/tests/tseries/offsets/test_offsets.py
+@@ -560,27 +560,27 @@ class TestCommon:
+         off = _create_offset(offset_types)
+         assert hash(off) is not None
+ 
++    # TODO: belongs in arithmetic tests?
+     @pytest.mark.filterwarnings(
+         "ignore:Non-vectorized DateOffset being applied to Series or DatetimeIndex"
+     )
+     @pytest.mark.parametrize("unit", ["s", "ms", "us"])
+-    def test_add_dt64_ndarray_non_nano(self, offset_types, unit, request):
++    def test_add_dt64_ndarray_non_nano(self, offset_types, unit):
+         # check that the result with non-nano matches nano
+         off = _create_offset(offset_types)
+ 
+         dti = date_range("2016-01-01", periods=35, freq="D", unit=unit)
+-        dta = dti._data
+ 
+-        expected = dti._data + off
+-        result = dta + off
++        result = (dti + off)._with_freq(None)
+ 
+         exp_unit = unit
+-        if isinstance(off, Tick) and off._creso > dta._creso:
++        if isinstance(off, Tick) and off._creso > dti._data._creso:
+             # cast to higher reso like we would with Timedelta scalar
+             exp_unit = Timedelta(off).unit
+-        expected = expected.as_unit(exp_unit)
++        # TODO(GH#55564): as_unit will be unnecessary
++        expected = DatetimeIndex([x + off for x in dti]).as_unit(exp_unit)
+ 
+-        tm.assert_numpy_array_equal(result._ndarray, expected._ndarray)
++        tm.assert_index_equal(result, expected)
+ 
+ 
+ class TestDateOffset:

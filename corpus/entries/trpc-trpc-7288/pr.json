@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trpc/trpc/pull/7288",
+  "repo": "trpc/trpc",
+  "number": 7288,
+  "title": "chore(deps): bump fastify from 5.8.1 to 5.8.3",
+  "merged_at": "2026-04-01T21:51:16Z",
+  "stars": 40758,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "deps",
+  "split": "heldout",
+  "base_sha": "a6f049ee4979e8ca9e897af03209154441c5921b",
+  "head_sha": "9fa56dd2f0dd8ac1494d80d25cf84d9b6a284f3e",
+  "files_changed": 1,
+  "additions": 34,
+  "deletions": 28
+}

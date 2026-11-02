@@ -1,0 +1,23 @@
+import type { Rule } from '../types.js';
+import { rulesR } from './R.js';
+import { rulesO } from './O.js';
+import { rulesA } from './A.js';
+
+export * from './R.js';
+export * from './O.js';
+export * from './A.js';
+export * from './util.js';
+
+/** Built in rules in catalogue order. */
+export function builtinRules(): Rule[] {
+  return [...rulesR(), ...rulesA(), ...rulesO()];
+}
+
+export function ruleMap(rules: Rule[] = builtinRules()): Map<string, Rule> {
+  const m = new Map<string, Rule>();
+  for (const r of rules) {
+    if (m.has(r.id)) throw new Error(`duplicate rule id ${r.id}`);
+    m.set(r.id, r);
+  }
+  return m;
+}

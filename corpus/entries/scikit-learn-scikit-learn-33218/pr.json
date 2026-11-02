@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/33218",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 33218,
+  "title": "TST Move common binary Display class tests to `test_common_curve_display.py`",
+  "merged_at": "2026-02-10T15:16:28Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "8b6df227b2b0643a62b156ea860b175ca594f72c",
+  "head_sha": "704126603cb079c5ac5d154d1f052a163f4e1fea",
+  "files_changed": 2,
+  "additions": 375,
+  "deletions": 249
+}

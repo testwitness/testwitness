@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+// Normal setup (use when Maven Central is reachable):
+//   repositories { mavenCentral() }
+//   testImplementation 'junit:junit:4.13.2'
+// This workspace cannot reach Maven Central, so the fixture takes the
+// identical junit-4.13.2 and hamcrest-core-1.3 jars shipped inside the
+// Gradle distribution. Override with -PjunitJarDir=<dir>.
+def junitJarDir = project.findProperty('junitJarDir') ?: "${gradle.gradleHomeDir}/lib"
+
+dependencies {
+    testImplementation files("${junitJarDir}/junit-4.13.2.jar", "${junitJarDir}/hamcrest-core-1.3.jar")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+test {
+    useJUnit()
+    ignoreFailures = true
+}

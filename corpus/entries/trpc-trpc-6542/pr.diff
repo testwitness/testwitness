@@ -1,0 +1,1144 @@
+diff --git a/packages/client/package.json b/packages/client/package.json
+index a3c51b7..2bef0d6 100644
+--- a/packages/client/package.json
++++ b/packages/client/package.json
+@@ -76,15 +76,15 @@
+     "!**/*.test.*",
+     "!**/__tests__"
+   ],
+-  "dependencies": {},
+   "peerDependencies": {
+     "@trpc/server": "^10.45.1",
+     "typescript": ">=5.7.2"
+   },
+   "devDependencies": {
+-    "@trpc/server": "^10.45.1",
++    "@trpc/server": "workspace:*",
+     "@types/isomorphic-fetch": "^0.0.39",
+     "@types/node": "^22.13.5",
++    "dataloader": "^2.2.2",
+     "eslint": "^9.21.0",
+     "isomorphic-fetch": "^3.0.0",
+     "node-fetch": "^3.3.0",
+diff --git a/packages/next/package.json b/packages/next/package.json
+index bc37de5..35bf7e0 100644
+--- a/packages/next/package.json
++++ b/packages/next/package.json
+@@ -99,6 +99,7 @@
+     "@types/node": "^22.13.5",
+     "@types/react": "^19.0.0",
+     "@types/react-dom": "^19.0.0",
++    "devalue": "^5.0.0",
+     "eslint": "^9.21.0",
+     "express": "^5.0.0",
+     "next": "^15.1.3",
+diff --git a/packages/tests/server/regression/issue-4130-ssr-different-transformers.test.tsx b/packages/next/test/issue-4130-ssr-different-transformers.test.tsx
+similarity index 93%
+rename from packages/tests/server/regression/issue-4130-ssr-different-transformers.test.tsx
+rename to packages/next/test/issue-4130-ssr-different-transformers.test.tsx
+index 4a4e946..01208ef 100644
+--- a/packages/tests/server/regression/issue-4130-ssr-different-transformers.test.tsx
++++ b/packages/next/test/issue-4130-ssr-different-transformers.test.tsx
+@@ -1,6 +1,6 @@
+ /* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
+-import { routerToServerAndClientNew } from '../___testHelpers';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import type { DehydratedState } from '@tanstack/react-query';
+ import { createTRPCNext } from '@trpc/next';
+ import { ssrPrepass } from '@trpc/next/ssrPrepass';
+@@ -33,9 +33,7 @@ const ctx = konn()
+     const appRouter = t.router({
+       foo: t.procedure.query(() => 'bar' as const),
+     });
+-    const opts = routerToServerAndClientNew(appRouter, {
+-      transformer,
+-    });
++    const opts = testServerAndClientResource(appRouter);
+ 
+     return opts;
+   })
+diff --git a/packages/react-query/package.json b/packages/react-query/package.json
+index 8d0dfc9..e901653 100644
+--- a/packages/react-query/package.json
++++ b/packages/react-query/package.json
+@@ -14,6 +14,8 @@
+     "directory": "packages/react"
+   },
+   "scripts": {
++    "codegen:bigBoi": "tsx ../../scripts/generateBigBoi.ts",
++    "codegen-tests": "run-p codegen:*",
+     "build": "rollup --config rollup.config.ts --configPlugin rollup-plugin-swc3",
+     "dev": "pnpm build --watch",
+     "codegen-entrypoints": "tsx entrypoints.script.ts",
+@@ -72,7 +74,13 @@
+     "typescript": ">=5.7.2"
+   },
+   "devDependencies": {
++    "@tanstack/query-sync-storage-persister": "^5.66.0",
+     "@tanstack/react-query": "^5.66.0",
++    "@tanstack/react-query-persist-client": "^5.66.0",
++    "@testing-library/dom": "^10.0.0",
++    "@testing-library/jest-dom": "^6.0.0",
++    "@testing-library/react": "^16.1.0",
++    "@testing-library/user-event": "^14.4.3",
+     "@trpc/client": "workspace:*",
+     "@trpc/server": "^10.45.1",
+     "@types/express": "^5.0.0",
+@@ -87,7 +95,8 @@
+     "tslib": "^2.8.1",
+     "tsx": "^4.19.3",
+     "typescript": "^5.7.2",
+-    "zod": "^3.24.2"
++    "zod": "^3.24.2",
++    "zod-form-data": "^2.0.1"
+   },
+   "publishConfig": {
+     "access": "public"
+diff --git a/packages/tests/server/__queryClient.ts b/packages/react-query/test/__queryClient.ts
+similarity index 100%
+rename from packages/tests/server/__queryClient.ts
+rename to packages/react-query/test/__queryClient.ts
+diff --git a/packages/tests/server/react/__reactHelpers.tsx b/packages/react-query/test/__reactHelpers.tsx
+similarity index 94%
+rename from packages/tests/server/react/__reactHelpers.tsx
+rename to packages/react-query/test/__reactHelpers.tsx
+index 12eac79..2f7dc91 100644
+--- a/packages/tests/server/react/__reactHelpers.tsx
++++ b/packages/react-query/test/__reactHelpers.tsx
+@@ -1,5 +1,5 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import type { Persister } from '@tanstack/react-query-persist-client';
+ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+@@ -29,7 +29,7 @@ export function getServerAndReactClient<TRouter extends AnyRouter>(
+     // noop
+   });
+ 
+-  const ctx = routerToServerAndClientNew(appRouter, {
++  const ctx = testServerAndClientResource(appRouter, {
+     client: (clientOpts) => ({
+       links: [
+         () => {
+diff --git a/packages/tests/setupTests.ts b/packages/react-query/test/__setupTests.ts
+similarity index 100%
+rename from packages/tests/setupTests.ts
+rename to packages/react-query/test/__setupTests.ts
+diff --git a/packages/tests/server/react/__testHelpers.tsx b/packages/react-query/test/__testHelpers.tsx
+similarity index 95%
+rename from packages/tests/server/react/__testHelpers.tsx
+rename to packages/react-query/test/__testHelpers.tsx
+index 247d4b7..5ba25eb 100644
+--- a/packages/tests/server/react/__testHelpers.tsx
++++ b/packages/react-query/test/__testHelpers.tsx
+@@ -1,5 +1,5 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient, createQueryClientConfig } from '../__queryClient';
++import { createQueryClient, createQueryClientConfig } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import type { TRPCWebSocketClient } from '@trpc/client';
+ import {
+@@ -268,7 +268,7 @@ export function createAppRouter() {
+     up: vi.fn(),
+     down: vi.fn(),
+   };
+-  const { client, trpcClientOptions, close } = routerToServerAndClientNew(
++  const { client, trpcClientOptions, close } = testServerAndClientResource(
+     appRouter,
+     {
+       server: {
+@@ -318,10 +318,11 @@ export function createAppRouter() {
+     },
+   );
+ 
+-  trpcClientOptions.queryClientConfig = createQueryClientConfig(
+-    trpcClientOptions.queryClientConfig,
+-  );
+-  const queryClient = createQueryClient(trpcClientOptions.queryClientConfig);
++  // trpcClientOptions.queryClientConfig = createQueryClientConfig(
++  //   trpcClientOptions.queryClientConfig,
++  // );
++  const queryClient =
++    createQueryClient(/** trpcClientOptions.queryClientConfig */);
+   const trpc = createTRPCReact<typeof appRouter>();
+ 
+   function App(props: { children: ReactNode }) {
+diff --git a/packages/tests/server/react/abortOnUnmount.test.tsx b/packages/react-query/test/abortOnUnmount.test.tsx
+similarity index 96%
+rename from packages/tests/server/react/abortOnUnmount.test.tsx
+rename to packages/react-query/test/abortOnUnmount.test.tsx
+index e263fe2..8441ebc 100644
+--- a/packages/tests/server/react/abortOnUnmount.test.tsx
++++ b/packages/react-query/test/abortOnUnmount.test.tsx
+@@ -1,5 +1,5 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider, useIsFetching } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+@@ -96,7 +96,7 @@ const ctx = konn()
+       abortOnUnmount: true,
+     });
+     const proxy = createTRPCReact<typeof appRouter>();
+-    const opts = routerToServerAndClientNew(appRouter);
++    const opts = testServerAndClientResource(appRouter);
+ 
+     return {
+       ...opts,
+diff --git a/packages/tests/server/react/bigBoi.test.tsx b/packages/react-query/test/bigBoi.test.tsx
+similarity index 96%
+rename from packages/tests/server/react/bigBoi.test.tsx
+rename to packages/react-query/test/bigBoi.test.tsx
+index 1cddf01..9ed6f8b 100644
+--- a/packages/tests/server/react/bigBoi.test.tsx
++++ b/packages/react-query/test/bigBoi.test.tsx
+@@ -1,4 +1,4 @@
+-import { appRouter } from '../__generated__/bigBoi/_app';
++import { appRouter } from './__generated__/bigBoi/_app';
+ import { getServerAndReactClient } from './__reactHelpers';
+ import { render, waitFor } from '@testing-library/react';
+ import { konn } from 'konn';
+diff --git a/packages/tests/server/react/createClient.test.tsx b/packages/react-query/test/createClient.test.tsx
+similarity index 89%
+rename from packages/tests/server/react/createClient.test.tsx
+rename to packages/react-query/test/createClient.test.tsx
+index 3975ad6..901a5cf 100644
+--- a/packages/tests/server/react/createClient.test.tsx
++++ b/packages/react-query/test/createClient.test.tsx
+@@ -1,5 +1,5 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import { httpBatchLink } from '@trpc/client';
+@@ -18,7 +18,7 @@ const ctx = konn()
+ 
+     const queryClient = createQueryClient();
+     const hooks = createTRPCReact<typeof appRouter>();
+-    const opts = routerToServerAndClientNew(appRouter);
++    const opts = testServerAndClientResource(appRouter);
+ 
+     function App(props: { children: ReactNode }) {
+       const [client] = useState(() =>
+diff --git a/packages/tests/server/react/createQueryUtils.test.ts b/packages/react-query/test/createQueryUtils.test.ts
+similarity index 99%
+rename from packages/tests/server/react/createQueryUtils.test.ts
+rename to packages/react-query/test/createQueryUtils.test.ts
+index 39f018d..df09b50 100644
+--- a/packages/tests/server/react/createQueryUtils.test.ts
++++ b/packages/react-query/test/createQueryUtils.test.ts
+@@ -1,4 +1,4 @@
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
+ import type { Post } from './__testHelpers';
+ import { createAppRouter } from './__testHelpers';
+ import { createTRPCQueryUtils } from '@trpc/react-query';
+diff --git a/packages/tests/server/react/dehydrate.test.tsx b/packages/react-query/test/dehydrate.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/dehydrate.test.tsx
+rename to packages/react-query/test/dehydrate.test.tsx
+diff --git a/packages/tests/server/react/ensureQueryData.test.tsx b/packages/react-query/test/ensureQueryData.test.tsx
+similarity index 92%
+rename from packages/tests/server/react/ensureQueryData.test.tsx
+rename to packages/react-query/test/ensureQueryData.test.tsx
+index e250cc1..52c754e 100644
+--- a/packages/tests/server/react/ensureQueryData.test.tsx
++++ b/packages/react-query/test/ensureQueryData.test.tsx
+@@ -1,8 +1,6 @@
+-import { createQueryClient } from '../__queryClient';
+ import { createAppRouter } from './__testHelpers';
+-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
++import { useQueryClient } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+-import { getUntypedClient } from '@trpc/client';
+ import React, { useEffect, useState } from 'react';
+ 
+ let factory: ReturnType<typeof createAppRouter>;
+diff --git a/packages/tests/server/react/errors.test.tsx b/packages/react-query/test/errors.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/errors.test.tsx
+rename to packages/react-query/test/errors.test.tsx
+diff --git a/packages/tests/server/react/formData.test.tsx b/packages/react-query/test/formData.test.tsx
+similarity index 96%
+rename from packages/tests/server/react/formData.test.tsx
+rename to packages/react-query/test/formData.test.tsx
+index efcace0..90edaa4 100644
+--- a/packages/tests/server/react/formData.test.tsx
++++ b/packages/react-query/test/formData.test.tsx
+@@ -1,7 +1,8 @@
+ // Vitest doesn't play nice with JSOM ArrayBuffer's: https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1742028595
+ // @vitest-environment node
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import {
+   getUntypedClient,
+@@ -94,7 +95,7 @@ const ctx = konn()
+       log: vi.fn(),
+       error: vi.fn(),
+     };
+-    const opts = routerToServerAndClientNew(appRouter, {
++    const opts = testServerAndClientResource(appRouter, {
+       client: ({ httpUrl }) => ({
+         links: [
+           loggerLink({
+@@ -242,7 +243,7 @@ describe('with transformer', () => {
+           }),
+       });
+ 
+-      return routerToServerAndClientNew(appRouter, {
++      return testServerAndClientResource(appRouter, {
+         client: ({ httpUrl }) => ({
+           links: [
+             httpLink({
+diff --git a/packages/tests/server/react/formatError.test.tsx b/packages/react-query/test/formatError.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/formatError.test.tsx
+rename to packages/react-query/test/formatError.test.tsx
+diff --git a/packages/tests/server/react/getQueryKey.test.tsx b/packages/react-query/test/getQueryKey.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/getQueryKey.test.tsx
+rename to packages/react-query/test/getQueryKey.test.tsx
+diff --git a/packages/tests/server/react/invalidateQueries.test.tsx b/packages/react-query/test/invalidateQueries.test.tsx
+similarity index 99%
+rename from packages/tests/server/react/invalidateQueries.test.tsx
+rename to packages/react-query/test/invalidateQueries.test.tsx
+index 8304e8b..d2ba860 100644
+--- a/packages/tests/server/react/invalidateQueries.test.tsx
++++ b/packages/react-query/test/invalidateQueries.test.tsx
+@@ -1,4 +1,4 @@
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
+ import { createAppRouter } from './__testHelpers';
+ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+diff --git a/packages/tests/server/react/invalidateRouters.test.tsx b/packages/react-query/test/invalidateRouters.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/invalidateRouters.test.tsx
+rename to packages/react-query/test/invalidateRouters.test.tsx
+diff --git a/packages/tests/server/react/multiple-trpc-providers.test.tsx b/packages/react-query/test/multiple-trpc-providers.test.tsx
+similarity index 90%
+rename from packages/tests/server/react/multiple-trpc-providers.test.tsx
+rename to packages/react-query/test/multiple-trpc-providers.test.tsx
+index dc2b72d..1254f62 100644
+--- a/packages/tests/server/react/multiple-trpc-providers.test.tsx
++++ b/packages/react-query/test/multiple-trpc-providers.test.tsx
+@@ -1,5 +1,5 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import { getUntypedClient } from '@trpc/client';
+@@ -22,9 +22,9 @@ const ctx = konn()
+     });
+ 
+     return {
+-      A: routerToServerAndClientNew(appRouterA),
+-      B: routerToServerAndClientNew(appRouterB),
+-      C: routerToServerAndClientNew(appRouterC),
++      A: testServerAndClientResource(appRouterA),
++      B: testServerAndClientResource(appRouterB),
++      C: testServerAndClientResource(appRouterC),
+     };
+   })
+   .afterEach(async (ctx) => {
+diff --git a/packages/tests/server/react/mutationkey.test.tsx b/packages/react-query/test/mutationkey.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/mutationkey.test.tsx
+rename to packages/react-query/test/mutationkey.test.tsx
+diff --git a/packages/tests/server/react/octetStreams.test.tsx b/packages/react-query/test/octetStreams.test.tsx
+similarity index 94%
+rename from packages/tests/server/react/octetStreams.test.tsx
+rename to packages/react-query/test/octetStreams.test.tsx
+index 49b587f..3b5da64 100644
+--- a/packages/tests/server/react/octetStreams.test.tsx
++++ b/packages/react-query/test/octetStreams.test.tsx
+@@ -1,7 +1,7 @@
+ // Vitest doesn't play nice with JSOM ArrayBuffer's: https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1742028595
+ // @vitest-environment node
+-import { routerToServerAndClientNew } from '../___testHelpers';
+-import { createQueryClient } from '../__queryClient';
++import { createQueryClient } from './__queryClient';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClientProvider } from '@tanstack/react-query';
+ import {
+   getUntypedClient,
+@@ -52,7 +52,7 @@ const ctx = konn()
+       log: vi.fn(),
+       error: vi.fn(),
+     };
+-    const opts = routerToServerAndClientNew(appRouter, {
++    const opts = testServerAndClientResource(appRouter, {
+       client: ({ httpUrl }) => ({
+         links: [
+           loggerLink({
+diff --git a/packages/tests/server/react/offline.test.tsx b/packages/react-query/test/offline.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/offline.test.tsx
+rename to packages/react-query/test/offline.test.tsx
+diff --git a/packages/tests/server/react/overrides.test.tsx b/packages/react-query/test/overrides.test.tsx
+similarity index 96%
+rename from packages/tests/server/react/overrides.test.tsx
+rename to packages/react-query/test/overrides.test.tsx
+index 95aadbe..004a0c4 100644
+--- a/packages/tests/server/react/overrides.test.tsx
++++ b/packages/react-query/test/overrides.test.tsx
+@@ -1,4 +1,4 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+@@ -29,7 +29,7 @@ describe('mutation override', () => {
+           });
+         }),
+       });
+-      const opts = routerToServerAndClientNew(appRouter);
++      const opts = testServerAndClientResource(appRouter);
+       const trpc = createTRPCReact<typeof appRouter>({
+         overrides: {
+           useMutation: {
+diff --git a/packages/tests/server/react/polymorphism.common.tsx b/packages/react-query/test/polymorphism.common.tsx
+similarity index 100%
+rename from packages/tests/server/react/polymorphism.common.tsx
+rename to packages/react-query/test/polymorphism.common.tsx
+diff --git a/packages/tests/server/react/polymorphism.factory.tsx b/packages/react-query/test/polymorphism.factory.tsx
+similarity index 100%
+rename from packages/tests/server/react/polymorphism.factory.tsx
+rename to packages/react-query/test/polymorphism.factory.tsx
+diff --git a/packages/tests/server/react/polymorphism.subtyped-factory.tsx b/packages/react-query/test/polymorphism.subtyped-factory.tsx
+similarity index 100%
+rename from packages/tests/server/react/polymorphism.subtyped-factory.tsx
+rename to packages/react-query/test/polymorphism.subtyped-factory.tsx
+diff --git a/packages/tests/server/react/polymorphism.test.tsx b/packages/react-query/test/polymorphism.test.tsx
+similarity index 98%
+rename from packages/tests/server/react/polymorphism.test.tsx
+rename to packages/react-query/test/polymorphism.test.tsx
+index e1d8653..d3c4113 100644
+--- a/packages/tests/server/react/polymorphism.test.tsx
++++ b/packages/react-query/test/polymorphism.test.tsx
+@@ -8,7 +8,8 @@
+   The polymorphism types can be used to generate abstract types which routers sharing a common 
+   interface are compatible with, and allow you to pass around deep router paths to generic components with ease.
+ */
+-import { routerToServerAndClientNew } from '../___testHelpers';
++
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import {
+   QueryClient,
+   QueryClientProvider,
+@@ -105,7 +106,7 @@ describe('polymorphism', () => {
+         PullRequestExportsProvider,
+       } = createTRPCApi();
+ 
+-      const opts = routerToServerAndClientNew(appRouter);
++      const opts = testServerAndClientResource(appRouter);
+       const trpc = createTRPCReact<typeof appRouter>();
+ 
+       const queryClient = new QueryClient();
+diff --git a/packages/tests/server/react/prefetchQuery.test.tsx b/packages/react-query/test/prefetchQuery.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/prefetchQuery.test.tsx
+rename to packages/react-query/test/prefetchQuery.test.tsx
+diff --git a/packages/tests/server/react/queryClientDefaults.test.tsx b/packages/react-query/test/queryClientDefaults.test.tsx
+similarity index 96%
+rename from packages/tests/server/react/queryClientDefaults.test.tsx
+rename to packages/react-query/test/queryClientDefaults.test.tsx
+index 40408fb..f685668 100644
+--- a/packages/tests/server/react/queryClientDefaults.test.tsx
++++ b/packages/react-query/test/queryClientDefaults.test.tsx
+@@ -1,4 +1,4 @@
+-import { routerToServerAndClientNew } from '../___testHelpers';
++import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
+ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+@@ -29,7 +29,7 @@ describe('query client defaults', () => {
+           });
+         }),
+       });
+-      const opts = routerToServerAndClientNew(appRouter);
++      const opts = testServerAndClientResource(appRouter);
+       const trpc = createTRPCReact<typeof appRouter>();
+ 
+       const queryClient = new QueryClient({
+diff --git a/packages/tests/server/react/queryOptions.test.tsx b/packages/react-query/test/queryOptions.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/queryOptions.test.tsx
+rename to packages/react-query/test/queryOptions.test.tsx
+diff --git a/packages/tests/server/react/regression/issue-1645-setErrorStatusSSR.test.tsx b/packages/react-query/test/regression/issue-1645-setErrorStatusSSR.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/regression/issue-1645-setErrorStatusSSR.test.tsx
+rename to packages/react-query/test/regression/issue-1645-setErrorStatusSSR.test.tsx
+diff --git a/packages/tests/server/regression/issue-2942-useInfiniteQuery-setData.test.tsx b/packages/react-query/test/regression/issue-2942-useInfiniteQuery-setData.test.tsx
+similarity index 98%
+rename from packages/tests/server/regression/issue-2942-useInfiniteQuery-setData.test.tsx
+rename to packages/react-query/test/regression/issue-2942-useInfiniteQuery-setData.test.tsx
+index c800e4f..78d75fa 100644
+--- a/packages/tests/server/regression/issue-2942-useInfiniteQuery-setData.test.tsx
++++ b/packages/react-query/test/regression/issue-2942-useInfiniteQuery-setData.test.tsx
+@@ -1,4 +1,4 @@
+-import { getServerAndReactClient } from '../react/__reactHelpers';
++import { getServerAndReactClient } from '../__reactHelpers';
+ import type { DehydratedState, InfiniteData } from '@tanstack/react-query';
+ import { dehydrate } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+diff --git a/packages/tests/server/regression/issue-2996-defined-data.test.tsx b/packages/react-query/test/regression/issue-2996-defined-data.test.tsx
+similarity index 98%
+rename from packages/tests/server/regression/issue-2996-defined-data.test.tsx
+rename to packages/react-query/test/regression/issue-2996-defined-data.test.tsx
+index cf4052e..6317e27 100644
+--- a/packages/tests/server/regression/issue-2996-defined-data.test.tsx
++++ b/packages/react-query/test/regression/issue-2996-defined-data.test.tsx
+@@ -1,4 +1,4 @@
+-import { getServerAndReactClient } from '../react/__reactHelpers';
++import { getServerAndReactClient } from '../__reactHelpers';
+ import { useQuery } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import { initTRPC } from '@trpc/server';
+diff --git a/packages/tests/server/regression/issue-3455-56-invalidate-queries.test.tsx b/packages/react-query/test/regression/issue-3455-56-invalidate-queries.test.tsx
+similarity index 98%
+rename from packages/tests/server/regression/issue-3455-56-invalidate-queries.test.tsx
+rename to packages/react-query/test/regression/issue-3455-56-invalidate-queries.test.tsx
+index 77d82ae..573f26b 100644
+--- a/packages/tests/server/regression/issue-3455-56-invalidate-queries.test.tsx
++++ b/packages/react-query/test/regression/issue-3455-56-invalidate-queries.test.tsx
+@@ -1,4 +1,4 @@
+-import { getServerAndReactClient } from '../react/__reactHelpers';
++import { getServerAndReactClient } from '../__reactHelpers';
+ import { useQuery } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+diff --git a/packages/tests/server/react/regression/issue-3461-reserved-properties.test.tsx b/packages/react-query/test/regression/issue-3461-reserved-properties.test.tsx
+similarity index 97%
+rename from packages/tests/server/react/regression/issue-3461-reserved-properties.test.tsx
+rename to packages/react-query/test/regression/issue-3461-reserved-properties.test.tsx
+index 1aa762d..9de684b 100644
+--- a/packages/tests/server/react/regression/issue-3461-reserved-properties.test.tsx
++++ b/packages/react-query/test/regression/issue-3461-reserved-properties.test.tsx
+@@ -1,6 +1,5 @@
+ import { getServerAndReactClient } from '../__reactHelpers';
+ import { render } from '@testing-library/react';
+-import { createTRPCClient } from '@trpc/client';
+ import { createServerSideHelpers } from '@trpc/react-query/server';
+ import { initTRPC } from '@trpc/server';
+ import type { IntersectionError } from '@trpc/server/unstable-core-do-not-import';
+diff --git a/packages/tests/server/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx b/packages/react-query/test/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx
+similarity index 97%
+rename from packages/tests/server/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx
+rename to packages/react-query/test/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx
+index 995f115..bb723da 100644
+--- a/packages/tests/server/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx
++++ b/packages/react-query/test/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx
+@@ -1,4 +1,4 @@
+-import { getServerAndReactClient } from '../react/__reactHelpers';
++import { getServerAndReactClient } from '../__reactHelpers';
+ import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
+ import { initTRPC } from '@trpc/server';
+ import { konn } from 'konn';
+diff --git a/packages/tests/server/react/regression/issue-4486-initialData-types.test.tsx b/packages/react-query/test/regression/issue-4486-initialData-types.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/regression/issue-4486-initialData-types.test.tsx
+rename to packages/react-query/test/regression/issue-4486-initialData-types.test.tsx
+diff --git a/packages/tests/server/react/regression/issue-4519-invalid-select-as-transform.test.tsx b/packages/react-query/test/regression/issue-4519-invalid-select-as-transform.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/regression/issue-4519-invalid-select-as-transform.test.tsx
+rename to packages/react-query/test/regression/issue-4519-invalid-select-as-transform.test.tsx
+diff --git a/packages/tests/server/regression/issue-5357-input-always-required.test.tsx b/packages/react-query/test/regression/issue-5357-input-always-required.test.tsx
+similarity index 94%
+rename from packages/tests/server/regression/issue-5357-input-always-required.test.tsx
+rename to packages/react-query/test/regression/issue-5357-input-always-required.test.tsx
+index 3c00727..bf52554 100644
+--- a/packages/tests/server/regression/issue-5357-input-always-required.test.tsx
++++ b/packages/react-query/test/regression/issue-5357-input-always-required.test.tsx
+@@ -1,4 +1,4 @@
+-import { getServerAndReactClient } from '../react/__reactHelpers';
++import { getServerAndReactClient } from '../__reactHelpers';
+ import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
+ import { initTRPC } from '@trpc/server';
+ import { konn } from 'konn';
+diff --git a/packages/tests/server/react/regression/issue-5808-proxy-in-dep-array.test.tsx b/packages/react-query/test/regression/issue-5808-proxy-in-dep-array.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/regression/issue-5808-proxy-in-dep-array.test.tsx
+rename to packages/react-query/test/regression/issue-5808-proxy-in-dep-array.test.tsx
+diff --git a/packages/tests/server/react/rsc-prefetch.test.tsx b/packages/react-query/test/rsc-prefetch.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/rsc-prefetch.test.tsx
+rename to packages/react-query/test/rsc-prefetch.test.tsx
+diff --git a/packages/tests/server/react/setInfiniteQueryData.test.tsx b/packages/react-query/test/setInfiniteQueryData.test.tsx
+similarity index 94%
+rename from packages/tests/server/react/setInfiniteQueryData.test.tsx
+rename to packages/react-query/test/setInfiniteQueryData.test.tsx
+index e1299e9..c4d0d5d 100644
+--- a/packages/tests/server/react/setInfiniteQueryData.test.tsx
++++ b/packages/react-query/test/setInfiniteQueryData.test.tsx
+@@ -1,9 +1,7 @@
+-import { createQueryClient } from '../__queryClient';
+ import { createAppRouter } from './__testHelpers';
+-import { QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import React, { useState } from 'react';
++import React from 'react';
+ 
+ let factory: ReturnType<typeof createAppRouter>;
+ beforeEach(() => {
+diff --git a/packages/tests/server/react/setQueriesData.test.tsx b/packages/react-query/test/setQueriesData.test.tsx
+similarity index 92%
+rename from packages/tests/server/react/setQueriesData.test.tsx
+rename to packages/react-query/test/setQueriesData.test.tsx
+index c7c3d0a..3a35030 100644
+--- a/packages/tests/server/react/setQueriesData.test.tsx
++++ b/packages/react-query/test/setQueriesData.test.tsx
+@@ -1,9 +1,7 @@
+-import { createQueryClient } from '../__queryClient';
+ import { createAppRouter } from './__testHelpers';
+-import { QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import React, { useState } from 'react';
++import React from 'react';
+ 
+ let factory: ReturnType<typeof createAppRouter>;
+ beforeEach(() => {
+diff --git a/packages/tests/server/react/setQueryData.test.tsx b/packages/react-query/test/setQueryData.test.tsx
+similarity index 93%
+rename from packages/tests/server/react/setQueryData.test.tsx
+rename to packages/react-query/test/setQueryData.test.tsx
+index ab70407..d951a0a 100644
+--- a/packages/tests/server/react/setQueryData.test.tsx
++++ b/packages/react-query/test/setQueryData.test.tsx
+@@ -1,9 +1,7 @@
+-import { createQueryClient } from '../__queryClient';
+ import { createAppRouter } from './__testHelpers';
+-import { QueryClientProvider } from '@tanstack/react-query';
+ import { render, waitFor } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+-import React, { useState } from 'react';
++import React from 'react';
+ 
+ let factory: ReturnType<typeof createAppRouter>;
+ beforeEach(() => {
+diff --git a/packages/tests/server/react/ssg.test.ts b/packages/react-query/test/ssg.test.ts
+similarity index 100%
+rename from packages/tests/server/react/ssg.test.ts
+rename to packages/react-query/test/ssg.test.ts
+diff --git a/packages/tests/server/react/ssgExternal.test.ts b/packages/react-query/test/ssgExternal.test.ts
+similarity index 98%
+rename from packages/tests/server/react/ssgExternal.test.ts
+rename to packages/react-query/test/ssgExternal.test.ts
+index e175ba7..731dafa 100644
+--- a/packages/tests/server/react/ssgExternal.test.ts
++++ b/packages/react-query/test/ssgExternal.test.ts
+@@ -3,7 +3,6 @@ import type { InfiniteData } from '@tanstack/react-query';
+ import { createServerSideHelpers } from '@trpc/react-query/server';
+ import { initTRPC } from '@trpc/server';
+ import { konn } from 'konn';
+-import SuperJSON from 'superjson';
+ import { z } from 'zod';
+ 
+ const ctx = konn()
+diff --git a/packages/tests/server/react/trpc-options.test.tsx b/packages/react-query/test/trpc-options.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/trpc-options.test.tsx
+rename to packages/react-query/test/trpc-options.test.tsx
+diff --git a/packages/tests/server/react/useInfiniteQuery.test.tsx b/packages/react-query/test/useInfiniteQuery.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useInfiniteQuery.test.tsx
+rename to packages/react-query/test/useInfiniteQuery.test.tsx
+diff --git a/packages/tests/server/react/useMutation.test.tsx b/packages/react-query/test/useMutation.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useMutation.test.tsx
+rename to packages/react-query/test/useMutation.test.tsx
+diff --git a/packages/tests/server/react/useQueries.test.tsx b/packages/react-query/test/useQueries.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useQueries.test.tsx
+rename to packages/react-query/test/useQueries.test.tsx
+diff --git a/packages/tests/server/react/useQuery.test.tsx b/packages/react-query/test/useQuery.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useQuery.test.tsx
+rename to packages/react-query/test/useQuery.test.tsx
+diff --git a/packages/tests/server/react/useSubscription.test.tsx b/packages/react-query/test/useSubscription.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useSubscription.test.tsx
+rename to packages/react-query/test/useSubscription.test.tsx
+diff --git a/packages/tests/server/react/useSuspenseInfiniteQuery.test.tsx b/packages/react-query/test/useSuspenseInfiniteQuery.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useSuspenseInfiniteQuery.test.tsx
+rename to packages/react-query/test/useSuspenseInfiniteQuery.test.tsx
+diff --git a/packages/tests/server/react/useSuspenseQueries.test.tsx b/packages/react-query/test/useSuspenseQueries.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useSuspenseQueries.test.tsx
+rename to packages/react-query/test/useSuspenseQueries.test.tsx
+diff --git a/packages/tests/server/react/useSuspenseQuery.test.tsx b/packages/react-query/test/useSuspenseQuery.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useSuspenseQuery.test.tsx
+rename to packages/react-query/test/useSuspenseQuery.test.tsx
+diff --git a/packages/tests/server/react/useUtils.test.tsx b/packages/react-query/test/useUtils.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/useUtils.test.tsx
+rename to packages/react-query/test/useUtils.test.tsx
+diff --git a/packages/tests/server/react/withTRPC.test.tsx b/packages/react-query/test/withTRPC.test.tsx
+similarity index 100%
+rename from packages/tests/server/react/withTRPC.test.tsx
+rename to packages/react-query/test/withTRPC.test.tsx
+diff --git a/packages/react-query/tsconfig.json b/packages/react-query/tsconfig.json
+index 596e2cf..eacabf6 100644
+--- a/packages/react-query/tsconfig.json
++++ b/packages/react-query/tsconfig.json
+@@ -1,4 +1,7 @@
+ {
+   "extends": "../../tsconfig.json",
+-  "include": ["src"]
++  "include": ["src", "test"],
++  "compilerOptions": {
++    "types": ["@testing-library/jest-dom", "vitest/globals"]
++  }
+ }
+diff --git a/packages/react-query/vitest.config.ts b/packages/react-query/vitest.config.ts
+index 026df8b..88a17f9 100644
+--- a/packages/react-query/vitest.config.ts
++++ b/packages/react-query/vitest.config.ts
+@@ -1 +1,8 @@
+-export { default } from '../../vitest.config';
++import { mergeConfig } from 'vitest/config';
++import baseConfig from '../../vitest.config';
++
++export default mergeConfig(baseConfig, {
++  test: {
++    setupFiles: ['@testing-library/jest-dom/vitest'],
++  },
++});
+diff --git a/packages/tests/package.json b/packages/tests/package.json
+index e2d2d9f..1181534 100644
+--- a/packages/tests/package.json
++++ b/packages/tests/package.json
+@@ -14,18 +14,10 @@
+     "@fastify/websocket": "^10.0.1",
+     "@js-temporal/polyfill": "^0.4.4",
+     "@miniflare/core": "^2.9.0",
+-    "@tanstack/query-sync-storage-persister": "^5.59.13",
+-    "@tanstack/react-query": "^5.66.0",
+-    "@tanstack/react-query-persist-client": "^5.64.2",
+-    "@testing-library/dom": "^10.0.0",
+-    "@testing-library/jest-dom": "^6.0.0",
+-    "@testing-library/react": "^16.1.0",
+-    "@testing-library/user-event": "^14.4.3",
+     "@trpc/client": "workspace:*",
+-    "@trpc/next": "workspace:*",
+-    "@trpc/react-query": "workspace:*",
+     "@trpc/server": "^10.45.1",
+     "@types/node": "^22.13.5",
++    "@vitest/spy": "^2.1.8",
+     "abort-controller": "^3.0.0",
+     "arktype": "^2.0.1",
+     "dataloader": "^2.2.2",
+@@ -36,10 +28,7 @@
+     "jsdom": "^24.0.0",
+     "miniflare": "^2.4.0",
+     "myzod": "^1.3.1",
+-    "next": "^15.1.3",
+     "node-fetch": "^3.3.0",
+-    "react": "^19.0.0",
+-    "react-dom": "^19.0.0",
+     "runtypes": "^7.0.0",
+     "scale-codec": "^0.13.0",
+     "superstruct": "^2.0.0",
+diff --git a/packages/tests/server/adapters/next.test.ts b/packages/tests/server/adapters/next.test.ts
+index c928342..1f38b9d 100644
+--- a/packages/tests/server/adapters/next.test.ts
++++ b/packages/tests/server/adapters/next.test.ts
+@@ -7,12 +7,6 @@ import * as trpcNext from '@trpc/server/adapters/next';
+ import type { TRPCErrorResponse, TRPCSuccessResponse } from '@trpc/server/rpc';
+ import type { DefaultErrorShape } from '@trpc/server/unstable-core-do-not-import';
+ import { createDeferred } from '@trpc/server/unstable-core-do-not-import';
+-// @ts-expect-error - no types
+-import _request from 'supertest';
+-
+-const request = _request as (handler: trpcNext.NextApiHandler) => {
+-  get: (path: string) => Promise<any>;
+-};
+ 
+ function createHttpServer(opts: {
+   handler: trpcNext.NextApiHandler;
+diff --git a/packages/tests/tsconfig.json b/packages/tests/tsconfig.json
+index 2b11830..ac7023e 100644
+--- a/packages/tests/tsconfig.json
++++ b/packages/tests/tsconfig.json
+@@ -1,11 +1,11 @@
+ {
+   "extends": "../../tsconfig.json",
+-  "include": ["server", "showcase", "setupTests.ts", "vitest.config.ts"],
++  "include": ["server", "showcase", "vitest.config.ts"],
+   "compilerOptions": {
+     "skipLibCheck": true,
+     "lib": ["ES2023", "DOM", "DOM.Iterable"],
+     "target": "ES2023",
+-    "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
++    "types": ["node", "vitest/globals"],
+     "noUnusedLocals": false,
+     "noEmit": true
+   }
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 83b64bf..fd21703 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -1756,7 +1756,7 @@ importers:
+   packages/client:
+     devDependencies:
+       '@trpc/server':
+-        specifier: ^10.45.1
++        specifier: workspace:*
+         version: link:../server
+       '@types/isomorphic-fetch':
+         specifier: ^0.0.39
+@@ -1764,6 +1764,9 @@ importers:
+       '@types/node':
+         specifier: 20.17.19
+         version: 20.17.19
++      dataloader:
++        specifier: ^2.2.2
++        version: 2.2.2
+       eslint:
+         specifier: ^9.21.0
+         version: 9.21.0(jiti@2.4.2)
+@@ -1818,6 +1821,9 @@ importers:
+       '@types/react-dom':
+         specifier: ^19.0.0
+         version: 19.0.0
++      devalue:
++        specifier: ^5.0.0
++        version: 5.0.0
+       eslint:
+         specifier: ^9.21.0
+         version: 9.21.0(jiti@2.4.2)
+@@ -1848,9 +1854,27 @@ importers:
+ 
+   packages/react-query:
+     devDependencies:
++      '@tanstack/query-sync-storage-persister':
++        specifier: ^5.66.0
++        version: 5.66.4
+       '@tanstack/react-query':
+         specifier: ^5.66.0
+         version: 5.66.0(react@19.0.0)
++      '@tanstack/react-query-persist-client':
++        specifier: ^5.66.0
++        version: 5.66.0(@tanstack/react-query@5.66.0(react@19.0.0))(react@19.0.0)
++      '@testing-library/dom':
++        specifier: ^10.0.0
++        version: 10.0.0
++      '@testing-library/jest-dom':
++        specifier: ^6.0.0
++        version: 6.0.0(vitest@3.0.6)
++      '@testing-library/react':
++        specifier: ^16.1.0
++        version: 16.1.0(@testing-library/dom@10.0.0)(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
++      '@testing-library/user-event':
++        specifier: ^14.4.3
++        version: 14.4.3(@testing-library/dom@10.0.0)
+       '@trpc/client':
+         specifier: workspace:*
+         version: link:../client
+@@ -1896,6 +1920,9 @@ importers:
+       zod:
+         specifier: ^3.24.2
+         version: 3.24.2
++      zod-form-data:
++        specifier: ^2.0.1
++        version: 2.0.1(zod@3.24.2)
+ 
+   packages/server:
+     devDependencies:
+@@ -2052,42 +2079,18 @@ importers:
+       '@miniflare/core':
+         specifier: ^2.9.0
+         version: 2.11.0
+-      '@tanstack/query-sync-storage-persister':
+-        specifier: ^5.59.13
+-        version: 5.59.13
+-      '@tanstack/react-query':
+-        specifier: ^5.66.0
+-        version: 5.66.0(react@19.0.0)
+-      '@tanstack/react-query-persist-client':
+-        specifier: ^5.64.2
+-        version: 5.66.0(@tanstack/react-query@5.66.0(react@19.0.0))(react@19.0.0)
+-      '@testing-library/dom':
+-        specifier: ^10.0.0
+-        version: 10.0.0
+-      '@testing-library/jest-dom':
+-        specifier: ^6.0.0
+-        version: 6.0.0(vitest@3.0.6)
+-      '@testing-library/react':
+-        specifier: ^16.1.0
+-        version: 16.1.0(@testing-library/dom@10.0.0)(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+-      '@testing-library/user-event':
+-        specifier: ^14.4.3
+-        version: 14.4.3(@testing-library/dom@10.0.0)
+       '@trpc/client':
+         specifier: workspace:*
+         version: link:../client
+-      '@trpc/next':
+-        specifier: workspace:*
+-        version: link:../next
+-      '@trpc/react-query':
+-        specifier: workspace:*
+-        version: link:../react-query
+       '@trpc/server':
+         specifier: ^10.45.1
+         version: link:../server
+       '@types/node':
+         specifier: 20.17.19
+         version: 20.17.19
++      '@vitest/spy':
++        specifier: ^2.1.8
++        version: 2.1.9
+       abort-controller:
+         specifier: ^3.0.0
+         version: 3.0.0
+@@ -2118,18 +2121,9 @@ importers:
+       myzod:
+         specifier: ^1.3.1
+         version: 1.8.8
+-      next:
+-        specifier: ^15.1.3
+-        version: 15.1.3(@playwright/test@1.28.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+       node-fetch:
+         specifier: ^3.3.0
+         version: 3.3.0
+-      react:
+-        specifier: ^19.0.0
+-        version: 19.0.0
+-      react-dom:
+-        specifier: ^19.0.0
+-        version: 19.0.0(react@19.0.0)
+       runtypes:
+         specifier: ^7.0.0
+         version: 7.0.1
+@@ -7377,23 +7371,23 @@ packages:
+     resolution: {integrity: sha512-JMd7USmnp8zV8BRGIjALqzPxazvKtQ7PGXQC7n39HpbqdsmfV2ePCzieO84IvN+mwsTrXErpbjI4BfKCa+ZNCg==}
+     engines: {node: '>=12'}
+ 
+-  '@tanstack/query-core@5.59.13':
+-    resolution: {integrity: sha512-Oou0bBu/P8+oYjXsJQ11j+gcpLAMpqW42UlokQYEz4dE7+hOtVO9rVuolJKgEccqzvyFzqX4/zZWY+R/v1wVsQ==}
+-
+   '@tanstack/query-core@5.66.0':
+     resolution: {integrity: sha512-J+JeBtthiKxrpzUu7rfIPDzhscXF2p5zE/hVdrqkACBP8Yu0M96mwJ5m/8cPPYQE9aRNvXztXHlNwIh4FEeMZw==}
+ 
++  '@tanstack/query-core@5.66.4':
++    resolution: {integrity: sha512-skM/gzNX4shPkqmdTCSoHtJAPMTtmIJNS0hE+xwTTUVYwezArCT34NMermABmBVUg5Ls5aiUXEDXfqwR1oVkcA==}
++
+   '@tanstack/query-devtools@5.65.0':
+     resolution: {integrity: sha512-g5y7zc07U9D3esMdqUfTEVu9kMHoIaVBsD0+M3LPdAdD710RpTcLiNvJY1JkYXqkq9+NV+CQoemVNpQPBXVsJg==}
+ 
+-  '@tanstack/query-persist-client-core@5.59.13':
+-    resolution: {integrity: sha512-dv6KxeJmHl8x9nCGEZtF+HW8pXYWwBX8DqZT7538RmIn+Y9rW5WSB3bCzFDr1hlaNa4B/5J+dk9L9i0egLFVoQ==}
+-
+   '@tanstack/query-persist-client-core@5.66.0':
+     resolution: {integrity: sha512-y6bolShmbOmexexZfnmTiHsBOm4ruJxc2MQJzqi6PxkSPjkKAU+Zqviy4ZwQos5skwSw0g7b9L6V6Rd64oZc9g==}
+ 
+-  '@tanstack/query-sync-storage-persister@5.59.13':
+-    resolution: {integrity: sha512-GLgWyF49tXL4wpVWFVuaZwp6PcUbYUTkQ126Q3GGEl3xzosAhLyEKO9YkLRi8f8C2FfS7ukMbxGGr3NLQMKLCw==}
++  '@tanstack/query-persist-client-core@5.66.4':
++    resolution: {integrity: sha512-OAw98P8DhrZyxZ60Tz4Eq8KyEAKPWIf3tuSStzS0F3jovW42/RpFy7wmgg3SrOgI7/kVKspBvPQDQn6ymcpwCg==}
++
++  '@tanstack/query-sync-storage-persister@5.66.4':
++    resolution: {integrity: sha512-Cdbpx6LGMAoHISGQbB7Dma2PCG8iBeyw4uEgkXMo6f6YpCFdyFDaaDWdiFQPNOdha25BUPC4jWYPCPT32sHQCw==}
+ 
+   '@tanstack/react-cross-context@1.99.0':
+     resolution: {integrity: sha512-PJuVaijr3FTV8HJcmfzGcQ4+ZlNUwJ0B51MNlawClJ4pBOerJrW/iEKPIg0glPVx3KQ4WHMv8cEGmvN+xYtLJw==}
+@@ -8089,6 +8083,9 @@ packages:
+   '@vitest/snapshot@3.0.6':
+     resolution: {integrity: sha512-qKSmxNQwT60kNwwJHMVwavvZsMGXWmngD023OHSgn873pV0lylK7dwBTfYP7e4URy5NiBCHHiQGA9DHkYkqRqg==}
+ 
++  '@vitest/spy@2.1.9':
++    resolution: {integrity: sha512-E1B35FwzXXTs9FHNK6bDszs7mtydNi5MIfUWpceJ8Xbfb1gBMscAnwLbEu+B44ed6W3XjL9/ehLPHR1fkf1KLQ==}
++
+   '@vitest/spy@3.0.6':
+     resolution: {integrity: sha512-HfOGx/bXtjy24fDlTOpgiAEJbRfFxoX3zIGagCqACkFKKZ/TTOE6gYMKXlqecvxEndKFuNHcHqP081ggZ2yM0Q==}
+ 
+@@ -24301,24 +24298,24 @@ snapshots:
+ 
+   '@tanstack/history@1.99.13': {}
+ 
+-  '@tanstack/query-core@5.59.13': {}
+-
+   '@tanstack/query-core@5.66.0': {}
+ 
+-  '@tanstack/query-devtools@5.65.0': {}
++  '@tanstack/query-core@5.66.4': {}
+ 
+-  '@tanstack/query-persist-client-core@5.59.13':
+-    dependencies:
+-      '@tanstack/query-core': 5.59.13
++  '@tanstack/query-devtools@5.65.0': {}
+ 
+   '@tanstack/query-persist-client-core@5.66.0':
+     dependencies:
+       '@tanstack/query-core': 5.66.0
+ 
+-  '@tanstack/query-sync-storage-persister@5.59.13':
++  '@tanstack/query-persist-client-core@5.66.4':
+     dependencies:
+-      '@tanstack/query-core': 5.59.13
+-      '@tanstack/query-persist-client-core': 5.59.13
++      '@tanstack/query-core': 5.66.4
++
++  '@tanstack/query-sync-storage-persister@5.66.4':
++    dependencies:
++      '@tanstack/query-core': 5.66.4
++      '@tanstack/query-persist-client-core': 5.66.4
+ 
+   '@tanstack/react-cross-context@1.99.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+     dependencies:
+@@ -25709,6 +25706,10 @@ snapshots:
+       magic-string: 0.30.17
+       pathe: 2.0.3
+ 
++  '@vitest/spy@2.1.9':
++    dependencies:
++      tinyspy: 3.0.2
++
+   '@vitest/spy@3.0.6':
+     dependencies:
+       tinyspy: 3.0.2
+@@ -28534,7 +28535,7 @@ snapshots:
+       '@typescript-eslint/parser': 7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2)
+       eslint: 9.21.0(jiti@2.4.2)
+       eslint-import-resolver-node: 0.3.9
+-      eslint-import-resolver-typescript: 3.5.2(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2))
++      eslint-import-resolver-typescript: 3.5.2(eslint-plugin-import@2.31.0)(eslint@9.21.0(jiti@2.4.2))
+       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint-import-resolver-typescript@3.5.2)(eslint@9.21.0(jiti@2.4.2))
+       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.21.0(jiti@2.4.2))
+       eslint-plugin-react: 7.37.2(eslint@9.21.0(jiti@2.4.2))
+@@ -28557,7 +28558,7 @@ snapshots:
+     transitivePeerDependencies:
+       - supports-color
+ 
+-  eslint-import-resolver-typescript@3.5.2(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2)):
++  eslint-import-resolver-typescript@3.5.2(eslint-plugin-import@2.31.0)(eslint@9.21.0(jiti@2.4.2)):
+     dependencies:
+       debug: 4.4.0(supports-color@9.4.0)
+       enhanced-resolve: 5.17.1
+@@ -28571,14 +28572,14 @@ snapshots:
+     transitivePeerDependencies:
+       - supports-color
+ 
+-  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.2(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2)):
++  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.2)(eslint@9.21.0(jiti@2.4.2)):
+     dependencies:
+       debug: 3.2.7
+     optionalDependencies:
+       '@typescript-eslint/parser': 7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2)
+       eslint: 9.21.0(jiti@2.4.2)
+       eslint-import-resolver-node: 0.3.9
+-      eslint-import-resolver-typescript: 3.5.2(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2))
++      eslint-import-resolver-typescript: 3.5.2(eslint-plugin-import@2.31.0)(eslint@9.21.0(jiti@2.4.2))
+     transitivePeerDependencies:
+       - supports-color
+ 
+@@ -28593,7 +28594,7 @@ snapshots:
+       doctrine: 2.1.0
+       eslint: 9.21.0(jiti@2.4.2)
+       eslint-import-resolver-node: 0.3.9
+-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.2(eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2)))(eslint@9.21.0(jiti@2.4.2))
++      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.16.1(eslint@9.21.0(jiti@2.4.2))(typescript@5.7.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.2)(eslint@9.21.0(jiti@2.4.2))
+       hasown: 2.0.2
+       is-core-module: 2.15.1
+       is-glob: 4.0.3
+diff --git a/scripts/generateBigBoi.ts b/scripts/generateBigBoi.ts
+index 6237869..4688b87 100644
+--- a/scripts/generateBigBoi.ts
++++ b/scripts/generateBigBoi.ts
+@@ -55,25 +55,29 @@ function createRouter(routerName: string) {
+   })`.trim();
+ }
+ 
+-const TEST_DIR =
+-  import.meta.dirname + '/../packages/tests/server/__generated__/bigBoi';
+-fs.mkdirSync(TEST_DIR, { recursive: true });
++const TEST_DIRS = [
++  import.meta.dirname + '/../packages/tests/server/__generated__/bigBoi',
++  import.meta.dirname + '/../packages/react-query/test/__generated__/bigBoi',
++];
+ 
+-console.log('Generating routers...', TEST_DIR);
++for (const TEST_DIR of TEST_DIRS) {
++  fs.mkdirSync(TEST_DIR, { recursive: true });
+ 
+-const indexBuf: string[] = [];
+-for (let i = 0; i < NUM_ROUTERS; i++) {
+-  const routerName = `r${i}`;
+-  indexBuf.push(routerName);
+-  fs.writeFileSync(`${TEST_DIR}/${routerName}.ts`, createRouter(routerName));
+-}
++  console.log('Generating routers...', TEST_DIR);
++
++  const indexBuf: string[] = [];
++  for (let i = 0; i < NUM_ROUTERS; i++) {
++    const routerName = `r${i}`;
++    indexBuf.push(routerName);
++    fs.writeFileSync(`${TEST_DIR}/${routerName}.ts`, createRouter(routerName));
++  }
+ 
+-const trpcFile = `
++  const trpcFile = `
+ import { initTRPC } from '@trpc/server';
+ 
+ export const t = initTRPC.create();
+ `.trim();
+-const indexFile = `
++  const indexFile = `
+ import { t } from './_trpc';
+ 
+ ${indexBuf.map((name) => `import { ${name} } from './${name}';`).join('\n')}
+@@ -82,7 +86,8 @@ export const appRouter = t.router({
+   ${indexBuf.join(',\n    ')}
+ })
+ 
+-`.trim();
++  `.trim();
+ 
+-fs.writeFileSync(`${TEST_DIR}/_app.ts`, indexFile);
+-fs.writeFileSync(`${TEST_DIR}/_trpc.ts`, trpcFile);
++  fs.writeFileSync(`${TEST_DIR}/_app.ts`, indexFile);
++  fs.writeFileSync(`${TEST_DIR}/_trpc.ts`, trpcFile);
++}
+diff --git a/turbo.json b/turbo.json
+index 7ee3e95..b1385da 100644
+--- a/turbo.json
++++ b/turbo.json
+@@ -17,7 +17,7 @@
+   "tasks": {
+     "codegen-entrypoints": {},
+     "codegen-tests": {
+-      "outputs": ["server/__generated__/bigBoi/**"]
++      "outputs": ["*/__generated__/bigBoi/**"]
+     },
+     "prebuild": {
+       "cache": false
+diff --git a/vitest.config.ts b/vitest.config.ts
+index 9174f3f..ef63063 100644
+--- a/vitest.config.ts
++++ b/vitest.config.ts
+@@ -41,7 +41,6 @@ export default defineConfig({
+     snapshotFormat: {
+       printBasicPrototype: true,
+     },
+-    setupFiles: ['./tests/setupTests.ts'],
+     coverage: {
+       provider: 'istanbul',
+       include: ['**/src/**'],

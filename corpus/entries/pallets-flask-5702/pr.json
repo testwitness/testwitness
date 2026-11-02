@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pallets/flask/pull/5702",
+  "repo": "pallets/flask",
+  "number": 5702,
+  "title": "remove tests about deprecated pkgutil.get_loader",
+  "merged_at": "2025-03-29T22:45:11Z",
+  "stars": 75155,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "deleted",
+  "split": "tuning",
+  "base_sha": "2732c4db66763462c2795d2287b61d4f77031342",
+  "head_sha": "41ec5760a2c55a099c3a1733fdd36fbb1258a02b",
+  "files_changed": 2,
+  "additions": 3,
+  "deletions": 35
+}

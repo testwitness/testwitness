@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trpc/trpc/pull/6542",
+  "repo": "trpc/trpc",
+  "number": 6542,
+  "title": "refactor: move react tests",
+  "merged_at": "2025-02-24T13:59:45Z",
+  "stars": 40758,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "be14f29e3f0667a2670f89e2e9e6d017797502d8",
+  "head_sha": "23c730e8872b11e19f9ca38e2db0a94dd8f7baed",
+  "files_changed": 68,
+  "additions": 160,
+  "deletions": 161
+}

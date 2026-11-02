@@ -1,0 +1,39 @@
+diff --git a/docs/modules/databases/tidb.md b/docs/modules/databases/tidb.md
+index 6ecc12d..3dfdc74 100644
+--- a/docs/modules/databases/tidb.md
++++ b/docs/modules/databases/tidb.md
+@@ -7,7 +7,7 @@ Testcontainers module for [TiDB](https://hub.docker.com/r/pingcap/tidb)
+ You can start a TiDB container instance from any Java application by using:
+ 
+ <!--codeinclude-->
+-[Container creation](../../../modules/tidb/src/test/java/org/testcontainers/junit/tidb/SimpleTiDBTest.java) inside_block:container
++[Container creation](../../../modules/tidb/src/test/java/org/testcontainers/tidb/TiDBContainerTest.java) inside_block:container
+ <!--/codeinclude-->
+ 
+ See [Database containers](./index.md) for documentation and usage that is common to all relational database container types.
+diff --git a/modules/tidb/src/test/java/org/testcontainers/junit/tidb/SimpleTiDBTest.java b/modules/tidb/src/test/java/org/testcontainers/tidb/TiDBContainerTest.java
+similarity index 93%
+rename from modules/tidb/src/test/java/org/testcontainers/junit/tidb/SimpleTiDBTest.java
+rename to modules/tidb/src/test/java/org/testcontainers/tidb/TiDBContainerTest.java
+index 9323e7d..54ded93 100644
+--- a/modules/tidb/src/test/java/org/testcontainers/junit/tidb/SimpleTiDBTest.java
++++ b/modules/tidb/src/test/java/org/testcontainers/tidb/TiDBContainerTest.java
+@@ -1,16 +1,15 @@
+-package org.testcontainers.junit.tidb;
++package org.testcontainers.tidb;
+ 
+ import org.junit.jupiter.api.Test;
+ import org.testcontainers.TiDBTestImages;
+ import org.testcontainers.db.AbstractContainerDatabaseTest;
+-import org.testcontainers.tidb.TiDBContainer;
+ 
+ import java.sql.ResultSet;
+ import java.sql.SQLException;
+ 
+ import static org.assertj.core.api.Assertions.assertThat;
+ 
+-class SimpleTiDBTest extends AbstractContainerDatabaseTest {
++class TiDBContainerTest extends AbstractContainerDatabaseTest {
+ 
+     @Test
+     void testSimple() throws SQLException {

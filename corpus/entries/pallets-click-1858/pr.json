@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pallets/click/pull/1858",
+  "repo": "pallets/click",
+  "number": 1858,
+  "title": "Replaced group of asserts with pytest parametrize",
+  "merged_at": "2022-02-19T15:33:54Z",
+  "stars": 17812,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "5828a1645f566df15d8ee40d0c06c63ccc1e5475",
+  "head_sha": "57af071b304d194f50276392db5047a4fdcc60bf",
+  "files_changed": 1,
+  "additions": 28,
+  "deletions": 31
+}

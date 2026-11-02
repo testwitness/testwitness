@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ReactiveX/RxJava/pull/8253",
+  "repo": "ReactiveX/RxJava",
+  "number": 8253,
+  "title": "4.x: Move TestHelper.race tests into @Isolated classes (flatMap/mergeWith batch) (#8075)",
+  "merged_at": "2026-07-29T10:48:43Z",
+  "stars": 48157,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "b7946f24fc6ec1f6bc984bcc2810024efbad744e",
+  "head_sha": "13f4cfb90433c493072698c90dd354d7d8a76839",
+  "files_changed": 12,
+  "additions": 470,
+  "deletions": 298
+}
