@@ -1,1 +1,1 @@
-[]
+[{"ruleId":"R002","severity":"low","subject":"tests/test_discounts.py","label":"production removed"}]

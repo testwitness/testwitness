@@ -1,6 +1,6 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
-import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, type HeadIndex } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, subjectRemoved, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -52,6 +52,16 @@ export const R001: Rule = {
       if (pair.file.status === 'deleted') continue;
       const t = change.base;
       index ??= await headIndex(ctx);
+      if (subjectRemoved(pair.base, pair.file.path, ctx)) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted together with the production code it exercised`, {
+            label: 'production removed',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
       const moved = t.statementCount > 0 ? index.byHash.get(t.bodyHash)?.filter((m) => m.path !== pair.file.path || m.test.qualifiedName !== t.qualifiedName) : undefined;
       if (moved && moved.length) {
         out.push(
@@ -167,6 +177,10 @@ export const R002: Rule = {
       if (pair.file.status !== 'deleted') continue;
       const tests = pair.base?.tests ?? [];
       if (tests.length === 0) continue;
+      if (subjectRemoved(pair.base, pair.file.path, ctx)) {
+        out.push(makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted together with the production code it exercised (${tests.length} tests)`, { label: 'production removed' }));
+        continue;
+      }
       const index = await headIndex(ctx, pair.file.path);
       const movedCount = tests.filter((t) => t.statementCount > 0 && (index.byHash.has(t.bodyHash) || refactoredInto(t, index))).length;
       if (movedCount === tests.filter((t) => t.statementCount > 0).length && movedCount > 0) {

@@ -43,6 +43,33 @@ export function changedProductionStems(ctx: RuleContext): Set<string> {
   return s;
 }
 
+/** Stems of production files deleted by this PR, lower cased. */
+export function deletedProductionStems(ctx: RuleContext): Set<string> {
+  const s = new Set<string>();
+  for (const f of ctx.files) if (f.kind === 'production' && f.status === 'deleted') s.add(stem(f.path).toLowerCase());
+  return s;
+}
+
+/**
+ * The test file's subject was removed: its name convention stem or its imports
+ * point at production files deleted in this PR, and at no modified ones.
+ */
+export function subjectRemoved(inv: TestInventory | undefined, path: string, ctx: RuleContext): boolean {
+  const deleted = deletedProductionStems(ctx);
+  if (deleted.size === 0) return false;
+  const modified = new Set([...changedProductionStems(ctx)].filter((x) => !deleted.has(x)));
+  const own = stem(path).toLowerCase();
+  const refs = new Set<string>();
+  if (own) refs.add(own);
+  for (const imp of inv?.imports ?? []) for (const part of imp.split(/[./\\:]/).filter(Boolean)) refs.add(part.toLowerCase());
+  let hitsDeleted = false;
+  for (const r of refs) {
+    if (modified.has(r)) return false;
+    if (deleted.has(r)) hitsDeleted = true;
+  }
+  return hitsDeleted;
+}
+
 /**
  * Does the test file plausibly exercise a production file the PR changed?
  * Name convention match (billing.test.ts for billing.ts, FooServiceTest for FooService,

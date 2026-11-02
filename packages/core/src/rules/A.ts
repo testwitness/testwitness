@@ -202,10 +202,12 @@ const LITERAL = /^(true|false|True|False|null|None|undefined|-?\d+(\.\d+)?[fFlLd
 function isTautology(a: Assertion): boolean {
   const s = norm(a.subject);
   const e = norm(a.expected);
+  // Truthiness assertion on a literal true: assert True, assertTrue(true), expect(true).toBeTruthy()
+  if (s && !e && /^(true|True|1)$/.test(s) && !/\.not\b|False|false/.test(a.callee)) return true;
   if (!s || !e) {
     // Fall back to text patterns.
     const t = norm(a.text);
-    return /^(assertTrue|assert|self\.assertTrue|Assert\.assertTrue|assertThat)\(?(true|True)\)?/.test(t) || /^expect\((true|1)\)\.(toBe|toEqual|toStrictEqual)\((true|1)\)$/.test(t) || /^assertEquals\(([^,]+),\1\)$/.test(t) || /^assert([^=]+)==\1$/.test(t);
+    return /^(assertTrue|assert|self\.assertTrue|Assert\.assertTrue|assertThat)\(?(true|True)\)?$/.test(t) || /^expect\((true|1)\)\.(toBe|toEqual|toStrictEqual)\((true|1)\)$/.test(t) || /^assertEquals\(([^,]+),\1\)$/.test(t) || /^assert([^=]+)==\1$/.test(t);
   }
   if (s === e) return true;
   if (LITERAL.test(s) && LITERAL.test(e) && s === e) return true;

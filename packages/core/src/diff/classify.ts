@@ -149,6 +149,7 @@ export function classifyPath(path: string, source: string | undefined, options: 
   // conftest.py is configuration, not a test file.
   const baseName = path.split('/').pop() ?? path;
   if (baseName === 'conftest.py') return { kind: 'runner-config', language: 'python' };
+  if (baseName === '__init__.py') return { kind: 'other', language: 'python' };
 
   if (isSnapshot(path) && !testMatcher(path)) return { kind: 'snapshot' };
   if (isWorkflow(path)) return { kind: 'ci-workflow' };
