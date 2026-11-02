@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_comp_nat"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_index_series_compat"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_parr_cmp_period_scalar2"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_pi_comp_period"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_pi_comp_period_nat"
+  }
+]

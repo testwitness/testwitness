@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Verify every corpus entry, rebuild index.json, print counts."""
-import json, os, sys, hashlib, collections
+import json, os, re, sys, hashlib, collections
 ROOT = "/home/claude/testwitness/corpus"
 E = f"{ROOT}/entries"
 ALLOWED = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC"}
@@ -10,6 +10,11 @@ for slug in sorted(os.listdir(E)):
     d = f"{E}/{slug}"
     for f in ("pr.json","pr.diff","expected.json","NOTES.md"):
         if not os.path.isfile(f"{d}/{f}"): errors.append(f"{slug}: missing {f}")
+    if not os.path.isfile(f"{d}/files/manifest.json"): errors.append(f"{slug}: missing files/manifest.json")
+    else:
+        try:
+            for m in json.load(open(f"{d}/files/manifest.json")): assert m["status"] in ("added","modified","deleted","renamed") and m["path"]
+        except Exception as ex: errors.append(f"{slug}: bad manifest {ex}")
     if os.path.getsize(f"{d}/pr.diff") == 0 if os.path.isfile(f"{d}/pr.diff") else True: errors.append(f"{slug}: empty pr.diff")
     try:
         p = json.load(open(f"{d}/pr.json"))
@@ -25,7 +30,7 @@ for slug in sorted(os.listdir(E)):
     try:
         exp = json.load(open(f"{d}/expected.json"))
         assert isinstance(exp, list)
-        for f in exp: assert f["verdict"] in ("tp","fp") and f["ruleId"]
+        for f in exp: assert f["verdict"] in ("tp","fp") and re.match(r"^[RAOESMTCWXVQ]\d{3}$", f["ruleId"]) and f.get("severity") in (None,"low","medium","high")
     except Exception as ex: errors.append(f"{slug}: bad expected.json {ex}")
 with open(f"{ROOT}/index.json","w") as fh: json.dump(index, fh, indent=2); fh.write("\n")
 json.load(open(f"{ROOT}/index.json"))
@@ -35,6 +40,7 @@ print("split:", dict(collections.Counter(p["split"] for p in index)))
 print("split by category:", {c: dict(collections.Counter(p["split"] for p in index if p["category"]==c)) for c in sorted({p["category"] for p in index})})
 print("languages:", dict(collections.Counter(p["language"] for p in index)))
 print("licences:", dict(collections.Counter(p["license"] for p in index)))
+print("expected findings:", dict(collections.Counter(f["ruleId"]+"/"+str(f.get("severity")) for p in index for f in json.load(open(f"{E}/{p['url'].split('/')[3].lower()}-{p['url'].split('/')[4].lower()}-{p['number']}/expected.json")))))
 print("errors:", len(errors))
 for e in errors: print("  ", e)
 sys.exit(1 if errors else 0)

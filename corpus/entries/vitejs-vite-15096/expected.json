@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "full-reload encodeURI path"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "Unicode path"
+  }
+]

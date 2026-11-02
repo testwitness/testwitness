@@ -1,1 +1,100 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_date"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_date_explicit_date_format"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_date_tz"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_dates"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_datetime"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_dti_construction_ambiguous_endpoint"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_dti_construction_nonexistent_endpoint"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_factorize"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_mixed"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_nat_representations"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_no_tz"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_to_native_types"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_tz_dateutil"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_tz_pytz"
+  }
+]

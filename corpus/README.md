@@ -49,8 +49,16 @@ corpus/
                           ([] for honest refactors)
     NOTES.md              what the PR did, why it is honest or weakened,
                           which rule it stresses
+    files/manifest.json   every changed file: {path, status, oldPath?} with
+                          status added, modified, deleted or renamed, from
+                          git diff --name-status --find-renames
+    files/base/<path>     full base version of changed test files, snapshots,
+    files/head/<path>     runner configs and CI workflows (any size) and of
+                          changed production source files under 50 KB.
+                          Deleted files exist only under base/, added files
+                          only under head/
   _tools/                 the collection scripts (search.sh, ingest.py,
-                          label.py, verify.py)
+                          files.py, label.py, expected.py, verify.py)
 ```
 
 Slug is `<owner>-<repo>-<number>` in lower case.
@@ -68,11 +76,24 @@ Slug is `<owner>-<repo>-<number>` in lower case.
 
 ## Rule ids used in expected.json
 
-The spec's rule catalogue could not be read from the session that built this
-corpus, so the ids below follow the rule group letters in
-`packages/core/src/types.ts` and must be reconciled with spec section 1 when
-the rules land. `S001` means an unconditional skip or disable without a tracked
-reason, `X001` a non strict xfail added. Honest entries carry an empty list.
+Ids follow the spec catalogue: R001 deleted test (medium; low with label
+`moved` or `parameterised`), R002 deleted test file, R003 skip or disable added
+(medium; low with label `tracked` when the reason references an issue, low with
+label `conditional` for a platform or optional dependency condition), R004
+xfail or expectedFailure added (high; medium when strict with an issue
+reference), A001 assertion removed, A002 assertion loosened, A009 tautology,
+O001 new test without assertion, O002 smoke oracle only, O006 new test file with
+no tests.
+
+Each finding is `{ruleId, severity, subject?, label?, verdict, reason?}`.
+`verdict` says what the finding points at: `tp` when the test really was
+weakened, `fp` when the finding is a benign low severity signal the tool is
+still expected to emit (a moved test gives R001 low `moved`, a parametrised fold
+gives R001 low `parameterised`, a conditional skip gives R003 low
+`conditional`). Anything the tool emits above low on an honest entry is a false
+positive. Subjects are the test names deleted in the diff that do not reappear
+under the same name; `deleted` entries carry an empty list because the
+production code was removed in the same PR and the spec credits that.
 
 ## Tuning and held out split
 
@@ -89,7 +110,8 @@ and must never be changed by hand. Rules may be tuned on `tuning` entries only;
 2. Run `python3 -I corpus/_tools/ingest.py <owner>/<repo> <number> <category>`.
    It refuses unmerged PRs, PRs over 2,000 changed lines and bad licences, and
    writes `pr.json` and `pr.diff`.
-3. Read the diff and write `expected.json` and `NOTES.md` by hand (two to five
+3. Run `python3 -I corpus/_tools/files.py <slug>` to populate `files/`.
+4. Read the diff and write `expected.json` and `NOTES.md` by hand (two to five
    sentences, no names).
-4. Run `python3 -I corpus/_tools/verify.py` to rebuild `index.json` and check
+5. Run `python3 -I corpus/_tools/verify.py` to rebuild `index.json` and check
    the entry.

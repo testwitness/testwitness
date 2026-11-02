@@ -1,6 +1,7 @@
 [
   {
-    "ruleId": "S001",
+    "ruleId": "R003",
+    "severity": "medium",
     "subject": "$subscription() - server randomly stop and restart (this test might be flaky, try re-running)",
     "verdict": "tp",
     "reason": "test changed to test.skip with only a flaky remark, no issue or condition"

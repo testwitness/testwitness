@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_roc_curve_display_from_cv_results_curve_kwargs"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_roc_curve_from_cv_results_legend_label"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_roc_curve_from_cv_results_param_validation"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_roc_curve_from_cv_results_pos_label_inferred"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_roc_curve_plot_legend_label"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "test_validate_plot_params"
+  }
+]

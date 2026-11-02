@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "test_build_wheel_in_non_base_pkg_env"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "test_build_wheel_in_free_threaded_pkg_env"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "test_build_wheel_in_debug_pkg_env"
+  }
+]

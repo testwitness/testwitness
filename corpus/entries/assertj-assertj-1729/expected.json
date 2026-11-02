@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_with_value_has_multiple_no_values"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_with_value_has_no_value"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_with_value_is_missing"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_with_value_is_wrong"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_without_value_has_multiple_values"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_without_value_has_value"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_fail_if_parameter_without_value_is_missing"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_pass_if_parameter_has_no_value"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_pass_if_parameter_has_value"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_pass_if_parameter_with_escaped_value_is_found"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_pass_if_parameter_with_value_is_found"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "should_pass_if_parameter_without_value_is_found"
+  }
+]

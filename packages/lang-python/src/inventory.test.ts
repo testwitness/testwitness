@@ -1000,3 +1000,51 @@ def test_smoke():
     expect(elapsed).toBeLessThan(1000);
   });
 });
+
+describe('expected operand and imperative xfail', () => {
+  it('records the expected operand of == and of two argument unittest assertions', async () => {
+    const i = await inv(`
+import unittest
+
+def test_a():
+    assert cart.total() == 9
+    assert 9 == cart.total()
+    assert cart.total() == cart.total()
+    assert cart.total()
+    assert 1 < cart.total() < 3
+
+class CartTest(unittest.TestCase):
+    def test_b(self):
+        self.assertEqual(cart.total(), 9)
+        self.assertEqual(cart.total(), cart.total())
+        self.assertTrue(cart.total())
+`);
+    const a = only(i, 'test_a').assertions;
+    expect(a[0]).toMatchObject({ subject: 'cart.total()', expected: '9' });
+    expect(a[1]).toMatchObject({ subject: 'cart.total()', expected: '9' });
+    expect(a[2]).toMatchObject({ subject: 'cart.total()', expected: 'cart.total()' });
+    expect(a[3]!.expected).toBeUndefined();
+    expect(a[4]!.expected).toBeUndefined();
+    const b = only(i, 'CartTest::test_b').assertions;
+    expect(b[0]).toMatchObject({ subject: 'cart.total()', expected: '9' });
+    expect(b[1]).toMatchObject({ subject: 'cart.total()', expected: 'cart.total()' });
+    expect(b[2]!.expected).toBeUndefined();
+  });
+
+  it('treats pytest.xfail() as the first statement as an xfail marker', async () => {
+    const i = await inv(`
+import pytest
+
+def test_a():
+    pytest.xfail("PAY-412 rounding drift")
+    assert 1
+
+def test_b():
+    x = 1
+    pytest.xfail("later")
+    assert x
+`);
+    expect(only(i, 'test_a').markers).toEqual([{ marker: 'pytest.xfail', kind: 'xfail', constant: true, reason: 'PAY-412 rounding drift', line: 5 }]);
+    expect(only(i, 'test_b').markers).toEqual([]);
+  });
+});

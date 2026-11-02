@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "testClientQuotas"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "testCreateClusterAndCreateAndManyTopics"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "testCreateClusterAndCreateListDeleteTopic"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "testDefaultClientQuotas"
+  }
+]

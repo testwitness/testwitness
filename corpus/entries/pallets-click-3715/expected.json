@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_stream_helper_deprecated"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_utilities_deprecated"
+  }
+]

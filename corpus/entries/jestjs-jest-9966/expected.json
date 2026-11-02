@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "e2e/__tests__/watchModeNoAccess.test.ts"
+  }
+]

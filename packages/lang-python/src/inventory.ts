@@ -448,11 +448,16 @@ function firstStatementSkip(body: Node | null, aliases: Map<string, string>): Sk
   if (!parts || parts.node.type !== 'call') return undefined;
   const tail = parts.chain.split('.').pop() ?? '';
   let marker: string | undefined;
+  let kind: SkipMarker['kind'] = 'skip';
   if (parts.chain === 'pytest.skip') marker = 'pytest.skip';
-  else if (tail === 'skipTest') marker = 'self.skipTest';
+  else if (parts.chain === 'pytest.xfail') {
+    // Imperative xfail: the rest of the body never runs, same as a decorator.
+    marker = 'pytest.xfail';
+    kind = 'xfail';
+  } else if (tail === 'skipTest') marker = 'self.skipTest';
   else if (first.type === 'raise_statement' && tail === 'SkipTest') marker = 'unittest.SkipTest';
   if (!marker) return undefined;
-  const m: SkipMarker = { marker, kind: 'skip', constant: true, line: line(first) };
+  const m: SkipMarker = { marker, kind, constant: true, line: line(first) };
   const reason = reasonOf(parts, 0);
   if (reason !== undefined) m.reason = reason;
   return m;
@@ -543,7 +548,10 @@ function bareAssert(stmt: Node, aliases: Map<string, string>): Assertion {
       const p = callParts(o, aliases);
       return p?.chain === 'pytest.approx';
     });
-    a.subject = right && isLiteral(left) && !isLiteral(right) ? right.text : left.text;
+    const swapped = !!right && isLiteral(left) && !isLiteral(right);
+    a.subject = swapped ? right!.text : left.text;
+    // The expected operand of a two operand comparison, for tautology checks (A009).
+    if (right && ops.length === 1) a.expected = swapped ? left.text : right.text;
     if (approx) return withLattice(a, 'assert.approx');
     if (ops.length > 1) return withLattice(a, 'assert.compare');
     switch (op) {
@@ -642,6 +650,9 @@ function callAssertion(stmt: Node, call: Node, ctx: FileContext): Assertion | un
     base.callee = receiverText ? `${receiverText}.${tail}` : tail;
     base.kind = UNITTEST_ASSERTIONS[tail] as AssertionKind;
     if (firstArg) base.subject = firstArg.text;
+    // Two operand assertions (assertEqual, assertIn, assertGreater) carry the expected operand second.
+    const secondArg = parts.positional[1];
+    if (secondArg && base.kind === 'value') base.expected = secondArg.text;
     return withLattice(base, tail);
   }
   // Custom helper defined in the same file: bare name, or self/cls method.

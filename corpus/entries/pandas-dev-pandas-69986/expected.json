@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "subject": "test_encoding_detected"
+  }
+]

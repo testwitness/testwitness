@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_k_means_fortran_aligned_data"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_k_means_init"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_k_means_new_centers"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_labels_assignment_and_inertia"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_mb_kmeans_verbose"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "parameterised",
+    "verdict": "fp",
+    "subject": "test_minibatch_k_means_init"
+  }
+]

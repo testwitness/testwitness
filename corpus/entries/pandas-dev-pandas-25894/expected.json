@@ -1,8 +1,9 @@
 [
   {
-    "ruleId": "X001",
+    "ruleId": "R004",
+    "severity": "high",
     "subject": "TestTSPlot::test_time_change_xlim",
     "verdict": "tp",
-    "reason": "body split out into a new test marked xfail(strict=False, reason='Unreliable test'), so it can never fail"
+    "reason": "assertions moved into a new test marked xfail(strict=False, reason='Unreliable test'), so they can never fail"
   }
 ]

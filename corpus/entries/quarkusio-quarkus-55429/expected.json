@@ -1,8 +1,9 @@
 [
   {
-    "ruleId": "S001",
+    "ruleId": "R003",
+    "severity": "medium",
     "subject": "AccessLogTestCase",
     "verdict": "tp",
-    "reason": "class level @Disabled with a flaky remark and no tracking issue"
+    "reason": "class level @Disabled with a flaky remark and no tracking issue, covers every test in the class"
   }
 ]

@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "should not select disabled second"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "low",
+    "label": "moved",
+    "verdict": "fp",
+    "subject": "should not select minute when hour is disabled "
+  }
+]

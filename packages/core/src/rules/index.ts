@@ -3,16 +3,18 @@ import { rulesR } from './R.js';
 import { rulesO } from './O.js';
 import { rulesA } from './A.js';
 import { rulesV } from './V.js';
+import { rulesW } from './W.js';
 
 export * from './R.js';
 export * from './O.js';
 export * from './A.js';
 export * from './V.js';
+export * from './W.js';
 export * from './util.js';
 
 /** Built in rules in catalogue order. */
 export function builtinRules(): Rule[] {
-  return [...rulesR(), ...rulesA(), ...rulesO(), ...rulesV()];
+  return [...rulesR(), ...rulesA(), ...rulesO(), ...rulesW(), ...rulesV()];
 }
 
 export function ruleMap(rules: Rule[] = builtinRules()): Map<string, Rule> {
