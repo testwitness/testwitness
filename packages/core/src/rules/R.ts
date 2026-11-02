@@ -68,9 +68,12 @@ export const R001: Rule = {
         (c) => c.change.kind === 'deleted' && c.change.base.container.join('/') === t.container.join('/'),
       ).length;
       const fold = (pair.head?.tests ?? []).find((h) => {
+        if (h.container.join('/') !== t.container.join('/')) return false;
         const b = pair.base?.tests.find((x) => x.qualifiedName === h.qualifiedName);
         const before = b?.parameterCount ?? (b ? 1 : 0);
-        return (h.parameterCount ?? 0) >= before + deletedInContainer && h.container.join('/') === t.container.join('/');
+        if ((h.parameterCount ?? 0) >= before + deletedInContainer) return true;
+        // Dynamic source (MethodSource, a variable): the test became parameterised in this PR and the count is unknown.
+        return h.parameterised === true && h.parameterCount === undefined && !(b?.parameterised);
       });
       if (fold) {
         out.push(

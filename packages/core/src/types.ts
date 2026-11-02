@@ -86,6 +86,16 @@ export interface SkipMarker {
   line: number;
 }
 
+export interface CatchAll {
+  line: number;
+  /** Caught type as written: Exception, Throwable, bare except, any (JavaScript). */
+  binding: string;
+  /** True when the catch body neither rethrows, fails, nor asserts. */
+  swallows: boolean;
+  /** Normalised text of the try block's first statement, for the fingerprint. */
+  snippet: string;
+}
+
 export interface TestCase {
   /** Short name: method name, `it` title, function name. */
   name: string;
@@ -103,6 +113,10 @@ export interface TestCase {
   markers: SkipMarker[];
   /** Number of parameterised cases when countable; `undefined` means unknown or not parameterised. */
   parameterCount?: number;
+  /** True when the test is parameterised at all, including dynamic sources (@MethodSource, a variable passed to parametrize). */
+  parameterised?: boolean;
+  /** Catch blocks in the test body that swallow exceptions (E001). */
+  catchAlls?: CatchAll[];
   /** Mock or stub targets declared in the body. */
   mocks: string[];
   framework: string;
