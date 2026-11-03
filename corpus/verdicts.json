@@ -35,81 +35,64 @@
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_is_missing"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_multiple_no_values",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_without_value_is_found"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_no_value",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_value"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_missing",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_multiple_values"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_wrong",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_missing"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_multiple_values",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_no_value"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_has_value",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_has_multiple_no_values"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_value_is_wrong"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_value_is_found"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_escaped_value_is_found"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_without_value_is_missing",
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
@@ -118,7 +101,7 @@
     "severity": "low",
     "verdict": "expected-low",
     "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_no_value",
-    "label": "refactored"
+    "label": "parameterised"
   },
   {
     "slug": "assertj-assertj-1729",
@@ -127,7 +110,34 @@
     "severity": "low",
     "verdict": "expected-low",
     "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_value",
-    "label": "refactored"
+    "label": "parameterised"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_escaped_value_is_found",
+    "label": "parameterised"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_value_is_found",
+    "label": "parameterised"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_without_value_is_found",
+    "label": "parameterised"
   },
   {
     "slug": "excalidraw-excalidraw-7213",

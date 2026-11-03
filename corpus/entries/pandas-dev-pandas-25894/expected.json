@@ -1,9 +1,1 @@
-[
-  {
-    "ruleId": "R004",
-    "severity": "high",
-    "subject": "TestTSPlot::test_time_change_xlim",
-    "verdict": "tp",
-    "reason": "assertions moved into a new test marked xfail(strict=False, reason='Unreliable test'), so they can never fail"
-  }
-]
+[{"ruleId":"R010","severity":"low","subject":"TestTSPlot::test_time_change_xlim","verdict":"fp","reason":"The PR adds a brand new test already marked xfail(strict=False). Added then skipped is informational (R010), not a conversion (R004)."}]

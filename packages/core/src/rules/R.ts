@@ -77,14 +77,17 @@ export const R001: Rule = {
       const deletedInContainer = allChanges([pair]).filter(
         (c) => c.change.kind === 'deleted' && c.change.base.container.join('/') === t.container.join('/'),
       ).length;
-      const fold = (pair.head?.tests ?? []).find((h) => {
-        if (h.container.join('/') !== t.container.join('/')) return false;
+      // Fold: parameterised tests in the same container gained enough cases to cover the deletions (sum across the container, literal counts), or one became parameterised with a dynamic source.
+      const sameContainer = (pair.head?.tests ?? []).filter((h) => h.container.join('/') === t.container.join('/'));
+      let gained = 0;
+      let dynamicFold: TestCase | undefined;
+      for (const h of sameContainer) {
         const b = pair.base?.tests.find((x) => x.qualifiedName === h.qualifiedName);
         const before = b?.parameterCount ?? (b ? 1 : 0);
-        if ((h.parameterCount ?? 0) >= before + deletedInContainer) return true;
-        // Dynamic source (MethodSource, a variable): the test became parameterised in this PR and the count is unknown.
-        return h.parameterised === true && h.parameterCount === undefined && !(b?.parameterised);
-      });
+        if (h.parameterCount !== undefined) gained += Math.max(0, h.parameterCount - before);
+        else if (h.parameterised === true && !b?.parameterised) dynamicFold = h;
+      }
+      const fold = gained >= deletedInContainer && deletedInContainer > 0 ? sameContainer.find((h) => (h.parameterCount ?? 0) > 1) : dynamicFold;
       if (fold) {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} appears folded into parameterised test ${fold.qualifiedName}`, {

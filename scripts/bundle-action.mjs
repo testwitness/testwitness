@@ -45,4 +45,4 @@ for (const [pkg, name] of [['lang-java', 'java'], ['lang-ts', 'ts'], ['lang-pyth
   const q = join(root, 'packages', pkg, 'queries');
   if (existsSync(q)) cpSync(q, join(assets, 'queries', name), { recursive: true });
 }
-console.log('bundled dist/index.js and dist/assets');
+process.stdout.write('bundled dist/index.js and dist/assets\n');
