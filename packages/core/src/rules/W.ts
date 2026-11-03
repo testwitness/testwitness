@@ -11,6 +11,7 @@ function isCommandFile(f: ChangedFile): boolean {
     f.kind === 'runner-config' ||
     /^(Makefile|Jenkinsfile|tox\.ini|noxfile\.py|package\.json|pom\.xml|build\.gradle(\.kts)?|\.gitlab-ci\.yml|azure-pipelines\.yml|bitbucket-pipelines\.yml|Taskfile\.ya?ml|justfile)$/.test(base) ||
     /\.(sh|bash|zsh)$/.test(base) ||
+    /\.gradle(\.kts)?$/.test(base) ||
     f.path.startsWith('.circleci/') ||
     f.path.startsWith('scripts/')
   );

@@ -40,7 +40,7 @@ Measured 2026-11-03 on 101 public pull requests (corpus/). Precision counts medi
 | W002 | all | 4 | 0 | 0 | 0 | 1.00 | 0 |
 | W002 | heldout | 1 | 0 | 0 | 0 | 1.00 | 0 |
 | W002 | tuning | 3 | 0 | 0 | 0 | 1.00 | 0 |
-| W003 | all | 0 | 0 | 0 | 1 | n/a | 0 |
-| W003 | heldout | 0 | 0 | 0 | 1 | n/a | 0 |
+| W003 | all | 1 | 0 | 0 | 0 | 1.00 | 0 |
+| W003 | heldout | 1 | 0 | 0 | 0 | 1.00 | 0 |
 
 Regenerate with `pnpm corpus:report`.

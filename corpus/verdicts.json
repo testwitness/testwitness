@@ -348,7 +348,7 @@
     "split": "heldout",
     "ruleId": "W003",
     "severity": "high",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "task.ignoreFailures = true"
   },
   {
