@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/tenstorrent/tt-metal/pull/10327",
+  "repo": "tenstorrent/tt-metal",
+  "number": 10327,
+  "title": "#10322: commented out failing t3k tests",
+  "merged_at": "2024-07-16T04:17:19Z",
+  "stars": 1740,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R006",
+  "split": "heldout",
+  "base_sha": "51d8c061460a332fe37c8a3e794ce2f410b03dce",
+  "head_sha": "eea551f4a2df1945802ae57fee8c55b0860db67a",
+  "files_changed": 12,
+  "additions": 24,
+  "deletions": 4
+}

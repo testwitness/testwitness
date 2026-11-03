@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/leanprover/verso/pull/1031",
+  "repo": "leanprover/verso",
+  "number": 1031,
+  "title": "chore: comment out test failing in downstream",
+  "merged_at": "2026-10-13T18:33:28Z",
+  "stars": 405,
+  "license": "Apache-2.0",
+  "language": "lean",
+  "category": "R006",
+  "split": "tuning",
+  "base_sha": "304b8561790c50222551c937ce02928df0d5b445",
+  "head_sha": "dc9698a43ffe538c91aed1daeedba4ba44e997bd",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 2
+}
