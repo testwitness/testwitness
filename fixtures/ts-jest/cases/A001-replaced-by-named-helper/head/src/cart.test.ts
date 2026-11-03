@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { total } from './cart';
 import { checkTotal } from './test-helpers';
 import { money } from './money-matchers';

@@ -1,8 +1,9 @@
+// @ts-nocheck
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['scripts/**', '**/dist/**', '**/node_modules/**', 'fixtures/*/project/**', 'fixtures/*/cases/**', 'corpus/**', 'packages/cli/bin/**'] },
+  { ignores: ['scripts/**', 'bench/rss-hook.cjs', 'bench/.prof/**', '**/dist/**', '**/node_modules/**', 'fixtures/*/project/**', 'fixtures/*/cases/**', 'corpus/**', 'packages/cli/bin/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

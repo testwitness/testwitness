@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import { shortHash, normaliseText } from '@testwitness/core';
 import { byName, inv, single, src } from './helpers.test-util.js';

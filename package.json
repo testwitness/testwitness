@@ -22,10 +22,13 @@
     "gen:docs": "tsx --conditions=development scripts/gen-docs.ts",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
-    "bench": "tsx bench/run.ts"
+    "bench": "tsx bench/run.ts",
+    "mutate": "stryker run"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1",
     "@testwitness/core": "workspace:*",
     "@types/node": "^26.6.6",
     "@types/picomatch": "^4.0.3",

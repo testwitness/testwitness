@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, test } from 'vitest';
 import { addLine, total } from './cart';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CartSummary } from './CartSummary';

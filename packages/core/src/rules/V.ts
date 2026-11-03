@@ -10,6 +10,12 @@ function langOf(pair: { file: { language?: string } }): 'java' | 'typescript' | 
   return (pair.file.language ?? 'typescript') as 'java' | 'typescript' | 'javascript' | 'python';
 }
 
+/** Turn a normalised key holding a printf or $variable template into a regex that matches formatted rows. */
+export function templateRegex(key: string): RegExp {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp('^' + escaped.replace(/%[sdifjop#]/g, '.+?').replace(/\\\$\w+/g, '.+?') + '$');
+}
+
 /** V003 Changed test did not run. */
 export const V003: Rule = {
   id: 'V003',
@@ -40,7 +46,16 @@ export const V003: Rule = {
     for (const pair of ctx.pairs) {
       if (!pair.head || pair.file.status === 'deleted') continue;
       const lang = langOf(pair);
-      const ran = (t: TestCase) => inventoryKeys(pair.file.path, t.qualifiedName, lang).some((k) => ev.has(k));
+      const ran = (t: TestCase) => {
+        const keys = inventoryKeys(pair.file.path, t.qualifiedName, lang);
+        if (keys.some((k) => ev.has(k))) return true;
+        // test.each / it.each titles are printf style templates; the producer writes the formatted rows.
+        if (/%[sdifjop#]|\$\w+/.test(t.qualifiedName)) {
+          const res = keys.map(templateRegex);
+          for (const k of ev.keys()) if (res.some((re) => re.test(k))) return true;
+        }
+        return false;
+      };
       const anyRan = pair.head.tests.some(ran);
       filesChecked++;
       if (anyRan) filesWithResults++;

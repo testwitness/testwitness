@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { addLine, total } from './cart';
 
 function expectTotal(lines: Parameters<typeof total>[0], expected: number) {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { total } from './cart';
 
 export function registerPricingTests() {

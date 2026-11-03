@@ -5,7 +5,7 @@ import { changedFile, context, inventory, test as t } from './testkit.js';
 
 function evidence(keys: string[], extra: Partial<Evidence> = {}): Evidence {
   const set = new Set(keys);
-  return { sources: ['junit.xml'], total: keys.length, passed: keys.length, failed: 0, errored: 0, skipped: 0, flaky: 0, has: (k) => set.has(k), statusOf: (k) => (set.has(k) ? 'passed' : undefined), keysForClass: () => [], ...extra };
+  return { sources: ['junit.xml'], total: keys.length, passed: keys.length, failed: 0, errored: 0, skipped: 0, flaky: 0, has: (k) => set.has(k), statusOf: (k) => (set.has(k) ? 'passed' : undefined), keysForClass: () => [], keys: () => set.keys(), ...extra };
 }
 
 describe('V003 changed test did not run', () => {
@@ -81,5 +81,16 @@ describe('V005 and V006', () => {
     expect((await V006.run(context({ pairs: [], prText: { title: 'CI is green', body: '' }, evidence: failing }), {}))[0]).toMatchObject({ severity: 'high' });
     expect(await V006.run(context({ pairs: [], prText: { title: 'wip', body: '' }, evidence: failing }), {})).toEqual([]);
     expect(await V006.run(context({ pairs: [], prText: { title: 'CI is green', body: '' }, evidence: evidence(['a::b']) }), {})).toEqual([]);
+  });
+});
+
+describe('V003 template titles', () => {
+  it('matches test.each rows written by the producer', async () => {
+    const { templateRegex } = await import('./V.js');
+    expect(templateRegex('billing charge adds %i and %i to get %i::billing charge adds %i and %i to get %i').test('billing charge adds 1 and 2 to get 3::billing charge adds 1 and 2 to get 3')).toBe(true);
+    const head = t({ name: 'adds %i and %i to get %i', container: ['billing'], body: 'x' });
+    const pair = { file: changedFile('src/billing.test.ts', 'added'), head: inventory('src/billing.test.ts', [head]) };
+    const ev = evidence(['billing adds 1 and 2 to get 3::billing adds 1 and 2 to get 3', 'billing adds 2 and 2 to get 4::billing adds 2 and 2 to get 4']);
+    expect(await V003.run(context({ pairs: [pair], evidence: ev }), {})).toEqual([]);
   });
 });

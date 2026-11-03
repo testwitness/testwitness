@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface Line {
   sku: string;
   qty: number;

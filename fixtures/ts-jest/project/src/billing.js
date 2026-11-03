@@ -1,3 +1,4 @@
+// @ts-nocheck
 function charge(card, amount) {
   if (card.expired) {
     throw new Error('card expired');

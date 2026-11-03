@@ -16,3 +16,4 @@ fixtures/**/.pytest_cache/
 dist/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+bench/.prof/

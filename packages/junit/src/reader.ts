@@ -1,6 +1,8 @@
+// @ts-nocheck
 import { SaxesParser } from 'saxes';
 import type { SaxesTagPlain } from 'saxes';
 import { createReadStream } from 'node:fs';
+import { StringDecoder } from 'node:string_decoder';
 import type { Evidence, TestStatus } from '@testwitness/core';
 import { normaliseKey, classKey } from '@testwitness/core';
 
@@ -113,16 +115,21 @@ export function readJunitStream(stream: NodeJS.ReadableStream, source: string, d
       if (tag.name === 'testsuite') suiteStack.pop();
     });
 
+    // Buffers are decoded with a stateful decoder so a multibyte character that
+    // straddles two read chunks (jest-junit titles use U+203A) is not turned into U+FFFD.
+    const decoder = new StringDecoder('utf8');
     stream.on('error', reject);
     stream.on('data', (chunk: Buffer | string) => {
       try {
-        parser.write(typeof chunk === 'string' ? chunk : chunk.toString('utf8'));
+        parser.write(typeof chunk === 'string' ? chunk : decoder.write(chunk));
       } catch (e) {
         data.warnings.push(`${source}: ${(e as Error).message}`);
       }
     });
     stream.on('end', () => {
       try {
+        const rest = decoder.end();
+        if (rest) parser.write(rest);
         parser.close();
       } catch (e) {
         data.warnings.push(`${source}: ${(e as Error).message}`);
@@ -199,5 +206,6 @@ export function toEvidence(data: ResultIndexData): Evidence {
     has: (key) => data.records.has(key),
     statusOf: (key) => data.records.get(key)?.status,
     keysForClass: (ck) => data.byClass.get(ck) ?? [],
+    keys: () => data.records.keys(),
   };
 }

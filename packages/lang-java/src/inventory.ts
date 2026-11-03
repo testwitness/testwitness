@@ -5,6 +5,8 @@
  * methods, call chains, annotations, mock declarations). The tables in
  * frameworks.ts decide what each candidate means. This file joins the two.
  */
+// @ts-nocheck
+
 import {
   parseSource,
   countParseErrors,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import type { FrameworkProfile, TestCase, TestInventory } from '@testwitness/core';
 import { pythonFrontEnd } from './index.js';

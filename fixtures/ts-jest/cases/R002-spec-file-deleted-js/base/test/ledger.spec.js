@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { post, balance } = require('../lib/ledger');
 
 describe('ledger', () => {

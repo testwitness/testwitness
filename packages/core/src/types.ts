@@ -210,6 +210,8 @@ export interface Evidence {
   statusOf(key: string): TestStatus | undefined;
   /** All keys that share a file or class prefix. */
   keysForClass(classKey: string): string[];
+  /** Every key, for template matching (test.each titles). */
+  keys(): Iterable<string>;
 }
 
 export type TestStatus = 'passed' | 'failed' | 'error' | 'skipped' | 'flaky';

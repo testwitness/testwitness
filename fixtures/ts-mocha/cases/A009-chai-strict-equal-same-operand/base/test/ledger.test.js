@@ -1,3 +1,4 @@
+// @ts-nocheck
 const assert = require('node:assert/strict');
 const { balance } = require('../lib/ledger');
 

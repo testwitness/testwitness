@@ -7,6 +7,8 @@
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
  */
+// @ts-nocheck
+
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

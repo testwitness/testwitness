@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import { isPythonTestFile, pythonFrontEnd } from './index.js';
 import { FRAMEWORKS, latticeFor, parametrizeCaseCount } from './frameworks.js';

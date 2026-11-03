@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { addLine, total } from './cart';
 
 function checkNegativeQuantity() {

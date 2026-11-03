@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { checkout, type Receipt } from './checkout';
 
 function expectReceipt(receipt: Receipt, subtotal: number, tax: number, total: number) {

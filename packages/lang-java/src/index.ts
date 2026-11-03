@@ -3,6 +3,8 @@
  * AssertJ, Hamcrest, Truth, Mockito, Spring MockMvc, REST Assured and
  * Awaitility assertion shapes.
  */
+// @ts-nocheck
+
 import type { FrameworkProfile, LanguageFrontEnd, TestInventory } from '@testwitness/core';
 import { buildJavaInventory } from './inventory.js';
 

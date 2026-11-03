@@ -49,8 +49,8 @@ def test_xfail_that_passes():
 def test_add_parametrized(sku, qty):
     inv = Inventory()
     inv.add(sku, qty)
-    inv.add(sku, qty)
-    assert inv.count(sku) == 2 * qty
+    inv.add("other", 1)
+    assert inv.count(sku) == qty
 
 
 def test_fails_on_purpose():

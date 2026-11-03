@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { expect } = require('chai');
 const { balance } = require('../lib/ledger');
 

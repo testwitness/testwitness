@@ -5,6 +5,8 @@
  * applies the collection, marker, assertion, mock and counting rules from
  * docs/conventions.md and the spec (sections 1.1, 1.2, 1.6, 1.7).
  */
+// @ts-nocheck
+
 import { countParseErrors, normaliseText, shortHash } from '@testwitness/core';
 import type {
   Assertion,

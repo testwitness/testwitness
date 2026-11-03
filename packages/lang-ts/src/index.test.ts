@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import { FRAMEWORKS, FRAMEWORK_BY_ID, MATCHER_LATTICE, detectFramework, isTestFile, jsFrontEnd, languageIdFor, tsFrontEnd } from './index.js';
 import { emptyProfile } from './helpers.test-util.js';

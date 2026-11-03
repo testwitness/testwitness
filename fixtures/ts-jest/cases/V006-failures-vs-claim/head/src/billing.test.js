@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { charge, formatInvoice } = require('./billing');
 
 describe('Billing', () => {

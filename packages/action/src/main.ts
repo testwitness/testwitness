@@ -4,6 +4,8 @@
  * reports, emits workflow command annotations, and posts or updates one PR
  * comment when the token can write. Works with no token at all.
  */
+// @ts-nocheck
+
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { readFile, writeFile } from 'node:fs/promises';

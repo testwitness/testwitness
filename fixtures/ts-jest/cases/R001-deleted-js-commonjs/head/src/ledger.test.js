@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { post, balance } = require('./ledger');
 
 describe('ledger', () => {

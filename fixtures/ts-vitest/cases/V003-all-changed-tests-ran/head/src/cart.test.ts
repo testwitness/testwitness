@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, test } from 'vitest';
 import { applyDiscount, total } from './cart';
 

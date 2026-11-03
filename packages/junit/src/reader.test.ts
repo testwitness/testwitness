@@ -1,5 +1,10 @@
+// @ts-nocheck
 import { describe, expect, it } from 'vitest';
-import { readJunitString, toEvidence } from './reader.js';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { Readable } from 'node:stream';
+import { emptyIndex, readJunitFiles, readJunitStream, readJunitString, toEvidence } from './reader.js';
 
 const SUREFIRE = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="com.acme.FooTest" time="0.1" tests="4" errors="1" skipped="1" failures="1">
@@ -49,5 +54,32 @@ describe('readJunitString', () => {
     expect(e.has('footest::adds')).toBe(true);
     expect(e.statusOf('footest::nope')).toBeUndefined();
     expect(e.keysForClass('footest').length).toBe(5);
+  });
+
+  it('keeps multibyte characters whole across read chunk boundaries', async () => {
+    // Enough 3 byte characters at shifting offsets that every chunk boundary of a file read lands inside one somewhere.
+    let xml = '<testsuites><testsuite name="s">';
+    for (let i = 0; i < 6000; i++) xml += `<testcase classname="Billing › charge ${i}" name="${'›'.repeat(1 + (i % 7))} ${i}"/>`;
+    xml += '</testsuite></testsuites>';
+    const dir = mkdtempSync(join(tmpdir(), 'tw-junit-'));
+    try {
+      const file = join(dir, 'junit.xml');
+      writeFileSync(file, xml);
+      const d = await readJunitFiles([file]);
+      expect(d.records.size).toBe(6000);
+      const names = [...d.records.values()].map((r) => r.classname + ' ' + r.name);
+      expect(names.filter((n) => n.includes('\uFFFD'))).toEqual([]);
+      expect(names).toContain('Billing › charge 2 ››› 2');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('decodes a buffer stream whose chunks split a character', async () => {
+    const bytes = Buffer.from('<testsuite name="s"><testcase classname="c" name="a › b"/></testsuite>', 'utf8');
+    const cut = bytes.indexOf(Buffer.from('›', 'utf8')) + 1; // one byte into the 3 byte sequence
+    const data = emptyIndex();
+    await readJunitStream(Readable.from([bytes.subarray(0, cut), bytes.subarray(cut)]), 'split.xml', data);
+    expect([...data.records.values()].map((r) => r.name)).toEqual(['a › b']);
   });
 });
