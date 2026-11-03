@@ -1098,3 +1098,11 @@ describe('parameterised flag and catch alls', () => {
     expect(by('test_d').catchAlls![0]!).toMatchObject({ binding: 'bare except', swallows: false });
   });
 });
+
+describe('assertion helper used as an assignment value', () => {
+  it('counts the helper call on the right side of an assignment', async () => {
+    const src = `class T(unittest.TestCase):\n    def assertSent(self):\n        self.assertEqual(len(outbox), 1)\n        return outbox[0]\n\n    def test_a(self):\n        msg = self.assertSent()\n        self.assertEqual(msg.to, ["x"])\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests[0]!.assertions.map((a) => a.callee)).toEqual(['self.assertSent', 'self.assertEqual']);
+  });
+});

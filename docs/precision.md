@@ -1,12 +1,12 @@
 # Precision on the false positive corpus
 
-Measured 2026-11-02 on 50 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
+Measured 2026-11-03 on 50 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
 
 | Rule | Split | True positives | Low (informational) | False positives (medium or high) | Missed | Precision | High severity false positives |
 |---|---|---|---|---|---|---|---|
-| A001 | all | 0 | 4 | 20 | 0 | 0.00 | 0 |
+| A001 | all | 0 | 4 | 18 | 0 | 0.00 | 0 |
 | A001 | heldout | 0 | 4 | 1 | 0 | 0.00 | 0 |
-| A001 | tuning | 0 | 0 | 19 | 0 | 0.00 | 0 |
+| A001 | tuning | 0 | 0 | 17 | 0 | 0.00 | 0 |
 | O001 | all | 0 | 0 | 19 | 0 | 0.00 | 19 |
 | O001 | heldout | 0 | 0 | 13 | 0 | 0.00 | 13 |
 | O001 | tuning | 0 | 0 | 6 | 0 | 0.00 | 6 |

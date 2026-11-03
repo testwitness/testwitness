@@ -168,22 +168,6 @@
     "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_escaped_value_is_found"
   },
   {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_save_plaintext_email"
-  },
-  {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_save_html_email_template_name"
-  },
-  {
     "slug": "excalidraw-excalidraw-7213",
     "split": "heldout",
     "ruleId": "R003",

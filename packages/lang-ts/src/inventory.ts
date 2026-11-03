@@ -8,7 +8,7 @@
  * docs/conventions.md.
  */
 import { countParseErrors, normaliseText, parseSource, shortHash } from '@testwitness/core';
-import type { Assertion, AssertionKind, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
+import type { Assertion, AssertionKind, CatchAll, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
 import type { Query } from '@testwitness/core';
 import { grammarFor, grammarForPath } from './grammar.js';
 import type { GrammarId } from './grammar.js';
@@ -196,6 +196,8 @@ interface Declaration {
   body?: Node;
   markers: SkipMarker[];
   parameterCount?: number;
+  /** True for test.each, it.each, describe.each and test.for declarations, countable or not. */
+  parameterised?: boolean;
 }
 
 /** Count rows of a test.each table: array literal elements or tagged template data rows. */
@@ -235,6 +237,7 @@ function analyseDeclaration(call: Node): Declaration | undefined {
   let base = alias.base;
   const markers: SkipMarker[] = [];
   let parameterCount: number | undefined;
+  let parameterised = false;
   const prefix: string[] = [chain.rootName];
 
   if (alias.marker) markers.push(markerFor(chain.rootName, alias.marker, call, { constant: true }));
@@ -252,6 +255,7 @@ function analyseDeclaration(call: Node): Declaration | undefined {
     prefix.push(seg.name);
     if (mod.table) {
       parameterCount = countTable(seg.args);
+      parameterised = true;
       continue;
     }
     if (mod.marker) {
@@ -282,6 +286,7 @@ function analyseDeclaration(call: Node): Declaration | undefined {
 
   const decl: Declaration = { node: call, base, title: titleOf(titleNode), markers };
   if (parameterCount !== undefined) decl.parameterCount = parameterCount;
+  if (parameterised) decl.parameterised = true;
 
   for (let i = 1; i < args.length; i++) {
     const a = args[i]!;
@@ -603,10 +608,12 @@ export async function buildInventory(path: string, source: string, profile: Fram
     const markers: SkipMarker[] = [...fileMarkers];
     const mocks = new Set<string>(fileMocks);
     let parameterCount = decl.parameterCount;
+    let parameterised = decl.parameterised === true || isDeclaredInLoop(decl.node, containers);
     for (const c of ancestors) {
       markers.push(...c.markers, ...(containerMarkers.get(c.node.id) ?? []));
       for (const m of containerMocks.get(c.node.id) ?? []) mocks.add(m);
       if (c.parameterCount !== undefined) parameterCount = parameterCount === undefined ? c.parameterCount : parameterCount * c.parameterCount;
+      if (c.parameterised) parameterised = true;
     }
     markers.push(...decl.markers, ...(testMarkers.get(decl.node.id) ?? []));
     for (const m of testMocks.get(decl.node.id) ?? []) mocks.add(m);
@@ -626,6 +633,9 @@ export async function buildInventory(path: string, source: string, profile: Fram
       framework,
     };
     if (parameterCount !== undefined) tc.parameterCount = parameterCount;
+    if (parameterised) tc.parameterised = true;
+    const catchAlls = collectCatchAlls(decl.body);
+    if (catchAlls.length > 0) tc.catchAlls = catchAlls;
     cases.push(tc);
   }
   cases.sort((a, b) => a.startLine - b.startLine || a.qualifiedName.localeCompare(b.qualifiedName));

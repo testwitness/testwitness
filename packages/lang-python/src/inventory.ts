@@ -779,6 +779,14 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
         if (u.type === 'call') {
           const a = callAssertion(stmt, u, ctx);
           if (a) out.push(a);
+        } else if (u.type === 'assignment' || u.type === 'augmented_assignment') {
+          // `msg = self.assertEmailMessageSent()`: an assertion helper used for its return value still asserts.
+          const right = u.childForFieldName('right');
+          const rv = right ? unwrap(right) : undefined;
+          if (rv && rv.type === 'call') {
+            const a = callAssertion(stmt, rv, ctx);
+            if (a) out.push(a);
+          }
         }
       }
     }
