@@ -47,30 +47,15 @@ One PR comment, updated in place, with a four number summary (tests deleted, tes
 
 ## Rules in v0.1
 
-| Rule | Finding | Default |
-|---|---|---|
-| R001 | Test function deleted | medium, high when its production code changed |
-| R002 | Test file deleted | high |
-| R003 | Test newly skipped or disabled | medium, high when its production code changed |
-| R004 | Test converted to expected failure | high |
-| R005 | Focused test added (.only, fit) | high |
-| R006 | Test body emptied | high |
-| R010 | Test added already skipped | low |
-| A001 | Assertion removed | medium, high when it touched changed production code |
-| A002 | Assertion loosened (equality to not null, exact to contains, called with to called) | medium, high for two steps or truthiness |
-| A009 | Tautological assertion | high |
-| O001 | New test without an assertion | high |
-| O002 | New test with a smoke oracle only | low |
-| O006 | New test file with no tests collected | medium |
-| E001 | Catch all added in a test | high |
-| S004 | Snapshot update enabled in the test command | high |
-| W003 | Failure suppressed in the run command (`\|\| true`, `-DskipTests`, `set +e`) | high |
-| V003 | Changed test did not run (not in the JUnit XML) | high |
-| V004 | Claim in PR text not supported by results | medium |
-| V005 | No test results found | low |
-| V006 | Failures in results while the PR claims passing | high |
+<!-- rules:start -->
+Rules with measured true positives on the public PR corpus (see [docs/precision.md](docs/precision.md)):
 
-Every rule has documented false positive controls and ships with golden fixtures: renamed and moved tests, parameterised folds, helper extraction, consolidated assertions, tracked skips with an issue reference, platform conditional skips, deleted features, smoke tests. Diff scoped: a repository full of pre existing skipped tests gets no finding until a PR adds one.
+| Rule | Finding | Default | True positives | False positives (medium or high) | Precision |
+|---|---|---|---|---|---|
+| R003 | Test newly skipped or disabled | medium | 4 | 0 | 1.00 |
+
+19 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R001 Test function deleted; R002 Test file deleted; R004 Test converted to expected failure; R005 Focused test added; R006 Test body emptied or commented out; R010 Test added then skipped; A001 Assertion removed; A002 Assertion loosened; A009 Tautological assertion; O001 New test without an assertion; O002 New test with a smoke oracle only; O006 New test file with no tests collected; E001 Catch all added in a test; W003 Failure suppressed in the run command; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V004 Claim in PR text not supported by results; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
+<!-- rules:end -->
 
 ## Precision
 

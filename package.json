@@ -18,10 +18,12 @@
     "fixtures": "vitest run --project fixtures",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "corpus:report": "tsx --conditions=development corpus/runner/report.ts",
-    "bundle:action": "node scripts/bundle-action.mjs"
+    "bundle:action": "node scripts/bundle-action.mjs",
+    "gen:docs": "tsx --conditions=development scripts/gen-docs.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@testwitness/core": "workspace:*",
     "@types/node": "^26.6.6",
     "@types/picomatch": "^4.0.3",
     "esbuild": "^0.28.2",
