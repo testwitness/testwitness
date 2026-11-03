@@ -19,13 +19,13 @@ function isCommandFile(f: ChangedFile): boolean {
 export const TEST_COMMAND =
   /(?:^|[\s;&|("'`])(npm\s+(run\s+)?(test|t)\b|yarn\s+(run\s+)?test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|npx\s+(jest|vitest|playwright|mocha|ava|tap|jasmine|cypress)\b|\bjest\b|\bvitest\b|playwright\s+test\b|\bmocha\b|\bpytest\b|python3?\s+-m\s+(pytest|unittest)\b|\bnose2?\b|\btox\b|\bnox\b|mvn[w]?\s+(-[\w.=-]+\s+)*(test|verify|install|package)\b|\.\/gradlew?\s+(-[\w.=-]+\s+)*(test|check|build)\b|\bgradle\s+(-[\w.=-]+\s+)*(test|check|build)\b|make\s+(test|check)\b|go\s+test\b|cargo\s+test\b|dotnet\s+test\b|rspec\b|phpunit\b)/;
 
-interface Suppressor {
+export interface Suppressor {
   re: RegExp;
   what: string;
 }
 
 /** Suppressors that must sit on the same line (the same pipeline) as the test command. */
-const INLINE_SUPPRESSORS: Suppressor[] = [
+export const INLINE_SUPPRESSORS: Suppressor[] = [
   { re: /\|\|\s*true\b/, what: '|| true' },
   { re: /\|\|\s*exit\s+0\b/, what: '|| exit 0' },
   { re: /\|\|\s*:(\s|$)/, what: '|| :' },
@@ -43,7 +43,7 @@ const INLINE_SUPPRESSORS: Suppressor[] = [
 ];
 
 /** Suppressors that live on their own line in config. */
-const CONFIG_SUPPRESSORS: Suppressor[] = [
+export const CONFIG_SUPPRESSORS: Suppressor[] = [
   { re: /<testFailureIgnore>\s*true\s*<\/testFailureIgnore>/, what: '<testFailureIgnore>true' },
   { re: /\bignoreFailures\s*(=|:)\s*true\b/, what: 'ignoreFailures = true' },
   { re: /<skipTests>\s*true\s*<\/skipTests>/, what: '<skipTests>true' },
@@ -53,7 +53,7 @@ const CONFIG_SUPPRESSORS: Suppressor[] = [
   { re: /\btasks\.(test|withType<Test>)\s*\{[^}]*enabled\s*=\s*false/, what: 'test task disabled' },
 ];
 
-function stripYamlAndJson(line: string): string {
+export function stripYamlAndJson(line: string): string {
   // Lines in workflows and package.json scripts carry a key and quotes; strip to the command.
   return line
     .replace(/^\s*-?\s*(run|script|cmd|command|"test"|test|"[\w:-]+")\s*:\s*/, '')
@@ -118,7 +118,7 @@ export const W003: Rule = {
   },
 };
 
-const SNAPSHOT_UPDATE: Suppressor[] = [
+export const SNAPSHOT_UPDATE: Suppressor[] = [
   { re: /\b(jest|vitest)\b[^|&;]*\s(-u|--updateSnapshot|--update)\b/, what: '-u' },
   { re: /\bjest\b[^|&;]*--ci=false\b/, what: '--ci=false' },
   { re: /\bUPDATE_SNAPSHOTS?=1\b/, what: 'UPDATE_SNAPSHOTS=1' },
