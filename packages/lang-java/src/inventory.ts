@@ -14,6 +14,7 @@ import {
 import type {
   Assertion,
   AssertionKind,
+  CatchAll,
   FrameworkProfile,
   Node,
   Query,
@@ -338,6 +339,18 @@ interface FileContext {
   /** Helpers defined in this file plus profile.extraAssertions. */
   helpers: Set<string>;
   extraAssertions: Set<string>;
+  /** Every method name defined in this file, so a bare call to a local method without assertions is not trusted by name. */
+  definedMethods: Set<string>;
+}
+
+/**
+ * Method names that read as assertions: assert, check, verify, expect, should, validate followed by a camelCase
+ * boundary (uppercase, underscore, digit or end), plus Spring's andExpect. `checkout` and `expected` do not match.
+ */
+const ASSERTION_NAME = /^(?:[aA]ssert|[cC]heck|[vV]erify|[eE]xpect|[sS]hould|[vV]alidate)(?:[A-Z_0-9]|$)|^andExpect(?:All)?$/;
+
+export function looksLikeAssertionName(name: string): boolean {
+  return ASSERTION_NAME.test(name);
 }
 
 function assertionFamilies(imports: ImportInfo[]): Set<string> {
@@ -546,8 +559,9 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     return [makeAssertion(chain, callee, 'interaction', 'mockito', mockitoStrength(root.args[1], shape.strength), root.args[0])];
   }
 
-  // AssertJ, Truth and Hamcrest
-  const starter = assertjStarters[root.name] ?? (root.name === 'assertWithMessage' ? {} : undefined);
+  // AssertJ, Truth and Hamcrest. BDDAssertions.then(actual) is assertThat under another name.
+  const bddThen = root.name === 'then' && root.args.length === 1 && calls.length > 1 && ctx.families.has('assertj') && (qualifier === undefined || /Assertions$/.test(qualifier));
+  const starter = assertjStarters[root.name] ?? (root.name === 'assertWithMessage' || bddThen ? {} : undefined);
   if (starter) {
     if (calls.length === 1) {
       // Hamcrest: assertThat(actual, matcher) or assertThat(reason, actual, matcher)
@@ -567,6 +581,7 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     const family = ctx.families.has('truth') && !ctx.families.has('assertj') ? 'truth' : 'assertj';
     const table = family === 'truth' ? truthTerminals : assertjTerminals;
     const thatCall = root.name === 'assertWithMessage' ? calls.find((c) => c.name === 'that') : root;
+    const starterName = bddThen ? 'assertThat' : root.name;
     const subject = thatCall?.args[0];
     let shape = table[terminal.name] ?? { kind: 'value' as AssertionKind, strength: 2 };
     if (starter.kind === 'exception') {
@@ -579,7 +594,7 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     let kind = shape.kind;
     if (kind === 'value' && stateMatchers.has(terminal.name) && isPlainReference(subject)) kind = 'state';
     const expected = terminal.args.length ? normaliseText(terminal.args.map((a) => a.text).join(', ')) : undefined;
-    return [makeAssertion(chain, `${root.name}.${terminal.name}`, kind, family, shape.strength, subject, chain.top, expected)];
+    return [makeAssertion(chain, `${starterName}.${terminal.name}`, kind, family, shape.strength, subject, chain.top, expected)];
   }
 
   // JUnit, TestNG: one call, optional Assert/Assertions qualifier.
@@ -595,6 +610,17 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
     if ((local && ctx.helpers.has(root.name)) || ctx.extraAssertions.has(root.name) || ctx.extraAssertions.has(dotted)) {
       return [makeAssertion(chain, dotted, 'custom', undefined, undefined, root.args[0])];
     }
+  }
+
+  // Name based custom assertions: ts.assertResult(1), expectAssertionError(...), verifyNoDrift(), .test().assertComplete().
+  // A bare call to a method defined in this file is trusted only when that method asserts (it is then a helper above).
+  const named = calls.filter((c, i) => {
+    if (!looksLikeAssertionName(c.name)) return false;
+    const bare = i === 0 && (qualifier === undefined || qualifier === 'this');
+    return !(bare && ctx.definedMethods.has(c.name) && !ctx.helpers.has(c.name));
+  });
+  if (named.length) {
+    return named.map((c) => makeAssertion(chain, c.name, 'custom', undefined, undefined, c.args[0] ?? c.node.childForFieldName('object') ?? undefined, c.node));
   }
   return [];
 }
@@ -849,6 +875,56 @@ export function parameterCountOf(annotations: ParsedAnnotation[], table: Framewo
   return found ? total : undefined;
 }
 
+/** True when the test runs more than once from a source: @ParameterizedTest, @TestTemplate, @RepeatedTest, TestNG dataProvider. */
+export function isParameterised(annotations: ParsedAnnotation[]): boolean {
+  for (const a of annotations) {
+    if (a.name === 'ParameterizedTest' || a.name === 'TestTemplate' || a.name === 'RepeatedTest') return true;
+    if (a.name === 'Test' && a.args.has('dataProvider')) return true;
+    if (a.name === 'Parameters' || a.name === 'DataProvider') return true;
+  }
+  return false;
+}
+
+const CATCH_ALL_TYPES = new Set(['Exception', 'Throwable', 'RuntimeException', 'Error']);
+
+/** Catch type text, with generics and package prefixes stripped per union member. */
+function isCatchAllType(typeText: string): boolean {
+  return typeText
+    .split('|')
+    .map((t) => t.trim().split('.').pop() ?? '')
+    .some((t) => CATCH_ALL_TYPES.has(t));
+}
+
+const CATCH_ESCAPES = /\bthrow\b|\bfail\s*\(|\bAssert\.fail\b|\bassert[A-Za-z_]*\s*\(|\bassertThat\b|\bexpect[A-Za-z_]*\s*\(/;
+
+/** Try statements in a body whose catch takes Exception, Throwable, RuntimeException or Error (E001). Lambdas and local classes are not visited. */
+export function collectCatchAlls(body: Node): CatchAll[] {
+  const out: CatchAll[] = [];
+  const visit = (node: Node): void => {
+    for (const child of node.namedChildren) {
+      if (NON_RECURSIVE.has(child.type)) continue;
+      if (child.type === 'try_statement' || child.type === 'try_with_resources_statement') {
+        const block = child.childForFieldName('body');
+        const first = block?.namedChildren.find((c) => c.type !== 'line_comment' && c.type !== 'block_comment');
+        const snippet = normaliseText((first ?? block ?? child).text).slice(0, 120);
+        for (const clause of child.namedChildren) {
+          if (clause.type !== 'catch_clause') continue;
+          const param = clause.namedChildren.find((c) => c.type === 'catch_formal_parameter');
+          const typeNode = param?.namedChildren.find((c) => c.type === 'catch_type');
+          const binding = normaliseText(typeNode?.text ?? '');
+          if (!binding || !isCatchAllType(binding)) continue;
+          const catchBody = clause.childForFieldName('body') ?? clause.namedChildren.find((c) => c.type === 'block');
+          const swallows = !CATCH_ESCAPES.test(catchBody?.text ?? '');
+          out.push({ line: line(clause), binding, swallows, snippet });
+        }
+      }
+      visit(child);
+    }
+  };
+  visit(body);
+  return out;
+}
+
 function mockTarget(typeText: string, partial: boolean): string {
   const t = normaliseText(typeText);
   return partial ? `spy:${t}` : t;
@@ -1011,6 +1087,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
       testngAssert,
       helpers: new Set<string>(),
       extraAssertions,
+      definedMethods: new Set<string>(),
     };
 
     // All methods with a body, outside anonymous and local classes.
@@ -1021,6 +1098,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
     }
     const testMethods = methods.filter((m) => isTestMethod(m, framework));
     const testIds = new Set(testMethods.map((m) => m.node.id));
+    ctx.definedMethods = new Set(methods.map((m) => m.name));
 
     // Assertion helpers: non test, non lifecycle methods whose body asserts (one level deep).
     const helpers = new Set<string>();
@@ -1074,6 +1152,9 @@ export async function buildJavaInventory(path: string, source: string, profile: 
         framework,
       };
       if (parameterCount !== undefined) test.parameterCount = parameterCount;
+      if (isParameterised(m.annotations)) test.parameterised = true;
+      const catchAlls = collectCatchAlls(m.body);
+      if (catchAlls.length) test.catchAlls = catchAlls;
       tests.push(test);
 
       const timeout = timeoutFrom(m.annotations, table) ?? timeoutFrom(classAnnotations, table);

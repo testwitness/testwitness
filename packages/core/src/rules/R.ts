@@ -220,6 +220,28 @@ export const R003: Rule = {
   run(ctx) {
     const out: Finding[] = [];
     for (const { pair, change } of allChanges(ctx.pairs)) {
+      // A test deleted and re added under the same name with a skip (moved within the file, or into another describe) is a new skip.
+      if (change.kind === 'added' && isSkipped(change.head)) {
+        const deleted = allChanges([pair]).find((c) => c.change.kind === 'deleted' && c.change.base.name === change.head.name && !isSkipped(c.change.base));
+        if (!deleted) continue;
+        const head = change.head;
+        const marker = head.markers.find((m) => ((m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false) || (m.kind === 'conditional-skip' && m.constant === true))!;
+        let sev: Severity = exercisesChangedProduction(pair.head, pair.file.path, ctx) ? 'high' : 'medium';
+        let label: string | undefined;
+        if (reasonReferencesIssue(marker.reason)) {
+          sev = lower(sev);
+          label = 'tracked';
+        }
+        out.push(
+          makeFinding(ctx, 'R003', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName} is now skipped (${marker.marker})${marker.reason ? `: ${marker.reason}` : ''}`, {
+            line: marker.line,
+            after: marker.marker + (marker.reason ? `(${marker.reason})` : ''),
+            ...(label ? { label } : {}),
+            snippet: markersKey(head),
+          }),
+        );
+        continue;
+      }
       if (change.kind !== 'modified' && change.kind !== 'renamed') continue;
       const { base, head } = change;
       if (isSkipped(base) || !isSkipped(head)) {
@@ -387,6 +409,8 @@ export const R010: Rule = {
       if (change.kind !== 'added') continue;
       const t = change.head;
       if (!isSkipped(t) && !isXfail(t)) continue;
+      if (allChanges([pair]).some((c) => c.change.kind === 'deleted' && c.change.base.name === t.name)) continue; // reported by R003
+
       const m = t.markers.find((x) => x.kind !== 'focus' && x.kind !== 'conditional-skip')!;
       out.push(
         makeFinding(ctx, 'R010', claimsCoverage ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} is added with ${m.marker} and will not run`, {

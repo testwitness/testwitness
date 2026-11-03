@@ -12,7 +12,8 @@
  */
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { extname } from 'node:path';
+import { extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { compileQuery, loadLanguage } from '@testwitness/core';
 import type { Language, Query } from '@testwitness/core';
 
@@ -39,7 +40,24 @@ export function grammarForPath(path: string): GrammarId {
   return 'typescript';
 }
 
+const WASM_FILES: Record<GrammarId, string> = {
+  typescript: 'tree-sitter-typescript.wasm',
+  tsx: 'tree-sitter-tsx.wasm',
+  javascript: 'tree-sitter-javascript.wasm',
+};
+
+/**
+ * The bundled GitHub Action ships the wasm files and queries next to its entry point and
+ * points TESTWITNESS_ASSET_DIR at that directory. Unset, assets resolve relative to the package.
+ */
+export function assetDir(): string | undefined {
+  const dir = process.env['TESTWITNESS_ASSET_DIR'];
+  return dir && dir.length > 0 ? dir : undefined;
+}
+
 export function wasmPathFor(id: GrammarId): string {
+  const dir = assetDir();
+  if (dir) return join(dir, WASM_FILES[id]);
   return require.resolve(WASM_SPECIFIERS[id]);
 }
 
@@ -50,13 +68,20 @@ export async function languageFor(id: GrammarId): Promise<Language> {
 export type QueryName = 'tests' | 'assertions' | 'markers' | 'mocks';
 
 const QUERY_NAMES: QueryName[] = ['tests', 'assertions', 'markers', 'mocks'];
-const querySources = new Map<QueryName, string>();
+const querySources = new Map<string, string>();
+
+export function queryPathFor(name: QueryName): string {
+  const dir = assetDir();
+  if (dir) return join(dir, 'queries', 'ts', `${name}.scm`);
+  return fileURLToPath(new URL(`../queries/${name}.scm`, import.meta.url));
+}
 
 function querySource(name: QueryName): string {
-  let src = querySources.get(name);
+  const path = queryPathFor(name);
+  let src = querySources.get(path);
   if (src === undefined) {
-    src = readFileSync(new URL(`../queries/${name}.scm`, import.meta.url), 'utf8');
-    querySources.set(name, src);
+    src = readFileSync(path, 'utf8');
+    querySources.set(path, src);
   }
   return src;
 }

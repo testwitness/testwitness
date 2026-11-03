@@ -172,8 +172,8 @@
     "split": "heldout",
     "ruleId": "R003",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "should bump the version of a labeled arrow when the label is updated"
+    "verdict": "tp",
+    "subject": "textWysiwyg › start text editing › should bump the version of a labeled arrow when the label is updated"
   },
   {
     "slug": "excalidraw-excalidraw-7213",
@@ -183,14 +183,6 @@
     "verdict": "expected-low",
     "subject": "textWysiwyg › should bump the version of a labeled arrow when the label is updated",
     "label": "refactored"
-  },
-  {
-    "slug": "excalidraw-excalidraw-7213",
-    "split": "heldout",
-    "ruleId": "R010",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "textWysiwyg › start text editing › should bump the version of a labeled arrow when the label is updated"
   },
   {
     "slug": "fastapi-fastapi-16545",
@@ -938,15 +930,7 @@
     "split": "tuning",
     "ruleId": "R003",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "AccessLogTestCase"
-  },
-  {
-    "slug": "quarkusio-quarkus-55429",
-    "split": "tuning",
-    "ruleId": "R003",
-    "severity": "medium",
-    "verdict": "fp",
+    "verdict": "tp",
     "subject": "AccessLogTestCase#testAccessLogContent"
   },
   {

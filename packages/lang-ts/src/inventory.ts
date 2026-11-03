@@ -408,7 +408,7 @@ function analyseAssertion(expr: Node, helpers: Set<string>): AssertionAnalysis |
     return withLattice(callee, chain.shouldSubject, rest, terminal);
   }
 
-  if (!chain.root) return undefined;
+  if (!chain.root) return namedCustomAssertion(chain);
   let rootName = chain.rootName;
   let segments = chain.segments;
   let rootArgs = chain.rootArgs;
@@ -461,7 +461,40 @@ function analyseAssertion(expr: Node, helpers: Set<string>): AssertionAnalysis |
     if (arg) out.subject = squash(arg.text);
     return out;
   }
-  return undefined;
+  return namedCustomAssertion(chain);
+}
+
+const CUSTOM_ASSERTION_NAME = /^(assert|check|verify|expect|should|validate)/;
+
+/** Bare framework roots are never custom assertions on their own: `expect(x)` alone asserts nothing. */
+const CUSTOM_ASSERTION_EXCLUDED = new Set(['expect', 'should', 'assert', 'expectTypeOf', 'assertType']);
+
+/**
+ * Name based custom assertion: a call whose callee name (the last member) starts with assert,
+ * check, verify, expect, should or validate, bare or on any receiver. The spec follows helpers one
+ * file deep; the naming convention is the cheap proxy for helpers imported from elsewhere.
+ */
+function namedCustomAssertion(chain: Chain): AssertionAnalysis | undefined {
+  const named = chain.segments.filter((s) => s.name !== '()');
+  const last = named[named.length - 1];
+  let name: string;
+  let args: Node | undefined;
+  if (last) {
+    name = last.name;
+    args = last.args;
+  } else {
+    if (!chain.root || chain.root.type !== 'identifier') return undefined;
+    name = chain.rootName;
+    args = chain.rootArgs;
+  }
+  if (!args || args.type !== 'arguments') return undefined;
+  if (!CUSTOM_ASSERTION_NAME.test(name) || CUSTOM_ASSERTION_EXCLUDED.has(name)) return undefined;
+  // page.check(selector) and locator.check() are Playwright actions, not assertions.
+  if (last && name === 'check') return undefined;
+  const out: AssertionAnalysis = { callee: name, kind: 'custom' };
+  const arg = argList(args)[0];
+  if (arg) out.subject = squash(arg.text);
+  return out;
 }
 
 const NULLISH_MATCHERS = new Set(['toBeNull', 'toBeUndefined', 'toBeNaN', 'null', 'undefined', 'NaN', 'isNull', 'isUndefined', 'isNaN']);
@@ -761,6 +794,94 @@ function functionName(fn: Node): string | undefined {
 
 export function looksLikeTestName(name: string): boolean {
   return /^(test|it|spec|specify)([A-Z_0-9]|$)/.test(name) || /^x?(it|test)$/.test(name);
+}
+
+/**
+ * A test declared inside a `for` loop (Playwright's documented way to run one test per
+ * array element) is parameterised with an unknown count.
+ */
+function isDeclaredInLoop(node: Node, containers: Map<NodeId, Declaration>): boolean {
+  let cur: Node | null = node.parent;
+  while (cur) {
+    if (cur.type === 'for_statement' || cur.type === 'for_in_statement') return true;
+    if (cur.type === 'call_expression' && containers.has(cur.id)) return false;
+    cur = cur.parent;
+  }
+  return false;
+}
+
+/** A function node is immediately invoked: `(() => { ... })()` or `(async function () { ... })()`. */
+function isImmediatelyInvoked(fn: Node): boolean {
+  let cur: Node = fn;
+  while (cur.parent && cur.parent.type === 'parenthesized_expression') cur = cur.parent;
+  const parent = cur.parent;
+  return parent !== null && parent.type === 'call_expression' && parent.childForFieldName('function')?.id === cur.id;
+}
+
+const CATCH_HANDLES = /\b(throw|expect\s*[(.]|assert|fail\s*\(|done\s*\(\s*[^)\s]|reject\s*\(|Promise\.reject)/;
+
+/** Handler identifiers passed to `.catch(name)` that fail the test rather than swallow. */
+const CATCH_HANDLER_FAILS = /^(done|fail|reject|expect|assert|throw)/i;
+
+function firstStatementSnippet(block: Node | null | undefined, fallback: Node): string {
+  const first = block?.namedChildren.find((c): c is Node => c !== null && c.type !== 'comment');
+  return normaliseText(first?.text ?? fallback.text).slice(0, 120);
+}
+
+/**
+ * Catch clauses and `.catch(fn)` handlers in the test body that swallow a failure (E001).
+ * Nested functions are not entered unless immediately invoked; JavaScript catches everything,
+ * so every catch clause qualifies and the binding is its parameter name or `any`.
+ */
+export function collectCatchAlls(body: Node | undefined): CatchAll[] {
+  const out: CatchAll[] = [];
+  if (!body) return out;
+  const start = isFunctionNode(body) ? (body.childForFieldName('body') ?? body) : body;
+  const stack: Node[] = [start];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node.id !== start.id && isFunctionNode(node) && !isImmediatelyInvoked(node)) continue;
+    if (node.type === 'try_statement') {
+      const snippet = firstStatementSnippet(node.childForFieldName('body'), node);
+      for (const clause of node.namedChildren) {
+        if (!clause || clause.type !== 'catch_clause') continue;
+        const param = clause.childForFieldName('parameter');
+        const binding = param ? squash(param.text) : 'any';
+        const text = clause.childForFieldName('body')?.text ?? '';
+        out.push({ line: line(clause), binding, swallows: !CATCH_HANDLES.test(text), snippet });
+      }
+    } else if (node.type === 'call_expression') {
+      const handler = promiseCatchHandler(node);
+      if (handler) out.push(handler);
+    }
+    for (let i = node.namedChildren.length - 1; i >= 0; i--) {
+      const c = node.namedChildren[i];
+      if (c) stack.push(c);
+    }
+  }
+  return out.sort((a, b) => a.line - b.line);
+}
+
+/** `promise.catch(() => {})` or `.catch(noop)`: a swallowing handler on the promise left of `.catch`. */
+function promiseCatchHandler(call: Node): CatchAll | undefined {
+  const fn = call.childForFieldName('function');
+  if (!fn || fn.type !== 'member_expression') return undefined;
+  const prop = fn.childForFieldName('property');
+  const obj = fn.childForFieldName('object');
+  if (!prop || !obj || prop.text !== 'catch') return undefined;
+  const args = argList(call.childForFieldName('arguments') ?? undefined);
+  const handler = args[0];
+  if (!handler) return undefined;
+  let swallows: boolean;
+  if (isFunctionNode(handler)) {
+    const inner = handler.childForFieldName('body');
+    swallows = !CATCH_HANDLES.test(inner?.text ?? '');
+  } else if (handler.type === 'identifier') {
+    swallows = !CATCH_HANDLER_FAILS.test(handler.text);
+  } else {
+    return undefined;
+  }
+  return { line: line(prop), binding: 'promise catch', swallows, snippet: normaliseText(obj.text).slice(0, 120) };
 }
 
 function containerAncestors(node: Node, containers: Map<NodeId, Declaration>): Declaration[] {

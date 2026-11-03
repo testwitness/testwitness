@@ -18,13 +18,13 @@ Measured 2026-11-03 on 50 public pull requests (corpus/). Precision counts mediu
 | R002 | all | 0 | 3 | 0 | 0 | n/a | 0 |
 | R002 | heldout | 0 | 1 | 0 | 0 | n/a | 0 |
 | R002 | tuning | 0 | 2 | 0 | 0 | n/a | 0 |
-| R003 | all | 2 | 7 | 1 | 2 | 0.67 | 0 |
-| R003 | heldout | 2 | 4 | 0 | 1 | 1.00 | 0 |
-| R003 | tuning | 0 | 3 | 1 | 1 | 0.00 | 0 |
+| R003 | all | 4 | 7 | 0 | 0 | 1.00 | 0 |
+| R003 | heldout | 3 | 4 | 0 | 0 | 1.00 | 0 |
+| R003 | tuning | 1 | 3 | 0 | 0 | 1.00 | 0 |
 | R004 | all | 0 | 0 | 0 | 1 | n/a | 0 |
 | R004 | heldout | 0 | 0 | 0 | 1 | n/a | 0 |
-| R010 | all | 0 | 3 | 0 | 0 | n/a | 0 |
-| R010 | heldout | 0 | 2 | 0 | 0 | n/a | 0 |
+| R010 | all | 0 | 2 | 0 | 0 | n/a | 0 |
+| R010 | heldout | 0 | 1 | 0 | 0 | n/a | 0 |
 | R010 | tuning | 0 | 1 | 0 | 0 | n/a | 0 |
 
 Regenerate with `pnpm corpus:report`.
