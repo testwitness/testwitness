@@ -822,3 +822,194 @@ class BTest { @Test void run() { } }`);
     expect(i.tests.map((t) => t.qualifiedName)).toEqual(['ATest#run', 'BTest#run']);
   });
 });
+
+describe('name based custom assertions', () => {
+  it('counts assert, check, verify, expect, should and validate prefixed calls on any receiver', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    ts.assertValues(1, 2);
+    expectAssertionError(() -> svc.run());
+    verifyNoDrift();
+    TestObserver.assertComplete();
+    Checker.checkInvariant(x);
+    validateState(x);
+    this.shouldBeOk(x);
+  }
+}`);
+    expect(t.assertions.map((a) => [a.callee, a.kind])).toEqual([
+      ['assertValues', 'custom'],
+      ['expectAssertionError', 'custom'],
+      ['verifyNoDrift', 'custom'],
+      ['assertComplete', 'custom'],
+      ['checkInvariant', 'custom'],
+      ['validateState', 'custom'],
+      ['shouldBeOk', 'custom'],
+    ]);
+    expect(t.assertions[0]!.subject).toBe('1');
+  });
+
+  it('finds the terminal of RxJava .test().assertResult(...) chains and Spring .andExpect(...)', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    pp.mergeWith(cs).test().assertResult(1, 1);
+    client.get("/x").andExpect(status().isOk());
+  }
+}`);
+    expect(t.assertions.map((a) => a.callee)).toEqual(['assertResult', 'andExpect']);
+    expect(t.assertions.every((a) => a.kind === 'custom')).toBe(true);
+  });
+
+  it('does not count checkout, expected or other names where the prefix is not a word', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    cart.checkout();
+    cart.expected();
+    cart.assertion();
+    cart.verifying();
+  }
+}`);
+    expect(t.assertions).toEqual([]);
+  });
+
+  it('does not trust a bare call to a local method whose body has no assertion', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() { assertCartReady(cart); }
+  private static void assertCartReady(Cart cart) { cart.checkout(); }
+}`);
+    expect(t.assertions).toEqual([]);
+  });
+
+  it('does not reclassify calls already known, such as Mockito verify and JUnit assertEquals', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+import static org.mockito.Mockito.verify;
+class FooTest {
+  @Test void run() {
+    assertEquals(1, x);
+    verify(mock).go();
+  }
+}`);
+    expect(t.assertions.map((a) => [a.callee, a.kind])).toEqual([
+      ['assertEquals', 'value'],
+      ['verify', 'interaction'],
+    ]);
+  });
+
+  it('classifies BDDAssertions.then(actual).hasMessage as an assertj assertion', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+import static org.assertj.core.api.BDDAssertions.then;
+class FooTest {
+  @Test void run() { then(error).hasMessage("boom"); }
+}`);
+    expect(t.assertions.map((a) => [a.callee, a.kind, a.family])).toEqual([['assertThat.hasMessage', 'exception', 'assertj']]);
+  });
+});
+
+describe('parameterised flag', () => {
+  it('sets parameterised on @ParameterizedTest with a dynamic source and no parameterCount', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+import org.junit.jupiter.params.provider.MethodSource;
+class FooTest {
+  @ParameterizedTest
+  @MethodSource("cases")
+  void run(int x) { assertTrue(x > 0); }
+}`);
+    expect(t.parameterised).toBe(true);
+    expect(t.parameterCount).toBeUndefined();
+  });
+
+  it('sets parameterised alongside parameterCount for @ValueSource', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @ParameterizedTest
+  @ValueSource(ints = {1, 2, 3})
+  void run(int x) { assertTrue(x > 0); }
+}`);
+    expect(t.parameterised).toBe(true);
+    expect(t.parameterCount).toBe(3);
+  });
+
+  it('sets parameterised for @TestTemplate, @RepeatedTest and TestNG dataProvider', async () => {
+    const i = await inv(`${JUNIT5_HEADER}
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.RepeatedTest;
+class FooTest {
+  @TestTemplate void a() { assertTrue(x); }
+  @RepeatedTest(3) void b() { assertTrue(x); }
+  @Test void c() { assertTrue(x); }
+}`);
+    expect(i.tests.map((t) => t.parameterised)).toEqual([true, true, undefined]);
+    const ng = await one(`${TESTNG_HEADER}
+class FooTest {
+  @Test(dataProvider = "rows") public void a(int x) { assertTrue(x > 0); }
+}`);
+    expect(ng.parameterised).toBe(true);
+    expect(ng.parameterCount).toBeUndefined();
+  });
+});
+
+describe('catch alls', () => {
+  it('records a swallowing catch of Exception with the try block first statement as snippet', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    try {
+      svc.reconcile(   ledger  );
+      assertEquals(0, ledger.drift());
+    } catch (Exception e) {
+      // ignore
+    }
+  }
+}`);
+    expect(t.catchAlls).toEqual([{ line: 14, binding: 'Exception', swallows: true, snippet: "svc.reconcile( ledger );" }]);
+  });
+
+  it('marks catches that assert, fail, expect or rethrow as not swallowing', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    try { a(); } catch (Throwable e) { assertThat(e).hasMessage("x"); }
+    try { b(); } catch (RuntimeException e) { fail("boom"); }
+    try { c(); } catch (Error e) { Assert.fail(); }
+    try { d(); } catch (Exception e) { throw new IllegalStateException(e); }
+    try { f(); } catch (Exception e) { assertEquals(1, e.code()); }
+    try { g(); } catch (Exception e) { expectNoFailure(e); }
+  }
+}`);
+    expect(t.catchAlls!.map((c) => [c.binding, c.swallows])).toEqual([
+      ['Throwable', false],
+      ['RuntimeException', false],
+      ['Error', false],
+      ['Exception', false],
+      ['Exception', false],
+      ['Exception', false],
+    ]);
+  });
+
+  it('handles union types and qualified names, and skips specific exceptions, finally only, lambdas and local classes', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    try { a(); } catch (IOException | RuntimeException e) { }
+    try { b(); } catch (java.lang.Exception e) { }
+    try { c(); } catch (IOException e) { }
+    try { d(); } finally { close(); }
+    Runnable r = () -> { try { e(); } catch (Exception x) { } };
+    Object o = new Object() { void m() { try { f(); } catch (Exception x) { } } };
+  }
+}`);
+    expect(t.catchAlls!.map((c) => [c.binding, c.swallows, c.snippet])).toEqual([
+      ['IOException | RuntimeException', true, 'a();'],
+      ['java.lang.Exception', true, 'b();'],
+    ]);
+  });
+
+  it('leaves catchAlls undefined when the body has no try', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest { @Test void run() { assertTrue(x); } }`);
+    expect(t.catchAlls).toBeUndefined();
+  });
+});

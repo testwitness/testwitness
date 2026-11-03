@@ -350,6 +350,53 @@ describe('jest custom assertion helpers', () => {
     ]);
   });
 
+  it('classifies calls by name convention, bare or on any receiver, as custom assertions', async () => {
+    const inventory = await inv(src(`
+      import { expect, test } from '@jest/globals';
+      import { assertReceipt, checkTotals } from './helpers';
+      test('named helpers', async () => {
+        const r = await charge(5);
+        assertReceipt(r);
+        checkTotals(cart);
+        screen.verifyToast();
+        await page.expectVisible(x);
+        this.validateState(store, 2);
+        shouldMatch(a, b);
+        (await build()).verifyHeaders();
+        render(r);
+        checkedIn.push(r);
+        await page.check('#box');
+        const ok = checkSomething(r);
+        expect(ok).toBe(true);
+      });
+    `));
+    const t = byName(inventory, 'named helpers');
+    expect(t.assertions.map((a) => [a.callee, a.kind, a.subject])).toEqual([
+      ['assertReceipt', 'custom', 'r'],
+      ['checkTotals', 'custom', 'cart'],
+      ['verifyToast', 'custom', undefined],
+      ['expectVisible', 'custom', 'x'],
+      ['validateState', 'custom', 'store'],
+      ['shouldMatch', 'custom', 'a'],
+      ['verifyHeaders', 'custom', undefined],
+      ['expect.toBe', 'value', 'ok'],
+    ]);
+  });
+
+  it('keeps expect.assertions and expect.hasAssertions as count smoke assertions', async () => {
+    const t = await single(src(`
+      test('x', async () => {
+        expect.assertions(2);
+        expect.hasAssertions();
+        await run();
+      });
+    `));
+    expect(t.assertions.map((a) => [a.callee, a.kind, a.family])).toEqual([
+      ['expect.assertions', 'smoke', 'count'],
+      ['expect.hasAssertions', 'smoke', 'count'],
+    ]);
+  });
+
   it('honours profile.extraAssertions', async () => {
     const t = await single(`test('x', () => { assertSchema(doc); });`, 'a.test.ts', {
       frameworks: new Set(['jest']),
@@ -389,5 +436,100 @@ describe('jest mocks', () => {
       it('x', () => {});
     `));
     expect(inventory.imports).toEqual(['@jest/globals', '../billing', 'sinon']);
+  });
+});
+
+describe('jest parameterised flag', () => {
+  it('sets parameterised on each tables, countable or not, and on describe.each children', async () => {
+    const inventory = await inv(src(`
+      const rows = load();
+      test.each([[1], [2]])('literal %i', (n) => { expect(n).toBe(n); });
+      test.each(rows)('variable %i', (n) => { expect(n).toBe(n); });
+      it.each(cases())('call %i', (n) => { expect(n).toBe(n); });
+      test.each\`
+        a | b
+        \${1} | \${2}
+      \`('template $a', ({ a, b }) => { expect(a).toBeLessThan(b); });
+      describe.each(rows)('group %s', (r) => {
+        it('inside', () => { expect(r).toBeDefined(); });
+      });
+      it('plain', () => { expect(1).toBe(1); });
+    `));
+    expect(byName(inventory, 'literal %i')).toMatchObject({ parameterCount: 2, parameterised: true });
+    expect(byName(inventory, 'variable %i').parameterCount).toBeUndefined();
+    expect(byName(inventory, 'variable %i').parameterised).toBe(true);
+    expect(byName(inventory, 'call %i').parameterised).toBe(true);
+    expect(byName(inventory, 'template $a')).toMatchObject({ parameterCount: 1, parameterised: true });
+    expect(byName(inventory, 'inside').parameterised).toBe(true);
+    expect(byName(inventory, 'inside').parameterCount).toBeUndefined();
+    expect(byName(inventory, 'plain').parameterised).toBeUndefined();
+  });
+});
+
+describe('jest catch alls', () => {
+  it('records every catch clause in the test body with its binding and whether it swallows', async () => {
+    const inventory = await inv(src(`
+      test('swallows', async () => {
+        try {
+          await svc.reconcile(ledger);
+          expect(ledger.drift()).toBe(0);
+        } catch (e) {
+          // ignore transient failures
+        }
+        try { risky(); } catch { log('x'); }
+      });
+      test('handles', async () => {
+        try {
+          await svc.reconcile(ledger);
+        } catch (err) {
+          expect(err.message).toMatch(/drift/);
+        }
+        try { a(); } catch (e) { throw e; }
+        try { b(); } catch (e) { fail('unexpected'); }
+        try { c(); } catch (e: unknown) { assert.fail(String(e)); }
+        try { d(); } finally { cleanup(); }
+      });
+      test('nested functions are not the test body', () => {
+        const helper = () => { try { x(); } catch (e) {} };
+        (async () => { try { y(); } catch (e) {} })();
+        helper();
+        expect(1).toBe(1);
+      });
+    `));
+    expect(byName(inventory, 'swallows').catchAlls).toEqual([
+      { line: 5, binding: 'e', swallows: true, snippet: 'await svc.reconcile(ledger);' },
+      { line: 8, binding: 'any', swallows: true, snippet: 'risky();' },
+    ]);
+    const handles = byName(inventory, 'handles').catchAlls!;
+    expect(handles.map((c) => [c.binding, c.swallows])).toEqual([
+      ['err', false],
+      ['e', false],
+      ['e', false],
+      ['e', false],
+    ]);
+    expect(byName(inventory, 'nested functions are not the test body').catchAlls).toEqual([
+      { line: 23, binding: 'e', swallows: true, snippet: 'y();' },
+    ]);
+  });
+
+  it('records promise .catch handlers that swallow', async () => {
+    const inventory = await inv(src(`
+      test('promise catches', async () => {
+        await svc.sync(ledger).catch(() => {});
+        await svc.sync(ledger).catch(noop);
+        await svc.sync(ledger).catch((e) => { expect(e).toBeUndefined(); });
+        await svc.sync(ledger).catch((e) => { throw e; });
+        svc.sync(ledger).then(check).catch(done);
+        expect(1).toBe(1);
+      });
+    `));
+    const all = byName(inventory, 'promise catches').catchAlls!;
+    expect(all.map((c) => [c.line, c.binding, c.swallows, c.snippet])).toEqual([
+      [2, 'promise catch', true, 'svc.sync(ledger)'],
+      [3, 'promise catch', true, 'svc.sync(ledger)'],
+      [4, 'promise catch', false, 'svc.sync(ledger)'],
+      [5, 'promise catch', false, 'svc.sync(ledger)'],
+      [6, 'promise catch', false, 'svc.sync(ledger).then(check)'],
+    ]);
   });
 });

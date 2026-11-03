@@ -149,3 +149,30 @@ describe('playwright declarations', () => {
     expect(t.framework).toBe('playwright');
   });
 });
+
+describe('playwright parameterised loops and named assertions', () => {
+  it('marks tests declared inside a for loop as parameterised with an unknown count', async () => {
+    const inventory = await inv(src(`
+      import { test, expect } from '@playwright/test';
+      const names = ['alice', 'bob'];
+      for (const name of names) {
+        test(\`greets \${name}\`, async ({ page }) => {
+          await page.goto('/');
+          await page.expectGreeting(name);
+        });
+      }
+      for (let i = 0; i < 3; i++) {
+        test(\`indexed \${i}\`, async ({ page }) => { await expect(page).toHaveTitle(/x/); });
+      }
+      test('plain', async ({ page }) => { await page.check('#agree'); await expect(page).toHaveURL(/done/); });
+    `), 'e2e/greet.spec.ts');
+    const loop = byName(inventory, '`greets ${name}`');
+    expect(loop.parameterised).toBe(true);
+    expect(loop.parameterCount).toBeUndefined();
+    expect(loop.assertions.map((a) => [a.callee, a.kind])).toEqual([['expectGreeting', 'custom']]);
+    expect(byName(inventory, '`indexed ${i}`').parameterised).toBe(true);
+    const plain = byName(inventory, 'plain');
+    expect(plain.parameterised).toBeUndefined();
+    expect(plain.assertions.map((a) => a.callee)).toEqual(['expect.toHaveURL']);
+  });
+});
