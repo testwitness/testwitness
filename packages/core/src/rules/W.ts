@@ -17,7 +17,7 @@ function isCommandFile(f: ChangedFile): boolean {
 }
 
 export const TEST_COMMAND =
-  /(?:^|[\s;&|("'`])(npm\s+(run\s+)?(test|t)\b|yarn\s+(run\s+)?test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|npx\s+(jest|vitest|playwright|mocha|ava|tap|jasmine|cypress)\b|\bjest\b|\bvitest\b|playwright\s+test\b|\bmocha\b|\bpytest\b|python3?\s+-m\s+(pytest|unittest)\b|\bnose2?\b|\btox\b|\bnox\b|mvn[w]?\s+(-[\w.=-]+\s+)*(test|verify|install|package)\b|\.\/gradlew?\s+(-[\w.=-]+\s+)*(test|check|build)\b|\bgradle\s+(-[\w.=-]+\s+)*(test|check|build)\b|make\s+(test|check)\b|go\s+test\b|cargo\s+test\b|dotnet\s+test\b|rspec\b|phpunit\b)/;
+  /(?:^|[\s;&|("'`])(npm\s+(run\s+)?(test|t)\b|yarn\s+(run\s+)?test\b|pnpm\s+(run\s+)?test\b|bun\s+test\b|npx\s+(jest|vitest|playwright|mocha|ava|tap|jasmine|cypress)\b|\bjest(?![\w-])|\bvitest(?![\w-])|playwright\s+test\b|\bmocha(?![\w-])|\bpytest(?![\w-])|python3?\s+-m\s+(pytest|unittest)\b|\bnose2?\b|\btox\b|\bnox\b|mvn[w]?\s+(-[\w.=-]+\s+)*(test|verify|install|package)\b|\.\/gradlew?\s+(-[\w.=-]+\s+)*(test|check|build)\b|\bgradle\s+(-[\w.=-]+\s+)*(test|check|build)\b|make\s+(test|check)\b|go\s+test\b|cargo\s+test\b|dotnet\s+test\b|rspec\b|phpunit\b)/;
 
 export interface Suppressor {
   re: RegExp;
@@ -52,6 +52,16 @@ export const CONFIG_SUPPRESSORS: Suppressor[] = [
   { re: /\btest\s*\{\s*enabled\s*=\s*false/, what: 'test { enabled = false }' },
   { re: /\btasks\.(test|withType<Test>)\s*\{[^}]*enabled\s*=\s*false/, what: 'test task disabled' },
 ];
+
+/** Quoted strings are not commands: `echo "run pytest now"` is not a test run. */
+export function stripQuoted(line: string): string {
+  return line.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""');
+}
+
+function isTestCommandLine(line: string): boolean {
+  if (/^\s*(echo|printf|#)/.test(line)) return false;
+  return TEST_COMMAND.test(stripQuoted(line));
+}
 
 export function stripYamlAndJson(line: string): string {
   // Lines in workflows and package.json scripts carry a key and quotes; strip to the command.
@@ -92,7 +102,7 @@ export const W003: Rule = {
             setPlusE = lineNo;
             return;
           }
-          const isTest = TEST_COMMAND.test(line);
+          const isTest = isTestCommandLine(line);
           if (isTest) {
             for (const s of INLINE_SUPPRESSORS) {
               if (s.re.test(line)) {
@@ -219,7 +229,7 @@ export const W002: Rule = {
               const ind = l.match(/^\s*/)![0].length;
               if (ind < indent && !/^\s*-\s/.test(l)) break;
               if (ind < indent - 2) break;
-              if (/^\s*(-\s+)?run:/.test(l) && TEST_COMMAND.test(stripYamlAndJson(l))) {
+              if (/^\s*(-\s+)?run:/.test(l) && isTestCommandLine(stripYamlAndJson(l))) {
                 testLine = l.trim().replace(/^-\s+/, '');
                 break;
               }
@@ -235,7 +245,7 @@ export const W002: Rule = {
               if (!l.trim()) continue;
               const ind = l.match(/^\s*/)![0].length;
               if (ind < jobIndent) break;
-              if (/^\s*(-\s+)?run:/.test(l) && TEST_COMMAND.test(stripYamlAndJson(l))) {
+              if (/^\s*(-\s+)?run:/.test(l) && isTestCommandLine(stripYamlAndJson(l))) {
                 testLine = l.trim().replace(/^-\s+/, '');
                 break;
               }

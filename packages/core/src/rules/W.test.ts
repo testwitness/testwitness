@@ -290,9 +290,20 @@ describe('TEST_COMMAND alternatives', () => {
   });
 });
 
-describe('TEST_COMMAND known broad matches', () => {
-  it.each(['npm run test-unit', 'python -m pip install pytest-cov', 'echo "run pytest now"'])('matches %s', (cmd) => {
-    expect(TEST_COMMAND.test(cmd)).toBe(true);
+describe('TEST_COMMAND near misses', () => {
+  it('matches npm run test-unit (a test script by convention)', () => {
+    expect(TEST_COMMAND.test('npm run test-unit')).toBe(true);
+  });
+  it('does not match a package name or a quoted mention', async () => {
+    const { stripQuoted } = await import('./W.js');
+    expect(TEST_COMMAND.test('python -m pip install pytest-cov')).toBe(false);
+    expect(TEST_COMMAND.test('npm i -D jest-junit')).toBe(false);
+    expect(TEST_COMMAND.test(stripQuoted('echo "run pytest now"'))).toBe(false);
+  });
+  it('W003 ignores echo lines and quoted test commands', async () => {
+    const { W003 } = await import('./W.js');
+    const out = await W003.run(ctxWith(file('.github/workflows/ci.yml', 'ci-workflow', ['        run: echo "pytest || true"', '        run: pip install pytest-cov || true'])), {});
+    expect(out).toEqual([]);
   });
 });
 
