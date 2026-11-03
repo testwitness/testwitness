@@ -4,6 +4,7 @@
  * are cheap.
  */
 import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compileQuery, loadLanguage, parseSource } from '@testwitness/core';
@@ -22,12 +23,16 @@ let grammarPromise: Promise<PythonGrammar> | undefined;
 
 /** Absolute path of the bundled tree-sitter-python wasm. */
 export function pythonWasmPath(): string {
+  const dir = process.env['TESTWITNESS_ASSET_DIR'];
+  if (dir) return join(dir, 'tree-sitter-python.wasm');
   const req = createRequire(import.meta.url);
   return req.resolve('tree-sitter-python/tree-sitter-python.wasm');
 }
 
 /** Read a query file from the package's queries directory. */
 export function readQuerySource(name: QueryName): string {
+  const dir = process.env['TESTWITNESS_ASSET_DIR'];
+  if (dir) return readFileSync(join(dir, 'queries', 'python', `${name}.scm`), 'utf8');
   const url = new URL(`../queries/${name}.scm`, import.meta.url);
   return readFileSync(fileURLToPath(url), 'utf8');
 }

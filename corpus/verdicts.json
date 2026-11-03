@@ -173,38 +173,6 @@
     "ruleId": "A001",
     "severity": "medium",
     "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_user_email_unicode_collision"
-  },
-  {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_user_email_domain_unicode_collision"
-  },
-  {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_custom_email_subject"
-  },
-  {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "PasswordResetFormTest::test_custom_email_constructor"
-  },
-  {
-    "slug": "django-django-18509",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
     "subject": "PasswordResetFormTest::test_save_plaintext_email"
   },
   {
@@ -941,10 +909,9 @@
     "slug": "pytest-dev-pytest-14292",
     "split": "heldout",
     "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_node_ctor_fspath_argument_is_deprecated",
-    "label": "refactored"
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "test_node_ctor_fspath_argument_is_deprecated"
   },
   {
     "slug": "pytest-dev-pytest-14293",
