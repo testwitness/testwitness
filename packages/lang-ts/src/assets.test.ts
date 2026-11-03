@@ -22,6 +22,7 @@ beforeAll(() => {
   copyFileSync(require.resolve('tree-sitter-typescript/tree-sitter-typescript.wasm'), join(dir, 'tree-sitter-typescript.wasm'));
   copyFileSync(require.resolve('tree-sitter-typescript/tree-sitter-tsx.wasm'), join(dir, 'tree-sitter-tsx.wasm'));
   copyFileSync(require.resolve('tree-sitter-javascript/tree-sitter-javascript.wasm'), join(dir, 'tree-sitter-javascript.wasm'));
+  copyFileSync(require.resolve('web-tree-sitter/web-tree-sitter.wasm'), join(dir, 'web-tree-sitter.wasm'));
   for (const name of ['tests', 'assertions', 'markers', 'mocks']) {
     copyFileSync(join(queriesDir, `${name}.scm`), join(dir, 'queries', 'ts', `${name}.scm`));
   }
