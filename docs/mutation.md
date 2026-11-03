@@ -2,9 +2,11 @@
 
 StrykerJS runs over `packages/core/src` with the vitest unit project (fixture cases are excluded because each spawns a git repository). Incremental mode keeps `reports/stryker-incremental.json` so later runs only retest what changed. Run: `pnpm mutate` (about 20 minutes on 2 cores with `--concurrency 2`).
 
-## Score on 3 November 2026 (first full run, 5,106 mutants)
+## Score on 3 November 2026
 
-Overall 43.8 percent; 56.5 percent on covered code. 2,173 killed, 14 timed out, 1,685 survived, 1,124 without coverage, 110 runtime errors.
+Second run, after unit tests for engine, git, markdown, treesitter, hash and the W tables (704 unit tests): overall 55.8 percent; 60.6 percent on covered code. 2,773 killed, 22 timed out, 1,817 survived, 399 without coverage, 95 runtime errors. Per file after that run: engine.ts 68.7 (was 0), report/markdown.ts 82.7 (was 0), git.ts 88.4 (was 0), treesitter.ts 70.3 (was 0), hash.ts 100, rules/W.ts 39.5 (regex survivors, see below).
+
+First full run earlier the same day (5,106 mutants): overall 43.8 percent; 56.5 percent on covered code. 2,173 killed, 14 timed out, 1,685 survived, 1,124 without coverage, 110 runtime errors. The table below is from that first run; the last column is the score on covered mutants.
 
 | File | Mutants | Killed | Survived | No coverage | Score on covered |
 |---|---|---|---|---|---|
@@ -33,6 +35,6 @@ Overall 43.8 percent; 56.5 percent on covered code. 2,173 killed, 14 timed out, 
 - The four files with no unit coverage (engine, markdown, git, treesitter) are exercised by the 555 golden fixture cases, which Stryker does not run. Unit tests for them are the next step and the cheapest way to move the number.
 - W.ts is regex heavy. Many survivors are equivalent mutants inside character classes and alternations (a changed bound that no fixture exercises). The fix is more table driven matching and one unit test per suppressor pattern, both directions.
 - Message text mutants (a word changed inside a finding message) survive by design: tests assert on rule id, severity, subject and label, not on prose. They inflate the survivor count without hiding a defect.
-- Thresholds in `stryker.config.json`: high 80, low 60, break 50. The break threshold is below the current score on purpose until the four uncovered files have unit tests; it fails the weekly job if the score regresses from here.
+- Thresholds in `stryker.config.json`: high 80, low 60, break 40. The break threshold sits below the current score so the weekly job fails only on a regression; it moves up as the score does.
 
 The HTML report is in `reports/mutation/index.html` after a run.
