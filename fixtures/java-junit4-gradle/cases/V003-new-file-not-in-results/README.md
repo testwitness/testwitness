@@ -1,0 +1,1 @@
+Positive for V003. The head commit adds src/test/java/demo/StackPeekTest.java with a real assertion. The junit directory holds the real TEST-demo.StackTest.xml, TEST-demo.StackSizeTest.xml, which predates the new file, so no test from that file ran. One changed file, no partial results, so the finding is medium with the label file not in results.

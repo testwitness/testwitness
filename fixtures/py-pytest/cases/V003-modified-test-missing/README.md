@@ -1,0 +1,1 @@
+Positive for V003. The head commit changes an assertion value in test_add_increases_count. The junit directory holds a copy of the real junit.xml, junit-reruns.xml derived by a script that removed the testcase element named "test_add_increases_count" (1 element removed) and changed nothing else. Other tests from the same file still have records, so the finding is high.

@@ -1,0 +1,1 @@
+Positive for V004 at low. The PR body says All tests pass and no JUnit XML is attached, so the claim cannot be checked and is reported as unreadable, never as false. V005 also fires and is ignored by the runner. The head commit changes an assertion value in pricing › parses a dollar amount.

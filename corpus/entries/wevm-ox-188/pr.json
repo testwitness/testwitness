@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/wevm/ox/pull/188",
+  "repo": "wevm/ox",
+  "number": 188,
+  "title": "fix: use toMatchObject for remaining flaky network tests",
+  "merged_at": "2026-03-05T20:14:23Z",
+  "stars": 229,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "db0880b23e402ff15cc17ebcd088bbb2ce9e8f34",
+  "head_sha": "221672b656093a9fc08d36d1b8a920d9b141b456",
+  "files_changed": 3,
+  "additions": 20,
+  "deletions": 41
+}

@@ -1,0 +1,1 @@
+Positive for V004. The PR body says Added tests but the head commit only changes an assertion value in PricingTest#addsTax; no test is added. The real XML is attached so the claim is checked against the diff, not reported as unreadable.

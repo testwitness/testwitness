@@ -1,0 +1,1 @@
+[{"ruleId": "V003", "severity": "low", "subject": "checkout \u203a sums two prices", "label": "partial results"}, {"ruleId": "V003", "severity": "low", "subject": "formats cents", "label": "partial results"}]

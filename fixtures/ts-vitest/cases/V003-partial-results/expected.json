@@ -1,0 +1,1 @@
+[{"ruleId": "V003", "severity": "low", "subject": "Shipping \u203a is free above the threshold", "label": "partial results"}, {"ruleId": "V003", "severity": "low", "subject": "Discount \u203a keeps the amount at zero percent", "label": "partial results"}]

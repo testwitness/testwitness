@@ -1,0 +1,6 @@
+[
+  {
+    "path": "plugin/trino-postgresql/src/test/java/io/trino/plugin/postgresql/TestPostgreSqlRollbacks.java",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,1 @@
+Positive for V003. The head commit changes an assertion value in pricing › parses a dollar amount. The junit directory holds a copy of the real junit.xml derived by a script that removed the testcase element named "pricing › parses a dollar amount" (1 element removed) and changed nothing else. Other tests from the same file still have records, so the finding is high.

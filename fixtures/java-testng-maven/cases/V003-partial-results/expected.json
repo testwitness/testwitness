@@ -1,0 +1,1 @@
+[{"ruleId": "V003", "severity": "low", "subject": "RoundingTest#roundsToCents", "label": "partial results"}, {"ruleId": "V003", "severity": "low", "subject": "ZeroRateTest#zeroRateKeepsNet", "label": "partial results"}]

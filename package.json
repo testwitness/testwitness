@@ -21,7 +21,8 @@
     "bundle:action": "node scripts/bundle-action.mjs",
     "gen:docs": "tsx --conditions=development scripts/gen-docs.ts",
     "docs:build": "vitepress build docs",
-    "docs:dev": "vitepress dev docs"
+    "docs:dev": "vitepress dev docs",
+    "bench": "tsx bench/run.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

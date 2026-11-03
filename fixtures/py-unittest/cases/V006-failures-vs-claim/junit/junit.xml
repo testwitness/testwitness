@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="2" tests="10" time="0.063" timestamp="2026-11-01T13:35:26.217997-06:00" hostname="vm"><testcase classname="tests.test_shapes.ShapesTest" name="test_circle_area" time="0.002" /><testcase classname="tests.test_shapes.ShapesTest" name="test_ellipse_area" time="0.001"><skipped type="pytest.skip" message="not implemented yet">/home/claude/testwitness/fixtures/py-unittest/project/tests/test_shapes.py:15: not implemented yet</skipped></testcase><testcase classname="tests.test_shapes.ShapesTest" name="test_fails_on_purpose" time="0.001"><failure message="AssertionError: 8 != 9">self = &lt;tests.test_shapes.ShapesTest testMethod=test_fails_on_purpose&gt;
+
+    def test_fails_on_purpose(self):
+&gt;       self.assertEqual(perimeter_of_rect(2, 2), 9)
+E       AssertionError: 8 != 9
+
+tests/test_shapes.py:29: AssertionError</failure></testcase><testcase classname="tests.test_shapes.ShapesTest" name="test_known_bug" time="0.001"><skipped type="pytest.xfail" message="" /></testcase><testcase classname="tests.test_shapes.ShapesTest" name="test_negative_radius_raises" time="0.001" /><testcase classname="tests.test_shapes.ShapesTest" name="test_rect_perimeter_subtests" time="0.001" /><testcase classname="tests.test_shapes.EdgeCasesTest" name="test_zero_radius" time="0.001" /></testsuite></testsuites>

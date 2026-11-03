@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="8" failures="1" errors="0" time="0.346">
+  <testsuite name="Billing" errors="0" failures="1" skipped="1" timestamp="2026-11-01T19:30:19" time="0.144" tests="8">
+    <testcase classname="Billing charge rejects expired cards" name="Billing charge rejects expired cards" time="0.011">
+    </testcase>
+    <testcase classname="Billing charge handles refunds" name="Billing charge handles refunds" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="Billing charge supports partial captures" name="Billing charge supports partial captures" time="0">
+    </testcase>
+    <testcase classname="Billing charge adds 1 and 2 to get 3" name="Billing charge adds 1 and 2 to get 3" time="0.001">
+    </testcase>
+    <testcase classname="Billing charge adds 2 and 3 to get 5" name="Billing charge adds 2 and 3 to get 5" time="0">
+    </testcase>
+    <testcase classname="Billing charge adds 10 and 20 to get 30" name="Billing charge adds 10 and 20 to get 30" time="0.001">
+    </testcase>
+    <testcase classname="Billing charge fails on purpose" name="Billing charge fails on purpose" time="0.003">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 99
+Received: 10
+    at Object.toBe (/home/claude/testwitness/fixtures/ts-jest/project/src/billing.test.js:30:69)
+    at Promise.finally.completed (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1834:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1774:10)
+    at _callCircusTest (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1167:40)
+    at _runTestInContext (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1103:3)
+    at runTestWithContext (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:996:5)
+    at _runTestsForDescribeBlockOnce (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1008:11)
+    at _runTestsForDescribeBlock (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+    at _runTestsForDescribeBlockOnce (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+    at _runTestsForDescribeBlock (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+    at _runTestsForDescribeBlockOnce (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+    at _runTestsForDescribeBlock (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+    at run (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:789:3)
+    at runAndTransformResultsToJestFormat (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:2300:21)
+    at jestAdapter (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/runner.js:111:19)
+    at runTestInternal (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-runner/build/index.js:247:16)
+    at runTest (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-runner/build/index.js:315:7)</failure>
+    </testcase>
+    <testcase classname="Billing formatInvoice matches the invoice snapshot" name="Billing formatInvoice matches the invoice snapshot" time="0.002">
+    </testcase>
+  </testsuite>
+</testsuites>

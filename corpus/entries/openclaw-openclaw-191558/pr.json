@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/openclaw/openclaw/pull/191558",
+  "repo": "openclaw/openclaw",
+  "number": 191558,
+  "title": "test(agents): remove implied exec ANSI assertion",
+  "merged_at": "2026-11-03T00:57:12Z",
+  "stars": 393760,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "A001",
+  "split": "tuning",
+  "base_sha": "93d234d422e0f92407d1bdbed08f25a8ae95741f",
+  "head_sha": "600371561eddead02894f452bf686fef5d5c29d6",
+  "files_changed": 2,
+  "additions": 34,
+  "deletions": 31
+}

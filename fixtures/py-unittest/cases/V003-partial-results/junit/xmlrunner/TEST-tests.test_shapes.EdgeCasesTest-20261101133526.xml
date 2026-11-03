@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="tests.test_shapes.EdgeCasesTest-20261101133526" tests="1" file="tests/test_shapes.py" time="0.000" timestamp="2026-11-01T13:35:26" failures="0" errors="0" skipped="0">
+	<testcase classname="tests.test_shapes.EdgeCasesTest" name="test_zero_radius" time="0.000" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="33"/>
+</testsuite>

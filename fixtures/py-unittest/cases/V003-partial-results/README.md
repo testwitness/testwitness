@@ -1,0 +1,1 @@
+Positive for V003 at low. The head commit changes ShapesTest::test_circle_area in a file the real XML covers and adds tests/test_volumes.py and tests/test_angles.py, which the XML does not cover. One of three changed test files has results, fewer than half, so every missing test is reported low with the label partial results instead of medium.

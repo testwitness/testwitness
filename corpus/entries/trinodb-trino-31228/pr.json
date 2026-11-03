@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trinodb/trino/pull/31228",
+  "repo": "trinodb/trino",
+  "number": 31228,
+  "title": "Remove redundant assertion from PostgreSQL rollback test",
+  "merged_at": "2026-09-18T11:12:48Z",
+  "stars": 13424,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A001",
+  "split": "tuning",
+  "base_sha": "1e5b340b152c5417169378248bd4794aeddf7353",
+  "head_sha": "51f5e2f79cf38e3a90777cfb5f9bc28e66d5244e",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 6
+}

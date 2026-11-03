@@ -1,0 +1,1 @@
+Positive for V003 at low. The head commit changes test_add_increases_count in a file the real XML covers and adds tests/test_ledger.py and tests/test_restock.py, which the XML does not cover. One of three changed test files has results, fewer than half, so every missing test is reported low with the label partial results instead of medium.

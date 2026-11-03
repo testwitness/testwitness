@@ -317,10 +317,13 @@ function headTests(f: FileModel, kind: HeadKind, r: () => number): TestModel[] {
     case 'skipped':
       tests[k]!.skipped = true;
       break;
-    case 'loosened':
-      tests[k]!.loosened = true;
-      if (tests[k]!.oracle === 'throws') tests[k]!.oracle = 'equals';
+    case 'loosened': {
+      // Loosen a value assertion on the same subject (equality to a smoke check); exception oracles are left alone.
+      const candidates = tests.map((t, i) => (t.oracle === 'throws' ? -1 : i)).filter((i) => i >= 0);
+      const j = candidates.length ? candidates[k % candidates.length]! : k;
+      tests[j]!.loosened = true;
       break;
+    }
     case 'newWithoutAssertion':
       tests.push({ words: ['smoke', 'runs', String(tests.length + 1)], oracle: 'equals', qty: int(r, 1, 9), price: int(r, 1, 50), noAssertion: true });
       break;

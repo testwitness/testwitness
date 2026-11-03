@@ -1,0 +1,1 @@
+Positive for V003. The head commit adds src/shipping.test.ts with a real assertion. The junit directory holds the real junit.xml, which predates the new file, so no test from that file ran. One changed file, no partial results, so the finding is medium with the label file not in results.

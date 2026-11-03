@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="9" failures="1" errors="0" time="0.012412902">
+    <testsuite name="src/cart.test.ts" timestamp="2026-11-01T19:31:25.745Z" hostname="vm" tests="9" failures="1" errors="0" skipped="2" time="0.012412902">
+        <testcase classname="src/cart.test.ts" name="Cart &gt; total &gt; sums line items" time="0.002253683">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; total &gt; is zero for an empty cart" time="0.000302381">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; total &gt; ignores negative quantities" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; total &gt; rounds to cents" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; applyDiscount &gt; applyDiscount(100, 10) -&gt; 90" time="0.000221841">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; applyDiscount &gt; applyDiscount(50, 50) -&gt; 25" time="0.00035778">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; applyDiscount &gt; applyDiscount(19.99, 0) -&gt; 19.99" time="0.000152924">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; applyDiscount &gt; throws when percent is out of range" time="0.000301183">
+        </testcase>
+        <testcase classname="src/cart.test.ts" name="Cart &gt; applyDiscount &gt; fails on purpose" time="0.006758498">
+            <failure message="expected 90 to be 80 // Object.is equality" type="AssertionError">
+AssertionError: expected 90 to be 80 // Object.is equality
+
+- Expected
++ Received
+
+- 80
++ 90
+
+ ❯ src/cart.test.ts:35:38
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

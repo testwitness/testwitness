@@ -1,0 +1,1 @@
+Positive for V003 at low. The head commit changes StackTest#pushIncreasesSize in a file the real XML covers and adds src/test/java/demo/StackPeekTest.java and src/test/java/demo/StackOrderTest.java, which the XML does not cover. One of three changed test files has results, fewer than half, so every missing test is reported low with the label partial results instead of medium.

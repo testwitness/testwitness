@@ -1,0 +1,1 @@
+[{"ruleId": "V003", "severity": "low", "subject": "VolumesTest::test_square_perimeter", "label": "partial results"}, {"ruleId": "V003", "severity": "low", "subject": "AnglesTest::test_unit_circle", "label": "partial results"}]

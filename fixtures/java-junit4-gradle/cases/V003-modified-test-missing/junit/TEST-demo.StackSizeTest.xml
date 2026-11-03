@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="demo.StackSizeTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-01T19:36:21.756Z" hostname="vm" time="0.014">
+  <properties/>
+  <testcase name="sizeMatchesPushes[0: pushes=1]" classname="demo.StackSizeTest" time="0.008"/>
+  <testcase name="sizeMatchesPushes[1: pushes=2]" classname="demo.StackSizeTest" time="0.001"/>
+  <testcase name="sizeMatchesPushes[2: pushes=3]" classname="demo.StackSizeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/xerial/snappy-java/pull/745",
+  "repo": "xerial/snappy-java",
+  "number": 745,
+  "title": "tests: remove Big Endian\u2013specific compressed size assertion (from #720)",
+  "merged_at": "2026-10-03T08:17:19Z",
+  "stars": 1084,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A001",
+  "split": "heldout",
+  "base_sha": "d494eda82d1804d651b400745725b7307102d573",
+  "head_sha": "11a643de135f22f29068782088c5de6874f69141",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 3
+}

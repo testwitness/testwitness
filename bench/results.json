@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-11-03T04:47:12.799Z",
+  "machine": {
+    "cores": 2,
+    "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "platform": "linux",
+    "release": "6.18.44-fc-v230",
+    "node": "v22.23.4"
+  },
+  "prefix": [],
+  "runs": 1,
+  "cases": [
+    {
+      "name": "small",
+      "budgetMs": 5000,
+      "generateMs": 190,
+      "gen": {
+        "repo": "/tmp/testwitness-bench/small/repo",
+        "junitDir": "/tmp/testwitness-bench/small/junit",
+        "junitGlob": "/tmp/testwitness-bench/small/junit/**/*.xml",
+        "baseSha": "01e83050140dd5bfa3e4ed946d501654ee13e94d",
+        "headSha": "f3cb584e81b0dfdd8769021d7535af5179439d1e",
+        "files": 20,
+        "testFiles": 6,
+        "tests": 128,
+        "xmlFiles": 4,
+        "xmlBytes": 2123643,
+        "mutations": {
+          "deleted": 1,
+          "skipped": 1,
+          "loosened": 1,
+          "newWithoutAssertion": 1,
+          "neutralTests": 2,
+          "production": 14
+        }
+      },
+      "runs": [
+        {
+          "wallMs": 890.4538990000001,
+          "maxRssMb": 123,
+          "userCpuMs": 950,
+          "systemCpuMs": 119,
+          "exitCode": 0,
+          "state": "review",
+          "findings": 3,
+          "byRule": {
+            "R003": 1,
+            "O001": 1,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 643,
+            "parseMs": 499,
+            "rulesMs": 28
+          },
+          "stderrTail": ""
+        }
+      ],
+      "medianWallMs": 890.4538990000001,
+      "bestWallMs": 890.4538990000001,
+      "maxRssMb": 123,
+      "overBudget": false
+    }
+  ]
+}

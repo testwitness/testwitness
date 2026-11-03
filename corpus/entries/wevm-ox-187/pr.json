@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/wevm/ox/pull/187",
+  "repo": "wevm/ox",
+  "number": 187,
+  "title": "fix: use toMatchObject for network-dependent legacy tx test",
+  "merged_at": "2026-03-05T03:39:33Z",
+  "stars": 229,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "e818cb79f062a4000aba4010f09344850a3bbe7b",
+  "head_sha": "7b97d2824e6bd819160897928bfd364fb5b78ee4",
+  "files_changed": 1,
+  "additions": 10,
+  "deletions": 20
+}

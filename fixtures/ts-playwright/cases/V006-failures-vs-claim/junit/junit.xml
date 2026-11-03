@@ -1,0 +1,95 @@
+<testsuites id="" name="" tests="9" failures="1" skipped="2" errors="0" time="5.211110000000001">
+<testsuite name="unit.spec.ts" timestamp="2026-11-01T19:33:39.005Z" hostname="unit" tests="7" failures="1" skipped="2" time="0.087" errors="0">
+<testcase name="pricing › parses a dollar amount" classname="unit.spec.ts" time="0.022">
+</testcase>
+<testcase name="pricing › parses a bare number" classname="unit.spec.ts" time="0.004">
+</testcase>
+<testcase name="pricing › parses euro amounts" classname="unit.spec.ts">
+<properties>
+<property name="skip" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="pricing › handles negative amounts" classname="unit.spec.ts">
+<properties>
+<property name="fixme" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="pricing › fails on purpose" classname="unit.spec.ts" time="0.026">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../project/test-results/unit-pricing-fails-on-purpose-unit/error-context.md]]
+
+[[ATTACHMENT|../project/test-results/unit-pricing-fails-on-purpose-unit-retry1/error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  [unit] › unit.spec.ts:28:7 › pricing › fails on purpose ──────────────────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2
+    Received: 1
+
+      27 |
+      28 |   test('fails on purpose', () => {
+    > 29 |     expect(parsePrice('$1')).toBe(2);
+         |                              ^
+      30 |   });
+      31 |
+      32 |   test('flaky passes on retry', () => {
+        at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30
+
+    Error Context: ../test-results/unit-pricing-fails-on-purpose-unit/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2
+    Received: 1
+
+      27 |
+      28 |   test('fails on purpose', () => {
+    > 29 |     expect(parsePrice('$1')).toBe(2);
+         |                              ^
+      30 |   });
+      31 |
+      32 |   test('flaky passes on retry', () => {
+        at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30
+
+    Error Context: ../test-results/unit-pricing-fails-on-purpose-unit-retry1/error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="pricing › flaky passes on retry" classname="unit.spec.ts" time="0.028">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../project/test-results/unit-pricing-flaky-passes-on-retry-unit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="expected to fail" classname="unit.spec.ts" time="0.007">
+<properties>
+<property name="fail" value="">
+</property>
+</properties>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../project/test-results/unit-expected-to-fail-unit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="api.spec.ts" timestamp="2026-11-01T19:33:39.005Z" hostname="api" tests="2" failures="0" skipped="0" time="0.496" errors="0">
+<testcase name="page basics › renders inline html" classname="api.spec.ts" time="0.381">
+</testcase>
+<testcase name="page basics › evaluates in the page" classname="api.spec.ts" time="0.115">
+</testcase>
+</testsuite>
+</testsuites>

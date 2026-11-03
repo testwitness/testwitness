@@ -1,0 +1,6 @@
+[
+  {
+    "path": "presto-native-execution/src/test/java/com/facebook/presto/nativeworker/AbstractTestNativeGeneralQueries.java",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/openclaw/openclaw/pull/190116",
+  "repo": "openclaw/openclaw",
+  "number": 190116,
+  "title": "test(plugins): remove runtime-internal path assertion",
+  "merged_at": "2026-11-01T06:38:55Z",
+  "stars": 393760,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "A001",
+  "split": "tuning",
+  "base_sha": "589fa5d255e13d8c286199d7e6b9a148d57e3191",
+  "head_sha": "a53730a4a361196476a7e75f34f0002a15c37b4e",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 14
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "product-matrix.json",
+    "status": "modified"
+  },
+  {
+    "path": "resources/META-INF/plugin.xml",
+    "status": "modified"
+  },
+  {
+    "path": "testSrc/unit/io/flutter/project/ProjectWatchTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "testSrc/unit/io/flutter/testing/Testing.java",
+    "status": "modified"
+  },
+  {
+    "path": "testSrc/unit/io/flutter/utils/FlutterModuleUtilsTest.java",
+    "status": "modified"
+  }
+]

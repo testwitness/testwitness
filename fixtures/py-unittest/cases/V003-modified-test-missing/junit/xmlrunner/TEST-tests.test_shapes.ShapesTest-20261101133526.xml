@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="tests.test_shapes.ShapesTest-20261101133526" tests="6" file="tests/test_shapes.py" time="0.002" timestamp="2026-11-01T13:35:26" failures="1" errors="0" skipped="2">
+	<testcase classname="tests.test_shapes.ShapesTest" name="test_negative_radius_raises" time="0.000" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="11"/>
+	<testcase classname="tests.test_shapes.ShapesTest" name="test_rect_perimeter_subtests" time="0.000" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="23"/>
+	<testcase classname="tests.test_shapes.ShapesTest" name="test_fails_on_purpose" time="0.001" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="28">
+		<failure type="AssertionError" message="8 != 9"><![CDATA[Traceback (most recent call last):
+  File "/home/claude/testwitness/fixtures/py-unittest/project/tests/test_shapes.py", line 29, in test_fails_on_purpose
+    self.assertEqual(perimeter_of_rect(2, 2), 9)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 8 != 9
+]]></failure>
+	</testcase>
+	<testcase classname="tests.test_shapes.ShapesTest" name="test_ellipse_area" time="0.000" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="15">
+		<skipped type="skip" message="not implemented yet"/>
+	</testcase>
+	<testcase classname="tests.test_shapes.ShapesTest" name="test_known_bug" time="0.000" timestamp="2026-11-01T13:35:26" file="tests/test_shapes.py" line="19">
+		<skipped type="XFAIL" message="expected failure: (&lt;class 'AssertionError'&gt;, AssertionError('4 != 5'), &lt;traceback object at 0x7f33bad27280&gt;)"/>
+	</testcase>
+</testsuite>

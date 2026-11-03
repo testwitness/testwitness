@@ -1,0 +1,1 @@
+[{"ruleId": "V006", "severity": "high", "subject": "tests-pass"}, {"ruleId": "V004", "severity": "medium", "subject": "tests-pass", "label": "unsupported"}]

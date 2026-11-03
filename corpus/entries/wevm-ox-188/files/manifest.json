@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/core/_test/TransactionEnvelopeEip1559.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/core/_test/TransactionEnvelopeEip2930.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/core/_test/TransactionEnvelopeEip4844.test.ts",
+    "status": "modified"
+  }
+]

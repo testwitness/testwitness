@@ -1,0 +1,10 @@
+[
+  {
+    "path": "samples/msal-node-samples/b2c-user-flows/test/user-flows-local.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "samples/msal-node-samples/b2c-user-flows/test/user-flows-msa.spec.ts",
+    "status": "modified"
+  }
+]

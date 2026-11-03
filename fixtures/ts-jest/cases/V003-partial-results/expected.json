@@ -1,0 +1,1 @@
+[{"ruleId": "V003", "severity": "low", "subject": "Refunds \u203a keeps the last four digits", "label": "partial results"}, {"ruleId": "V003", "severity": "low", "subject": "Invoice \u203a totals one line", "label": "partial results"}]
