@@ -1,0 +1,28 @@
+# Dogfood: testwitness runs on its own pull requests in strict mode.
+name: testwitness
+on:
+  pull_request:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm vitest run --project unit --reporter=default --reporter=junit --outputFile=junit.xml
+      - run: pnpm bundle:action
+      - name: testwitness (self)
+        uses: ./
+        with:
+          junit: junit.xml
+          mode: strict
+          fail_on: high

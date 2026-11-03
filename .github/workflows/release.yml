@@ -1,0 +1,43 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm bundle:action
+      - name: Commit dist on the tag and move the major tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist
+          git commit -m "build: dist for ${GITHUB_REF_NAME}" || true
+          git tag -f "${GITHUB_REF_NAME}"
+          MAJOR="${GITHUB_REF_NAME%%.*}"
+          git tag -f "$MAJOR"
+          git push -f origin "${GITHUB_REF_NAME}" "$MAJOR"
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/index.js
+      - name: Publish npm package with provenance (trusted publishing)
+        run: pnpm --filter testwitness publish --access public --provenance --no-git-checks
+      - name: GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
