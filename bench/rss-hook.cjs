@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Preloaded into the benchmarked CLI process with `node -r`. On exit it writes
 // the process resource usage (peak RSS in kilobytes, CPU time in microseconds)
 // as JSON to file descriptor 3, which bench/run.ts opens as a pipe. The CLI

@@ -1,0 +1,50 @@
+name: bench
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays 04:17 UTC
+    - cron: '17 4 * * 1'
+permissions:
+  contents: read
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc -b
+      - name: Pick a network sandbox for the check step
+        id: sandbox
+        run: |
+          if unshare -rn true 2>/dev/null; then
+            echo "prefix=unshare -rn" >> "$GITHUB_OUTPUT"
+            echo "sandbox: unshare -rn (user and network namespace, no network)" >> "$GITHUB_STEP_SUMMARY"
+          elif sudo -n unshare -n true 2>/dev/null; then
+            echo "prefix=sudo -n --preserve-env unshare -n -- sudo -n --preserve-env -u $USER" >> "$GITHUB_OUTPUT"
+            echo "sandbox: sudo unshare -n (network namespace, no network)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "prefix=" >> "$GITHUB_OUTPUT"
+            echo "sandbox: none available, the check step ran with network access" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Benchmark (large under 30 s, small under 5 s, median of 3)
+        run: |
+          pnpm bench --no-build --enforce --prefix "${{ steps.sandbox.outputs.prefix }}" | tee bench-output.txt
+          {
+            echo '```'
+            grep -A4 '^| case' bench-output.txt
+            grep '^machine:' bench-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-results
+          path: |
+            bench/results.json
+            bench-output.txt

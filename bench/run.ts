@@ -14,6 +14,8 @@
  * inside the child (bench/rss-hook.cjs, preloaded with -r), which is exact and
  * portable, unlike /usr/bin/time which is not on every runner.
  */
+// @ts-nocheck
+
 import { execFileSync, spawn } from 'node:child_process';
 import { cpus, platform, release, tmpdir } from 'node:os';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';

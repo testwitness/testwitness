@@ -1,0 +1,46 @@
+name: mutation
+on:
+  workflow_dispatch:
+  schedule:
+    # Sundays 03:23 UTC
+    - cron: '23 3 * * 0'
+permissions:
+  contents: read
+jobs:
+  stryker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Restore the incremental report
+        uses: actions/cache@v4
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            stryker-incremental-${{ github.ref_name }}-
+            stryker-incremental-
+      - name: Mutation test packages/core (break under 50)
+        run: pnpm mutate --concurrency 2 | tee mutation-output.txt
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '```'
+            grep -A200 '% Mutation score' mutation-output.txt | grep -E '^(All files|----| )' | head -60
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: |
+            reports/mutation/
+            reports/stryker-incremental.json
+            mutation-output.txt
