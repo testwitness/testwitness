@@ -75,3 +75,11 @@ Verified by running:
 In flight: Stryker sandbox run (25 minute cap, incremental file kept for the next run), corpus batch two (Opus), study scripts with a 10 PR smoke test (Opus).
 
 Open for Sajjad: GitHub noreply email for the author rewrite; the JUnit 5 Maven fixture run on his Mac.
+
+### Day 3, 04:30
+- Unit 704 passing (30 files), golden fixtures 555 passing, lint and typecheck clean, mutation 55.8 percent (sandbox mode, weekly workflow).
+- Corpus 101 entries. True positives engine confirmed, all entries: R001 15, R002 9, R003 20, R004 11, R005 6, R010 5, A001 5, O002 2, V004 6, W002 4, W003 1. Medium or high false positives: R001 9 (kafka and sklearn rewrites, pandas fixture folds), A001 19 (17 from one pip PR with helpers named did_create, needs assertions.extra), O001 5 (3 rxjava race tests with no assertion at all, one sklearn verbose test, one govuk test whose oracle is a thrown PostCSS error). Zero false positives for R002, R003, R004, R005, R010, V004, W002, W003, O002, A002.
+- README now lists the 11 rules with measured true positives (generated); the 11 others are named as unmeasured.
+- Engine changes from the corpus: override only tests, class existence for override semantics, Java disabled overrides of inherited tests, Python module level mark aliases, per case marks, W002 step names and retry actions, W003 gradle scripts, Python is None strength.
+- Study scripts (study/) complete with a 13 PR smoke run; full 500 PR sampling needs several hours of paced GitHub search and is a Sajjad decision on when to spend it.
+- Still empty of true positives: R006, A009, O001, O006, E001, S004, A002 (its 3 corpus labels are v0.2 shapes), V003/V005/V006 (need XML). The collector found no public PRs for these at or above 100 stars within the rate limit; golden fixtures prove recall for them.
