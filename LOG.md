@@ -58,3 +58,20 @@ Open for Sajjad:
 - Clearance still not confirmed; nothing is public.
 
 Next (day 3): V003 end to end fixtures with the real JUnit XML per producer; benchmark fixture (1,000 file PR); comment command acknowledgement; provenance in the comment verified on a real event payload; Stryker on core; docs site; study scripts.
+
+## 2026-11-03 (day 3)
+
+Clearance confirmed by Sajjad at 22:40 on 2 Nov (personal laptop, no employer conflict). Public commits, packages and posts allowed once v0.1 meets the quality bar. Two pre push fixes requested: true positives per rule in the corpus (README lists only measured rules until then, done via `pnpm gen:docs`), and commit authors rewritten to his GitHub noreply address (scripts/rewrite-authors.sh, needs the address).
+
+Verified by running:
+- 01:58 unit 402 passing after the restart; history clean of Stryker instrumentation (an in place Stryker run had instrumented packages/core and a commit captured it; the commit was redone from Stryker's backup and verified by re instrumenting; `git grep stryMutAct` over all commits is 0; 888 stray `// @ts-nocheck` headers removed from fixtures, corpus copies and sources).
+- Rules now 22: added W002 (continue-on-error on a test step or job) and W006 (gate weakened, maintainer only acknowledgement). Acknowledgement by comment command and label implemented in core and the Action.
+- Front ends: override only tests (`super().test_x()` bodies) in Java and Python feed R003/R004 (label override) and silence O001 and R010; Python records per case marks in pytest.param and conditional xfail (R004 low conditional, medium one case).
+- Evidence join proven on every real producer: 61 V003/V004/V006 golden cases; test.each template titles matched by regex; nested parametrisation brackets and describe separators normalised. Fixture suite 555 cases.
+- Benchmark (bench/): synthetic 1,000 file PR with 300 test files and 211 MB of JUnit XML runs in 16.4 s wall, 436 MB RSS on this 2 core container (budget 30 s).
+- Docs site (VitePress) with quick start, how it decides, evidence, configuration, cli, security, rules (generated), precision, design; pages workflow; dogfood workflow in strict mode; release workflow with attestations and npm trusted publishing; issue and PR templates; code of conduct; good first issues; launch drafts (Marketplace text, Show HN first comment).
+- Corpus: 89 entries after the first true positive batch (R003 10, R004 6, R001 6, A001 5, R002 3, R010 3, A002 3, W002 3, O002 1); GitHub secondary rate limit stopped the collector. Second batch running with 8 s pacing. Engine misses recorded by the collector and fixed: overrides, conditional xfail, pytest.param marks, W002.
+
+In flight: Stryker sandbox run (25 minute cap, incremental file kept for the next run), corpus batch two (Opus), study scripts with a 10 PR smoke test (Opus).
+
+Open for Sajjad: GitHub noreply email for the author rewrite; the JUnit 5 Maven fixture run on his Mac.
