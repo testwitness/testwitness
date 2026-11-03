@@ -35,3 +35,26 @@ Known gaps to fix next (front end changes, held until the fixture authoring agen
 - TestCase needs `catchAlls` for E001.
 - java-junit5-maven JUnit XML cannot be produced here: the workspace proxy denies Maven Central. Sajjad runs `mvn -B test -Dmaven.test.failure.ignore=true` in fixtures/java-junit5-maven/project on his Mac and copies target/surefire-reports/TEST-*.xml into fixtures/java-junit5-maven/junit/.
 - Rules shipped so far (13 of the 14 first tag): R001 R002 R003 R004 R005 R006 R010 A001 A002 A009 O001 O002 O006 V003 V004 V005 V006 W003 S004. Missing from the first tag: E001 (needs catchAlls).
+
+### Day 2 evening (21:30 to 22:30, after the 5 hour limit reset)
+Verified by running, counts read from output:
+- Unit: 356 passing (core 121, junit 20, lang-ts 78, lang-java 82, lang-python 70, fixtures runner split per project).
+- Golden fixtures: 494 passing across 9 fixture projects (java-junit5-maven 158, java-junit4-gradle 19, java-testng-maven 13, ts-jest 118, ts-vitest 14, ts-playwright 10, ts-mocha 11, py-pytest 130, py-unittest 21). Each case builds a temp git repo with two commits and runs the real CLI path.
+- Corpus: 50 public PRs (45 honest refactors, 5 true positives), 23 tuning / 27 held out. Medium or high false positives per rule, all entries: R001 8 (was 35 this morning), A001 18 (17 of them one pip PR whose assertion helpers are named did_create / did_not_create and need assertions.extra), O001 4 (3 rxjava race tests with no assertion at all, arguably correct), A002 0 (was 12), A009 0, R003 0 with 4 of 4 true positives. Table in docs/precision.md.
+- Rules shipped: R001 R002 R003 R004 R005 R006 R010 A001 A002 A009 O001 O002 O006 E001 S004 W003 V003 V004 V005 V006. That is the full 14 rule first tag plus six from the v0.1.x list.
+- Front ends: name based custom assertions (assert*, check*, verify*, expect*, should*, validate* on any receiver), parameterised flag, catch all collection, TESTWITNESS_ASSET_DIR for the bundled action, in all three languages.
+- Action: packages/action plus action.yml; `pnpm bundle:action` builds dist/index.js (2.1 MB) and dist/assets (wasm grammars and queries). Ran the bundle standalone from /tmp against the demo PR with a fake event payload: annotations, outputs and findings correct (A002, O001, A001, R003 warnings; R001 replaced, V004 unreadable, V005 as notices).
+- Docs: README, design.md, CONTRIBUTING, SECURITY, LICENSE (Apache 2.0).
+
+Decisions taken (reversible, flag if you disagree):
+- Helper extraction into a same file helper is silent for A001 (the helper resolves to assertions). Three fixture expectations changed from low consolidated to nothing.
+- Deleted test or test file whose production code was deleted in the same PR: low with label "production removed" rather than silent, so the reviewer still sees it collapsed.
+- R001 "rewritten" control: when other changed test files in the PR gained at least as many tests as the PR deleted, the deletion is low. Precision over recall; documented in the rule docs and design.md.
+- Low findings are informational and never counted against precision; precision is measured on medium and high only.
+- `@Test(expected = AssertionError.class)` in JUnit 4 and TestNG is treated as an expected failure marker (R004).
+
+Open for Sajjad:
+- java-junit5-maven JUnit XML: run `mvn -B test -Dmaven.test.failure.ignore=true` in fixtures/java-junit5-maven/project and copy target/surefire-reports/TEST-*.xml into fixtures/java-junit5-maven/junit/ (Maven Central is blocked from the workspace).
+- Clearance still not confirmed; nothing is public.
+
+Next (day 3): V003 end to end fixtures with the real JUnit XML per producer; benchmark fixture (1,000 file PR); comment command acknowledgement; provenance in the comment verified on a real event payload; Stryker on core; docs site; study scripts.
