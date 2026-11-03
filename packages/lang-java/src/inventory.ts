@@ -5,7 +5,6 @@
  * methods, call chains, annotations, mock declarations). The tables in
  * frameworks.ts decide what each candidate means. This file joins the two.
  */
-// @ts-nocheck
 
 import {
   parseSource,
@@ -1086,6 +1085,14 @@ function isLifecycle(m: MethodInfo): boolean {
 /* Entry point                                                               */
 /* ------------------------------------------------------------------------ */
 
+/** Body is a single `super.method(...)` statement (optionally returned), so the inherited test carries the oracle. */
+export function isOverrideOnly(body: Node): boolean {
+  const stmts = body.namedChildren.filter((c) => c.type !== 'line_comment' && c.type !== 'block_comment');
+  if (stmts.length !== 1) return false;
+  const text = stmts[0]!.text.replace(/\s+/g, '');
+  return /^(return)?super\.\w+\(.*\);$/.test(text);
+}
+
 export async function buildJavaInventory(path: string, source: string, profile: FrameworkProfile): Promise<JavaInventoryResult> {
   const { language, queries } = await loadJavaGrammar();
   const tree = parseSource(language, source);
@@ -1179,6 +1186,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
       if (isParameterised(m.annotations)) test.parameterised = true;
       const catchAlls = collectCatchAlls(m.body);
       if (catchAlls.length) test.catchAlls = catchAlls;
+      if (m.body && isOverrideOnly(m.body)) test.overrideOnly = true;
       tests.push(test);
 
       const timeout = timeoutFrom(m.annotations, table) ?? timeoutFrom(classAnnotations, table);

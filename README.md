@@ -52,9 +52,15 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 
 | Rule | Finding | Default | True positives | False positives (medium or high) | Precision |
 |---|---|---|---|---|---|
-| R003 | Test newly skipped or disabled | medium | 4 | 0 | 1.00 |
+| R001 | Test function deleted | medium | 15 | 8 | 0.65 |
+| R002 | Test file deleted | high | 9 | 0 | 1.00 |
+| R003 | Test newly skipped or disabled | medium | 19 | 0 | 1.00 |
+| R004 | Test converted to expected failure | high | 2 | 0 | 1.00 |
+| R010 | Test added then skipped | low | 3 | 0 | 1.00 |
+| A001 | Assertion removed | medium | 5 | 19 | 0.21 |
+| O002 | New test with a smoke oracle only | low | 2 | 0 | 1.00 |
 
-19 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R001 Test function deleted; R002 Test file deleted; R004 Test converted to expected failure; R005 Focused test added; R006 Test body emptied or commented out; R010 Test added then skipped; A001 Assertion removed; A002 Assertion loosened; A009 Tautological assertion; O001 New test without an assertion; O002 New test with a smoke oracle only; O006 New test file with no tests collected; E001 Catch all added in a test; W003 Failure suppressed in the run command; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V004 Claim in PR text not supported by results; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
+15 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R005 Focused test added; R006 Test body emptied or commented out; A002 Assertion loosened; A009 Tautological assertion; O001 New test without an assertion; O006 New test file with no tests collected; E001 Catch all added in a test; W002 continue-on-error added to a test step or job; W003 Failure suppressed in the run command; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V004 Claim in PR text not supported by results; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
 <!-- rules:end -->
 
 ## Precision

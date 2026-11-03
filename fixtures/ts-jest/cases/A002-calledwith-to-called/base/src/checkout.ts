@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { total, type Line } from './cart';
 
 export interface Receipt {

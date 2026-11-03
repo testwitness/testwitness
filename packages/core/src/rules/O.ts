@@ -28,6 +28,7 @@ export const O001: Rule = {
       const t = change.head;
       if (t.assertions.length > 0) continue;
       if (t.statementCount === 0) continue; // an empty new test is a todo, not an oracle problem; R010 covers marked ones
+      if (t.overrideOnly) continue; // the inherited test carries the oracle
       if (isSkipped(t) || isXfail(t)) continue;
       const smoke = SMOKE_NAME.test(t.name);
       out.push(

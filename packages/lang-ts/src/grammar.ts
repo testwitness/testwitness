@@ -10,7 +10,6 @@
  * same ABI version, so core's compileQuery cache key would collide between
  * them. Every query name is therefore prefixed with the grammar id.
  */
-// @ts-nocheck
 
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';

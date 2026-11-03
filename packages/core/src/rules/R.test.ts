@@ -151,3 +151,24 @@ describe('R010 added then skipped', () => {
     expect((await R010.run(context({ pairs: [pair], prText: { title: 'Add tests for 3DS', body: '' } }), {}))[0]).toMatchObject({ severity: 'medium' });
   });
 });
+
+describe('overrides and conditional xfail', () => {
+  it('R003 reports an added skipped override only test as medium with label override; R010 and O001 stay quiet', async () => {
+    const { O001 } = await import('./O.js');
+    const t2 = { ...t({ name: 'adds', container: ['CartTest'], body: 'super.adds();', markers: [{ marker: '@Disabled', kind: 'skip' as const, constant: true }] }), overrideOnly: true };
+    const pair = { file: changedFile(P), base: inventory(P, []), head: inventory(P, [t2]) };
+    expect((await R003.run(context({ pairs: [pair] }), {}))[0]).toMatchObject({ severity: 'medium', label: 'override' });
+    expect(await R010.run(context({ pairs: [pair] }), {})).toEqual([]);
+    const plain = { ...t({ name: 'b', container: ['CartTest'], body: 'super.b();' }), overrideOnly: true };
+    expect(await O001.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [plain]) }] }), {})).toEqual([]);
+  });
+  it('R004 reports conditional xfail low, per case marks medium, overrides high', async () => {
+    const base = t({ name: 'a', body: 'x' });
+    const cond = t({ name: 'a', body: 'x', markers: [{ marker: 'pytest.mark.xfail', kind: 'xfail', constant: false }] });
+    expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [cond]) }] }), {}))[0]).toMatchObject({ severity: 'low', label: 'conditional' });
+    const perCase = t({ name: 'a', body: 'x', markers: [{ marker: 'pytest.param(marks=pytest.mark.xfail)', kind: 'xfail', constant: true }] });
+    expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [perCase]) }] }), {}))[0]).toMatchObject({ severity: 'medium', label: 'one case' });
+    const over = { ...t({ name: 'c', body: 'super().c()', markers: [{ marker: 'pytest.mark.xfail', kind: 'xfail' as const, constant: true }] }), overrideOnly: true };
+    expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, []), head: inventory(P, [over]) }] }), {}))[0]).toMatchObject({ severity: 'high', label: 'override' });
+  });
+});

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import type { FrameworkProfile, TestInventory, TestCase } from '@testwitness/core';
 import { javaFrontEnd, buildJavaInventory } from './index.js';
@@ -1026,5 +1025,13 @@ class FooTest {
     const t = await one(`${JUNIT5_HEADER}
 class FooTest { @Test void run() { assertTrue(x); } }`);
     expect(t.catchAlls).toBeUndefined();
+  });
+});
+
+describe('override only', () => {
+  it('flags a test whose body only delegates to super', async () => {
+    const src = `import org.junit.jupiter.api.*;\nclass CartTest extends BaseCartTest {\n  @Disabled("flaky")\n  @Test\n  @Override\n  void adds() { super.adds(); }\n  @Test\n  void real() { super.adds(); assertEquals(1, 1); }\n}`;
+    const inv = await javaFrontEnd.inventory('CartTest.java', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests.map((t) => [t.name, t.overrideOnly])).toEqual([['adds', true], ['real', undefined]]);
   });
 });

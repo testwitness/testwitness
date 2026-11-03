@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { mergeConfig } from 'vitest/config';
 import baseConfig from '../../vitest.config';
 

@@ -226,7 +226,8 @@ export const R003: Rule = {
       // A test deleted and re added under the same name with a skip (moved within the file, or into another describe) is a new skip.
       if (change.kind === 'added' && isSkipped(change.head)) {
         const deleted = allChanges([pair]).find((c) => c.change.kind === 'deleted' && c.change.base.name === change.head.name && !isSkipped(c.change.base));
-        if (!deleted) continue;
+        // An override whose body only calls the inherited test exists to disable that test.
+        if (!deleted && !change.head.overrideOnly) continue;
         const head = change.head;
         const marker = head.markers.find((m) => ((m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false) || (m.kind === 'conditional-skip' && m.constant === true))!;
         let sev: Severity = exercisesChangedProduction(pair.head, pair.file.path, ctx) ? 'high' : 'medium';
@@ -235,8 +236,9 @@ export const R003: Rule = {
           sev = lower(sev);
           label = 'tracked';
         }
+        if (!deleted) label = label ?? 'override';
         out.push(
-          makeFinding(ctx, 'R003', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName} is now skipped (${marker.marker})${marker.reason ? `: ${marker.reason}` : ''}`, {
+          makeFinding(ctx, 'R003', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName} is now skipped (${marker.marker})${marker.reason ? `: ${marker.reason}` : ''}${deleted ? '' : '; the override only disables the inherited test'}`, {
             line: marker.line,
             after: marker.marker + (marker.reason ? `(${marker.reason})` : ''),
             ...(label ? { label } : {}),
@@ -299,20 +301,42 @@ export const R004: Rule = {
   },
   run(ctx) {
     const out: Finding[] = [];
-    for (const { pair, change } of allChanges(ctx.pairs)) {
-      if (change.kind !== 'modified' && change.kind !== 'renamed') continue;
-      const { base, head } = change;
-      if (isXfail(base) || !isXfail(head)) continue;
+    const report = (pair: (typeof ctx.pairs)[number], head: TestCase, base: TestCase | undefined, suffix = '') => {
       const m = head.markers.find((x) => x.kind === 'xfail')!;
-      const strict = /strict\s*=\s*True/.test(m.marker) || /strict/.test(m.marker);
-      const sev: Severity = strict && reasonReferencesIssue(m.reason) ? 'medium' : 'high';
+      const strict = /strict/.test(m.marker);
+      const perCase = m.marker.startsWith('pytest.param');
+      let sev: Severity = strict && reasonReferencesIssue(m.reason) ? 'medium' : 'high';
+      let label: string | undefined;
+      if (m.constant === false) {
+        sev = 'low';
+        label = 'conditional';
+      } else if (perCase) {
+        sev = sev === 'high' ? 'medium' : 'low';
+        label = 'one case';
+      } else if (!base) {
+        label = 'override';
+      }
       out.push(
-        makeFinding(ctx, 'R004', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName} is now an expected failure (${m.marker})${m.reason ? `: ${m.reason}` : ''}`, {
+        makeFinding(ctx, 'R004', sev, pair.file, head.qualifiedName, `Test ${head.qualifiedName} is now an expected failure (${m.marker})${m.reason ? `: ${m.reason}` : ''}${suffix}`, {
           line: m.line,
           after: m.marker,
+          ...(label ? { label } : {}),
           snippet: markersKey(head),
         }),
       );
+    };
+    for (const { pair, change } of allChanges(ctx.pairs)) {
+      if (change.kind === 'added') {
+        const t = change.head;
+        if (t.overrideOnly && t.markers.some((x) => x.kind === 'xfail')) report(pair, t, undefined, '; the override only marks the inherited test');
+        continue;
+      }
+      if (change.kind !== 'modified' && change.kind !== 'renamed') continue;
+      const { base, head } = change;
+      const baseX = base.markers.some((x) => x.kind === 'xfail');
+      const headX = head.markers.some((x) => x.kind === 'xfail');
+      if (baseX || !headX) continue;
+      report(pair, head, base);
     }
     return out;
   },
@@ -413,6 +437,7 @@ export const R010: Rule = {
       const t = change.head;
       if (!isSkipped(t) && !isXfail(t)) continue;
       if (allChanges([pair]).some((c) => c.change.kind === 'deleted' && c.change.base.name === t.name)) continue; // reported by R003
+      if (t.overrideOnly) continue; // reported by R003 or R004 as an override
 
       const m = t.markers.find((x) => x.kind !== 'focus' && x.kind !== 'conditional-skip')!;
       out.push(

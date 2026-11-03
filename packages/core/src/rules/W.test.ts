@@ -88,3 +88,23 @@ describe('W006 gate weakened', () => {
     ]);
   });
 });
+
+describe('W002 continue-on-error', () => {
+  const wf = `jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v5\n      - name: Unit tests\n        continue-on-error: true\n        run: ./gradlew test\n      - name: Upload\n        continue-on-error: true\n        run: ./upload.sh\n  e2e:\n    continue-on-error: true\n    runs-on: ubuntu-latest\n    steps:\n      - run: npx playwright test\n`;
+  it('reports the test step and the test job, not the upload step', async () => {
+    const { W002 } = await import('./W.js');
+    const f = file('.github/workflows/ci.yml', 'ci-workflow', ['        continue-on-error: true']);
+    f.hunks = [
+      { baseStart: 7, baseCount: 0, headStart: 7, headCount: 1, added: ['        continue-on-error: true'], removed: [] },
+      { baseStart: 10, baseCount: 0, headStart: 10, headCount: 1, added: ['        continue-on-error: true'], removed: [] },
+      { baseStart: 13, baseCount: 0, headStart: 13, headCount: 1, added: ['    continue-on-error: true'], removed: [] },
+    ];
+    const ctx = ctxWith(f);
+    ctx.readHead = async () => wf;
+    const out = await W002.run(ctx, {});
+    expect(out.map((x) => [x.location.line, x.subject])).toEqual([
+      [7, 'run: ./gradlew test'],
+      [13, 'run: npx playwright test'],
+    ]);
+  });
+});

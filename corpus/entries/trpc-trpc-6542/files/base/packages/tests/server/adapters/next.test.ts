@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import * as http from 'http';
 import type { AddressInfo } from 'net';

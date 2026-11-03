@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { total } from './cart';
 describe('cart', () => {
   it('sums items', () => { expect(total([1, 2])).toBe(3); });

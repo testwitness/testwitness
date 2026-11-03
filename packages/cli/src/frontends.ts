@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { LanguageFrontEnd } from '@testwitness/core';
 import { javaFrontEnd } from '@testwitness/lang-java';
 import { tsFrontEnd, jsFrontEnd } from '@testwitness/lang-ts';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { addLine, total } from './cart';
 
 async function totalAsync(lines: Parameters<typeof total>[0]): Promise<number> {

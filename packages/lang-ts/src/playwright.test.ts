@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import { byName, inv, single, src } from './helpers.test-util.js';
 

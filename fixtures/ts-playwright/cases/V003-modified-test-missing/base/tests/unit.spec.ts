@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';

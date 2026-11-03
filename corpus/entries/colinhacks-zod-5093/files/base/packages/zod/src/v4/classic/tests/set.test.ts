@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { expect, expectTypeOf, test } from "vitest";
 import * as z from "zod/v4";
 

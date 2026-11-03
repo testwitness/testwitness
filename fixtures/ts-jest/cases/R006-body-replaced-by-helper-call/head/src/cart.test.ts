@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { addLine, total } from './cart';
 
 function expectTotalAfterAdd(qty: number, unitPrice: number, expected: number) {

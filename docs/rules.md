@@ -194,6 +194,20 @@ A try block now wraps part of the test and its catch (Exception, Throwable, bare
 +  }
 ```
 
+## W002 continue-on-error added to a test step or job
+
+Default severity: high. Since 0.1.0. Languages: all. Needs: diff, workflow.
+
+A GitHub Actions workflow gained continue-on-error: true on a step whose run command is a test command, or on a job that runs one. The job stays green when the tests fail.
+
+**False positive controls.** continue-on-error on a non test step (uploads, linters, optional checks) is not reported. The step is found by scanning the head file for the nearest run: line after the added key in the same step, and the job by the job that contains a test command.
+
+```diff
+       - name: Unit tests
++        continue-on-error: true
+         run: ./gradlew test
+```
+
 ## W003 Failure suppressed in the run command
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, workflow, config.
@@ -205,6 +219,20 @@ A test command in a workflow, package.json script, Makefile, tox.ini, Jenkinsfil
 ```diff
 -        run: pytest -q
 +        run: pytest -q || true
+```
+
+## W006 The integrity gate itself weakened
+
+Default severity: high. Since 0.1.0. Languages: all. Needs: diff.
+
+The PR changes .testwitness.yml or the workflow step that runs testwitness (its version, inputs, mode or fail_on). Configuration is read from the base ref, so the change takes effect only after merge; this finding makes sure a maintainer sees it. It cannot be acknowledged by the PR author or by the label.
+
+**False positive controls.** Legitimate configuration changes. A maintainer acknowledges them with the comment command, and the change applies after merge.
+
+```diff
+ rules:
+-  R003: high
++  R003: off
 ```
 
 ## S004 Snapshot update enabled in the test command

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { checkout, type Receipt } from './checkout';
 
 function expectField(receipt: Receipt, field: keyof Receipt, value: number) {

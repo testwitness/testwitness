@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';

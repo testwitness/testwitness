@@ -5,7 +5,6 @@
  * The tables drive src/inventory.ts and are exported for rules that need to
  * reason about timeouts, sleeps, retries and the assertion strength lattice.
  */
-// @ts-nocheck
 
 import type { AssertionKind, SkipMarker } from '@testwitness/core';
 

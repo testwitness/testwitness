@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import type { FrameworkProfile, TestCase, TestInventory } from '@testwitness/core';
 import { pythonFrontEnd } from './index.js';
@@ -1105,5 +1104,29 @@ describe('assertion helper used as an assignment value', () => {
     const src = `class T(unittest.TestCase):\n    def assertSent(self):\n        self.assertEqual(len(outbox), 1)\n        return outbox[0]\n\n    def test_a(self):\n        msg = self.assertSent()\n        self.assertEqual(msg.to, ["x"])\n`;
     const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
     expect(inv.tests[0]!.assertions.map((a) => a.callee)).toEqual(['self.assertSent', 'self.assertEqual']);
+  });
+});
+
+describe('per case marks and overrides', () => {
+  it('records xfail and skip marks inside pytest.param', async () => {
+    const src = `import pytest\n@pytest.mark.parametrize("n", [1, pytest.param(2, marks=pytest.mark.xfail(reason="bug")), pytest.param(3, marks=[pytest.mark.skip, pytest.mark.slow])])\ndef test_a(n):\n    assert n\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    const m = inv.tests[0]!.markers.map((x) => [x.marker, x.kind, x.constant, x.reason]);
+    expect(m).toEqual([
+      ['pytest.param(marks=pytest.mark.xfail)', 'xfail', true, 'bug'],
+      ['pytest.param(marks=pytest.mark.skip)', 'skip', true, undefined],
+    ]);
+    expect(inv.tests[0]!.parameterCount).toBe(3);
+  });
+  it('marks conditional xfail as xfail with constant false', async () => {
+    const src = `import pytest, sys\n@pytest.mark.xfail(condition=sys.platform == "win32", reason="x", strict=False)\ndef test_a():\n    assert 1\n@pytest.mark.xfail(_IS_WASM, reason="y")\ndef test_b():\n    assert 1\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests.map((t) => t.markers[0]!.constant)).toEqual([false, false]);
+    expect(inv.tests.map((t) => t.markers[0]!.kind)).toEqual(['xfail', 'xfail']);
+  });
+  it('flags override only bodies', async () => {
+    const src = `import unittest\nclass TestT(Base):\n    @unittest.skip("flaky")\n    def test_a(self):\n        super().test_a()\n\n    def test_b(self):\n        return super().test_b(1)\n\n    def test_c(self):\n        super().test_c()\n        assert 1\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests.map((t) => [t.name, t.overrideOnly])).toEqual([['test_a', true], ['test_b', true], ['test_c', undefined]]);
   });
 });

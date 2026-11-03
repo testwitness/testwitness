@@ -5,7 +5,6 @@
  * applies the collection, marker, assertion, mock and counting rules from
  * docs/conventions.md and the spec (sections 1.1, 1.2, 1.6, 1.7).
  */
-// @ts-nocheck
 
 import { countParseErrors, normaliseText, shortHash } from '@testwitness/core';
 import type {
@@ -409,8 +408,37 @@ function markersFromDecorators(def: Node, aliases: Map<string, string>): SkipMar
     if (!expr) continue;
     const m = markerFromExpression(expr, aliases);
     if (m) out.push(m);
+    // Per case marks: @pytest.mark.parametrize("x", [pytest.param(1, marks=pytest.mark.xfail(reason="..."))])
+    const parts = callParts(expr, aliases);
+    if (parts && parts.chain === 'pytest.mark.parametrize') {
+      const values = parts.positional[1] ?? parts.keywords.get('argvalues');
+      const v = values ? unwrap(values) : undefined;
+      if (v && (v.type === 'list' || v.type === 'tuple')) {
+        for (const item of v.namedChildren) {
+          const ip = callParts(unwrap(item), aliases);
+          if (!ip || ip.chain !== 'pytest.param') continue;
+          const marks = ip.keywords.get('marks');
+          if (!marks) continue;
+          const mu = unwrap(marks);
+          const markNodes = mu.type === 'list' || mu.type === 'tuple' ? mu.namedChildren : [mu];
+          for (const mn of markNodes) {
+            const pm = markerFromExpression(unwrap(mn), aliases) ?? markerFromBareMark(unwrap(mn), aliases, line(mn));
+            if (pm) out.push({ ...pm, marker: `pytest.param(marks=${pm.marker})` });
+          }
+        }
+      }
+    }
   }
   return out;
+}
+
+/** `pytest.mark.xfail` without a call (bare attribute) used as a mark. */
+function markerFromBareMark(node: Node, aliases: Map<string, string>, at: number): SkipMarker | undefined {
+  const text = node.text.replace(/\s+/g, '');
+  const chain = resolveAlias(text, aliases);
+  if (chain === 'pytest.mark.xfail') return { marker: chain, kind: 'xfail', constant: true, line: at };
+  if (chain === 'pytest.mark.skip') return { marker: chain, kind: 'skip', constant: true, line: at };
+  return undefined;
 }
 
 /** Markers from `pytestmark = ...` assignments and module level `pytest.skip(...)`. */
@@ -539,6 +567,16 @@ function collectCatchAlls(body: Node | null): CatchAll[] {
     for (const c of node.namedChildren) stack.push(c);
   }
   return out;
+}
+
+/** Body is a single `super().test_x(...)` call or `return super().test_x(...)`, so the inherited test carries the oracle. */
+function isOverrideOnly(body: Node | null): boolean {
+  const stmts = statements(body).filter((s) => s.type !== 'comment' && !(s.type === 'expression_statement' && s.namedChildren[0]?.type === 'string'));
+  if (stmts.length !== 1) return false;
+  const st = stmts[0]!;
+  const expr = st.type === 'return_statement' ? st.namedChildren[0] : st.type === 'expression_statement' ? st.namedChildren[0] : undefined;
+  if (!expr) return false;
+  return /^super\(\)\.\w+\(/.test(expr.text.replace(/\s+/g, ''));
 }
 
 function parametrizeCount(def: Node, aliases: Map<string, string>): number | undefined {
@@ -1023,6 +1061,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
     if (isParametrized(c.def, aliases) || c.classes.some((cls) => isParametrized(cls, aliases))) test.parameterised = true;
     const catchAlls = collectCatchAlls(c.body);
     if (catchAlls.length) test.catchAlls = catchAlls;
+    if (isOverrideOnly(c.body)) test.overrideOnly = true;
     tests.push(test);
   }
 

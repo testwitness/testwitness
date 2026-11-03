@@ -6,7 +6,6 @@
  * the A002 strength lattice. Strength is higher for stronger assertions
  * within one family; comparing across families is not meaningful.
  */
-// @ts-nocheck
 
 import type { AssertionKind } from '@testwitness/core';
 

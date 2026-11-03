@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { addLine, total } from './cart';
 
 describe.skip('cart', () => { // flaky on CI, see #88

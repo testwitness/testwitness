@@ -1,5 +1,4 @@
 /** Shared helpers for the lang-ts test suite. Not a test file itself. */
-// @ts-nocheck
 
 import type { FrameworkProfile, TestCase, TestInventory } from '@testwitness/core';
 import { buildInventory } from './inventory.js';

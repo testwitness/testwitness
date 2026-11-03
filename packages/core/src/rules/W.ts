@@ -182,6 +182,74 @@ export const S004: Rule = {
 
 
 
+/** W002 continue-on-error added to a test step or job. */
+export const W002: Rule = {
+  id: 'W002',
+  name: 'continue-on-error added to a test step or job',
+  group: 'W',
+  defaultSeverity: 'high',
+  since: '0.1.0',
+  languages: 'any',
+  needs: ['diff', 'workflow'],
+  docs: {
+    summary: 'A GitHub Actions workflow gained continue-on-error: true on a step whose run command is a test command, or on a job that runs one. The job stays green when the tests fail.',
+    falsePositives: 'continue-on-error on a non test step (uploads, linters, optional checks) is not reported. The step is found by scanning the head file for the nearest run: line after the added key in the same step, and the job by the job that contains a test command.',
+    example: '       - name: Unit tests\n+        continue-on-error: true\n         run: ./gradlew test',
+  },
+  async run(ctx) {
+    const out: Finding[] = [];
+    for (const f of ctx.files) {
+      if (f.kind !== 'ci-workflow' || f.status === 'deleted' || f.binary) continue;
+      if (!/\.github\/workflows\//.test(f.path)) continue;
+      const removed = new Set(f.hunks.flatMap((h) => h.removed.map((l) => l.trim())));
+      const head = (await ctx.readHead(f.path)) ?? '';
+      const lines = head.split('\n');
+      for (const h of f.hunks) {
+        h.added.forEach((raw, i) => {
+          if (!/^\s*continue-on-error:\s*true\b/.test(raw)) return;
+          if (removed.has(raw.trim())) return;
+          const lineNo = h.headStart + i;
+          const indent = raw.match(/^\s*/)![0].length;
+          // Walk the enclosing block (same indent, until a line with less indent that is not a list continuation) for a test command.
+          let testLine: string | undefined;
+          for (const dir of [1, -1]) {
+            for (let k = lineNo - 1 + dir; k >= 0 && k < lines.length; k += dir) {
+              const l = lines[k]!;
+              if (!l.trim()) continue;
+              const ind = l.match(/^\s*/)![0].length;
+              if (ind < indent && !/^\s*-\s/.test(l)) break;
+              if (ind < indent - 2) break;
+              if (/^\s*(-\s+)?run:/.test(l) && TEST_COMMAND.test(stripYamlAndJson(l))) {
+                testLine = l.trim().replace(/^-\s+/, '');
+                break;
+              }
+              if (dir === -1 && /^\s*-\s/.test(l) && ind <= indent - 2) break;
+            }
+            if (testLine) break;
+          }
+          if (!testLine) {
+            // Job level: any test command in the job block below.
+            const jobIndent = indent;
+            for (let k = lineNo; k < lines.length; k++) {
+              const l = lines[k]!;
+              if (!l.trim()) continue;
+              const ind = l.match(/^\s*/)![0].length;
+              if (ind < jobIndent) break;
+              if (/^\s*(-\s+)?run:/.test(l) && TEST_COMMAND.test(stripYamlAndJson(l))) {
+                testLine = l.trim().replace(/^-\s+/, '');
+                break;
+              }
+            }
+          }
+          if (!testLine) return;
+          out.push(makeFinding(ctx, 'W002', 'high', f, testLine.slice(0, 80), `${f.path} sets continue-on-error on a test step or job (${testLine.slice(0, 60)})`, { line: lineNo, after: raw.trim(), snippet: `coe|${testLine}` }));
+        });
+      }
+    }
+    return out;
+  },
+};
+
 /** W006 The integrity gate itself weakened. */
 export const W006: Rule = {
   id: 'W006',
@@ -215,5 +283,5 @@ export const W006: Rule = {
 };
 
 export function rulesW(): Rule[] {
-  return [W003, W006, S004];
+  return [W002, W003, W006, S004];
 }

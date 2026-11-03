@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { checkout } from './checkout';
 
 async function loadLines() {

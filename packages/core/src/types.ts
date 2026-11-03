@@ -117,6 +117,8 @@ export interface TestCase {
   parameterised?: boolean;
   /** Catch blocks in the test body that swallow exceptions (E001). */
   catchAlls?: CatchAll[];
+  /** True when the body only delegates to the inherited test (super().test_x(), super.testX()). */
+  overrideOnly?: boolean;
   /** Mock or stub targets declared in the body. */
   mocks: string[];
   framework: string;

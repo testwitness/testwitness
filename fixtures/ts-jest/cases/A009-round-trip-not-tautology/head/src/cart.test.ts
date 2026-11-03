@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { total, type Line } from './cart';
 
 function serialise(line: Line): string {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 const assert = require('assert');
 const { slugify, clamp } = require('../lib');
 

@@ -3,7 +3,6 @@
  * query files in ../queries. Everything is cached by core, so repeated calls
  * are cheap.
  */
-// @ts-nocheck
 
 import { createRequire } from 'node:module';
 import { join } from 'node:path';

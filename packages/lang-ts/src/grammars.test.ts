@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, expect, it } from 'vitest';
 import { grammarForPath, wasmPathFor } from './grammar.js';
 import { byName, inv, single, src } from './helpers.test-util.js';

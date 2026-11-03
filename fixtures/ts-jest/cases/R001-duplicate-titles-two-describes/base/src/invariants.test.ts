@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { addLine, total } from './cart';
 import { post } from './ledger';
 

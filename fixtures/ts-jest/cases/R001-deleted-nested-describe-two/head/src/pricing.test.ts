@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { price } from './pricing';
 
 describe('pricing', () => {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import "pepjs";
 
 import type { RenderResult, RenderOptions } from "@testing-library/react";

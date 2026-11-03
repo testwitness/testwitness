@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { SaxesParser } from 'saxes';
 import type { SaxesTagPlain } from 'saxes';
 import { createReadStream } from 'node:fs';

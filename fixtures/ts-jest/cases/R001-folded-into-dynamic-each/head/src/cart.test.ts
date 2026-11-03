@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { total } from './cart';
 import { totalCases } from './cart-cases';
 

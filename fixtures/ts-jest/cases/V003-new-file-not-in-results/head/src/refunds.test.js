@@ -1,4 +1,3 @@
-// @ts-nocheck
 const { charge } = require('./billing');
 
 describe('Refunds', () => {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { experimental_streamedQuery } from '@tanstack/query-core'
 import { queryKey, sleep } from '@tanstack/query-test-utils'

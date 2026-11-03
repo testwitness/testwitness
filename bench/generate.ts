@@ -17,7 +17,6 @@
  * output) and Surefire (one TEST-<class>.xml per class with a properties
  * block and CDATA system-out).
  */
-// @ts-nocheck
 
 import { execFileSync } from 'node:child_process';
 import { closeSync, mkdirSync, openSync, rmSync, writeFileSync, writeSync } from 'node:fs';

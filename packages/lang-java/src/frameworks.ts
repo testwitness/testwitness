@@ -5,7 +5,6 @@
  *
  * Everything here is data. The logic that applies it lives in inventory.ts.
  */
-// @ts-nocheck
 
 import type { AssertionKind } from '@testwitness/core';
 

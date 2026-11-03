@@ -1,7 +1,6 @@
 /**
  * Python language front end for testwitness: pytest and unittest.
  */
-// @ts-nocheck
 
 import type { FrameworkProfile, LanguageFrontEnd, TestInventory } from '@testwitness/core';
 import { buildInventory } from './inventory.js';

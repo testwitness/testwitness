@@ -1,4 +1,3 @@
-// @ts-nocheck
 import os from 'node:os'
 
 const isWindows = os.platform() === 'win32'

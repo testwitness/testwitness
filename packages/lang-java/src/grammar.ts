@@ -2,7 +2,6 @@
  * Resolves and loads the bundled tree-sitter-java grammar and compiles the
  * query files under queries/ once per process.
  */
-// @ts-nocheck
 
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';

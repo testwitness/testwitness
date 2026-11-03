@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { addLine, total } from './cart';
 
 describe('checkout cart', () => {

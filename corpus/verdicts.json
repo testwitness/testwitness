@@ -360,6 +360,33 @@
     "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet"
   },
   {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "DownloadTests::test_download_no_safety_checker",
+    "label": "conditional"
+  },
+  {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "DownloadTests::test_cached_files_are_used_when_no_internet",
+    "label": "conditional"
+  },
+  {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet",
+    "label": "conditional"
+  },
+  {
     "slug": "huggingface-diffusers-14977",
     "split": "tuning",
     "ruleId": "R010",
@@ -374,150 +401,6 @@
     "severity": "low",
     "verdict": "missed",
     "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRVAEMemory::test_cpu_offload"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_with_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEModel::test_from_save_pretrained_dtype_inference"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_memory"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_training"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_group_offloading"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_group_offloading_with_layerwise_casting"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_group_offloading_with_disk"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_cpu_offload"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_disk_offload_without_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVAEMemory::test_disk_offload_with_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVocoderMemory::test_group_offloading"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVocoderMemory::test_group_offloading_with_layerwise_casting"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestMMAudioVocoderMemory::test_group_offloading_with_disk"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_cpu_offload"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_without_safetensors"
-  },
-  {
-    "slug": "huggingface-diffusers-14977",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_with_safetensors"
   },
   {
     "slug": "huggingface-transformers-49809",
@@ -552,6 +435,15 @@
     "subject": "TestPeftModelFusedLMHead"
   },
   {
+    "slug": "huggingface-trl-7645",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestAddFusedLMHeadLoss::test_forward_matches_reference_with_peft",
+    "label": "conditional"
+  },
+  {
     "slug": "l2beat-l2beat-13622",
     "split": "heldout",
     "ruleId": "R001",
@@ -570,34 +462,28 @@
   {
     "slug": "langchain-ai-langchain-37612",
     "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "TestXAIStandard::test_tool_calling"
-  },
-  {
-    "slug": "langchain-ai-langchain-37612",
-    "split": "heldout",
     "ruleId": "A001",
     "severity": "medium",
     "verdict": "fp",
     "subject": "test_web_search"
   },
   {
-    "slug": "langchain-ai-langchain-38365",
+    "slug": "langchain-ai-langchain-37612",
     "split": "heldout",
     "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "TestGroq::test_tool_choice"
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "TestXAIStandard::test_tool_calling",
+    "label": "one case"
   },
   {
     "slug": "langchain-ai-langchain-38365",
     "split": "heldout",
-    "ruleId": "R010",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "TestGroq::test_tool_choice"
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "TestGroq::test_tool_choice",
+    "label": "override"
   },
   {
     "slug": "microsoft-playwright-38187",
@@ -1256,6 +1142,14 @@
     "subject": ".github/workflows/ci.yml"
   },
   {
+    "slug": "puppeteer-puppeteer-8632",
+    "split": "heldout",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "run: npm run test:firefox"
+  },
+  {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
@@ -1838,6 +1732,15 @@
     "severity": "high",
     "verdict": "missed",
     "subject": "test_kd_tree_numerical_consistency"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-34555",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_thread_safety",
+    "label": "conditional"
   },
   {
     "slug": "sktime-sktime-11669",

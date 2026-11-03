@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { beforeAll, describe, expect, it, test } from 'vitest'
 import { hasWindowsUnicodeFsBug } from '../../hasWindowsUnicodeFsBug'
 import {

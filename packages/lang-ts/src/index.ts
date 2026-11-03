@@ -5,7 +5,6 @@
  * per file by extension (see grammar.ts) and the inventory reports
  * `language: 'javascript'` for .js, .mjs, .cjs and .jsx files.
  */
-// @ts-nocheck
 
 import type { FrameworkProfile, LanguageFrontEnd, TestInventory } from '@testwitness/core';
 import { ALL_EXTENSIONS, JS_EXTENSIONS, TS_EXTENSIONS, TSX_EXTENSIONS, grammarForPath } from './grammar.js';

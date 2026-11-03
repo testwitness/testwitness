@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use strict';
 
 function post(entries, entry) {

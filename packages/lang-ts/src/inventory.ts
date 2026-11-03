@@ -7,7 +7,6 @@
  * enclosing test or container, and fills the fields defined in
  * docs/conventions.md.
  */
-// @ts-nocheck
 
 import { countParseErrors, normaliseText, parseSource, shortHash } from '@testwitness/core';
 import type { Assertion, AssertionKind, CatchAll, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';

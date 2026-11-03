@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { total } from './cart';
 import { assertTotal } from './test-helpers';
 import { cartChecks } from './cart-checks';

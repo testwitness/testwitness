@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Run the engine on selected entries and print all findings (no judging). usage: tsx corpus/_tools/triage.ts slug...
 import { loadCorpus, runEntry } from '../runner/corpus.js';
 import { fileURLToPath } from 'node:url';
