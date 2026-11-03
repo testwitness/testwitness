@@ -2,15 +2,15 @@
   {
     "ruleId": "R003",
     "severity": "medium",
-    "subject": "B2C User Flow Tests \u203a User flows (local account) \u203a Performs edit profile",
     "verdict": "tp",
-    "reason": "describe.skip added, covers this test"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "B2C User Flow Tests \u203a User flows (local account) \u203a Performs edit profile"
   },
   {
     "ruleId": "R003",
     "severity": "medium",
-    "subject": "B2C User Flow Tests \u203a User flows (msa account) \u203a Performs edit profile",
     "verdict": "tp",
-    "reason": "describe.skip added, covers this test"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "B2C User Flow Tests \u203a User flows (msa account) \u203a Performs edit profile"
   }
 ]

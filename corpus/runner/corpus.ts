@@ -59,7 +59,9 @@ export async function runEntry(e: CorpusEntry): Promise<Report> {
     git(repo, ['commit', '-q', '-m', 'head', '--allow-empty']);
     const headSha = git(repo, ['rev-parse', 'HEAD']).trim();
     const baseSha = git(repo, ['rev-parse', 'HEAD~1']).trim();
-    const { report } = await check({ cwd: repo, base: baseSha, head: headSha, junit: 'none/**/*.xml', format: 'json', quiet: true, log: () => {}, prTitle: e.meta.title ?? '' });
+    // V004 entries keep the PR body (pr-body.md); every other entry is checked against the title only.
+    const bodyFile = join(e.dir, 'pr-body.md');
+    const { report } = await check({ cwd: repo, base: baseSha, head: headSha, junit: 'none/**/*.xml', format: 'json', quiet: true, log: () => {}, prTitle: e.meta.title ?? '', ...(existsSync(bodyFile) ? { prBodyFile: bodyFile } : {}) });
     return report;
   } finally {
     rmSync(repo, { recursive: true, force: true });
@@ -87,7 +89,9 @@ export function subjectMatches(expected: string | undefined, actual: string | un
 /** Classify findings: expected ones are tp (or labelled fp when the label says so), unexpected ones on an honest entry are fp, expected but absent are missed. */
 export function judge(e: CorpusEntry, findings: Finding[]): Verdict[] {
   const out: Verdict[] = [];
-  const remaining = findings.filter((f) => f.ruleId !== 'V005' && f.ruleId !== 'V004');
+  // V004 is judged only on entries that carry the PR body (pr-body.md); title only entries cannot support or refute a claim.
+  const hasBody = existsSync(join(e.dir, 'pr-body.md'));
+  const remaining = findings.filter((f) => f.ruleId !== 'V005' && (f.ruleId !== 'V004' || hasBody));
   for (const x of e.expected) {
     const i = remaining.findIndex((f) => f.ruleId === x.ruleId && (x.severity === undefined || f.severity === x.severity) && subjectMatches(x.subject, f.subject) && (x.label === undefined || f.label === x.label));
     if (i === -1) {

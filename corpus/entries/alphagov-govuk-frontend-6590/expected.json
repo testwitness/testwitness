@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "Components \u203a Sass render \u203a all components \u203a does not use custom properties in shorthand properties",
+    "verdict": "tp",
+    "reason": "it.only added to a new test and merged; the sibling tests in the file stop running"
+  }
+]

@@ -1062,6 +1062,9 @@ function isTestMethod(m: MethodInfo, framework: JavaFramework): boolean {
   const lifecycle = new Set<string>();
   for (const t of frameworkTables) for (const n of t.lifecycleAnnotations) lifecycle.add(n);
   if (m.annotations.some((a) => testNames.has(a.name))) return true;
+  // An @Override of an inherited test that only delegates to super and carries a skip or ignore marker:
+  // JUnit inherits @Test from the superclass method, so this is the inherited test, now disabled.
+  if (m.annotations.some((a) => a.name === 'Override') && m.annotations.some((a) => /^(Disabled|Ignore|Disabled[A-Z]\w*)$/.test(a.name)) && isOverrideOnly(m.body)) return true;
   if (framework === 'testng') {
     // TestNG class level @Test makes every public instance method a test.
     const owner = m.containers[m.containers.length - 1];

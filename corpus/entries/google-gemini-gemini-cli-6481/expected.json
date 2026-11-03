@@ -2,15 +2,15 @@
   {
     "ruleId": "R003",
     "severity": "medium",
-    "subject": "IdeClient \u203a reads port from file and connects",
     "verdict": "tp",
-    "reason": "describe.skip added with no reason, covers this test"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "IdeClient \u203a reads port from file and connects"
   },
   {
     "ruleId": "R003",
     "severity": "medium",
-    "subject": "getIdeProcessId \u203a should return the pid of the parent process",
     "verdict": "tp",
-    "reason": "describe.skip added with no reason, covers this test"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "getIdeProcessId \u203a should return the pid of the parent process"
   }
 ]

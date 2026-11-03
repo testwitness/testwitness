@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/FoundationDB/fdb-record-layer/pull/3822",
+  "repo": "FoundationDB/fdb-record-layer",
+  "number": 3822,
+  "title": "Ignore test failures in nightly runs",
+  "merged_at": "2026-01-02T20:10:23Z",
+  "stars": 679,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "W003",
+  "split": "heldout",
+  "base_sha": "5eb94d81f204a48eec81f9424c666dc523cce985",
+  "head_sha": "da09e28d59f19027aff6be476dabce0ad5a1d296",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 0
+}

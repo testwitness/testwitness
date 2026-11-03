@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "subject": "task.ignoreFailures = true",
+    "verdict": "tp",
+    "reason": "Gradle Test tasks set ignoreFailures when the nightly property is present; engine misses it because gradle/testing.gradle is not treated as a command file"
+  }
+]

@@ -1035,3 +1035,11 @@ describe('override only', () => {
     expect(inv.tests.map((t) => [t.name, t.overrideOnly])).toEqual([['adds', true], ['real', undefined]]);
   });
 });
+
+describe('inherited test overridden to disable it', () => {
+  it('counts an @Override with @Disabled whose body only calls super as a test', async () => {
+    const src = `import org.junit.jupiter.api.Disabled;\nclass DockerTest extends BaseDockerTest {\n  @Override\n  @Disabled("flaky after segment drops")\n  public void test_runIndexTask_andKillData() {\n    super.test_runIndexTask_andKillData();\n  }\n  @Override\n  public void helper() { super.helper(); }\n}`;
+    const inv = await javaFrontEnd.inventory('DockerTest.java', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests.map((t) => [t.name, t.overrideOnly, t.markers[0]?.kind])).toEqual([['test_runIndexTask_andKillData', true, 'skip']]);
+  });
+});

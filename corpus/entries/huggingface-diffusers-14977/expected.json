@@ -12,5 +12,21 @@
     "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors",
     "verdict": "tp",
     "reason": "new override decorated with a module level xfail alias"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestMMAudioVAEModel::test_from_save_pretrained_dtype_inference",
+    "label": "override",
+    "verdict": "tp",
+    "reason": "override added to an existing class only to mark the inherited test xfail"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestMMAudioVocoderMemory::test_group_offloading",
+    "label": "override",
+    "verdict": "tp",
+    "reason": "override added to an existing class only to mark the inherited test xfail"
   }
 ]

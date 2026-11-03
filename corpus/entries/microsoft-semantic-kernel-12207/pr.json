@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/semantic-kernel/pull/12207",
+  "repo": "microsoft/semantic-kernel",
+  "number": 12207,
+  "title": ".Net: Improve docs for VectorData.Abstractions",
+  "merged_at": "2025-05-23T10:37:14Z",
+  "stars": 28726,
+  "license": "MIT",
+  "language": "csharp",
+  "category": "V004",
+  "split": "heldout",
+  "base_sha": "53e080e5fb81ea9fa12086ca95dad042cf891b48",
+  "head_sha": "cce1fdd7fa8792dbbe2de9463aa80d0fb027494b",
+  "files_changed": 30,
+  "additions": 152,
+  "deletions": 146
+}

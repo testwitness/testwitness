@@ -1,8 +1,7 @@
 [
   {
-    "ruleId": "W003",
-    "severity": "medium",
-    "subject": ".github/workflows/ecosystem-tests.yml",
+    "ruleId": "W002",
+    "severity": "high",
     "verdict": "tp",
     "reason": "continue-on-error: true added to the tester step"
   }

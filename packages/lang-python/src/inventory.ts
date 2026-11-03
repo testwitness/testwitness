@@ -245,8 +245,31 @@ function decoratorsOf(def: Node): Node[] {
   return parent.namedChildren.filter((c) => c.type === 'decorator');
 }
 
+/** Module level `NAME = pytest.mark.xfail(...)` style assignments, so `@NAME` resolves to the mark. */
+let markAliasScope: Map<string, Node> = new Map();
+
+function collectMarkAliases(root: Node): Map<string, Node> {
+  const out = new Map<string, Node>();
+  for (const stmt of statements(root)) {
+    if (stmt.type !== 'expression_statement') continue;
+    const a = stmt.namedChildren[0];
+    if (!a || a.type !== 'assignment') continue;
+    const left = a.childForFieldName('left');
+    const right = a.childForFieldName('right');
+    if (!left || !right || left.type !== 'identifier') continue;
+    const txt = right.text.replace(/\s+/g, '');
+    if (/^(pytest|pt|mark)\.?(mark\.)?(xfail|skip|skipif)\b/.test(txt) || /^(pytest\.)?mark\.(xfail|skip|skipif)\b/.test(txt)) out.set(left.text, unwrap(right));
+  }
+  return out;
+}
+
 function decoratorExpression(decorator: Node): Node | undefined {
-  return decorator.namedChildren.find((c) => c.type !== 'comment');
+  const e = decorator.namedChildren.find((c) => c.type !== 'comment');
+  if (e && e.type === 'identifier') {
+    const aliased = markAliasScope.get(e.text);
+    if (aliased) return aliased;
+  }
+  return e;
 }
 
 /** Enclosing class definitions, outermost first. Undefined when nested in a function. */
@@ -1014,6 +1037,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
   for (const name of profile.extraAssertions) helpers.add(name);
   const ctx: FileContext = { aliases, helpers, framework };
 
+  markAliasScope = collectMarkAliases(root);
   const fileMarkers = fileMarkersOf(root, grammar.queries.tests, aliases);
 
   // Pass 3: build each test case.

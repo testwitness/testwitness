@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/agent-framework/pull/8377",
+  "repo": "microsoft/agent-framework",
+  "number": 8377,
+  "title": ".NET: Temporarily skip flaky steering harness session reuse test",
+  "merged_at": "2026-09-15T10:06:50Z",
+  "stars": 14509,
+  "license": "MIT",
+  "language": "csharp",
+  "category": "V004",
+  "split": "heldout",
+  "base_sha": "7a82595cbd9e2efb06356ea81f6a6e4640e537b8",
+  "head_sha": "076845777e3e2352d9497c1c4bc6e129cd2674e9",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

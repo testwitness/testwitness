@@ -192,6 +192,12 @@ export const S004: Rule = {
 
 
 
+/** A workflow line that marks a step as running tests: a run or command line with a test command, or a step name that says so. */
+function isTestStepLine(l: string): boolean {
+  if (/^\s*(-\s+)?(run|command):/.test(l) && isTestCommandLine(stripYamlAndJson(l))) return true;
+  return /^\s*(-\s+)?name:\s*.*\b(unit tests?|tests?|specs?|e2e|integration tests?|verify)\b/i.test(l) && !/\b(lint|upload|download|build only|coverage upload)\b/i.test(l);
+}
+
 /** W002 continue-on-error added to a test step or job. */
 export const W002: Rule = {
   id: 'W002',
@@ -216,10 +222,10 @@ export const W002: Rule = {
       const lines = head.split('\n');
       for (const h of f.hunks) {
         h.added.forEach((raw, i) => {
-          if (!/^\s*continue-on-error:\s*true\b/.test(raw)) return;
+          if (!/^\s*(-\s+)?continue-on-error:\s*true\b/.test(raw)) return;
           if (removed.has(raw.trim())) return;
           const lineNo = h.headStart + i;
-          const indent = raw.match(/^\s*/)![0].length;
+          const indent = raw.match(/^\s*/)![0].length + (/^\s*-\s/.test(raw) ? 2 : 0);
           // Walk the enclosing block (same indent, until a line with less indent that is not a list continuation) for a test command.
           let testLine: string | undefined;
           for (const dir of [1, -1]) {
@@ -229,7 +235,7 @@ export const W002: Rule = {
               const ind = l.match(/^\s*/)![0].length;
               if (ind < indent && !/^\s*-\s/.test(l)) break;
               if (ind < indent - 2) break;
-              if (/^\s*(-\s+)?run:/.test(l) && isTestCommandLine(stripYamlAndJson(l))) {
+              if (isTestStepLine(l)) {
                 testLine = l.trim().replace(/^-\s+/, '');
                 break;
               }
@@ -245,7 +251,7 @@ export const W002: Rule = {
               if (!l.trim()) continue;
               const ind = l.match(/^\s*/)![0].length;
               if (ind < jobIndent) break;
-              if (/^\s*(-\s+)?run:/.test(l) && isTestCommandLine(stripYamlAndJson(l))) {
+              if (isTestStepLine(l)) {
                 testLine = l.trim().replace(/^-\s+/, '');
                 break;
               }

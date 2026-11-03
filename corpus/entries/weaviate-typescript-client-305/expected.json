@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "Testing of the collection.config namespace \u203a should be able update the config of a collection",
+    "verdict": "tp",
+    "reason": "it.only added to an existing integration test and merged"
+  }
+]

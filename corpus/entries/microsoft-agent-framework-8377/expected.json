@@ -1,0 +1,18 @@
+[
+  {
+    "ruleId": "V004",
+    "severity": "medium",
+    "subject": "added-tests",
+    "verdict": "tp",
+    "reason": "checked box says new tests were added; the diff adds no test",
+    "label": "unsupported"
+  },
+  {
+    "ruleId": "V004",
+    "severity": "low",
+    "subject": "tests-pass",
+    "label": "unreadable",
+    "verdict": "fp",
+    "reason": "tests pass claim cannot be checked without results; expected low signal"
+  }
+]

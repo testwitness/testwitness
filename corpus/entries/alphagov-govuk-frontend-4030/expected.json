@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "Common JS utilities \u203a isSupported \u203a returns true if the govuk-frontend-supported class is set",
+    "verdict": "tp",
+    "reason": "describe.only added and merged"
+  },
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "Common JS utilities \u203a isSupported \u203a returns false if the govuk-frontend-supported class is not set",
+    "verdict": "tp",
+    "reason": "describe.only added and merged"
+  }
+]

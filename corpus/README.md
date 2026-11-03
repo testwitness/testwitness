@@ -73,9 +73,9 @@ Slug is `<owner>-<repo>-<number>` in lower case.
 - `skip`: a conditional skip added for a platform or optional dependency with a reason.
 - `deleted`: a test deleted because the feature it covered was removed.
 - `tp`: the first five clearly weakened tests (true positives), kept separate from the controls.
-- `R001`, `R002`, `R003`, `R004`, `R010`, `A001`, `A002`, `O002`, `W003`: true positive entries collected per rule; the category is the rule id the entry was collected for and every finding in expected.json has verdict `tp`. Severities follow the rule defaults (R002 high, R010 low) and the catalogue notes (R004 medium when strict with an issue reference).
+- `R001`, `R002`, `R003`, `R004`, `R005`, `R010`, `A001`, `A002`, `O002`, `W003`, `V004`: true positive entries collected per rule; the category is the rule id the entry was collected for and every finding in expected.json has verdict `tp`. Severities follow the rule defaults (R002 high, R010 low) and the catalogue notes (R004 medium when strict with an issue reference).
 
-A `pr-body.md` file (PR body with mentions and sign off lines stripped) is stored only for V004 entries; none were collected yet.
+A `pr-body.md` file (PR body with mentions and sign off lines stripped) is stored only for V004 entries. The corpus runner passes it to the engine as the PR body when present; every other entry is checked against the title only.
 
 ## Rule ids used in expected.json
 

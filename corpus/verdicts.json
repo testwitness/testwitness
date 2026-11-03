@@ -1,5 +1,54 @@
 [
   {
+    "slug": "alphagov-govuk-frontend-4030",
+    "split": "tuning",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "Common JS utilities › isSupported › returns true if the govuk-frontend-supported class is set"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-4030",
+    "split": "tuning",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "Common JS utilities › isSupported › returns false if the govuk-frontend-supported class is not set"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-4030",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "errors › SupportError › is an instance of GOVUKFrontendError",
+    "label": "smoke"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-6590",
+    "split": "tuning",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-6590",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-6590",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Components › Sass render › renders CSS for all components"
+  },
+  {
     "slug": "apache-camel-13941",
     "split": "heldout",
     "ruleId": "R003",
@@ -12,8 +61,9 @@
     "split": "heldout",
     "ruleId": "R003",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "IngestionBackwardCompatibilityDockerTest#test_runIndexTask_andKillData"
+    "verdict": "tp",
+    "subject": "IngestionBackwardCompatibilityDockerTest#test_runIndexTask_andKillData",
+    "label": "override"
   },
   {
     "slug": "apache-iceberg-10802",
@@ -230,10 +280,10 @@
   {
     "slug": "eslint-eslint-20818",
     "split": "tuning",
-    "ruleId": "W003",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": ".github/workflows/ecosystem-tests.yml"
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "run: npm run test:ecosystem -- --plugin all"
   },
   {
     "slug": "excalidraw-excalidraw-7213",
@@ -251,6 +301,14 @@
     "verdict": "expected-low",
     "subject": "textWysiwyg › should bump the version of a labeled arrow when the label is updated",
     "label": "refactored"
+  },
+  {
+    "slug": "expo-entity-305",
+    "split": "heldout",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "postgres entity integration › BYTEA fields › supports BYTEA fields"
   },
   {
     "slug": "fastapi-fastapi-16545",
@@ -284,6 +342,14 @@
     "severity": "medium",
     "verdict": "missed",
     "subject": "ProjectWatchTest#shouldSendEventWhenModuleRootsChange"
+  },
+  {
+    "slug": "foundationdb-fdb-record-layer-3822",
+    "split": "heldout",
+    "ruleId": "W003",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "task.ignoreFailures = true"
   },
   {
     "slug": "google-gemini-gemini-cli-6481",
@@ -339,32 +405,8 @@
     "slug": "huggingface-diffusers-13454",
     "split": "heldout",
     "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "DownloadTests::test_download_no_safety_checker"
-  },
-  {
-    "slug": "huggingface-diffusers-13454",
-    "split": "heldout",
-    "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "DownloadTests::test_cached_files_are_used_when_no_internet"
-  },
-  {
-    "slug": "huggingface-diffusers-13454",
-    "split": "heldout",
-    "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet"
-  },
-  {
-    "slug": "huggingface-diffusers-13454",
-    "split": "heldout",
-    "ruleId": "R004",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "DownloadTests::test_download_no_safety_checker",
     "label": "conditional"
   },
@@ -373,7 +415,7 @@
     "split": "heldout",
     "ruleId": "R004",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "DownloadTests::test_cached_files_are_used_when_no_internet",
     "label": "conditional"
   },
@@ -382,7 +424,7 @@
     "split": "heldout",
     "ruleId": "R004",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet",
     "label": "conditional"
   },
@@ -391,7 +433,7 @@
     "split": "tuning",
     "ruleId": "R010",
     "severity": "low",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "TestKandinsky6SRVAEMemory::test_cpu_offload"
   },
   {
@@ -399,8 +441,106 @@
     "split": "tuning",
     "ruleId": "R010",
     "severity": "low",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "TestMMAudioVAEModel::test_from_save_pretrained_dtype_inference",
+    "label": "override"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "TestMMAudioVocoderMemory::test_group_offloading",
+    "label": "override"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_with_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_memory"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_training"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_group_offloading"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestMMAudioVAEMemory::test_disk_offload_with_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_with_safetensors"
   },
   {
     "slug": "huggingface-transformers-49809",
@@ -430,16 +570,8 @@
     "slug": "huggingface-trl-7645",
     "split": "heldout",
     "ruleId": "R004",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": "TestPeftModelFusedLMHead"
-  },
-  {
-    "slug": "huggingface-trl-7645",
-    "split": "heldout",
-    "ruleId": "R004",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "TestAddFusedLMHeadLoss::test_forward_matches_reference_with_peft",
     "label": "conditional"
   },
@@ -454,10 +586,11 @@
   {
     "slug": "langchain-ai-langchain-37612",
     "split": "heldout",
-    "ruleId": "R010",
-    "severity": "low",
-    "verdict": "missed",
-    "subject": "TestXAIStandard::test_tool_calling"
+    "ruleId": "R004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestXAIStandard::test_tool_calling",
+    "label": "one case"
   },
   {
     "slug": "langchain-ai-langchain-37612",
@@ -468,15 +601,6 @@
     "subject": "test_web_search"
   },
   {
-    "slug": "langchain-ai-langchain-37612",
-    "split": "heldout",
-    "ruleId": "R004",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "TestXAIStandard::test_tool_calling",
-    "label": "one case"
-  },
-  {
     "slug": "langchain-ai-langchain-38365",
     "split": "heldout",
     "ruleId": "R004",
@@ -484,6 +608,24 @@
     "verdict": "tp",
     "subject": "TestGroq::test_tool_choice",
     "label": "override"
+  },
+  {
+    "slug": "microsoft-agent-framework-8377",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-agent-framework-8377",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
   },
   {
     "slug": "microsoft-playwright-38187",
@@ -540,6 +682,96 @@
     "severity": "high",
     "verdict": "tp",
     "subject": "packages/web/src/shared/imageDiffView.spec.tsx"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-12207",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-12207",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-12910",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-12910",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-13464",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-13464",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-13524",
+    "split": "tuning",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-13524",
+    "split": "tuning",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-9049",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "added-tests",
+    "label": "unsupported"
+  },
+  {
+    "slug": "microsoft-semantic-kernel-9049",
+    "split": "heldout",
+    "ruleId": "V004",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "tests-pass",
+    "label": "unreadable"
   },
   {
     "slug": "mlflow-mlflow-8415",
@@ -1128,25 +1360,25 @@
   {
     "slug": "puppeteer-puppeteer-8368",
     "split": "tuning",
-    "ruleId": "W003",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": ".github/workflows/main.yml"
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "name: Run browser tests"
   },
   {
-    "slug": "puppeteer-puppeteer-8632",
-    "split": "heldout",
-    "ruleId": "W003",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": ".github/workflows/ci.yml"
+    "slug": "puppeteer-puppeteer-8368",
+    "split": "tuning",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "name: Run unit tests on Firefox"
   },
   {
     "slug": "puppeteer-puppeteer-8632",
     "split": "heldout",
     "ruleId": "W002",
     "severity": "high",
-    "verdict": "fp",
+    "verdict": "tp",
     "subject": "run: npm run test:firefox"
   },
   {
@@ -1729,16 +1961,8 @@
     "slug": "scikit-learn-scikit-learn-34555",
     "split": "heldout",
     "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "test_kd_tree_numerical_consistency"
-  },
-  {
-    "slug": "scikit-learn-scikit-learn-34555",
-    "split": "heldout",
-    "ruleId": "R004",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "test_thread_safety",
     "label": "conditional"
   },
@@ -1887,6 +2111,31 @@
     "verdict": "expected-low",
     "subject": "Unicode path › spa fallback",
     "label": "conditional"
+  },
+  {
+    "slug": "weaviate-typescript-client-305",
+    "split": "heldout",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "Testing of the collection.config namespace › should be able update the config of a collection"
+  },
+  {
+    "slug": "weaviate-typescript-client-373",
+    "split": "tuning",
+    "ruleId": "R005",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "Testing of the collection.config namespace › should be able update the config of a collection with legacy vectors"
+  },
+  {
+    "slug": "weaviate-typescript-client-373",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Testing of the collection.config namespace › should be able get the config of a collection without generics",
+    "label": "replaced"
   },
   {
     "slug": "wevm-ox-187",

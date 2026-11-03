@@ -156,9 +156,14 @@ describe('overrides and conditional xfail', () => {
   it('R003 reports an added skipped override only test as medium with label override; R010 and O001 stay quiet', async () => {
     const { O001 } = await import('./O.js');
     const t2 = { ...t({ name: 'adds', container: ['CartTest'], body: 'super.adds();', markers: [{ marker: '@Disabled', kind: 'skip' as const, constant: true }] }), overrideOnly: true };
-    const pair = { file: changedFile(P), base: inventory(P, []), head: inventory(P, [t2]) };
+    const sibling = t({ name: 'other', container: ['CartTest'], body: 'x' });
+    const pair = { file: changedFile(P), base: inventory(P, [sibling]), head: inventory(P, [sibling, t2]) };
     expect((await R003.run(context({ pairs: [pair] }), {}))[0]).toMatchObject({ severity: 'medium', label: 'override' });
     expect(await R010.run(context({ pairs: [pair] }), {})).toEqual([]);
+    // In a brand new class the override is a test added then skipped (R010 low), not a conversion.
+    const fresh = { file: changedFile(P, 'added'), head: inventory(P, [t2]) };
+    expect(await R003.run(context({ pairs: [fresh] }), {})).toEqual([]);
+    expect((await R010.run(context({ pairs: [fresh] }), {}))[0]).toMatchObject({ severity: 'low' });
     const plain = { ...t({ name: 'b', container: ['CartTest'], body: 'super.b();' }), overrideOnly: true };
     expect(await O001.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [plain]) }] }), {})).toEqual([]);
   });
@@ -169,6 +174,8 @@ describe('overrides and conditional xfail', () => {
     const perCase = t({ name: 'a', body: 'x', markers: [{ marker: 'pytest.param(marks=pytest.mark.xfail)', kind: 'xfail', constant: true }] });
     expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [perCase]) }] }), {}))[0]).toMatchObject({ severity: 'medium', label: 'one case' });
     const over = { ...t({ name: 'c', body: 'super().c()', markers: [{ marker: 'pytest.mark.xfail', kind: 'xfail' as const, constant: true }] }), overrideOnly: true };
-    expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, []), head: inventory(P, [over]) }] }), {}))[0]).toMatchObject({ severity: 'high', label: 'override' });
+    const sib = t({ name: 'd', body: 'y' });
+    expect((await R004.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [sib]), head: inventory(P, [sib, over]) }] }), {}))[0]).toMatchObject({ severity: 'high', label: 'override' });
+    expect(await R004.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [over]) }] }), {})).toEqual([]);
   });
 });

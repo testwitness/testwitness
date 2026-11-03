@@ -2,8 +2,8 @@
   {
     "ruleId": "R003",
     "severity": "medium",
-    "subject": "RestartBrokerBeforeCommitIT#commitShouldThrowJmsException",
     "verdict": "tp",
-    "reason": "class level @Disabled with a free text reason covers this test"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "RestartBrokerBeforeCommitIT#commitShouldThrowJmsException"
   }
 ]

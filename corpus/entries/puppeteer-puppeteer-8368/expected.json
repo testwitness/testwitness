@@ -1,8 +1,13 @@
 [
   {
-    "ruleId": "W003",
-    "severity": "medium",
-    "subject": ".github/workflows/main.yml",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "continue-on-error: true added to Firefox test steps"
+  },
+  {
+    "ruleId": "W002",
+    "severity": "high",
     "verdict": "tp",
     "reason": "continue-on-error: true added to Firefox test steps"
   }

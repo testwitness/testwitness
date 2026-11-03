@@ -1,0 +1,122 @@
+[
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/CollectionJsonModelBuilder.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/CollectionModel.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/CollectionModelBuilder.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/CollectionModelBuildingOptions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/DataPropertyModel.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/Filter/FilterTranslationPreprocessor.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/KeyPropertyModel.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/PropertyModel.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/ProviderServices/VectorPropertyModel.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordAttributes/VectorStoreVectorAttribute.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/DistanceFunction.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/IndexKind.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/VectorStoreDataProperty.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/VectorStoreKeyProperty.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/VectorStoreProperty.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordDefinition/VectorStoreVectorProperty.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/RecordOptions/FilteredRecordRetrievalOptions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/HybridSearchOptions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/IKeywordHybridSearchable.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/IVectorSearchable.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/RecordSearchOptions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/VectorSearchExtensions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorSearch/VectorSearchFilter.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStore.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreCollection.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreCollectionMetadata.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreCollectionOptions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreException.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreExtensions.cs",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Connectors/VectorData.Abstractions/VectorStorage/VectorStoreMetadata.cs",
+    "status": "modified"
+  }
+]

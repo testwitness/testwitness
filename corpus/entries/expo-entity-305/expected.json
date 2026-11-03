@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "postgres entity integration \u203a BYTEA fields \u203a supports BYTEA fields",
+    "verdict": "tp",
+    "reason": "describe.only added on a new describe block and merged"
+  }
+]

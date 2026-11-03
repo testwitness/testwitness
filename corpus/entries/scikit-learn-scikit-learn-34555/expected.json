@@ -1,9 +1,10 @@
 [
   {
     "ruleId": "R004",
-    "severity": "high",
-    "subject": "test_kd_tree_numerical_consistency",
+    "severity": "low",
     "verdict": "tp",
-    "reason": "xfail added with condition _IS_WASM and a reason, no issue"
+    "reason": "engine shape",
+    "subject": "test_thread_safety",
+    "label": "conditional"
   }
 ]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/semantic-kernel/pull/13524",
+  "repo": "microsoft/semantic-kernel",
+  "number": 13524,
+  "title": ".Net: Update Microsoft.SemanticKernel packages from 1.68.0 to 1.70.0",
+  "merged_at": "2026-02-09T11:13:24Z",
+  "stars": 28726,
+  "license": "MIT",
+  "language": "csharp",
+  "category": "V004",
+  "split": "tuning",
+  "base_sha": "b0d621f2a682f4d6915c4a9b44384353cbbfdbe9",
+  "head_sha": "dbafbd1dc8555ce1723baaab2f757f05ce90ef8a",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

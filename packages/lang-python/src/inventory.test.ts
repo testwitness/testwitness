@@ -1130,3 +1130,11 @@ describe('per case marks and overrides', () => {
     expect(inv.tests.map((t) => [t.name, t.overrideOnly])).toEqual([['test_a', true], ['test_b', true], ['test_c', undefined]]);
   });
 });
+
+describe('module level mark aliases', () => {
+  it('resolves @NAME to the pytest.mark it was assigned', async () => {
+    const src = `import pytest\nSLOW_FAIL = pytest.mark.xfail(reason="too slow", strict=False)\nNEEDS_GPU = pytest.mark.skip(reason="no gpu")\n\n@SLOW_FAIL\ndef test_a():\n    assert 1\n\n@NEEDS_GPU\ndef test_b():\n    assert 1\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    expect(inv.tests.map((t) => [t.name, t.markers[0]?.kind, t.markers[0]?.reason])).toEqual([['test_a', 'xfail', 'too slow'], ['test_b', 'skip', 'no gpu']]);
+  });
+});

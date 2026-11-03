@@ -4,6 +4,15 @@ import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, sub
 
 const RULE_SINCE = '0.1.0';
 
+/** The test's class or file existed before this PR (an override there converts an inherited test; in a new class it is an added test). */
+function classExisted(pair: { file: { status: string }; base?: { tests: TestCase[] } }, t: TestCase): boolean {
+  if (pair.file.status === 'added' || !pair.base) return false;
+  if (t.container.length === 0) return true;
+  if (pair.base.tests.some((b) => b.container.join('/') === t.container.join('/'))) return true;
+  // The base file existed but had no tests of its own in that class (all inherited): still an existing class.
+  return pair.base.tests.length === 0;
+}
+
 function snippet(t: TestCase): string {
   return `${t.qualifiedName}|${t.bodyHash}`;
 }
@@ -226,8 +235,8 @@ export const R003: Rule = {
       // A test deleted and re added under the same name with a skip (moved within the file, or into another describe) is a new skip.
       if (change.kind === 'added' && isSkipped(change.head)) {
         const deleted = allChanges([pair]).find((c) => c.change.kind === 'deleted' && c.change.base.name === change.head.name && !isSkipped(c.change.base));
-        // An override whose body only calls the inherited test exists to disable that test.
-        if (!deleted && !change.head.overrideOnly) continue;
+        // An override whose body only calls the inherited test exists to disable that test, when the class already existed.
+        if (!deleted && !(change.head.overrideOnly && classExisted(pair, change.head))) continue;
         const head = change.head;
         const marker = head.markers.find((m) => ((m.kind === 'skip' || m.kind === 'todo' || m.kind === 'fixme') && m.constant !== false) || (m.kind === 'conditional-skip' && m.constant === true))!;
         let sev: Severity = exercisesChangedProduction(pair.head, pair.file.path, ctx) ? 'high' : 'medium';
@@ -328,7 +337,7 @@ export const R004: Rule = {
     for (const { pair, change } of allChanges(ctx.pairs)) {
       if (change.kind === 'added') {
         const t = change.head;
-        if (t.overrideOnly && t.markers.some((x) => x.kind === 'xfail')) report(pair, t, undefined, '; the override only marks the inherited test');
+        if (t.overrideOnly && classExisted(pair, t) && t.markers.some((x) => x.kind === 'xfail')) report(pair, t, undefined, '; the override only marks the inherited test');
         continue;
       }
       if (change.kind !== 'modified' && change.kind !== 'renamed') continue;
@@ -437,7 +446,8 @@ export const R010: Rule = {
       const t = change.head;
       if (!isSkipped(t) && !isXfail(t)) continue;
       if (allChanges([pair]).some((c) => c.change.kind === 'deleted' && c.change.base.name === t.name)) continue; // reported by R003
-      if (t.overrideOnly) continue; // reported by R003 or R004 as an override
+      // An override in a class that existed is reported by R003 or R004; in a new class it is a test added then skipped.
+      if (t.overrideOnly && classExisted(pair, t)) continue;
 
       const m = t.markers.find((x) => x.kind !== 'focus' && x.kind !== 'conditional-skip')!;
       out.push(

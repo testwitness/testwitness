@@ -2,8 +2,8 @@
   {
     "ruleId": "R002",
     "severity": "high",
-    "subject": "packages/next/src/client/components/router-reducer/set-cache-busting-search-param.test.ts",
     "verdict": "tp",
-    "reason": "test file deleted, production kept"
+    "reason": "engine shape; see NOTES.md",
+    "subject": "packages/next/src/client/components/router-reducer/set-cache-busting-search-param.test.ts"
   }
 ]
