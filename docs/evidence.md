@@ -32,7 +32,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/download-artifact@v4
         with: { name: junit, path: results }
-      - uses: testwitness/testwitness@v1
+      - uses: testwitness/testwitness@v0
         with: { junit: "results/**/*.xml" }
 ```
 

@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: testwitness/testwitness@v1
+      - uses: testwitness/testwitness@v0
         with:
           junit: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
