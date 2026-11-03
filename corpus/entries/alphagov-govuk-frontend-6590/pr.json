@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/alphagov/govuk-frontend/pull/6590",
+  "repo": "alphagov/govuk-frontend",
+  "number": 6590,
+  "title": "Move calls to `govuk-functional-colour` out of shorthand parameters",
+  "merged_at": "2026-01-13T10:43:55Z",
+  "stars": 1477,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "2f35774139aa826dd0b568e994ad628dc2dea535",
+  "head_sha": "cfbf579994c6cd44845382ae5f57a9f3a25146d6",
+  "files_changed": 28,
+  "additions": 129,
+  "deletions": 47
+}

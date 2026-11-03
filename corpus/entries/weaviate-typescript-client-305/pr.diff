@@ -1,0 +1,167 @@
+diff --git a/.github/workflows/main.yaml b/.github/workflows/main.yaml
+index 335f89d..2d34792 100644
+--- a/.github/workflows/main.yaml
++++ b/.github/workflows/main.yaml
+@@ -10,10 +10,10 @@ env:
+   WEAVIATE_124: 1.24.26
+   WEAVIATE_125: 1.25.34
+   WEAVIATE_126: 1.26.17
+-  WEAVIATE_127: 1.27.15
+-  WEAVIATE_128: 1.28.11
+-  WEAVIATE_129: 1.29.1
+-  WEAVIATE_130: 1.30.1
++  WEAVIATE_127: 1.27.27
++  WEAVIATE_128: 1.28.16
++  WEAVIATE_129: 1.29.8
++  WEAVIATE_130: 1.30.7
+   WEAVIATE_131: 1.31.0
+ 
+ concurrency:
+diff --git a/src/collections/config/classes.ts b/src/collections/config/classes.ts
+index 7c7fdc6..a8524de 100644
+--- a/src/collections/config/classes.ts
++++ b/src/collections/config/classes.ts
+@@ -23,6 +23,7 @@ import {
+   GenerativeConfig,
+   GenerativeSearch,
+   ModuleConfig,
++  PropertyDescriptionsUpdate,
+   Reranker,
+   RerankerConfig,
+   VectorIndexType,
+@@ -32,10 +33,12 @@ export class MergeWithExisting {
+   static schema(
+     current: WeaviateClass,
+     supportsNamedVectors: boolean,
+-    update?: CollectionConfigUpdate
++    update?: CollectionConfigUpdate<any>
+   ): WeaviateClass {
+     if (update === undefined) return current;
+     if (update.description !== undefined) current.description = update.description;
++    if (update.propertyDescriptions !== undefined)
++      current.properties = MergeWithExisting.properties(current.properties, update.propertyDescriptions);
+     if (update.generative !== undefined)
+       current.moduleConfig = MergeWithExisting.generative(current.moduleConfig, update.generative);
+     if (update.invertedIndex !== undefined)
+@@ -74,6 +77,18 @@ export class MergeWithExisting {
+     return current;
+   }
+ 
++  static properties(
++    current: WeaviateClass['properties'],
++    update: PropertyDescriptionsUpdate<any>
++  ): WeaviateClass['properties'] {
++    if (current === undefined) throw Error('Properties are missing from the class schema.');
++    if (current.length === 0) return current;
++    return current.map((property) => ({
++      ...property,
++      description: update[property.name!] ?? property.description,
++    }));
++  }
++
+   static generative(
+     current: WeaviateModuleConfig,
+     update: ModuleConfig<GenerativeSearch, GenerativeConfig>
+diff --git a/src/collections/config/index.ts b/src/collections/config/index.ts
+index ee982d3..e03533a 100644
+--- a/src/collections/config/index.ts
++++ b/src/collections/config/index.ts
+@@ -87,7 +87,7 @@ const config = <T>(
+         )
+       ).then(() => this.getShards());
+     },
+-    update: (config?: CollectionConfigUpdate) => {
++    update: (config?: CollectionConfigUpdate<T>) => {
+       return getRaw()
+         .then(async (current) =>
+           MergeWithExisting.schema(
+@@ -164,10 +164,10 @@ export interface Config<T> {
+    *
+    * Use the `weaviate.classes.Reconfigure` class to generate the necessary configuration objects for this method.
+    *
+-   * @param {CollectionConfigUpdate} [config] The configuration to update. Only a subset of the actual collection configuration can be updated.
++   * @param {CollectionConfigUpdate<T>} [config] The configuration to update. Only a subset of the actual collection configuration can be updated.
+    * @returns {Promise<void>} A promise that resolves when the collection has been updated.
+    */
+-  update: (config?: CollectionConfigUpdate) => Promise<void>;
++  update: (config?: CollectionConfigUpdate<T>) => Promise<void>;
+ }
+ 
+ export class VectorIndex {
+diff --git a/src/collections/config/integration.test.ts b/src/collections/config/integration.test.ts
+index 2e63b8b..ead9672 100644
+--- a/src/collections/config/integration.test.ts
++++ b/src/collections/config/integration.test.ts
+@@ -511,7 +511,7 @@ describe('Testing of the collection.config namespace', () => {
+     expect(notUpdated?.status).toEqual('READY');
+   });
+ 
+-  it('should be able update the config of a collection', async () => {
++  it.only('should be able update the config of a collection', async () => {
+     const collectionName = 'TestCollectionConfigUpdate';
+     const collection = await client.collections.create({
+       name: collectionName,
+@@ -520,11 +520,23 @@ describe('Testing of the collection.config namespace', () => {
+           name: 'testProp',
+           dataType: 'text',
+         },
++        {
++          name: 'testProp2',
++          dataType: 'text',
++        },
+       ],
+       vectorizers: weaviate.configure.vectorizer.none(),
+     });
++    const supportsUpdatingPropertyDescriptions = await client
++      .getWeaviateVersion()
++      .then((ver) => ver.isAtLeast(1, 27, 0));
+     const config = await collection.config
+       .update({
++        propertyDescriptions: supportsUpdatingPropertyDescriptions
++          ? {
++              testProp: 'This is a test property',
++            }
++          : undefined,
+         vectorizers: weaviate.reconfigure.vectorizer.update({
+           vectorIndexConfig: weaviate.reconfigure.vectorIndex.hnsw({
+             quantizer: weaviate.reconfigure.vectorIndex.quantizer.pq(),
+@@ -539,6 +551,18 @@ describe('Testing of the collection.config namespace', () => {
+       {
+         name: 'testProp',
+         dataType: 'text',
++        description: supportsUpdatingPropertyDescriptions ? 'This is a test property' : undefined,
++        indexRangeFilters: false,
++        indexSearchable: true,
++        indexFilterable: true,
++        indexInverted: false,
++        vectorizerConfig: undefined,
++        nestedProperties: undefined,
++        tokenization: 'word',
++      },
++      {
++        name: 'testProp2',
++        dataType: 'text',
+         description: undefined,
+         indexRangeFilters: false,
+         indexSearchable: true,
+diff --git a/src/collections/config/types/index.ts b/src/collections/config/types/index.ts
+index 04630b1..8936002 100644
+--- a/src/collections/config/types/index.ts
++++ b/src/collections/config/types/index.ts
+@@ -104,8 +104,15 @@ export type CollectionConfig = {
+   vectorizers: VectorConfig;
+ };
+ 
+-export type CollectionConfigUpdate = {
++export type PropertyDescriptionsUpdate<T> = T extends undefined
++  ? Record<string, string>
++  : {
++      [Property in keyof T]: string;
++    };
++
++export type CollectionConfigUpdate<T> = {
+   description?: string;
++  propertyDescriptions?: PropertyDescriptionsUpdate<T>;
+   generative?: ModuleConfig<GenerativeSearch, GenerativeConfig>;
+   invertedIndex?: InvertedIndexConfigUpdate;
+   multiTenancy?: MultiTenancyConfigUpdate;

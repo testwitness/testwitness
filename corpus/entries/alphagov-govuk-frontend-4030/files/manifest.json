@@ -1,0 +1,122 @@
+[
+  {
+    "path": "docs/contributing/coding-standards/js.md",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/common/index.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/common/index.unit.test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/accordion/accordion.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/accordion/accordion.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/button/button.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/button/button.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/character-count/character-count.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/character-count/character-count.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/error-summary/error-summary.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/error-summary/error-summary.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/header/header.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/header/header.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/radios/radios.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/radios/radios.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/skip-link/skip-link.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/skip-link/skip-link.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/tabs/tabs.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/tabs/tabs.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/errors/index.mjs",
+    "status": "added"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/errors/index.unit.test.mjs",
+    "status": "added"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/govuk-frontend-component.mjs",
+    "status": "added"
+  },
+  {
+    "path": "packages/govuk-frontend/tasks/build/package.test.mjs",
+    "status": "modified"
+  },
+  {
+    "path": "shared/helpers/puppeteer.js",
+    "status": "modified"
+  }
+]

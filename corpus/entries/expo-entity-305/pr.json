@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/expo/entity/pull/305",
+  "repo": "expo/entity",
+  "number": 305,
+  "title": "feat: add support for Buffer fields",
+  "merged_at": "2025-07-29T20:26:19Z",
+  "stars": 162,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "heldout",
+  "base_sha": "9a03fdb7ba7b4d8d7e868ba21e8ac603be1e353a",
+  "head_sha": "ed20398d936befcb148ed90d63723a5e5d0e33d5",
+  "files_changed": 8,
+  "additions": 113,
+  "deletions": 1
+}

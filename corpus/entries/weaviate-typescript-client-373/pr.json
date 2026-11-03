@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/weaviate/typescript-client/pull/373",
+  "repo": "weaviate/typescript-client",
+  "number": 373,
+  "title": "Add latest weaviate versions to CI testing",
+  "merged_at": "2025-11-28T11:14:18Z",
+  "stars": 101,
+  "license": "BSD-3-Clause",
+  "language": "typescript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "9a2fd870749c484d68f254e708f836df310717dc",
+  "head_sha": "0469b73705e16cab1e01b580492a0eda3d50e9b6",
+  "files_changed": 4,
+  "additions": 34,
+  "deletions": 22
+}

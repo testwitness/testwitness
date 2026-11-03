@@ -1,0 +1,34 @@
+[
+  {
+    "path": "packages/entity-cache-adapter-redis/src/RedisCommon.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-full-integration-test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-integration-test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity-cache-adapter-redis/src/__testfixtures__/RedisTestEntity.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity-database-adapter-knex/src/__integration-tests__/PostgresEntityIntegration-test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity-database-adapter-knex/src/__testfixtures__/PostgresTestEntity.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity/src/EntityFields.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/entity/src/__tests__/EntityFields-test.ts",
+    "status": "modified"
+  }
+]

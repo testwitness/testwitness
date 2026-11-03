@@ -1,0 +1,18 @@
+[
+  {
+    "path": ".github/workflows/main.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "src/collections/config/integration.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/connection/integration.test.ts",
+    "status": "modified"
+  }
+]

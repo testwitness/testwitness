@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/weaviate/typescript-client/pull/305",
+  "repo": "weaviate/typescript-client",
+  "number": 305,
+  "title": "Add client-side logic allowing to update property descriptions",
+  "merged_at": "2025-06-13T08:54:20Z",
+  "stars": 101,
+  "license": "BSD-3-Clause",
+  "language": "typescript",
+  "category": "R005",
+  "split": "heldout",
+  "base_sha": "364112b533c4ca0bb5aac2e0bbcc25cadb74ee3a",
+  "head_sha": "8909b12e0705442b2f73d616c50f22c91e067f11",
+  "files_changed": 5,
+  "additions": 56,
+  "deletions": 10
+}

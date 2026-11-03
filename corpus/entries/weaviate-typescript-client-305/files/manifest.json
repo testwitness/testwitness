@@ -1,0 +1,22 @@
+[
+  {
+    "path": ".github/workflows/main.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "src/collections/config/classes.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/collections/config/index.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/collections/config/integration.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/collections/config/types/index.ts",
+    "status": "modified"
+  }
+]

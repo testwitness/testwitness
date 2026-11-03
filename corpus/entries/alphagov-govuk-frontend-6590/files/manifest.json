@@ -1,0 +1,114 @@
+[
+  {
+    "path": "packages/govuk-frontend-review/src/stylesheets/full-page-examples/campaign-page.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend-review/src/stylesheets/full-page-examples/search.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend-review/src/stylesheets/partials/_code.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/accordion/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/checkboxes/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/components.unit.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/details/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/error-summary/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/file-upload/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/footer/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/header/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/input/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/inset-text/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/notification-banner/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/pagination/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/phase-banner/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/radios/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/select/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/skip-link/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/summary-list/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/table/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/tabs/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/task-list/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/textarea/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/components/warning-text/_index.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/core/_section-break.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/helpers/_focused.scss",
+    "status": "modified"
+  },
+  {
+    "path": "packages/govuk-frontend/src/govuk/objects/_form-group.scss",
+    "status": "modified"
+  }
+]

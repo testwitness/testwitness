@@ -1,0 +1,1874 @@
+diff --git a/docs/contributing/coding-standards/js.md b/docs/contributing/coding-standards/js.md
+index 13b1e20..bba84bb 100644
+--- a/docs/contributing/coding-standards/js.md
++++ b/docs/contributing/coding-standards/js.md
+@@ -136,6 +136,40 @@ Avoid using namespace imports (`import * as namespace`) in code bundled for Comm
+ 
+ Prefer named exports over default exports to avoid compatibility issues with transpiler "synthetic default" as discussed in: https://github.com/alphagov/govuk-frontend/issues/2829
+ 
++## Throwing errors
++
++### Error types
++
++First, check if one of the [native errors provides](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#error_types) the right semantic for the error you're looking to throw, if so, use this class.
++
++If none of the native errors have the right semantics, create a new class for this error. This class should:
++
++- have a name ending in `Error` to match the native conventions
++- extend `GOVUKFrontendError`, so users can separate our custom errors from native ones using `instanceof`
++- have a `name` property set to its class name, as extending classes doesn't set this automatically and grabbing the constructor's name risks being affected by mangling during minification
++
++```js
++class CustomError extends GOVUKFrontendError {
++  name = 'CustomError'
++}
++```
++
++### Error message
++
++Keep the message to the point, but provide the users the information they need to identify the cause of the error.
++
++If the message is the same whatever the situation, you may use the constructor of our custom error to centralise that message, rather than passing it each time an error is thrown.
++
++```js
++class SupportError extends GOVUKFrontendError {
++  name = 'SupportError'
++
++  constructor () {
++    super('GOV.UK Frontend is not supported in this browser')
++  }
++}
++```
++
+ ## Polyfilling
+ 
+ If you need polyfills for features that are not yet included in this project, please see the following guide on [how to add polyfills](../polyfilling.md).
+diff --git a/packages/govuk-frontend/src/govuk/common/index.mjs b/packages/govuk-frontend/src/govuk/common/index.mjs
+index e8e6656..1f26ab1 100644
+--- a/packages/govuk-frontend/src/govuk/common/index.mjs
++++ b/packages/govuk-frontend/src/govuk/common/index.mjs
+@@ -133,3 +133,17 @@ export function extractConfigByNamespace(configObject, namespace) {
+   }
+   return newObject
+ }
++
++/**
++ * Checks if GOV.UK Frontend is supported on this page
++ *
++ * Some browsers will load and run our JavaScript but GOV.UK Frontend
++ * won't be supported.
++ *
++ * @internal
++ * @param {HTMLElement} [$scope] - The `<body>` element of the document to check for support
++ * @returns {boolean} Whether GOV.UK Frontend is supported on this page
++ */
++export function isSupported($scope = document.body) {
++  return $scope.classList.contains('govuk-frontend-supported')
++}
+diff --git a/packages/govuk-frontend/src/govuk/common/index.unit.test.mjs b/packages/govuk-frontend/src/govuk/common/index.unit.test.mjs
+index 70c9c4f..dd67015 100644
+--- a/packages/govuk-frontend/src/govuk/common/index.unit.test.mjs
++++ b/packages/govuk-frontend/src/govuk/common/index.unit.test.mjs
+@@ -1,4 +1,8 @@
+-import { mergeConfigs, extractConfigByNamespace } from './index.mjs'
++import {
++  mergeConfigs,
++  extractConfigByNamespace,
++  isSupported
++} from './index.mjs'
+ 
+ describe('Common JS utilities', () => {
+   describe('mergeConfigs', () => {
+@@ -112,4 +116,22 @@ describe('Common JS utilities', () => {
+       expect(() => extractConfigByNamespace(flattenedConfig)).toThrow()
+     })
+   })
++
++  describe.only('isSupported', () => {
++    beforeEach(() => {
++      // Jest does not tidy the JSDOM document between tests
++      // so we need to take care of that ourselves
++      document.documentElement.innerHTML = ''
++    })
++
++    it('returns true if the govuk-frontend-supported class is set', () => {
++      document.body.classList.add('govuk-frontend-supported')
++
++      expect(isSupported(document.body)).toBe(true)
++    })
++
++    it('returns false if the govuk-frontend-supported class is not set', () => {
++      expect(isSupported(document.body)).toBe(false)
++    })
++  })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/accordion/accordion.mjs b/packages/govuk-frontend/src/govuk/components/accordion/accordion.mjs
+index 4123160..43e618d 100644
+--- a/packages/govuk-frontend/src/govuk/components/accordion/accordion.mjs
++++ b/packages/govuk-frontend/src/govuk/components/accordion/accordion.mjs
+@@ -1,5 +1,6 @@
+ import { mergeConfigs, extractConfigByNamespace } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ import { I18n } from '../../i18n.mjs'
+ 
+ /**
+@@ -14,7 +15,7 @@ import { I18n } from '../../i18n.mjs'
+  * The state of each section is saved to the DOM via the `aria-expanded`
+  * attribute, which also provides accessibility.
+  */
+-export class Accordion {
++export class Accordion extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -113,10 +114,9 @@ export class Accordion {
+    * @param {AccordionConfig} [config] - Accordion config
+    */
+   constructor($module, config) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/accordion/accordion.test.js b/packages/govuk-frontend/src/govuk/components/accordion/accordion.test.js
+index 421101a..03578fa 100644
+--- a/packages/govuk-frontend/src/govuk/components/accordion/accordion.test.js
++++ b/packages/govuk-frontend/src/govuk/components/accordion/accordion.test.js
+@@ -712,6 +712,28 @@ describe('/components/accordion', () => {
+             )
+           })
+         })
++
++        describe('errors at instantiation', () => {
++          let examples
++
++          beforeAll(async () => {
++            examples = await getExamples('accordion')
++          })
++
++          it('throws when GOV.UK Frontend is not supported', async () => {
++            await expect(
++              renderAndInitialise(page, 'accordion', {
++                params: examples.default,
++                beforeInitialisation() {
++                  document.body.classList.remove('govuk-frontend-supported')
++                }
++              })
++            ).rejects.toEqual({
++              name: 'SupportError',
++              message: 'GOV.UK Frontend is not supported in this browser'
++            })
++          })
++        })
+       })
+     })
+   })
+diff --git a/packages/govuk-frontend/src/govuk/components/button/button.mjs b/packages/govuk-frontend/src/govuk/components/button/button.mjs
+index b1204db..58e2f91 100644
+--- a/packages/govuk-frontend/src/govuk/components/button/button.mjs
++++ b/packages/govuk-frontend/src/govuk/components/button/button.mjs
+@@ -1,5 +1,6 @@
+ import { mergeConfigs } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ 
+ const KEY_SPACE = 32
+ const DEBOUNCE_TIMEOUT_IN_SECONDS = 1
+@@ -7,7 +8,7 @@ const DEBOUNCE_TIMEOUT_IN_SECONDS = 1
+ /**
+  * JavaScript enhancements for the Button component
+  */
+-export class Button {
++export class Button extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -29,10 +30,9 @@ export class Button {
+    * @param {ButtonConfig} [config] - Button config
+    */
+   constructor($module, config) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/button/button.test.js b/packages/govuk-frontend/src/govuk/components/button/button.test.js
+index 3d86400..db81c49 100644
+--- a/packages/govuk-frontend/src/govuk/components/button/button.test.js
++++ b/packages/govuk-frontend/src/govuk/components/button/button.test.js
+@@ -338,5 +338,27 @@ describe('/components/button', () => {
+         expect(button2Counts.debounce).toBe(0)
+       })
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('button')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'button', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/character-count/character-count.mjs b/packages/govuk-frontend/src/govuk/components/character-count/character-count.mjs
+index 3e4b46c..c8c4506 100644
+--- a/packages/govuk-frontend/src/govuk/components/character-count/character-count.mjs
++++ b/packages/govuk-frontend/src/govuk/components/character-count/character-count.mjs
+@@ -1,6 +1,7 @@
+ import { closestAttributeValue } from '../../common/closest-attribute-value.mjs'
+ import { extractConfigByNamespace, mergeConfigs } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ import { I18n } from '../../i18n.mjs'
+ 
+ /**
+@@ -13,7 +14,7 @@ import { I18n } from '../../i18n.mjs'
+  * You can configure the message to only appear after a certain percentage
+  * of the available characters/words has been entered.
+  */
+-export class CharacterCount {
++export class CharacterCount extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -64,10 +65,9 @@ export class CharacterCount {
+    * @param {CharacterCountConfig} [config] - Character count config
+    */
+   constructor($module, config) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/character-count/character-count.test.js b/packages/govuk-frontend/src/govuk/components/character-count/character-count.test.js
+index 554cdcf..fb039a9 100644
+--- a/packages/govuk-frontend/src/govuk/components/character-count/character-count.test.js
++++ b/packages/govuk-frontend/src/govuk/components/character-count/character-count.test.js
+@@ -763,6 +763,28 @@ describe('Character count', () => {
+         )
+       })
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('character-count')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'character-count', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ 
+   describe('in mismatched locale', () => {
+@@ -777,7 +799,7 @@ describe('Character count', () => {
+           // Override maxlength to 10
+           maxlength: 10
+         },
+-        initialiser($module) {
++        beforeInitialisation($module) {
+           // Set locale to Welsh, which expects translations for 'one', 'two',
+           // 'few' 'many' and 'other' forms – with the default English strings
+           // provided we only have translations for 'one' and 'other'.
+diff --git a/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.mjs b/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.mjs
+index 2ceb333..7349d98 100644
+--- a/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.mjs
++++ b/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.mjs
+@@ -1,7 +1,9 @@
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
++
+ /**
+  * Checkboxes component
+  */
+-export class Checkboxes {
++export class Checkboxes extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -23,10 +25,9 @@ export class Checkboxes {
+    * @param {Element} $module - HTML element to use for checkboxes
+    */
+   constructor($module) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.test.js b/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.test.js
+index e3f8394..d30d9b5 100644
+--- a/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.test.js
++++ b/packages/govuk-frontend/src/govuk/components/checkboxes/checkboxes.test.js
+@@ -3,8 +3,10 @@ const {
+   goToExample,
+   getAttribute,
+   getProperty,
+-  isVisible
++  isVisible,
++  renderAndInitialise
+ } = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ 
+ describe('Checkboxes with conditional reveals', () => {
+   describe('when JavaScript is unavailable or fails', () => {
+@@ -316,5 +318,27 @@ describe('Checkboxes with multiple groups and a "None" checkbox and conditional
+       // Expect conditional content to have been collapsed
+       expect(await isVisible($conditionalPrimary)).toBe(false)
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('checkboxes')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'checkboxes', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.mjs b/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.mjs
+index db03472..0b811b6 100644
+--- a/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.mjs
++++ b/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.mjs
+@@ -1,12 +1,13 @@
+ import { mergeConfigs } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ 
+ /**
+  * Error summary component
+  *
+  * Takes focus on initialisation for accessible announcement, unless disabled in configuration.
+  */
+-export class ErrorSummary {
++export class ErrorSummary extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -22,17 +23,9 @@ export class ErrorSummary {
+    * @param {ErrorSummaryConfig} [config] - Error summary config
+    */
+   constructor($module, config) {
+-    // Some consuming code may not be passing a module,
+-    // for example if they initialise the component
+-    // on their own by directly passing the result
+-    // of `document.querySelector`.
+-    // To avoid breaking further JavaScript initialisation
+-    // we need to safeguard against this so things keep
+-    // working the same now we read the elements data attributes
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.test.js b/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.test.js
+index 24148a4..e6928ed 100644
+--- a/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.test.js
++++ b/packages/govuk-frontend/src/govuk/components/error-summary/error-summary.test.js
+@@ -230,4 +230,26 @@ describe('Error Summary', () => {
+       })
+     }
+   )
++
++  describe('errors at instantiation', () => {
++    let examples
++
++    beforeAll(async () => {
++      examples = await getExamples('error-summary')
++    })
++
++    it('throws when GOV.UK Frontend is not supported', async () => {
++      await expect(
++        renderAndInitialise(page, 'error-summary', {
++          params: examples.default,
++          beforeInitialisation() {
++            document.body.classList.remove('govuk-frontend-supported')
++          }
++        })
++      ).rejects.toEqual({
++        name: 'SupportError',
++        message: 'GOV.UK Frontend is not supported in this browser'
++      })
++    })
++  })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.mjs b/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.mjs
+index 09e25ab..4a7ee8d 100644
+--- a/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.mjs
++++ b/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.mjs
+@@ -1,11 +1,12 @@
+ import { mergeConfigs, extractConfigByNamespace } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ import { I18n } from '../../i18n.mjs'
+ 
+ /**
+  * Exit This Page component
+  */
+-export class ExitThisPage {
++export class ExitThisPage extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -75,10 +76,9 @@ export class ExitThisPage {
+    * @param {ExitThisPageConfig} [config] - Exit This Page config
+    */
+   constructor($module, config) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.test.js b/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.test.js
+index b92745a..87713e9 100644
+--- a/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.test.js
++++ b/packages/govuk-frontend/src/govuk/components/exit-this-page/exit-this-page.test.js
+@@ -1,7 +1,9 @@
+ const {
+   goToComponent,
+-  goToExample
++  goToExample,
++  renderAndInitialise
+ } = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ 
+ const buttonClass = '.govuk-js-exit-this-page-button'
+ const skiplinkClass = '.govuk-js-exit-this-page-skiplink'
+@@ -185,5 +187,27 @@ describe('/components/exit-this-page', () => {
+         expect(message).toBe('Exit this page expired.')
+       })
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('exit-this-page')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'exit-this-page', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/header/header.mjs b/packages/govuk-frontend/src/govuk/components/header/header.mjs
+index 13d692a..9c40057 100644
+--- a/packages/govuk-frontend/src/govuk/components/header/header.mjs
++++ b/packages/govuk-frontend/src/govuk/components/header/header.mjs
+@@ -1,7 +1,9 @@
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
++
+ /**
+  * Header component
+  */
+-export class Header {
++export class Header extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -37,10 +39,9 @@ export class Header {
+    * @param {Element} $module - HTML element to use for header
+    */
+   constructor($module) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/header/header.test.js b/packages/govuk-frontend/src/govuk/components/header/header.test.js
+index 09be0db..20c369c 100644
+--- a/packages/govuk-frontend/src/govuk/components/header/header.test.js
++++ b/packages/govuk-frontend/src/govuk/components/header/header.test.js
+@@ -1,4 +1,8 @@
+-const { goToComponent } = require('govuk-frontend-helpers/puppeteer')
++const {
++  goToComponent,
++  renderAndInitialise
++} = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ const { KnownDevices } = require('puppeteer')
+ 
+ const iPhone = KnownDevices['iPhone 6']
+@@ -163,5 +167,27 @@ describe('Header navigation', () => {
+         expect(ariaExpanded).toBe('false')
+       })
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('header')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'header', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.mjs b/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.mjs
+index bfd1bca..a0ebed7 100644
+--- a/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.mjs
++++ b/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.mjs
+@@ -1,10 +1,11 @@
+ import { mergeConfigs } from '../../common/index.mjs'
+ import { normaliseDataset } from '../../common/normalise-dataset.mjs'
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
+ 
+ /**
+  * Notification Banner component
+  */
+-export class NotificationBanner {
++export class NotificationBanner extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -19,10 +20,9 @@ export class NotificationBanner {
+    * @param {NotificationBannerConfig} [config] - Notification banner config
+    */
+   constructor($module, config) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.test.js b/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.test.js
+index f525da0..8b97f22 100644
+--- a/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.test.js
++++ b/packages/govuk-frontend/src/govuk/components/notification-banner/notification-banner.test.js
+@@ -4,200 +4,219 @@ const {
+ } = require('govuk-frontend-helpers/puppeteer')
+ const { getExamples } = require('govuk-frontend-lib/files')
+ 
+-describe('Notification banner, when type is set to "success"', () => {
++describe('Notification banner', () => {
+   let examples
+ 
+   beforeAll(async () => {
+     examples = await getExamples('notification-banner')
+   })
+ 
+-  it('has the correct tabindex attribute to be focused with JavaScript', async () => {
+-    await goToComponent(page, 'notification-banner', {
+-      exampleName: 'with-type-as-success'
+-    })
+-
+-    const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-      el.getAttribute('tabindex')
+-    )
+-
+-    expect(tabindex).toEqual('-1')
+-  })
+-
+-  it('is automatically focused when the page loads', async () => {
+-    await goToComponent(page, 'notification-banner', {
+-      exampleName: 'with-type-as-success'
+-    })
+-
+-    const activeElement = await page.evaluate(() =>
+-      document.activeElement.getAttribute('data-module')
+-    )
+-
+-    expect(activeElement).toBe('govuk-notification-banner')
+-  })
+-
+-  it('removes the tabindex attribute on blur', async () => {
+-    await goToComponent(page, 'notification-banner', {
+-      exampleName: 'with-type-as-success'
+-    })
+-
+-    await page.$eval(
+-      '.govuk-notification-banner',
+-      (el) => el instanceof window.HTMLElement && el.blur()
+-    )
+-
+-    const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-      el.getAttribute('tabindex')
+-    )
+-    expect(tabindex).toBeNull()
+-  })
+-
+-  describe('and auto-focus is disabled using data attributes', () => {
+-    beforeAll(async () => {
++  describe('when type is set to "success"', () => {
++    it('has the correct tabindex attribute to be focused with JavaScript', async () => {
+       await goToComponent(page, 'notification-banner', {
+-        exampleName: 'auto-focus-disabled,-with-type-as-success'
++        exampleName: 'with-type-as-success'
+       })
+-    })
+ 
+-    it('does not have a tabindex attribute', async () => {
+       const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+         el.getAttribute('tabindex')
+       )
+ 
+-      expect(tabindex).toBeNull()
++      expect(tabindex).toEqual('-1')
+     })
+ 
+-    it('does not focus the notification banner', async () => {
++    it('is automatically focused when the page loads', async () => {
++      await goToComponent(page, 'notification-banner', {
++        exampleName: 'with-type-as-success'
++      })
++
+       const activeElement = await page.evaluate(() =>
+         document.activeElement.getAttribute('data-module')
+       )
+ 
+-      expect(activeElement).not.toBe('govuk-notification-banner')
++      expect(activeElement).toBe('govuk-notification-banner')
+     })
+-  })
+ 
+-  describe('and auto-focus is disabled using JavaScript configuration', () => {
+-    beforeAll(async () => {
+-      await renderAndInitialise(page, 'notification-banner', {
+-        params: examples['with type as success'],
+-        config: {
+-          disableAutoFocus: true
+-        }
++    it('removes the tabindex attribute on blur', async () => {
++      await goToComponent(page, 'notification-banner', {
++        exampleName: 'with-type-as-success'
+       })
+-    })
+ 
+-    it('does not have a tabindex attribute', async () => {
++      await page.$eval(
++        '.govuk-notification-banner',
++        (el) => el instanceof window.HTMLElement && el.blur()
++      )
++
+       const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+         el.getAttribute('tabindex')
+       )
+-
+       expect(tabindex).toBeNull()
+     })
+ 
+-    it('does not focus the notification banner', async () => {
+-      const activeElement = await page.evaluate(() =>
+-        document.activeElement.getAttribute('data-module')
+-      )
++    describe('and auto-focus is disabled using data attributes', () => {
++      beforeAll(async () => {
++        await goToComponent(page, 'notification-banner', {
++          exampleName: 'auto-focus-disabled,-with-type-as-success'
++        })
++      })
+ 
+-      expect(activeElement).not.toBe('govuk-notification-banner')
+-    })
+-  })
++      it('does not have a tabindex attribute', async () => {
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
+ 
+-  describe('and auto-focus is disabled using options passed to initAll', () => {
+-    beforeAll(async () => {
+-      await renderAndInitialise(page, 'notification-banner', {
+-        params: examples['with type as success'],
+-        config: {
+-          disableAutoFocus: true
+-        }
++        expect(tabindex).toBeNull()
+       })
+-    })
+ 
+-    it('does not have a tabindex attribute', async () => {
+-      const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-        el.getAttribute('tabindex')
+-      )
++      it('does not focus the notification banner', async () => {
++        const activeElement = await page.evaluate(() =>
++          document.activeElement.getAttribute('data-module')
++        )
+ 
+-      expect(tabindex).toBeNull()
++        expect(activeElement).not.toBe('govuk-notification-banner')
++      })
+     })
+ 
+-    it('does not focus the notification banner', async () => {
+-      const activeElement = await page.evaluate(() =>
+-        document.activeElement.getAttribute('data-module')
+-      )
++    describe('and auto-focus is disabled using JavaScript configuration', () => {
++      beforeAll(async () => {
++        await renderAndInitialise(page, 'notification-banner', {
++          params: examples['with type as success'],
++          config: {
++            disableAutoFocus: true
++          }
++        })
++      })
+ 
+-      expect(activeElement).not.toBe('govuk-notification-banner')
+-    })
+-  })
++      it('does not have a tabindex attribute', async () => {
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
+ 
+-  describe('and autofocus is disabled in JS but enabled in data attributes', () => {
+-    beforeAll(async () => {
+-      await renderAndInitialise(page, 'notification-banner', {
+-        params: examples['auto-focus explicitly enabled, with type as success'],
+-        config: {
+-          disableAutoFocus: true
+-        }
++        expect(tabindex).toBeNull()
+       })
+-    })
+ 
+-    it('has the correct tabindex attribute to be focused with JavaScript', async () => {
+-      const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-        el.getAttribute('tabindex')
+-      )
++      it('does not focus the notification banner', async () => {
++        const activeElement = await page.evaluate(() =>
++          document.activeElement.getAttribute('data-module')
++        )
+ 
+-      expect(tabindex).toEqual('-1')
++        expect(activeElement).not.toBe('govuk-notification-banner')
++      })
+     })
+ 
+-    it('is automatically focused when the page loads', async () => {
+-      const activeElement = await page.evaluate(() =>
+-        document.activeElement.getAttribute('data-module')
+-      )
++    describe('and auto-focus is disabled using options passed to initAll', () => {
++      beforeAll(async () => {
++        await renderAndInitialise(page, 'notification-banner', {
++          params: examples['with type as success'],
++          config: {
++            disableAutoFocus: true
++          }
++        })
++      })
+ 
+-      expect(activeElement).toBe('govuk-notification-banner')
+-    })
+-  })
++      it('does not have a tabindex attribute', async () => {
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
+ 
+-  describe('and role is overridden to "region"', () => {
+-    beforeAll(async () => {
+-      await goToComponent(page, 'notification-banner', {
+-        exampleName:
+-          'role=alert-overridden-to-role=region,-with-type-as-success'
++        expect(tabindex).toBeNull()
+       })
+-    })
+ 
+-    it('does not have a tabindex attribute', async () => {
+-      const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-        el.getAttribute('tabindex')
+-      )
++      it('does not focus the notification banner', async () => {
++        const activeElement = await page.evaluate(() =>
++          document.activeElement.getAttribute('data-module')
++        )
+ 
+-      expect(tabindex).toBeNull()
++        expect(activeElement).not.toBe('govuk-notification-banner')
++      })
+     })
+ 
+-    it('does not focus the notification banner', async () => {
+-      const activeElement = await page.evaluate(() =>
+-        document.activeElement.getAttribute('data-module')
+-      )
++    describe('and autofocus is disabled in JS but enabled in data attributes', () => {
++      beforeAll(async () => {
++        await renderAndInitialise(page, 'notification-banner', {
++          params:
++            examples['auto-focus explicitly enabled, with type as success'],
++          config: {
++            disableAutoFocus: true
++          }
++        })
++      })
++
++      it('has the correct tabindex attribute to be focused with JavaScript', async () => {
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
+ 
+-      expect(activeElement).not.toBe('govuk-notification-banner')
++        expect(tabindex).toEqual('-1')
++      })
++
++      it('is automatically focused when the page loads', async () => {
++        const activeElement = await page.evaluate(() =>
++          document.activeElement.getAttribute('data-module')
++        )
++
++        expect(activeElement).toBe('govuk-notification-banner')
++      })
+     })
+-  })
+ 
+-  describe('and a custom tabindex is set', () => {
+-    beforeAll(async () => {
+-      await goToComponent(page, 'notification-banner', {
+-        exampleName: 'custom-tabindex'
++    describe('and role is overridden to "region"', () => {
++      beforeAll(async () => {
++        await goToComponent(page, 'notification-banner', {
++          exampleName:
++            'role=alert-overridden-to-role=region,-with-type-as-success'
++        })
++      })
++
++      it('does not have a tabindex attribute', async () => {
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
++
++        expect(tabindex).toBeNull()
++      })
++
++      it('does not focus the notification banner', async () => {
++        const activeElement = await page.evaluate(() =>
++          document.activeElement.getAttribute('data-module')
++        )
++
++        expect(activeElement).not.toBe('govuk-notification-banner')
+       })
+     })
+ 
+-    it('does not remove the tabindex attribute on blur', async () => {
+-      await page.$eval(
+-        '.govuk-notification-banner',
+-        (el) => el instanceof window.HTMLElement && el.blur()
+-      )
++    describe('and a custom tabindex is set', () => {
++      beforeAll(async () => {
++        await goToComponent(page, 'notification-banner', {
++          exampleName: 'custom-tabindex'
++        })
++      })
+ 
+-      const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
+-        el.getAttribute('tabindex')
+-      )
+-      expect(tabindex).toEqual('2')
++      it('does not remove the tabindex attribute on blur', async () => {
++        await page.$eval(
++          '.govuk-notification-banner',
++          (el) => el instanceof window.HTMLElement && el.blur()
++        )
++
++        const tabindex = await page.$eval('.govuk-notification-banner', (el) =>
++          el.getAttribute('tabindex')
++        )
++        expect(tabindex).toEqual('2')
++      })
++    })
++  })
++
++  describe('errors at instantiation', () => {
++    it('throws when GOV.UK Frontend is not supported', async () => {
++      await expect(
++        renderAndInitialise(page, 'notification-banner', {
++          params: examples.default,
++          beforeInitialisation() {
++            document.body.classList.remove('govuk-frontend-supported')
++          }
++        })
++      ).rejects.toEqual({
++        name: 'SupportError',
++        message: 'GOV.UK Frontend is not supported in this browser'
++      })
+     })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/radios/radios.mjs b/packages/govuk-frontend/src/govuk/components/radios/radios.mjs
+index aaccf0d..7f27650 100644
+--- a/packages/govuk-frontend/src/govuk/components/radios/radios.mjs
++++ b/packages/govuk-frontend/src/govuk/components/radios/radios.mjs
+@@ -1,7 +1,9 @@
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
++
+ /**
+  * Radios component
+  */
+-export class Radios {
++export class Radios extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -23,10 +25,9 @@ export class Radios {
+    * @param {Element} $module - HTML element to use for radios
+    */
+   constructor($module) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/radios/radios.test.js b/packages/govuk-frontend/src/govuk/components/radios/radios.test.js
+index 00164e8..037876e 100644
+--- a/packages/govuk-frontend/src/govuk/components/radios/radios.test.js
++++ b/packages/govuk-frontend/src/govuk/components/radios/radios.test.js
+@@ -3,264 +3,292 @@ const {
+   goToExample,
+   getProperty,
+   getAttribute,
+-  isVisible
++  isVisible,
++  renderAndInitialise
+ } = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ 
+-describe('Radios with conditional reveals', () => {
+-  describe('when JavaScript is unavailable or fails', () => {
+-    beforeAll(async () => {
+-      await page.setJavaScriptEnabled(false)
+-    })
++describe('Radios', () => {
++  describe('with conditional reveals', () => {
++    describe('when JavaScript is unavailable or fails', () => {
++      beforeAll(async () => {
++        await page.setJavaScriptEnabled(false)
++      })
+ 
+-    afterAll(async () => {
+-      await page.setJavaScriptEnabled(true)
+-    })
++      afterAll(async () => {
++        await page.setJavaScriptEnabled(true)
++      })
+ 
+-    describe('with conditional items', () => {
+-      let $component
+-      let $inputs
+-      let $conditionals
++      describe('with conditional items', () => {
++        let $component
++        let $inputs
++        let $conditionals
+ 
+-      beforeAll(async () => {
+-        await goToComponent(page, 'radios', {
+-          exampleName: 'with-conditional-items'
+-        })
++        beforeAll(async () => {
++          await goToComponent(page, 'radios', {
++            exampleName: 'with-conditional-items'
++          })
+ 
+-        $component = await page.$('.govuk-radios')
+-        $inputs = await $component.$$('.govuk-radios__input')
+-        $conditionals = await $component.$$('.govuk-radios__conditional')
++          $component = await page.$('.govuk-radios')
++          $inputs = await $component.$$('.govuk-radios__input')
++          $conditionals = await $component.$$('.govuk-radios__conditional')
+ 
+-        expect($inputs.length).toBe(3)
+-        expect($conditionals.length).toBe(3)
+-      })
++          expect($inputs.length).toBe(3)
++          expect($conditionals.length).toBe(3)
++        })
+ 
+-      it('has no ARIA attributes applied', async () => {
+-        const $inputsWithAriaExpanded = await $component.$$(
+-          '.govuk-radios__input[aria-expanded]'
+-        )
+-        const $inputsWithAriaControls = await $component.$$(
+-          '.govuk-radios__input[aria-controls]'
+-        )
++        it('has no ARIA attributes applied', async () => {
++          const $inputsWithAriaExpanded = await $component.$$(
++            '.govuk-radios__input[aria-expanded]'
++          )
++          const $inputsWithAriaControls = await $component.$$(
++            '.govuk-radios__input[aria-controls]'
++          )
+ 
+-        expect($inputsWithAriaExpanded.length).toBe(0)
+-        expect($inputsWithAriaControls.length).toBe(0)
+-      })
++          expect($inputsWithAriaExpanded.length).toBe(0)
++          expect($inputsWithAriaControls.length).toBe(0)
++        })
+ 
+-      it('falls back to making all conditional content visible', async () => {
+-        return Promise.all(
+-          $conditionals.map(async ($conditional) => {
+-            return expect(await isVisible($conditional)).toBe(true)
+-          })
+-        )
++        it('falls back to making all conditional content visible', async () => {
++          return Promise.all(
++            $conditionals.map(async ($conditional) => {
++              return expect(await isVisible($conditional)).toBe(true)
++            })
++          )
++        })
+       })
+     })
+-  })
+ 
+-  describe('when JavaScript is available', () => {
+-    describe('with conditional item checked', () => {
+-      let $component
+-      let $inputs
++    describe('when JavaScript is available', () => {
++      describe('with conditional item checked', () => {
++        let $component
++        let $inputs
+ 
+-      beforeEach(async () => {
+-        await goToComponent(page, 'radios', {
+-          exampleName: 'with-conditional-item-checked'
+-        })
++        beforeEach(async () => {
++          await goToComponent(page, 'radios', {
++            exampleName: 'with-conditional-item-checked'
++          })
+ 
+-        $component = await page.$('.govuk-radios')
+-        $inputs = await $component.$$('.govuk-radios__input')
+-      })
++          $component = await page.$('.govuk-radios')
++          $inputs = await $component.$$('.govuk-radios__input')
++        })
+ 
+-      it('has conditional content revealed that is associated with a checked input', async () => {
+-        const $input = $inputs[0] // First input, checked
+-        const $conditional = await $component.$(
+-          `[id="${await getAttribute($input, 'aria-controls')}"]`
+-        )
++        it('has conditional content revealed that is associated with a checked input', async () => {
++          const $input = $inputs[0] // First input, checked
++          const $conditional = await $component.$(
++            `[id="${await getAttribute($input, 'aria-controls')}"]`
++          )
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await isVisible($conditional)).toBe(true)
+-      })
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await isVisible($conditional)).toBe(true)
++        })
+ 
+-      it('has no conditional content revealed that is associated with an unchecked input', async () => {
+-        const $input = $inputs[$inputs.length - 1] // Last input, unchecked
+-        const $conditional = await $component.$(
+-          `[id="${await getAttribute($input, 'aria-controls')}"]`
+-        )
++        it('has no conditional content revealed that is associated with an unchecked input', async () => {
++          const $input = $inputs[$inputs.length - 1] // Last input, unchecked
++          const $conditional = await $component.$(
++            `[id="${await getAttribute($input, 'aria-controls')}"]`
++          )
+ 
+-        expect(await getProperty($input, 'checked')).toBe(false)
+-        expect(await isVisible($conditional)).toBe(false)
++          expect(await getProperty($input, 'checked')).toBe(false)
++          expect(await isVisible($conditional)).toBe(false)
++        })
+       })
+-    })
+ 
+-    describe('with conditional items', () => {
+-      let $component
+-      let $inputs
++      describe('with conditional items', () => {
++        let $component
++        let $inputs
+ 
+-      beforeEach(async () => {
+-        await goToComponent(page, 'radios', {
+-          exampleName: 'with-conditional-items'
+-        })
++        beforeEach(async () => {
++          await goToComponent(page, 'radios', {
++            exampleName: 'with-conditional-items'
++          })
+ 
+-        $component = await page.$('.govuk-radios')
+-        $inputs = await $component.$$('.govuk-radios__input')
+-      })
++          $component = await page.$('.govuk-radios')
++          $inputs = await $component.$$('.govuk-radios__input')
++        })
+ 
+-      it('indicates when conditional content is collapsed or revealed', async () => {
+-        const $input = $inputs[0] // First input, with conditional content
++        it('indicates when conditional content is collapsed or revealed', async () => {
++          const $input = $inputs[0] // First input, with conditional content
+ 
+-        // Initially collapsed
+-        expect(await getProperty($input, 'checked')).toBe(false)
+-        expect(await getAttribute($input, 'aria-expanded')).toBe('false')
++          // Initially collapsed
++          expect(await getProperty($input, 'checked')).toBe(false)
++          expect(await getAttribute($input, 'aria-expanded')).toBe('false')
+ 
+-        // Toggle revealed
+-        await $input.click()
++          // Toggle revealed
++          await $input.click()
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await getAttribute($input, 'aria-expanded')).toBe('true')
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await getAttribute($input, 'aria-expanded')).toBe('true')
+ 
+-        // Stays revealed (unlike radios)
+-        await $input.click()
++          // Stays revealed (unlike radios)
++          await $input.click()
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await getAttribute($input, 'aria-expanded')).toBe('true')
+-      })
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await getAttribute($input, 'aria-expanded')).toBe('true')
++        })
+ 
+-      it('toggles the conditional content when clicking an input', async () => {
+-        const $input = $inputs[0] // First input, with conditional content
+-        const $conditional = await $component.$(
+-          `[id="${await getAttribute($input, 'aria-controls')}"]`
+-        )
++        it('toggles the conditional content when clicking an input', async () => {
++          const $input = $inputs[0] // First input, with conditional content
++          const $conditional = await $component.$(
++            `[id="${await getAttribute($input, 'aria-controls')}"]`
++          )
+ 
+-        // Initially collapsed
+-        expect(await getProperty($input, 'checked')).toBe(false)
+-        expect(await isVisible($conditional)).toBe(false)
++          // Initially collapsed
++          expect(await getProperty($input, 'checked')).toBe(false)
++          expect(await isVisible($conditional)).toBe(false)
+ 
+-        // Toggle revealed
+-        await $input.click()
++          // Toggle revealed
++          await $input.click()
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await isVisible($conditional)).toBe(true)
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await isVisible($conditional)).toBe(true)
+ 
+-        // Stays revealed (unlike radios)
+-        await $input.click()
++          // Stays revealed (unlike radios)
++          await $input.click()
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await isVisible($conditional)).toBe(true)
+-      })
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await isVisible($conditional)).toBe(true)
++        })
+ 
+-      it('toggles the conditional content when using an input with a keyboard', async () => {
+-        const $input = $inputs[0] // First input, with conditional content
+-        const $conditional = await $component.$(
+-          `[id="${await getAttribute($input, 'aria-controls')}"]`
+-        )
++        it('toggles the conditional content when using an input with a keyboard', async () => {
++          const $input = $inputs[0] // First input, with conditional content
++          const $conditional = await $component.$(
++            `[id="${await getAttribute($input, 'aria-controls')}"]`
++          )
+ 
+-        // Initially collapsed
+-        expect(await getProperty($input, 'checked')).toBe(false)
+-        expect(await isVisible($conditional)).toBe(false)
++          // Initially collapsed
++          expect(await getProperty($input, 'checked')).toBe(false)
++          expect(await isVisible($conditional)).toBe(false)
+ 
+-        // Toggle revealed
+-        await $input.focus()
+-        await page.keyboard.press('Space')
++          // Toggle revealed
++          await $input.focus()
++          await page.keyboard.press('Space')
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await isVisible($conditional)).toBe(true)
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await isVisible($conditional)).toBe(true)
+ 
+-        // Stays revealed (unlike radios)
+-        await page.keyboard.press('Space')
++          // Stays revealed (unlike radios)
++          await page.keyboard.press('Space')
+ 
+-        expect(await getProperty($input, 'checked')).toBe(true)
+-        expect(await isVisible($conditional)).toBe(true)
++          expect(await getProperty($input, 'checked')).toBe(true)
++          expect(await isVisible($conditional)).toBe(true)
++        })
+       })
+-    })
+ 
+-    describe('with conditional items with special characters', () => {
+-      it('does not error when ID of revealed content contains special characters', async () => {
+-        // Errors logged to the console will cause this test to fail
+-        await goToComponent(page, 'radios', {
+-          exampleName: 'with-conditional-items-with-special-characters'
++      describe('with conditional items with special characters', () => {
++        it('does not error when ID of revealed content contains special characters', async () => {
++          // Errors logged to the console will cause this test to fail
++          await goToComponent(page, 'radios', {
++            exampleName: 'with-conditional-items-with-special-characters'
++          })
+         })
+       })
+     })
+   })
+-})
+ 
+-describe('Radios with multiple groups', () => {
+-  describe('when JavaScript is available', () => {
+-    let $inputsWarm
+-    let $inputsCool
+-    let $inputsNotInForm
++  describe('with multiple groups', () => {
++    describe('when JavaScript is available', () => {
++      let $inputsWarm
++      let $inputsCool
++      let $inputsNotInForm
+ 
+-    beforeEach(async () => {
+-      await goToExample(page, 'multiple-radio-groups')
++      beforeEach(async () => {
++        await goToExample(page, 'multiple-radio-groups')
+ 
+-      $inputsWarm = await page.$$('.govuk-radios__input[id^="warm"]')
+-      $inputsCool = await page.$$('.govuk-radios__input[id^="cool"]')
+-      $inputsNotInForm = await page.$$(
+-        '.govuk-radios__input[id^="question-not-in-form"]'
+-      )
+-    })
++        $inputsWarm = await page.$$('.govuk-radios__input[id^="warm"]')
++        $inputsCool = await page.$$('.govuk-radios__input[id^="cool"]')
++        $inputsNotInForm = await page.$$(
++          '.govuk-radios__input[id^="question-not-in-form"]'
++        )
++      })
+ 
+-    it('toggles conditional reveals in other groups', async () => {
+-      const $conditionalWarm = await page.$(
+-        `[id="${await getAttribute($inputsWarm[0], 'aria-controls')}"]`
+-      )
+-      const $conditionalCool = await page.$(
+-        `[id="${await getAttribute($inputsCool[0], 'aria-controls')}"]`
+-      )
++      it('toggles conditional reveals in other groups', async () => {
++        const $conditionalWarm = await page.$(
++          `[id="${await getAttribute($inputsWarm[0], 'aria-controls')}"]`
++        )
++        const $conditionalCool = await page.$(
++          `[id="${await getAttribute($inputsCool[0], 'aria-controls')}"]`
++        )
+ 
+-      // Select red in warm colours
+-      await $inputsWarm[0].click()
++        // Select red in warm colours
++        await $inputsWarm[0].click()
+ 
+-      expect(await isVisible($conditionalWarm)).toBe(true)
+-      expect(await isVisible($conditionalCool)).toBe(false)
++        expect(await isVisible($conditionalWarm)).toBe(true)
++        expect(await isVisible($conditionalCool)).toBe(false)
+ 
+-      // Select blue in cool colours
+-      await $inputsCool[0].click()
++        // Select blue in cool colours
++        await $inputsCool[0].click()
+ 
+-      expect(await isVisible($conditionalWarm)).toBe(false)
+-      expect(await isVisible($conditionalCool)).toBe(true)
+-    })
++        expect(await isVisible($conditionalWarm)).toBe(false)
++        expect(await isVisible($conditionalCool)).toBe(true)
++      })
+ 
+-    it('toggles conditional reveals when not in a form', async () => {
+-      const $conditionalWarm = await page.$(
+-        `[id="${await getAttribute($inputsWarm[0], 'aria-controls')}"]`
+-      )
++      it('toggles conditional reveals when not in a form', async () => {
++        const $conditionalWarm = await page.$(
++          `[id="${await getAttribute($inputsWarm[0], 'aria-controls')}"]`
++        )
+ 
+-      // Select first input in radios not in a form
+-      await $inputsNotInForm[0].click()
++        // Select first input in radios not in a form
++        await $inputsNotInForm[0].click()
+ 
+-      expect(await isVisible($conditionalWarm)).toBe(false)
++        expect(await isVisible($conditionalWarm)).toBe(false)
++      })
+     })
+   })
+-})
+ 
+-describe('Radios with multiple groups and conditional reveals', () => {
+-  describe('when JavaScript is available', () => {
+-    let $inputsPrimary
+-    let $inputsOther
++  describe('with multiple groups and conditional reveals', () => {
++    describe('when JavaScript is available', () => {
++      let $inputsPrimary
++      let $inputsOther
+ 
+-    beforeEach(async () => {
+-      await goToExample(page, 'conditional-reveals')
++      beforeEach(async () => {
++        await goToExample(page, 'conditional-reveals')
+ 
+-      $inputsPrimary = await page.$$('.govuk-radios__input[id^="fave-primary"]')
+-      $inputsOther = await page.$$('.govuk-radios__input[id^="fave-other"]')
+-    })
++        $inputsPrimary = await page.$$(
++          '.govuk-radios__input[id^="fave-primary"]'
++        )
++        $inputsOther = await page.$$('.govuk-radios__input[id^="fave-other"]')
++      })
+ 
+-    it('hides conditional reveals in other groups', async () => {
+-      const $conditionalPrimary = await page.$(
+-        `[id="${await getAttribute($inputsPrimary[1], 'aria-controls')}"]`
+-      )
++      it('hides conditional reveals in other groups', async () => {
++        const $conditionalPrimary = await page.$(
++          `[id="${await getAttribute($inputsPrimary[1], 'aria-controls')}"]`
++        )
+ 
+-      // Choose the second radio in the first group, which reveals additional content
+-      await $inputsPrimary[1].click()
++        // Choose the second radio in the first group, which reveals additional content
++        await $inputsPrimary[1].click()
+ 
+-      // Assert that conditional content is revealed
+-      expect(await isVisible($conditionalPrimary)).toBe(true)
++        // Assert that conditional content is revealed
++        expect(await isVisible($conditionalPrimary)).toBe(true)
+ 
+-      // Choose a different radio with the same name, but in a different group
+-      await $inputsOther[1].click()
++        // Choose a different radio with the same name, but in a different group
++        await $inputsOther[1].click()
+ 
+-      // Expect conditional content to have been collapsed
+-      expect(await isVisible($conditionalPrimary)).toBe(false)
++        // Expect conditional content to have been collapsed
++        expect(await isVisible($conditionalPrimary)).toBe(false)
++      })
++    })
++  })
++
++  describe('errors at instantiation', () => {
++    let examples
++
++    beforeAll(async () => {
++      examples = await getExamples('radios')
++    })
++
++    it('throws when GOV.UK Frontend is not supported', async () => {
++      await expect(
++        renderAndInitialise(page, 'radios', {
++          params: examples.default,
++          beforeInitialisation() {
++            document.body.classList.remove('govuk-frontend-supported')
++          }
++        })
++      ).rejects.toEqual({
++        name: 'SupportError',
++        message: 'GOV.UK Frontend is not supported in this browser'
++      })
+     })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.mjs b/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.mjs
+index 45466f7..7fc5a65 100644
+--- a/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.mjs
++++ b/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.mjs
+@@ -1,7 +1,9 @@
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
++
+ /**
+  * Skip link component
+  */
+-export class SkipLink {
++export class SkipLink extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -19,10 +21,9 @@ export class SkipLink {
+    * @param {Element} $module - HTML element to use for skip link
+    */
+   constructor($module) {
+-    if (
+-      !($module instanceof HTMLAnchorElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLAnchorElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.test.js b/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.test.js
+index d1bd10b..f1d6481 100644
+--- a/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.test.js
++++ b/packages/govuk-frontend/src/govuk/components/skip-link/skip-link.test.js
+@@ -1,7 +1,11 @@
+-const { goToExample } = require('govuk-frontend-helpers/puppeteer')
++const {
++  goToExample,
++  renderAndInitialise
++} = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ 
+-describe('/examples/template-default', () => {
+-  describe('skip link', () => {
++describe('Skip Link', () => {
++  describe('/examples/template-default', () => {
+     beforeAll(async () => {
+       await goToExample(page, 'template-default')
+       await page.keyboard.press('Tab')
+@@ -56,4 +60,26 @@ describe('/examples/template-default', () => {
+       expect(cssClass).not.toContain('govuk-skip-link-focused-element')
+     })
+   })
++
++  describe('errors at instantiation', () => {
++    let examples
++
++    beforeAll(async () => {
++      examples = await getExamples('skip-link')
++    })
++
++    it('throws when GOV.UK Frontend is not supported', async () => {
++      await expect(
++        renderAndInitialise(page, 'skip-link', {
++          params: examples.default,
++          beforeInitialisation() {
++            document.body.classList.remove('govuk-frontend-supported')
++          }
++        })
++      ).rejects.toEqual({
++        name: 'SupportError',
++        message: 'GOV.UK Frontend is not supported in this browser'
++      })
++    })
++  })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/components/tabs/tabs.mjs b/packages/govuk-frontend/src/govuk/components/tabs/tabs.mjs
+index 54e1295..42f0722 100644
+--- a/packages/govuk-frontend/src/govuk/components/tabs/tabs.mjs
++++ b/packages/govuk-frontend/src/govuk/components/tabs/tabs.mjs
+@@ -1,7 +1,9 @@
++import { GOVUKFrontendComponent } from '../../govuk-frontend-component.mjs'
++
+ /**
+  * Tabs component
+  */
+-export class Tabs {
++export class Tabs extends GOVUKFrontendComponent {
+   /** @private */
+   $module
+ 
+@@ -36,10 +38,9 @@ export class Tabs {
+    * @param {Element} $module - HTML element to use for tabs
+    */
+   constructor($module) {
+-    if (
+-      !($module instanceof HTMLElement) ||
+-      !document.body.classList.contains('govuk-frontend-supported')
+-    ) {
++    super()
++
++    if (!($module instanceof HTMLElement)) {
+       return this
+     }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/tabs/tabs.test.js b/packages/govuk-frontend/src/govuk/components/tabs/tabs.test.js
+index 259a5d6..842e86e 100644
+--- a/packages/govuk-frontend/src/govuk/components/tabs/tabs.test.js
++++ b/packages/govuk-frontend/src/govuk/components/tabs/tabs.test.js
+@@ -1,4 +1,9 @@
+-const { goTo, goToComponent } = require('govuk-frontend-helpers/puppeteer')
++const {
++  goTo,
++  goToComponent,
++  renderAndInitialise
++} = require('govuk-frontend-helpers/puppeteer')
++const { getExamples } = require('govuk-frontend-lib/files.js')
+ const { KnownDevices } = require('puppeteer')
+ 
+ const iPhone = KnownDevices['iPhone 6']
+@@ -242,5 +247,27 @@ describe('/components/tabs', () => {
+         expect(isContentVisible).toBeTruthy()
+       })
+     })
++
++    describe('errors at instantiation', () => {
++      let examples
++
++      beforeAll(async () => {
++        examples = await getExamples('tabs')
++      })
++
++      it('throws when GOV.UK Frontend is not supported', async () => {
++        await expect(
++          renderAndInitialise(page, 'tabs', {
++            params: examples.default,
++            beforeInitialisation() {
++              document.body.classList.remove('govuk-frontend-supported')
++            }
++          })
++        ).rejects.toEqual({
++          name: 'SupportError',
++          message: 'GOV.UK Frontend is not supported in this browser'
++        })
++      })
++    })
+   })
+ })
+diff --git a/packages/govuk-frontend/src/govuk/errors/index.mjs b/packages/govuk-frontend/src/govuk/errors/index.mjs
+new file mode 100644
+index 0000000..5263618
+--- /dev/null
++++ b/packages/govuk-frontend/src/govuk/errors/index.mjs
+@@ -0,0 +1,35 @@
++/**
++ * GOV.UK Frontend error
++ *
++ * A base class for `Error`s thrown by GOV.UK Frontend.
++ *
++ * It is meant to be extended into specific types of errors
++ * to be thrown by our code.
++ *
++ * @example
++ * ```js
++ * class MissingRootError extends GOVUKFrontendError {
++ *   // Setting an explicit name is important as extending the class will not
++ *   // set a new `name` on the subclass. The `name` property is important
++ *   // to ensure intelligible error names even if the class name gets
++ *   // mangled by a minifier
++ *   name = "MissingRootError"
++ * }
++ * ```
++ * @abstract
++ */
++export class GOVUKFrontendError extends Error {
++  name = 'GOVUKFrontendError'
++}
++
++/**
++ * Indicates that GOV.UK Frontend is not supported
++ */
++export class SupportError extends GOVUKFrontendError {
++  name = 'SupportError'
++
++  // eslint-disable-next-line jsdoc/require-jsdoc -- Nothing pertinent to document
++  constructor() {
++    super('GOV.UK Frontend is not supported in this browser')
++  }
++}
+diff --git a/packages/govuk-frontend/src/govuk/errors/index.unit.test.mjs b/packages/govuk-frontend/src/govuk/errors/index.unit.test.mjs
+new file mode 100644
+index 0000000..33ea446
+--- /dev/null
++++ b/packages/govuk-frontend/src/govuk/errors/index.unit.test.mjs
+@@ -0,0 +1,27 @@
++import { GOVUKFrontendError, SupportError } from './index.mjs'
++
++describe('errors', () => {
++  describe('GOVUKFrontendError', () => {
++    it('allows subclasses to set a custom name', () => {
++      class CustomError extends GOVUKFrontendError {
++        name = 'CustomName'
++      }
++
++      expect(new CustomError().name).toBe('CustomName')
++    })
++  })
++
++  describe('SupportError', () => {
++    it('is an instance of GOVUKFrontendError', () => {
++      expect(new SupportError()).toBeInstanceOf(GOVUKFrontendError)
++    })
++    it('has its own name set', () => {
++      expect(new SupportError().name).toBe('SupportError')
++    })
++    it('provides meaningfull feedback to users', () => {
++      expect(new SupportError().message).toBe(
++        'GOV.UK Frontend is not supported in this browser'
++      )
++    })
++  })
++})
+diff --git a/packages/govuk-frontend/src/govuk/govuk-frontend-component.mjs b/packages/govuk-frontend/src/govuk/govuk-frontend-component.mjs
+new file mode 100644
+index 0000000..bd537c2
+--- /dev/null
++++ b/packages/govuk-frontend/src/govuk/govuk-frontend-component.mjs
+@@ -0,0 +1,32 @@
++import { isSupported } from './common/index.mjs'
++import { SupportError } from './errors/index.mjs'
++
++/**
++ * Base Component class
++ *
++ * Centralises the behaviours shared by our components
++ *
++ * @internal
++ * @abstract
++ */
++export class GOVUKFrontendComponent {
++  /**
++   * Constructs a new component, validating that GOV.UK Frontend is supported
++   *
++   * @internal
++   */
++  constructor() {
++    this.checkSupport()
++  }
++
++  /**
++   * Validates whether GOV.UK Frontend is supported
++   *
++   * @private
++   */
++  checkSupport() {
++    if (!isSupported()) {
++      throw new SupportError()
++    }
++  }
++}
+diff --git a/packages/govuk-frontend/tasks/build/package.test.mjs b/packages/govuk-frontend/tasks/build/package.test.mjs
+index 088976f..163502e 100644
+--- a/packages/govuk-frontend/tasks/build/package.test.mjs
++++ b/packages/govuk-frontend/tasks/build/package.test.mjs
+@@ -216,7 +216,10 @@ describe('packages/govuk-frontend/dist/', () => {
+         for (const componentName of componentNamesWithJavaScript) {
+           const componentClassName = componentNameToClassName(componentName)
+ 
+-          expect(contents).toContain(`class ${componentClassName} {`)
++          expect(contents).toContain(
++            // Trailing space is important to not match `class ${componentClassName}Something`
++            `class ${componentClassName} `
++          )
+           expect(contents).toContain(
+             `exports.${componentClassName} = ${componentClassName};`
+           )
+diff --git a/shared/helpers/puppeteer.js b/shared/helpers/puppeteer.js
+index dc570c8..43c4879 100644
+--- a/shared/helpers/puppeteer.js
++++ b/shared/helpers/puppeteer.js
+@@ -62,21 +62,20 @@ async function axe(page, overrides = {}) {
+  * Render and initialise a component within test boilerplate HTML
+  *
+  * Renders a component's Nunjucks macro with the given params, injects it into
+- * the test boilerplate page, then either:
++ * the test boilerplate page, and instantiates the component class, passing the
++ * provided JavaScript configuration.
+  *
+- * - instantiates the component class, passing the provided JavaScript
+- *   configuration
+- * - runs the passed initialiser function inside the browser
+- *   (which lets you instantiate it a different way, like using `initAll`,
+- *   or run arbitrary code)
++ * It runs an optional `beforeInitialisation` function before initialising the
++ * components, allowing to tweak the state of the page before the component gets
++ * instantiated.
+  *
+  * @param {import('puppeteer').Page} page - Puppeteer page object
+  * @param {string} componentName - The kebab-cased name of the component
+  * @param {object} options - Render and initialise options
+  * @param {object} options.params - Nunjucks macro params
+  * @param {object} [options.config] - Component instantiation config
+- * @param {($module: Element) => void} [options.initialiser] - A function that'll run in the
+- *   browser to execute arbitrary initialisation
++ * @param {($module: Element) => void} [options.beforeInitialisation] - A function that'll run in the browser
++ *   before the component gets initialised
+  * @returns {Promise<import('puppeteer').Page>} Puppeteer page object
+  */
+ async function renderAndInitialise(page, componentName, options) {
+@@ -93,23 +92,46 @@ async function renderAndInitialise(page, componentName, options) {
+     html
+   )
+ 
++  // Call `beforeInitialisation` in a separate `$eval` call
++  // as running it inside the body of the next `evaluate`
++  // didn't provide a reliable execution
++  if (options.beforeInitialisation) {
++    await page.$eval('[data-module]', options.beforeInitialisation)
++  }
++
+   // Run a script to init the JavaScript component
+-  await page.evaluate(
++  //
++  // Use `evaluate` to ensure we run `document.querySelector` inside the
++  // browser, like users would, rather than rely on Puppeteer looking for the
++  // element which would cause an error in Jest-land rather than within the
++  // browser if the element is missingß
++  //
++  // Puppeteer returns very little information on errors thrown during
++  // `evaluate`, only a `name` that maps to the error class (and not its `name`
++  // property, which means we get a mangled value). As a workaround, we can
++  // gather and `return` the values we need from inside the browser, and throw
++  // them when back in Jest (to keep them triggering a Promise rejection)
++  const error = await page.evaluate(
+     async (exportName, options) => {
+       const $module = document.querySelector('[data-module]')
+ 
+-      if (options.initialiser) {
+-        options.initialiser($module)
+-      }
+-
+       const namespace = await import('govuk-frontend')
+-      /* eslint-disable-next-line no-new */
+-      new namespace[exportName]($module, options.config)
++
++      try {
++        /* eslint-disable-next-line no-new */
++        new namespace[exportName]($module, options.config)
++      } catch ({ name, message }) {
++        return { name, message }
++      }
+     },
+     componentNameToClassName(componentName),
+     options
+   )
+ 
++  if (error) {
++    throw error
++  }
++
+   return page
+ }
+ 

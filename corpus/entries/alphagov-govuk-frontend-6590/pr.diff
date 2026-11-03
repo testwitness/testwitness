@@ -1,0 +1,581 @@
+diff --git a/packages/govuk-frontend-review/src/stylesheets/full-page-examples/campaign-page.scss b/packages/govuk-frontend-review/src/stylesheets/full-page-examples/campaign-page.scss
+index e5611c6..4b8a78f 100644
+--- a/packages/govuk-frontend-review/src/stylesheets/full-page-examples/campaign-page.scss
++++ b/packages/govuk-frontend-review/src/stylesheets/full-page-examples/campaign-page.scss
+@@ -47,7 +47,8 @@
+ .app-updates {
+   margin-bottom: govuk-spacing(8);
+   padding: govuk-spacing(4) govuk-spacing(4) govuk-spacing(2);
+-  border: 1px solid govuk-functional-colour(border);
++  border: 1px solid;
++  border-color: govuk-functional-colour(border);
+   background-color: govuk-colour("black", $variant: "tint-95");
+ }
+ 
+diff --git a/packages/govuk-frontend-review/src/stylesheets/full-page-examples/search.scss b/packages/govuk-frontend-review/src/stylesheets/full-page-examples/search.scss
+index df2ac67..fc4ba15 100644
+--- a/packages/govuk-frontend-review/src/stylesheets/full-page-examples/search.scss
++++ b/packages/govuk-frontend-review/src/stylesheets/full-page-examples/search.scss
+@@ -4,7 +4,8 @@
+ .app-document-list > li {
+   padding-top: govuk-spacing(4);
+   padding-bottom: govuk-spacing(2);
+-  border-bottom: 1px solid govuk-functional-colour(border);
++  border-bottom: 1px solid;
++  border-bottom-color: govuk-functional-colour(border);
+ }
+ 
+ .app-metadata-list > li {
+@@ -14,7 +15,8 @@
+ 
+ .app-filter li {
+   padding-bottom: govuk-spacing(4);
+-  border-bottom: 1px solid govuk-functional-colour(border);
++  border-bottom: 1px solid;
++  border-bottom-color: govuk-functional-colour(border);
+ }
+ 
+ .app-open-fieldset {
+diff --git a/packages/govuk-frontend-review/src/stylesheets/partials/_code.scss b/packages/govuk-frontend-review/src/stylesheets/partials/_code.scss
+index d7bc19d..5d451a3 100644
+--- a/packages/govuk-frontend-review/src/stylesheets/partials/_code.scss
++++ b/packages/govuk-frontend-review/src/stylesheets/partials/_code.scss
+@@ -15,7 +15,9 @@
+   @include govuk-responsive-margin(4, "bottom");
+ 
+   &:focus {
+-    border: $govuk-focus-width solid govuk-functional-colour(input-border);
+-    outline: $govuk-focus-width solid govuk-functional-colour(focus);
++    border: $govuk-focus-width solid;
++    border-color: govuk-functional-colour(input-border);
++    outline: $govuk-focus-width solid;
++    outline-color: govuk-functional-colour(focus);
+   }
+ }
+diff --git a/packages/govuk-frontend/src/govuk/components/accordion/_index.scss b/packages/govuk-frontend/src/govuk/components/accordion/_index.scss
+index cd3530a..76f4543 100644
+--- a/packages/govuk-frontend/src/govuk/components/accordion/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/accordion/_index.scss
+@@ -39,7 +39,8 @@
+   .govuk-frontend-supported {
+     .govuk-accordion {
+       // Border at the bottom of the whole accordion
+-      border-bottom: $govuk-accordion-bottom-border-width solid govuk-functional-colour(border);
++      border-bottom: $govuk-accordion-bottom-border-width solid;
++      border-bottom-color: govuk-functional-colour(border);
+     }
+ 
+     .govuk-accordion__section {
+@@ -188,13 +189,15 @@
+ 
+       border: 0;
+ 
+-      border-top: $govuk-accordion-bottom-border-width solid govuk-functional-colour(border);
++      border-top: $govuk-accordion-bottom-border-width solid;
+ 
+       // Visually separate the section from the one underneath when user changes
+       // colours in their browser. See
+       // https://github.com/alphagov/govuk-frontend/issues/2321#issuecomment-924201488
+       border-bottom: govuk-spacing(2) solid transparent;
+ 
++      border-top-color: govuk-functional-colour(border);
++
+       color: govuk-functional-colour(text);
+       background: none;
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/checkboxes/_index.scss b/packages/govuk-frontend/src/govuk/components/checkboxes/_index.scss
+index 5fb7be5..605b4ad 100644
+--- a/packages/govuk-frontend/src/govuk/components/checkboxes/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/checkboxes/_index.scss
+@@ -169,7 +169,8 @@
+     @include govuk-responsive-margin(4, "bottom");
+     margin-left: $conditional-margin-left;
+     padding-left: $conditional-padding-left;
+-    border-left: $conditional-border-width solid govuk-functional-colour(border);
++    border-left: $conditional-border-width solid;
++    border-left-color: govuk-functional-colour(border);
+ 
+     .govuk-frontend-supported &--hidden {
+       display: none;
+diff --git a/packages/govuk-frontend/src/govuk/components/components.unit.test.js b/packages/govuk-frontend/src/govuk/components/components.unit.test.js
+index 4e76fe3..f0ebcef 100644
+--- a/packages/govuk-frontend/src/govuk/components/components.unit.test.js
++++ b/packages/govuk-frontend/src/govuk/components/components.unit.test.js
+@@ -15,12 +15,51 @@ describe('Components', () => {
+   })
+ 
+   describe('Sass render', () => {
+-    it('renders CSS for all components', () => {
+-      const file = join(paths.package, 'src/govuk/components/_index.scss')
++    describe('all components', () => {
++      let sassCompilationResult
+ 
+-      return expect(compileSassFile(file)).resolves.toMatchObject({
+-        css: expect.any(String),
+-        loadedUrls: expect.arrayContaining([expect.any(URL)])
++      beforeAll(async () => {
++        const source = join(paths.package, 'src/govuk/components/_index.scss')
++        sassCompilationResult = await compileSassFile(source)
++      })
++
++      it('renders CSS for all components', () => {
++        return expect(sassCompilationResult).toMatchObject({
++          css: expect.any(String),
++          loadedUrls: expect.arrayContaining([expect.any(URL)])
++        })
++      })
++
++      it.only('does not use custom properties in shorthand properties', async () => {
++        const { css } = sassCompilationResult
++
++        // Use a list of allowed properties rather than disallowed ones
++        // to catch new uses and explicitly allow them, rather than
++        // risk problematic future uses implicitly be accepted
++        const allowedProperties = ['box-shadow']
++
++        await require('postcss')({
++          postcssPlugin: 'govuk-frontend-var-in-shorthands',
++          Declaration(declaration) {
++            // Find out if the value includes a CSS variable that is not the entire value
++            // Test first for `var(` to avoid running regex unnecessarily
++            if (
++              declaration.value.includes('var(') &&
++              !declaration.value.match(/^var\(.*?\)$/)
++            ) {
++              // If it does, error unless we allow custom properties for that property
++              if (!allowedProperties.includes(declaration.prop)) {
++                throw new Error(
++                  `\`${declaration.prop}: ${declaration.value}\` includes a custom property as part of its value`
++                )
++              }
++            }
++          }
++        }).process(css, {
++          // Avoid PostCSS complaining about lacking a `from` option to locate a Browserslist file
++          // as we don't care about Browser support here, just parsing syntax
++          from: undefined
++        })
+       })
+     })
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/details/_index.scss b/packages/govuk-frontend/src/govuk/components/details/_index.scss
+index 1ca6717..5e7b2a3 100644
+--- a/packages/govuk-frontend/src/govuk/components/details/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/details/_index.scss
+@@ -46,7 +46,8 @@
+   // like inset text
+   @media screen\0 {
+     .govuk-details {
+-      border-left: $govuk-border-width-wide solid govuk-functional-colour(border);
++      border-left: $govuk-border-width-wide solid;
++      border-left-color: govuk-functional-colour(border);
+     }
+ 
+     .govuk-details__summary {
+@@ -130,7 +131,8 @@
+     }
+ 
+     .govuk-details__text {
+-      border-left: $govuk-border-width solid govuk-functional-colour(border);
++      border-left: $govuk-border-width solid;
++      border-left-color: govuk-functional-colour(border);
+     }
+   }
+ }
+diff --git a/packages/govuk-frontend/src/govuk/components/error-summary/_index.scss b/packages/govuk-frontend/src/govuk/components/error-summary/_index.scss
+index 1435b0b..10d054c 100644
+--- a/packages/govuk-frontend/src/govuk/components/error-summary/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/error-summary/_index.scss
+@@ -7,10 +7,12 @@
+     @include govuk-responsive-padding(4);
+     @include govuk-responsive-margin(8, "bottom");
+ 
+-    border: $govuk-border-width solid govuk-functional-colour(error);
++    border: $govuk-border-width solid;
++    border-color: govuk-functional-colour(error);
+ 
+     &:focus {
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+     }
+   }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/file-upload/_index.scss b/packages/govuk-frontend/src/govuk/components/file-upload/_index.scss
+index da16d22..a3f9228 100644
+--- a/packages/govuk-frontend/src/govuk/components/file-upload/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/file-upload/_index.scss
+@@ -27,7 +27,8 @@
+     }
+ 
+     &:focus {
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+       // Use `box-shadow` to add border instead of changing `border-width`
+       // (which changes element size) and since `outline` is already used for
+       // the yellow focus state.
+@@ -40,7 +41,8 @@
+     // to recognise `focus-within` and don't set any styles from the block
+     // when it's a selector.
+     &:focus-within {
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+ 
+       box-shadow: inset 0 0 0 4px govuk-functional-colour(input-border);
+     }
+@@ -128,7 +130,8 @@
+     &:active,
+     &:focus {
+       border: $file-upload-border-width solid govuk-colour("black");
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+       // Ensure outline appears outside of the element
+       outline-offset: 0;
+       background-color: govuk-colour("black", $variant: "tint-95");
+diff --git a/packages/govuk-frontend/src/govuk/components/footer/_index.scss b/packages/govuk-frontend/src/govuk/components/footer/_index.scss
+index dc1a163..76107bf 100644
+--- a/packages/govuk-frontend/src/govuk/components/footer/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/footer/_index.scss
+@@ -12,7 +12,8 @@
+     @include govuk-responsive-padding(7, "top");
+     @include govuk-responsive-padding(5, "bottom");
+ 
+-    border-top: 10px solid govuk-functional-colour(brand);
++    border-top: 10px solid;
++    border-top-color: govuk-functional-colour(brand);
+     color: $govuk-footer-text;
+     @include _govuk-rebrand(
+       "background",
+diff --git a/packages/govuk-frontend/src/govuk/components/header/_index.scss b/packages/govuk-frontend/src/govuk/components/header/_index.scss
+index b88fafc..77ab064 100644
+--- a/packages/govuk-frontend/src/govuk/components/header/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/header/_index.scss
+@@ -40,7 +40,8 @@
+     position: relative;
+     margin-bottom: -$govuk-header-border-width;
+     padding-top: govuk-spacing($govuk-header-vertical-spacing-value);
+-    border-bottom: $govuk-header-border-width solid $govuk-header-border-color;
++    border-bottom: $govuk-header-border-width solid;
++    border-bottom-color: $govuk-header-border-color;
+ 
+     @include _govuk-rebrand {
+       // Remove the space allocated to the blue bar
+diff --git a/packages/govuk-frontend/src/govuk/components/input/_index.scss b/packages/govuk-frontend/src/govuk/components/input/_index.scss
+index 13ff190..8f1ee81 100644
+--- a/packages/govuk-frontend/src/govuk/components/input/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/input/_index.scss
+@@ -15,8 +15,9 @@
+     // to dark backgrounds in Firefox (https://bugzil.la/1335476). As
+     // background-color and color need to always be set together, color should
+     // not be set either
+-    border: $govuk-border-width-form-element solid govuk-functional-colour(input-border);
++    border: $govuk-border-width-form-element solid;
+     border-radius: 0;
++    border-color: govuk-functional-colour(input-border);
+ 
+     // Disable inner shadow and remove rounded corners
+     appearance: none;
+@@ -121,7 +122,8 @@
+     min-width: govuk-px-to-rem(40px);
+     height: govuk-px-to-rem(40px);
+     padding: govuk-spacing(1);
+-    border: $govuk-border-width-form-element solid govuk-functional-colour(input-border);
++    border: $govuk-border-width-form-element solid;
++    border-color: govuk-functional-colour(input-border);
+     background-color: govuk-colour("black", $variant: "tint-95");
+     text-align: center;
+     white-space: nowrap;
+diff --git a/packages/govuk-frontend/src/govuk/components/inset-text/_index.scss b/packages/govuk-frontend/src/govuk/components/inset-text/_index.scss
+index 5875478..acabc96 100644
+--- a/packages/govuk-frontend/src/govuk/components/inset-text/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/inset-text/_index.scss
+@@ -10,7 +10,8 @@
+ 
+     clear: both;
+ 
+-    border-left: $govuk-border-width-wide solid govuk-functional-colour(border);
++    border-left: $govuk-border-width-wide solid;
++    border-left-color: govuk-functional-colour(border);
+ 
+     > :first-child {
+       margin-top: 0;
+diff --git a/packages/govuk-frontend/src/govuk/components/notification-banner/_index.scss b/packages/govuk-frontend/src/govuk/components/notification-banner/_index.scss
+index 65f197a..d3e91e2 100644
+--- a/packages/govuk-frontend/src/govuk/components/notification-banner/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/notification-banner/_index.scss
+@@ -3,12 +3,14 @@
+     @include govuk-font($size: 19);
+     @include govuk-responsive-margin(8, "bottom");
+ 
+-    border: $govuk-border-width solid govuk-functional-colour(brand);
++    border: $govuk-border-width solid;
++    border-color: govuk-functional-colour(brand);
+ 
+     background-color: govuk-functional-colour(brand);
+ 
+     &:focus {
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+     }
+   }
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/pagination/_index.scss b/packages/govuk-frontend/src/govuk/components/pagination/_index.scss
+index 2a0e5d4..1a94fce 100644
+--- a/packages/govuk-frontend/src/govuk/components/pagination/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/pagination/_index.scss
+@@ -194,7 +194,8 @@
+ 
+     // Only apply a border between prev and next if both are present
+     .govuk-pagination__prev + .govuk-pagination__next {
+-      border-top: 1px solid govuk-functional-colour(border);
++      border-top: 1px solid;
++      border-top-color: govuk-functional-colour(border);
+     }
+ 
+     // Set the after pseudo element to a block which makes the title visually
+diff --git a/packages/govuk-frontend/src/govuk/components/phase-banner/_index.scss b/packages/govuk-frontend/src/govuk/components/phase-banner/_index.scss
+index cce3ccc..765c776 100644
+--- a/packages/govuk-frontend/src/govuk/components/phase-banner/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/phase-banner/_index.scss
+@@ -5,7 +5,8 @@
+     padding-top: govuk-spacing(2);
+     padding-bottom: govuk-spacing(2);
+ 
+-    border-bottom: 1px solid govuk-functional-colour(border);
++    border-bottom: 1px solid;
++    border-bottom-color: govuk-functional-colour(border);
+   }
+ 
+   .govuk-phase-banner__content {
+diff --git a/packages/govuk-frontend/src/govuk/components/radios/_index.scss b/packages/govuk-frontend/src/govuk/components/radios/_index.scss
+index 6eddb12..b7fc5dd 100644
+--- a/packages/govuk-frontend/src/govuk/components/radios/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/radios/_index.scss
+@@ -188,7 +188,8 @@
+     @include govuk-responsive-margin(4, "bottom");
+     margin-left: $conditional-margin-left;
+     padding-left: $conditional-padding-left;
+-    border-left: $conditional-border-width solid govuk-functional-colour(border);
++    border-left: $conditional-border-width solid;
++    border-left-color: govuk-functional-colour(border);
+ 
+     .govuk-frontend-supported &--hidden {
+       display: none;
+diff --git a/packages/govuk-frontend/src/govuk/components/select/_index.scss b/packages/govuk-frontend/src/govuk/components/select/_index.scss
+index 3d3200d..b8c9053 100644
+--- a/packages/govuk-frontend/src/govuk/components/select/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/select/_index.scss
+@@ -16,7 +16,8 @@
+     max-width: 100%;
+     height: govuk-px-to-rem(40px);
+     padding: govuk-spacing(1);
+-    border: $govuk-border-width-form-element solid govuk-functional-colour(input-border);
++    border: $govuk-border-width-form-element solid;
++    border-color: govuk-functional-colour(input-border);
+ 
+     // Default user agent colours for selects can have low contrast,
+     // and may look disabled (#2435)
+diff --git a/packages/govuk-frontend/src/govuk/components/skip-link/_index.scss b/packages/govuk-frontend/src/govuk/components/skip-link/_index.scss
+index 068d34d..ebb052c 100644
+--- a/packages/govuk-frontend/src/govuk/components/skip-link/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/skip-link/_index.scss
+@@ -20,7 +20,8 @@
+     }
+ 
+     &:focus {
+-      outline: $govuk-focus-width solid govuk-functional-colour(focus);
++      outline: $govuk-focus-width solid;
++      outline-color: govuk-functional-colour(focus);
+       outline-offset: 0;
+       background-color: govuk-functional-colour(focus);
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/summary-list/_index.scss b/packages/govuk-frontend/src/govuk/components/summary-list/_index.scss
+index 9b4db7b..8a07d19 100644
+--- a/packages/govuk-frontend/src/govuk/components/summary-list/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/summary-list/_index.scss
+@@ -13,7 +13,8 @@
+   }
+ 
+   .govuk-summary-list__row {
+-    border-bottom: 1px solid govuk-functional-colour(border);
++    border-bottom: 1px solid;
++    border-bottom-color: govuk-functional-colour(border);
+ 
+     @media #{govuk-until-breakpoint(tablet)} {
+       margin-bottom: govuk-spacing(3);
+@@ -106,7 +107,8 @@
+     .govuk-summary-card__action {
+       margin-right: govuk-spacing(2);
+       padding-right: govuk-spacing(2);
+-      border-right: 1px solid govuk-functional-colour(border);
++      border-right: 1px solid;
++      border-right-color: govuk-functional-colour(border);
+     }
+ 
+     .govuk-summary-list__actions-list-item:last-child,
+@@ -126,7 +128,8 @@
+ 
+     .govuk-summary-list__actions-list-item:not(:first-child),
+     .govuk-summary-card__action:not(:first-child) {
+-      border-left: 1px solid govuk-functional-colour(border);
++      border-left: 1px solid;
++      border-left-color: govuk-functional-colour(border);
+     }
+ 
+     .govuk-summary-list__actions-list-item:first-child,
+@@ -179,7 +182,8 @@
+   // Additional block for the summary card
+   .govuk-summary-card {
+     @include govuk-responsive-margin(6, "bottom");
+-    border: 1px solid govuk-functional-colour(border);
++    border: 1px solid;
++    border-color: govuk-functional-colour(border);
+   }
+ 
+   .govuk-summary-card__title-wrapper {
+diff --git a/packages/govuk-frontend/src/govuk/components/table/_index.scss b/packages/govuk-frontend/src/govuk/components/table/_index.scss
+index ef62cc4..f42cb6a 100644
+--- a/packages/govuk-frontend/src/govuk/components/table/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/table/_index.scss
+@@ -24,7 +24,8 @@
+   .govuk-table__header,
+   .govuk-table__cell {
+     padding: govuk-spacing(2) govuk-spacing(4) govuk-spacing(2) 0;
+-    border-bottom: 1px solid govuk-functional-colour(border);
++    border-bottom: 1px solid;
++    border-bottom-color: govuk-functional-colour(border);
+     text-align: left;
+     vertical-align: top;
+   }
+diff --git a/packages/govuk-frontend/src/govuk/components/tabs/_index.scss b/packages/govuk-frontend/src/govuk/components/tabs/_index.scss
+index cfd6846..2bd6911 100644
+--- a/packages/govuk-frontend/src/govuk/components/tabs/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/tabs/_index.scss
+@@ -50,7 +50,8 @@
+       .govuk-tabs__list {
+         @include govuk-clearfix;
+         margin-bottom: 0;
+-        border-bottom: 1px solid govuk-functional-colour(border);
++        border-bottom: 1px solid;
++        border-bottom-color: govuk-functional-colour(border);
+       }
+ 
+       .govuk-tabs__title {
+@@ -88,8 +89,9 @@
+         padding-bottom: govuk-spacing(3) + $border-width;
+         padding-left: govuk-spacing(4) - $border-width;
+ 
+-        border: $border-width solid govuk-functional-colour(border);
++        border: $border-width solid;
+         border-bottom: 0;
++        border-color: govuk-functional-colour(border);
+ 
+         background-color: govuk-functional-colour(body-background);
+ 
+@@ -116,8 +118,9 @@
+       .govuk-tabs__panel {
+         @include govuk-responsive-margin(0, "bottom");
+         padding: govuk-spacing(6) govuk-spacing(4);
+-        border: 1px solid govuk-functional-colour(border);
++        border: 1px solid;
+         border-top: 0;
++        border-color: govuk-functional-colour(border);
+ 
+         & > :last-child {
+           margin-bottom: 0;
+diff --git a/packages/govuk-frontend/src/govuk/components/task-list/_index.scss b/packages/govuk-frontend/src/govuk/components/task-list/_index.scss
+index 5c57cb0..5f54ebb 100644
+--- a/packages/govuk-frontend/src/govuk/components/task-list/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/task-list/_index.scss
+@@ -25,11 +25,13 @@
+     margin-bottom: 0;
+     padding-top: govuk-spacing(2);
+     padding-bottom: govuk-spacing(2);
+-    border-bottom: 1px solid govuk-functional-colour(border);
++    border-bottom: 1px solid;
++    border-bottom-color: govuk-functional-colour(border);
+   }
+ 
+   .govuk-task-list__item:first-child {
+-    border-top: 1px solid govuk-functional-colour(border);
++    border-top: 1px solid;
++    border-top-color: govuk-functional-colour(border);
+   }
+ 
+   // This class is added to the <li> elements where the task name is a link. The
+diff --git a/packages/govuk-frontend/src/govuk/components/textarea/_index.scss b/packages/govuk-frontend/src/govuk/components/textarea/_index.scss
+index 4f27933..981dc30 100644
+--- a/packages/govuk-frontend/src/govuk/components/textarea/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/textarea/_index.scss
+@@ -15,8 +15,9 @@
+ 
+     resize: vertical;
+ 
+-    border: $govuk-border-width-form-element solid govuk-functional-colour(input-border);
++    border: $govuk-border-width-form-element solid;
+     border-radius: 0;
++    border-color: govuk-functional-colour(input-border);
+ 
+     -webkit-appearance: none;
+ 
+diff --git a/packages/govuk-frontend/src/govuk/components/warning-text/_index.scss b/packages/govuk-frontend/src/govuk/components/warning-text/_index.scss
+index b92f31c..30d90f3 100644
+--- a/packages/govuk-frontend/src/govuk/components/warning-text/_index.scss
++++ b/packages/govuk-frontend/src/govuk/components/warning-text/_index.scss
+@@ -25,8 +25,9 @@
+ 
+     // When a user customises their colours the background colour will often be
+     // removed. Adding a border to the component keeps it's shape as a circle.
+-    border: 3px solid govuk-functional-colour(text);
++    border: 3px solid;
+     border-radius: 50%;
++    border-color: govuk-functional-colour(text);
+ 
+     color: govuk-functional-colour(body-background);
+     background: govuk-functional-colour(text);
+diff --git a/packages/govuk-frontend/src/govuk/core/_section-break.scss b/packages/govuk-frontend/src/govuk/core/_section-break.scss
+index b7807e1..5125bfa 100644
+--- a/packages/govuk-frontend/src/govuk/core/_section-break.scss
++++ b/packages/govuk-frontend/src/govuk/core/_section-break.scss
+@@ -40,7 +40,8 @@
+   // Visible variant
+ 
+   %govuk-section-break--visible {
+-    border-bottom: 1px solid govuk-functional-colour(border);
++    border-bottom: 1px solid;
++    border-bottom-color: govuk-functional-colour(border);
+   }
+ 
+   .govuk-section-break--visible {
+diff --git a/packages/govuk-frontend/src/govuk/helpers/_focused.scss b/packages/govuk-frontend/src/govuk/helpers/_focused.scss
+index 2ef28ea..913c96e 100644
+--- a/packages/govuk-frontend/src/govuk/helpers/_focused.scss
++++ b/packages/govuk-frontend/src/govuk/helpers/_focused.scss
+@@ -78,7 +78,8 @@
+ /// @access public
+ 
+ @mixin govuk-focused-form-input {
+-  outline: $govuk-focus-width solid govuk-functional-colour(focus);
++  outline: $govuk-focus-width solid;
++  outline-color: govuk-functional-colour(focus);
+   // Ensure outline appears outside of the element
+   outline-offset: 0;
+   // Double the border by adding its width again. Use `box-shadow` for this
+diff --git a/packages/govuk-frontend/src/govuk/objects/_form-group.scss b/packages/govuk-frontend/src/govuk/objects/_form-group.scss
+index d16766a..7f22c8c 100644
+--- a/packages/govuk-frontend/src/govuk/objects/_form-group.scss
++++ b/packages/govuk-frontend/src/govuk/objects/_form-group.scss
+@@ -12,7 +12,8 @@
+ 
+   .govuk-form-group--error {
+     padding-left: govuk-spacing(3);
+-    border-left: $govuk-border-width-form-group-error solid govuk-functional-colour(error);
++    border-left: $govuk-border-width-form-group-error solid;
++    border-left-color: govuk-functional-colour(error);
+ 
+     .govuk-form-group {
+       // Reset error styles in nested form groups that might have error class

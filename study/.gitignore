@@ -1,0 +1,8 @@
+# Local only: names repositories, PR urls, bodies or test names. Never publish.
+sample.jsonl
+rejected.jsonl
+results.csv
+labels.csv
+data/
+cache/
+smoke/

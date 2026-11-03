@@ -1,0 +1,283 @@
+diff --git a/packages/entity-cache-adapter-redis/src/RedisCommon.ts b/packages/entity-cache-adapter-redis/src/RedisCommon.ts
+index 36f6dde..22ec742 100644
+--- a/packages/entity-cache-adapter-redis/src/RedisCommon.ts
++++ b/packages/entity-cache-adapter-redis/src/RedisCommon.ts
+@@ -1,4 +1,4 @@
+-import { DateField } from '@expo/entity';
++import { BufferField, DateField } from '@expo/entity';
+ 
+ export const redisTransformerMap = new Map([
+   [
+@@ -22,4 +22,25 @@ export const redisTransformerMap = new Map([
+       read: (val: any) => (val ? new Date(val) : val),
+     },
+   ],
++  [
++    BufferField.name,
++    {
++      /**
++       * All Redis fields are serialized to JSON before being written.
++       * In the case of buffers, they need to be explicitly reconstructed
++       * as JavaScript Buffer objects upon retrieval. We also explicitly
++       * serialize them to base64 strings to ensure no underlying Redis
++       * changes affect the fields.
++       *
++       * Write behavior: Value to write will always be either a Buffer or null.
++       *                 Behavior is to pass through null and convert buffers
++       *                 to base64 strings.
++       * Read behavior:  Value will always be either null or a base64 string.
++       *                 behavior is to convert base64 strings back into Buffer
++       *                 objects and pass through null.
++       */
++      write: (val: Buffer) => (val ? val.toString('base64') : null),
++      read: (val: any) => (val ? Buffer.from(val, 'base64') : val),
++    },
++  ],
+ ]);
+diff --git a/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-full-integration-test.ts b/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-full-integration-test.ts
+index 1e57c71..335f302 100644
+--- a/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-full-integration-test.ts
++++ b/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-full-integration-test.ts
+@@ -64,6 +64,8 @@ describe(GenericRedisCacher, () => {
+ 
+     const entity1Created = await RedisTestEntity.creator(viewerContext)
+       .setField('name', 'blah')
++      .setField('dateField', new Date())
++      .setField('bufferField', Buffer.from('hello world'))
+       .createAsync();
+ 
+     // loading an entity should put it in cache
+@@ -207,4 +209,27 @@ describe(GenericRedisCacher, () => {
+     const entity3 = await RedisTestEntity.loader(vc2).loadByFieldEqualingAsync('name', '');
+     expect(entity3?.getID()).toEqual(entity1.getID());
+   });
++
++  it('caches and restores buffer fields', async () => {
++    const viewerContext = new TestViewerContext(
++      createRedisIntegrationTestEntityCompanionProvider(genericRedisCacheContext),
++    );
++    const buffer = Buffer.from('hello world');
++    const entity1 = await enforceAsyncResult(
++      RedisTestEntity.creatorWithAuthorizationResults(viewerContext)
++        .setField('bufferField', buffer)
++        .createAsync(),
++    );
++    expect(entity1.getField('bufferField')).toEqual(buffer);
++
++    const entity2 = await RedisTestEntity.loader(viewerContext).loadByIDAsync(entity1.getID());
++    expect(entity2.getField('bufferField')).toEqual(buffer);
++
++    // simulate new request
++    const vc2 = new TestViewerContext(
++      createRedisIntegrationTestEntityCompanionProvider(genericRedisCacheContext),
++    );
++    const entity3 = await RedisTestEntity.loader(vc2).loadByIDAsync(entity1.getID());
++    expect(entity3.getField('bufferField')).toEqual(buffer);
++  });
+ });
+diff --git a/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-integration-test.ts b/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-integration-test.ts
+index 5daadc2..997aded 100644
+--- a/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-integration-test.ts
++++ b/packages/entity-cache-adapter-redis/src/__integration-tests__/GenericRedisCacher-integration-test.ts
+@@ -55,9 +55,11 @@ describe(GenericRedisCacher, () => {
+       redisTestEntityConfiguration,
+     );
+     const date = new Date();
++    const buffer = Buffer.from('hello world');
+     const entity1Created = await RedisTestEntity.creator(viewerContext)
+       .setField('name', 'blah')
+       .setField('dateField', date)
++      .setField('bufferField', buffer)
+       .createAsync();
+     const testKey = `test-id-key-${entity1Created.getID()}`;
+     const objectMap = new Map<string, Readonly<RedisTestEntityFields>>([
+@@ -80,6 +82,7 @@ describe(GenericRedisCacher, () => {
+     });
+     expect(loadedObjectMap.size).toBe(1);
+   });
++
+   it('has correct negative caching behaviour', async () => {
+     const genericRedisCacher = new GenericRedisCacher(
+       genericRedisCacheContext,
+@@ -92,6 +95,7 @@ describe(GenericRedisCacher, () => {
+     const cacheLoadResult = loadedObjectMap.get(testKey)!;
+     expect(cacheLoadResult.status).toBe(CacheStatus.NEGATIVE);
+   });
++
+   it('has correct invalidation behaviour', async () => {
+     const viewerContext = new TestViewerContext(
+       createRedisIntegrationTestEntityCompanionProvider(genericRedisCacheContext),
+@@ -101,9 +105,11 @@ describe(GenericRedisCacher, () => {
+       redisTestEntityConfiguration,
+     );
+     const date = new Date();
++    const buffer = Buffer.from('hello world');
+     const entity1Created = await RedisTestEntity.creator(viewerContext)
+       .setField('name', 'blah')
+       .setField('dateField', date)
++      .setField('bufferField', buffer)
+       .createAsync();
+     const testKey = `test-id-key-${entity1Created.getID()}`;
+     const objectMap = new Map<string, Readonly<RedisTestEntityFields>>([
+diff --git a/packages/entity-cache-adapter-redis/src/__testfixtures__/RedisTestEntity.ts b/packages/entity-cache-adapter-redis/src/__testfixtures__/RedisTestEntity.ts
+index 96afe16..6f3a6e1 100644
+--- a/packages/entity-cache-adapter-redis/src/__testfixtures__/RedisTestEntity.ts
++++ b/packages/entity-cache-adapter-redis/src/__testfixtures__/RedisTestEntity.ts
+@@ -1,5 +1,6 @@
+ import {
+   AlwaysAllowPrivacyPolicyRule,
++  BufferField,
+   DateField,
+   Entity,
+   EntityCompanionDefinition,
+@@ -14,6 +15,7 @@ export type RedisTestEntityFields = {
+   id: string;
+   name: string;
+   dateField: Date | null;
++  bufferField: Buffer | null;
+ };
+ 
+ export class RedisTestEntity extends Entity<RedisTestEntityFields, 'id', ViewerContext> {
+@@ -67,11 +69,16 @@ export const redisTestEntityConfiguration = new EntityConfiguration<RedisTestEnt
+     dateField: new DateField({
+       columnName: 'date_field',
+     }),
++    bufferField: new BufferField({
++      columnName: 'buffer_field',
++      cache: true,
++    }),
+   },
+   databaseAdapterFlavor: 'postgres',
+   cacheAdapterFlavor: 'redis',
+   compositeFieldDefinitions: [
+     { compositeField: ['id', 'name'], cache: true },
+     { compositeField: ['id', 'dateField'], cache: true },
++    { compositeField: ['id', 'bufferField'], cache: true },
+   ],
+ });
+diff --git a/packages/entity-database-adapter-knex/src/__integration-tests__/PostgresEntityIntegration-test.ts b/packages/entity-database-adapter-knex/src/__integration-tests__/PostgresEntityIntegration-test.ts
+index 13d632f..b5196c3 100644
+--- a/packages/entity-database-adapter-knex/src/__integration-tests__/PostgresEntityIntegration-test.ts
++++ b/packages/entity-database-adapter-knex/src/__integration-tests__/PostgresEntityIntegration-test.ts
+@@ -256,6 +256,33 @@ describe('postgres entity integration', () => {
+     });
+   });
+ 
++  describe.only('BYTEA fields', () => {
++    it('supports BYTEA fields', async () => {
++      const vc1 = new ViewerContext(createKnexIntegrationTestEntityCompanionProvider(knexInstance));
++
++      const buffer = Buffer.from('hello world');
++      let entity = await enforceAsyncResult(
++        PostgresTestEntity.creatorWithAuthorizationResults(vc1)
++          .setField('binaryField', buffer)
++          .createAsync(),
++      );
++      expect(entity.getField('binaryField')).toEqual(buffer);
++
++      // load the entity in a different viewer context to ensure field deserialization works from db
++      const vc2 = new ViewerContext(createKnexIntegrationTestEntityCompanionProvider(knexInstance));
++      const entityLoaded = await PostgresTestEntity.loader(vc2).loadByIDAsync(entity.getID());
++      expect(entityLoaded.getField('binaryField')).toEqual(buffer);
++
++      const updatedBuffer = Buffer.from('updated hello world');
++      entity = await enforceAsyncResult(
++        PostgresTestEntity.updaterWithAuthorizationResults(entity)
++          .setField('binaryField', updatedBuffer)
++          .updateAsync(),
++      );
++      expect(entity.getField('binaryField')).toEqual(updatedBuffer);
++    });
++  });
++
+   it('supports single field and composite field equality loading', async () => {
+     const vc1 = new ViewerContext(createKnexIntegrationTestEntityCompanionProvider(knexInstance));
+ 
+diff --git a/packages/entity-database-adapter-knex/src/__testfixtures__/PostgresTestEntity.ts b/packages/entity-database-adapter-knex/src/__testfixtures__/PostgresTestEntity.ts
+index 2c3e8e6..9f94ed3 100644
+--- a/packages/entity-database-adapter-knex/src/__testfixtures__/PostgresTestEntity.ts
++++ b/packages/entity-database-adapter-knex/src/__testfixtures__/PostgresTestEntity.ts
+@@ -11,6 +11,7 @@ import {
+   StringField,
+   UUIDField,
+   ViewerContext,
++  BufferField,
+ } from '@expo/entity';
+ import { Knex } from 'knex';
+ 
+@@ -29,6 +30,7 @@ type PostgresTestEntityFields = {
+   dateField: Date | null;
+   maybeJsonArrayField: string[] | { hello: string } | null;
+   bigintField: string | null;
++  binaryField: Buffer | null;
+ };
+ 
+ export class PostgresTestEntity extends Entity<PostgresTestEntityFields, 'id', ViewerContext> {
+@@ -61,6 +63,7 @@ export class PostgresTestEntity extends Entity<PostgresTestEntityFields, 'id', V
+         table.dateTime('date_field', { useTz: true });
+         table.jsonb('maybe_json_array_field');
+         table.bigint('bigint_field');
++        table.binary('binary_field');
+       });
+     }
+     await knex.into(tableName).truncate();
+@@ -153,6 +156,9 @@ export const postgresTestEntityConfiguration = new EntityConfiguration<
+     bigintField: new BigIntField({
+       columnName: 'bigint_field',
+     }),
++    binaryField: new BufferField({
++      columnName: 'binary_field',
++    }),
+   },
+   databaseAdapterFlavor: 'postgres',
+   cacheAdapterFlavor: 'redis',
+diff --git a/packages/entity/src/EntityFields.ts b/packages/entity/src/EntityFields.ts
+index fefbb70..f7e69a2 100644
+--- a/packages/entity/src/EntityFields.ts
++++ b/packages/entity/src/EntityFields.ts
+@@ -121,6 +121,7 @@ export class EnumField<TRequireExplicitCache extends boolean> extends EntityFiel
+ 
+ /**
+  * EntityFieldDefinition for a enum column with a strict typescript enum type.
++ * The strict version checks that the value of the field adheres to a particular typescript enum
+  */
+ export class StrictEnumField<
+   T extends object,
+@@ -140,3 +141,15 @@ export class StrictEnumField<
+     return super.validateInputValueInternal(value) && Object.values(this.enum).includes(value);
+   }
+ }
++
++/**
++ * EntityFieldDefinition for a column with a JS Buffer type.
++ */
++export class BufferField<TRequireExplicitCache extends boolean> extends EntityFieldDefinition<
++  Buffer,
++  TRequireExplicitCache
++> {
++  protected validateInputValueInternal(value: Buffer): boolean {
++    return Buffer.isBuffer(value);
++  }
++}
+diff --git a/packages/entity/src/__tests__/EntityFields-test.ts b/packages/entity/src/__tests__/EntityFields-test.ts
+index 6062938..9629f21 100644
+--- a/packages/entity/src/__tests__/EntityFields-test.ts
++++ b/packages/entity/src/__tests__/EntityFields-test.ts
+@@ -4,6 +4,7 @@ import { v1 as uuidv1, v3 as uuidv3, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+ import { EntityFieldDefinition } from '../EntityFieldDefinition';
+ import {
+   BooleanField,
++  BufferField,
+   DateField,
+   EnumField,
+   FloatField,
+@@ -88,3 +89,9 @@ describeFieldTestCase(
+   [TestEnum.HELLO, TestEnum.WHO, 'world'],
+   ['what', 1, true],
+ );
++
++describeFieldTestCase(
++  new BufferField({ columnName: 'wat' }),
++  [Buffer.from('hello')],
++  ['hello', 1, true],
++);

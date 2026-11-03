@@ -1,0 +1,154 @@
+diff --git a/.github/workflows/main.yaml b/.github/workflows/main.yaml
+index 2ac2d4a..718cbbc 100644
+--- a/.github/workflows/main.yaml
++++ b/.github/workflows/main.yaml
+@@ -9,11 +9,12 @@ on:
+ env:
+   WEAVIATE_127: 1.27.27
+   WEAVIATE_128: 1.28.16
+-  WEAVIATE_129: 1.29.9
+-  WEAVIATE_130: 1.30.17
+-  WEAVIATE_131: 1.31.16
+-  WEAVIATE_132: 1.32.10
+-  WEAVIATE_133: 1.33.0
++  WEAVIATE_129: 1.29.11
++  WEAVIATE_130: 1.30.22
++  WEAVIATE_131: 1.31.20
++  WEAVIATE_132: 1.32.18
++  WEAVIATE_133: 1.33.6
++  WEAVIATE_134: 1.34.1
+ 
+ concurrency:
+   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+@@ -41,15 +42,16 @@ jobs:
+       fail-fast: false
+       matrix:
+         versions: [
+-          { node: "22.x", weaviate: $WEAVIATE_127},
+-          { node: "22.x", weaviate: $WEAVIATE_128},
+-          { node: "22.x", weaviate: $WEAVIATE_129},
+-          { node: "22.x", weaviate: $WEAVIATE_130},
+-          { node: "22.x", weaviate: $WEAVIATE_131},
+-          { node: "22.x", weaviate: $WEAVIATE_132},
+-          { node: "18.x", weaviate: $WEAVIATE_133},
+-          { node: "20.x", weaviate: $WEAVIATE_133},
+-          { node: "22.x", weaviate: $WEAVIATE_133},
++          { node: "24.x", weaviate: $WEAVIATE_127},
++          { node: "24.x", weaviate: $WEAVIATE_128},
++          { node: "24.x", weaviate: $WEAVIATE_129},
++          { node: "24.x", weaviate: $WEAVIATE_130},
++          { node: "24.x", weaviate: $WEAVIATE_131},
++          { node: "24.x", weaviate: $WEAVIATE_132},
++          { node: "24.x", weaviate: $WEAVIATE_133},
++          { node: "20.x", weaviate: $WEAVIATE_134},
++          { node: "22.x", weaviate: $WEAVIATE_134},
++          { node: "24.x", weaviate: $WEAVIATE_134},
+         ]
+     steps:
+     - uses: actions/checkout@v3
+@@ -80,7 +82,7 @@ jobs:
+       fail-fast: false
+       matrix:
+         versions: [
+-          { node: "22.x", weaviate: $WEAVIATE_133},
++          { node: "24.x", weaviate: $WEAVIATE_134},
+         ]
+     steps:
+     - uses: actions/checkout@v3
+diff --git a/package.json b/package.json
+index f54cf0f..6a1d278 100644
+--- a/package.json
++++ b/package.json
+@@ -17,7 +17,7 @@
+     }
+   },
+   "engines": {
+-    "node": ">=18.0.0"
++    "node": ">=20.0.0"
+   },
+   "scripts": {
+     "test": "jest --no-cache --useStderr --runInBand --detectOpenHandles",
+diff --git a/src/collections/config/integration.test.ts b/src/collections/config/integration.test.ts
+index 5836fd1..a2fed17 100644
+--- a/src/collections/config/integration.test.ts
++++ b/src/collections/config/integration.test.ts
+@@ -23,7 +23,7 @@ describe('Testing of the collection.config namespace', () => {
+ 
+   afterAll(() => client.collections.deleteAll());
+ 
+-  it('should be able get the config of a collection without generics', async () => {
++  it('should be able to get the config of a collection without generics', async () => {
+     const collectionName = 'TestCollectionConfigGetWithGenerics';
+     type TestCollectionConfigGet = {
+       testProp: string;
+@@ -68,7 +68,9 @@ describe('Testing of the collection.config namespace', () => {
+       dynamicEfMax: 500,
+       dynamicEfFactor: 8,
+       vectorCacheMaxObjects: 1000000000000,
+-      filterStrategy: 'sweeping',
++      filterStrategy: (await client.getWeaviateVersion().then((ver) => ver.isLowerThan(1, 34, 0)))
++        ? 'sweeping'
++        : 'acorn',
+       flatSearchCutoff: 40000,
+       distance: 'cosine',
+       multiVector: undefined,
+@@ -124,7 +126,9 @@ describe('Testing of the collection.config namespace', () => {
+       dynamicEfMax: 500,
+       dynamicEfFactor: 8,
+       vectorCacheMaxObjects: 1000000000000,
+-      filterStrategy: 'sweeping',
++      filterStrategy: (await client.getWeaviateVersion().then((ver) => ver.isLowerThan(1, 34, 0)))
++        ? 'sweeping'
++        : 'acorn',
+       flatSearchCutoff: 40000,
+       distance: 'cosine',
+       multiVector: undefined,
+@@ -609,7 +613,9 @@ describe('Testing of the collection.config namespace', () => {
+       dynamicEfMax: 500,
+       dynamicEfFactor: 8,
+       vectorCacheMaxObjects: 1000000000000,
+-      filterStrategy: 'sweeping',
++      filterStrategy: (await client.getWeaviateVersion().then((ver) => ver.isLowerThan(1, 34, 0)))
++        ? 'sweeping'
++        : 'acorn',
+       flatSearchCutoff: 40000,
+       distance: 'cosine',
+       multiVector: undefined,
+@@ -682,7 +688,7 @@ describe('Testing of the collection.config namespace', () => {
+     expect(config.multiTenancy.enabled).toEqual(true);
+   });
+ 
+-  it('should be able update the config of a collection with legacy vectors', async () => {
++  it.only('should be able update the config of a collection with legacy vectors', async () => {
+     const clientV2 = weaviateV2.client({
+       host: 'http://localhost:8080',
+     });
+@@ -719,7 +725,9 @@ describe('Testing of the collection.config namespace', () => {
+       dynamicEfMax: 500,
+       dynamicEfFactor: 8,
+       vectorCacheMaxObjects: 1000000000000,
+-      filterStrategy: 'sweeping',
++      filterStrategy: (await client.getWeaviateVersion().then((ver) => ver.isLowerThan(1, 34, 0)))
++        ? 'sweeping'
++        : 'acorn',
+       flatSearchCutoff: 40000,
+       distance: 'cosine',
+       multiVector: undefined,
+diff --git a/src/connection/integration.test.ts b/src/connection/integration.test.ts
+index 9f22978..cbe9f11 100644
+--- a/src/connection/integration.test.ts
++++ b/src/connection/integration.test.ts
+@@ -1,4 +1,5 @@
+ import { StartedWeaviateContainer, WeaviateContainer } from '@testcontainers/weaviate';
++import { Wait } from 'testcontainers';
+ import weaviate from '..';
+ import { WeaviateStartUpError } from '../errors';
+ import { Meta } from '../openapi/types';
+@@ -14,6 +15,7 @@ describe('Integration testing of the ConnectionGRPC class', () => {
+ 
+   beforeAll(async () => {
+     container = await new WeaviateContainer(`semitechnologies/weaviate:${process.env.WEAVIATE_VERSION}`)
++      .withWaitStrategy(Wait.forHttp('/v1/.well-known/ready', 8080).withStartupTimeout(10 * 1000))
+       .withExposedPorts(8080, 50051)
+       .withEnvironment({
+         GRPC_MAX_MESSAGE_SIZE: '1',
