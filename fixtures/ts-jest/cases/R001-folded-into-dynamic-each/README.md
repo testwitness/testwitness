@@ -1,0 +1,1 @@
+Negative control. Three single case tests are replaced by one test.each whose table is a function call, so the case count is unknown. The new test is flagged parameterised with no parameterCount and did not exist in the base, so each deletion is reported low with the label parameterised rather than medium.

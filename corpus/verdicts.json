@@ -34,62 +34,6 @@
   {
     "slug": "assertj-assertj-1729",
     "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_is_found"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_expected_value_is_found"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_with_expected_value_is_missing"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_has_wrong_value"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_fail_if_parameter_has_multiple_wrong_values"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_no_value"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_value"
-  },
-  {
-    "slug": "assertj-assertj-1729",
-    "split": "tuning",
     "ruleId": "R001",
     "severity": "medium",
     "verdict": "fp",
@@ -166,6 +110,24 @@
     "severity": "medium",
     "verdict": "fp",
     "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_with_escaped_value_is_found"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_no_value",
+    "label": "refactored"
+  },
+  {
+    "slug": "assertj-assertj-1729",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_has_value",
+    "label": "refactored"
   },
   {
     "slug": "excalidraw-excalidraw-7213",
@@ -955,87 +917,7 @@
     "ruleId": "O001",
     "severity": "high",
     "verdict": "fp",
-    "subject": "FlowableFlatMapMaybeIsolatedTest#successRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableFlatMapMaybeIsolatedTest#successCompleteRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
     "subject": "FlowableFlatMapSingleIsolatedTest#requestCancelRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableFlatMapSingleIsolatedTest#successRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithCompletableIsolatedTest#completeRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithMaybeIsolatedTest#completeRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithMaybeIsolatedTest#onSuccessFastPathBackpressuredRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithMaybeIsolatedTest#onNextRequestRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithSingleIsolatedTest#completeRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithSingleIsolatedTest#onSuccessFastPathBackpressuredRace"
-  },
-  {
-    "slug": "reactivex-rxjava-8253",
-    "split": "heldout",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "FlowableMergeWithSingleIsolatedTest#onNextRequestRace"
   },
   {
     "slug": "reactivex-rxjava-8253",

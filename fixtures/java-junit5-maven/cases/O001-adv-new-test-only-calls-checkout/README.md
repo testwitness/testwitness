@@ -1,0 +1,1 @@
+Adversarial. The new test only calls checkout and expected. Both start with letters of an assertion prefix but the prefix is not a whole word (checkout is not check plus a capital), so the name based rule does not count them and O001 reports the test at high.

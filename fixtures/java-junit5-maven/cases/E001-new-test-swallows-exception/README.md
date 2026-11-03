@@ -1,0 +1,1 @@
+Positive. The new test wraps the subject call and its assertion in try and catches Exception without failing, asserting or rethrowing. A failing checkout no longer fails the test, so E001 reports it at high.

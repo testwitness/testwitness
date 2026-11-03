@@ -1,0 +1,1 @@
+Negative control. The swallowing catch already existed in the base and is untouched; the PR edits the same test below the try and a sibling test. E001 reports catches added in the PR, matched on the snippet of the try block's first statement, so the pre existing one is not reported.

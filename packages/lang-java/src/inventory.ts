@@ -325,6 +325,17 @@ function enclosingStatement(node: Node): Node {
   return node;
 }
 
+/** True when the call sits inside the argument list of another call in the same statement. */
+function nestedInArguments(node: Node): boolean {
+  let cur = node.parent;
+  while (cur) {
+    if (cur.type === 'argument_list') return true;
+    if (cur.type.endsWith(STATEMENT_SUFFIX) || cur.type === 'local_variable_declaration' || cur.type === 'block' || cur.type === 'method_declaration') return false;
+    cur = cur.parent;
+  }
+  return false;
+}
+
 /* ------------------------------------------------------------------------ */
 /* Assertion classification                                                  */
 /* ------------------------------------------------------------------------ */
@@ -348,6 +359,8 @@ interface FileContext {
  * boundary (uppercase, underscore, digit or end), plus Spring's andExpect. `checkout` and `expected` do not match.
  */
 const ASSERTION_NAME = /^(?:[aA]ssert|[cC]heck|[vV]erify|[eE]xpect|[sS]hould|[vV]alidate)(?:[A-Z_0-9]|$)|^andExpect(?:All)?$/;
+
+const LITERAL_TYPES = new Set(['decimal_integer_literal', 'hex_integer_literal', 'octal_integer_literal', 'binary_integer_literal', 'decimal_floating_point_literal', 'hex_floating_point_literal', 'string_literal', 'character_literal', 'true', 'false', 'null_literal']);
 
 export function looksLikeAssertionName(name: string): boolean {
   return ASSERTION_NAME.test(name);
@@ -614,13 +627,22 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
 
   // Name based custom assertions: ts.assertResult(1), expectAssertionError(...), verifyNoDrift(), .test().assertComplete().
   // A bare call to a method defined in this file is trusted only when that method asserts (it is then a helper above).
+  // A call nested in the arguments of another call (shouldHaveParameter(...) inside hasMessage(...)) is not a statement
+  // level oracle and is left to the outer call.
+  if (nestedInArguments(chain.top)) return [];
   const named = calls.filter((c, i) => {
     if (!looksLikeAssertionName(c.name)) return false;
     const bare = i === 0 && (qualifier === undefined || qualifier === 'this');
     return !(bare && ctx.definedMethods.has(c.name) && !ctx.helpers.has(c.name));
   });
   if (named.length) {
-    return named.map((c) => makeAssertion(chain, c.name, 'custom', undefined, undefined, c.args[0] ?? c.node.childForFieldName('object') ?? undefined, c.node));
+    // Subject is the receiver when there is one, else the first non literal argument: a literal subject with no expected
+    // operand would read as a tautology in core (assertResult(1) is not assertTrue(1)).
+    return named.map((c) => {
+      const receiver = c.node.childForFieldName('object') ?? undefined;
+      const arg = c.args.find((a) => !LITERAL_TYPES.has(a.type));
+      return makeAssertion(chain, c.name, 'custom', undefined, undefined, receiver ?? arg, c.node);
+    });
   }
   return [];
 }

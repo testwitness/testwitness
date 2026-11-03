@@ -846,7 +846,9 @@ class FooTest {
       ['validateState', 'custom'],
       ['shouldBeOk', 'custom'],
     ]);
-    expect(t.assertions[0]!.subject).toBe('1');
+    expect(t.assertions[0]!.subject).toBe('ts');
+    expect(t.assertions[1]!.subject).toBe('() -> svc.run()');
+    expect(t.assertions[2]!.subject).toBeUndefined();
   });
 
   it('finds the terminal of RxJava .test().assertResult(...) chains and Spring .andExpect(...)', async () => {
@@ -859,6 +861,18 @@ class FooTest {
 }`);
     expect(t.assertions.map((a) => a.callee)).toEqual(['assertResult', 'andExpect']);
     expect(t.assertions.every((a) => a.kind === 'custom')).toBe(true);
+  });
+
+  it('leaves calls nested in the arguments of another call to the outer call', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+import static org.assertj.core.api.Assertions.assertThat;
+class FooTest {
+  @Test void run() {
+    AssertionError e = expectAssertionError(() -> uris.assertHasParameter(info, uri));
+    assertThat(e).hasMessage(shouldHaveParameter(uri).create());
+  }
+}`);
+    expect(t.assertions.map((a) => a.callee)).toEqual(['expectAssertionError', 'assertThat.hasMessage']);
   });
 
   it('does not count checkout, expected or other names where the prefix is not a word', async () => {

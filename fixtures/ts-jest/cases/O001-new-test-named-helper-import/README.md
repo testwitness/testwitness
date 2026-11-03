@@ -1,0 +1,1 @@
+Negative control. Two new tests assert only through helpers imported from other files, one bare (assertTotal) and one on a receiver (cartChecks.verifyTotal). The callee names start with assert and verify, so the front end counts them as custom assertions and O001 does not report the tests as having no assertion.

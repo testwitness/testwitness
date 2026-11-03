@@ -1,1 +1,1 @@
-Adversarial. The assertion helper lives in another file. The rule documents that helpers in other modules need assertions.extra, so without that configuration the new test is reported at high.
+Negative control. The assertion helper lives in another file and is called as CartAssertions.assertTotal(cart, 120). The method name starts with assert, so the call counts as a custom assertion by name without any assertions.extra configuration and O001 stays quiet. Before the name based rule this case reported the test at high.

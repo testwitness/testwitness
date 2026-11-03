@@ -1,0 +1,1 @@
+Positive. The awaited expectation now ends in .catch(() => {}), an empty promise handler. A rejection from totalAsync or a failing expect inside then is swallowed, so the test passes whatever happens. Recorded with the binding promise catch. Reported high.

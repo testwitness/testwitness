@@ -1,0 +1,1 @@
+Positive. The assertion is wrapped in a try whose optional catch binding form logs a warning and continues. Logging is not failing, so the test can no longer fail on a wrong total. The binding is recorded as any. Reported high.

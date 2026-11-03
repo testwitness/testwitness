@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "E001",
+    "severity": "high",
+    "subject": "CartTest#checkoutKeepsTotal"
+  }
+]

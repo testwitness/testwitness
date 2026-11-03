@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "fixtures": "vitest run --project fixtures",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
-    "corpus:report": "tsx --conditions=development corpus/runner/report.ts"
+    "corpus:report": "tsx --conditions=development corpus/runner/report.ts",
+    "bundle:action": "node scripts/bundle-action.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

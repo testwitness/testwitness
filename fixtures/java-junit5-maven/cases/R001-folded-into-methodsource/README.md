@@ -1,0 +1,1 @@
+Negative control. Three single item tests become one @ParameterizedTest with @MethodSource. The case count is dynamic so parameterCount is unknown, but the test is newly parameterised in this PR, so R001 reports parameterised at low for each removed test instead of medium.

@@ -1,0 +1,1 @@
+Negative control. The new test uses the RxJava TestObserver idiom, where the oracle is .test().assertResult(...) at the end of the chain. The assert prefixed terminal of the chain counts as a custom assertion, so O001 stays quiet. Mirrors the reactivex/rxjava corpus false positives.

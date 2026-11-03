@@ -13,3 +13,4 @@ fixtures/**/.gradle/
 fixtures/**/node_modules/
 fixtures/**/__pycache__/
 fixtures/**/.pytest_cache/
+dist/

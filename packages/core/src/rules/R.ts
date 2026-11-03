@@ -111,7 +111,7 @@ export const R001: Rule = {
       const addedElsewhere = [...addedByFile.entries()].filter(([p]) => p !== pair.file.path).reduce((n, [, c]) => n + c, 0);
       if (addedElsewhere >= deletedTotal && addedElsewhere > 0) {
         out.push(
-          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedElsewhere} new test${addedElsewhere === 1 ? '' : 's'} were added in other changed test files; likely rewritten`, {
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedElsewhere} new test${addedElsewhere === 1 ? ' was' : 's were'} added in other changed test files; likely rewritten`, {
             label: 'rewritten',
             line: t.startLine,
             snippet: snippet(t),
@@ -123,7 +123,7 @@ export const R001: Rule = {
       const addedInContainer = allChanges([pair]).filter((c) => c.change.kind === 'added' && c.change.head.container.join('/') === t.container.join('/')).length;
       if (addedInContainer >= deletedInContainer && addedInContainer > 0) {
         out.push(
-          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedInContainer} new test${addedInContainer === 1 ? '' : 's'} were added in the same ${t.container.length ? 'class or group' : 'file'}`, {
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while ${addedInContainer} new test${addedInContainer === 1 ? ' was' : 's were'} added in the same ${t.container.length ? 'class or group' : 'file'}`, {
             label: 'replaced',
             line: t.startLine,
             snippet: snippet(t),

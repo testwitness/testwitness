@@ -7,6 +7,7 @@ import { Parser, Language, Query } from 'web-tree-sitter';
 import type { Tree, Node } from 'web-tree-sitter';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export type { Tree, Node };
 export { Query, Language };
@@ -17,6 +18,8 @@ const queries = new Map<string, Query>();
 
 /** Resolve the web-tree-sitter runtime wasm so bundlers and SEA builds can find it. */
 function runtimeWasmPath(): string {
+  const dir = process.env['TESTWITNESS_ASSET_DIR'];
+  if (dir) return join(dir, 'web-tree-sitter.wasm');
   const req = createRequire(import.meta.url);
   return req.resolve('web-tree-sitter/web-tree-sitter.wasm');
 }

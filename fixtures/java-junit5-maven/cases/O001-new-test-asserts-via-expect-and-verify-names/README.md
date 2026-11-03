@@ -1,0 +1,1 @@
+Negative control. The new test calls expectAssertionError and verifyNoDrift, static imports whose names say they assert. Both count as custom assertions by name, so O001 stays quiet. Mirrors the assertj corpus false positives.

@@ -1,0 +1,1 @@
+Negative control. Two expect calls are replaced by two calls to helpers imported from other files, checkTotal(t, 5) and money.validateInteger(t). Both callee names match the custom assertion name convention, so the assertion count is unchanged and A001 stays quiet.

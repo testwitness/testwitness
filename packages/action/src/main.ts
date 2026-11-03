@@ -66,7 +66,11 @@ export async function run(): Promise<void> {
     else core.notice(msg, props);
   }
 
-  await core.summary.addRaw(markdown.replace(COMMENT_MARKER, '')).write();
+  try {
+    await core.summary.addRaw(markdown.replace(COMMENT_MARKER, '')).write();
+  } catch (err) {
+    core.info(`Could not write the job summary: ${(err as Error).message}`);
+  }
 
   if (commentEnabled && pr && config.comment.enabled) {
     const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
