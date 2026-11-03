@@ -147,12 +147,13 @@ export async function repoMeta(repos: string[]): Promise<Map<string, RepoMeta>> 
   const batches: string[][] = [];
   for (const r of unknown) {
     const last = batches[batches.length - 1];
-    if (last && last.length < 6 && [...last, r].map((x) => `repo:${x}`).join(' ').length < 240) last.push(r);
+    if (last && last.length < 6 && [...last, r].map((x) => `repo:${x}`).join(' ').length < 228) last.push(r);
     else batches.push([r]);
   }
   for (const b of batches) {
     const res = await ghSearch<{ full_name: string; stargazers_count: number; license: { spdx_id: string } | null; language: string | null; default_branch: string }>('search/repositories', {
-      q: b.map((x) => `repo:${x}`).join(' '),
+      // fork:true, or search silently leaves forks out and they would look like missing repositories.
+      q: `${b.map((x) => `repo:${x}`).join(' ')} fork:true`,
       per_page: '10',
     });
     for (const it of res.items) {

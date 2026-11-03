@@ -6,7 +6,7 @@ Reads results.csv and findings.jsonl, writes tables.md, summary.md and
 figures/*.png. Standard library plus matplotlib (no seaborn). Every number is
 an aggregate over a cohort; no repository, author or PR is named.
 """
-import csv, json, math, os, sys, collections
+import csv, hashlib, json, math, os, sys, collections
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIR = HERE
@@ -56,11 +56,8 @@ def load():
         for r in csv.DictReader(fh):
             if r["error"]:
                 continue
-            fired = collections.defaultdict(lambda: collections.Counter())
-            for part in filter(None, r["rules"].split(";")):
-                rule, sev, cnt = part.split(":")
-                fired[rule][sev] += int(cnt)
-            r["fired"] = fired
+            r["pr"] = hashlib.sha256(r["url"].encode()).hexdigest()[:16]
+            r["fired"] = collections.defaultdict(lambda: collections.Counter())
             r["any_high"] = r["any_high"] == "True" or r["any_high"] == "true"
             r["any_medium"] = r["any_medium"] == "True" or r["any_medium"] == "true"
             for k in ("stars", "changed_lines", "test_files", "new_tests", "new_tests_evaluable"):
@@ -73,7 +70,19 @@ def load():
     fp = os.path.join(DIR, "findings.jsonl")
     if os.path.exists(fp):
         findings = [json.loads(l) for l in open(fp) if l.strip()]
+    # Per PR rule counts come from findings.jsonl so artefacts of diff only mode can be left out:
+    # V005 (no test results attached) fires on every PR, and V004 with label unreadable means a claim
+    # could not be checked for the same reason. Both stay in the findings table at the end.
+    by_pr = {r["pr"]: r for r in rows}
+    for f in findings:
+        if is_artefact(f) or f["pr"] not in by_pr:
+            continue
+        by_pr[f["pr"]]["fired"][f["rule"]][f["severity"]] += 1
     return rows, findings, errors
+
+
+def is_artefact(f):
+    return f["rule"] == "V005" or (f["rule"] == "V004" and f.get("label") == "unreadable")
 
 
 def main():
@@ -83,7 +92,7 @@ def main():
         by[(r["agent"], r["language"])].append(r)
         by[(r["agent"], "all")].append(r)
     rules = sorted({rule for r in rows for rule in r["fired"]})
-    out = ["# Launch study tables", "", f"PRs analysed: {len(rows)}. Engine errors excluded: {errors}. Intervals are Wilson 95 percent score intervals. Diff only mode (no test run evidence), default configuration.", ""]
+    out = ["# Launch study tables", "", f"PRs analysed: {len(rows)}. Engine errors excluded: {errors}. Intervals are Wilson 95 percent score intervals. Diff only mode (no test run evidence), default configuration. Rule prevalence leaves out V005 and V004 with label unreadable, which only say that no test results were attached; they are still counted in the last table.", ""]
 
     # Cell counts
     out += ["## Cell counts (PRs)", "", "| Cohort | " + " | ".join(LANGS) + " | All |", "|---|" + "---|" * (len(LANGS) + 1)]

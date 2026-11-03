@@ -63,8 +63,11 @@ sample can be reported.
 configuration (a repository's own `.testwitness.yml` is not honoured, so every
 cohort is measured with the same rules), and the PR title and sanitised body
 as PR text so V004 can check claims. The temporary repository approach is the
-one in `corpus/runner/corpus.ts`. Rules that need test run evidence (E group,
-V005) cannot fire in this mode.
+one in `corpus/runner/corpus.ts`. Rules that need test run evidence (E group)
+cannot fire in this mode. V005 (no test results attached) fires low on every
+PR and V004 with label `unreadable` (a claim such as "tests pass" that cannot be
+checked without results) is an artefact of the same gap, so both are left out
+of the prevalence tables and only counted in the findings table.
 
 `analyze.py` reports, with Wilson 95 percent score intervals:
 
@@ -110,7 +113,13 @@ python3 -I study/kappa.py         # after both labellers filled their column -> 
 
 Every script takes `--dir <path>` to work in another directory; the smoke test
 used `--dir study/smoke --per-agent 2 --humans 2`. `sample.ts` also takes
-`--per-agent`, `--humans`, `--seed`, `--per-repo` and `--max-calls`.
+`--per-agent`, `--humans`, `--seed`, `--per-repo`, `--max-calls` and
+`--agents copilot,devin` (limit to some agents).
+
+Expect the full sample to take several hours. Most Claude Code and Copilot
+candidates sit in repositories under 100 stars (in the smoke test about one
+candidate in fifty qualified), and every star lookup is a paced search call,
+batched six repositories at a time.
 `run.ts --force` reruns the engine on PRs that already have a stored report.
 
 ## Limitations

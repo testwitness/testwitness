@@ -61,7 +61,7 @@ export const PYTEST_ASSERT_LATTICE: Record<string, LatticeEntry> = {
   'assert.is': { family: FAMILY_PYTEST_ASSERT, strength: 3 },
   'assert.isinstance': { family: FAMILY_PYTEST_ASSERT, strength: 2 },
   'assert.is-not-none': { family: FAMILY_PYTEST_ASSERT, strength: 2 },
-  'assert.is-none': { family: FAMILY_PYTEST_ASSERT, strength: 2 },
+  'assert.is-none': { family: FAMILY_PYTEST_ASSERT, strength: 5 }, // is None pins one exact value, as strong as an equality with a literal
   'assert.truthy': { family: FAMILY_PYTEST_ASSERT, strength: 1 },
   'assert.falsy': { family: FAMILY_PYTEST_ASSERT, strength: 1 },
 };
@@ -90,7 +90,7 @@ export const UNITTEST_LATTICE: Record<string, LatticeEntry> = {
   assertIsNot: { family: FAMILY_UNITTEST_EQUALITY, strength: 3 },
   assertIsInstance: { family: FAMILY_UNITTEST_EQUALITY, strength: 2 },
   assertIsNotNone: { family: FAMILY_UNITTEST_EQUALITY, strength: 2 },
-  assertIsNone: { family: FAMILY_UNITTEST_EQUALITY, strength: 2 },
+  assertIsNone: { family: FAMILY_UNITTEST_EQUALITY, strength: 5 },
   assertTrue: { family: FAMILY_UNITTEST_EQUALITY, strength: 1 },
   assertFalse: { family: FAMILY_UNITTEST_EQUALITY, strength: 1 },
 };

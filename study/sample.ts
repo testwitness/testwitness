@@ -2,7 +2,7 @@
  * Builds the stratified study sample (study/README.md, "Sample").
  *
  * usage: tsx --conditions=development study/sample.ts [--dir study] [--per-agent 100] [--humans 150]
- *        [--seed 20261101] [--per-repo 3] [--max-calls N]
+ *        [--seed 20261101] [--per-repo 3] [--max-calls N] [--agents copilot,devin]
  *
  * Search is sequential with 8 s between calls. The script is resumable: strata
  * already filled in sample.jsonl are skipped, candidates already accepted or
@@ -53,6 +53,8 @@ const humans = flag('humans', 150);
 const seed = flag('seed', 20261101);
 const perRepoCap = flag('per-repo', 3);
 const maxCalls = flag('max-calls', Number.POSITIVE_INFINITY);
+const agentsArg = process.argv.indexOf('--agents');
+const agents: Agent[] = agentsArg >= 0 ? (process.argv[agentsArg + 1] ?? '').split(',').filter((a): a is Agent => (AGENTS as readonly string[]).includes(a)) : [...AGENTS];
 
 const sampleFile = join(dir, 'sample.jsonl');
 const rejectedFile = join(dir, 'rejected.jsonl');
@@ -259,7 +261,7 @@ async function fillHumanStratum(lang: Language): Promise<void> {
 
 async function main() {
   try {
-    for (const agent of AGENTS) {
+    for (const agent of agents) {
       // Repeat until the agent total is met or every language ran dry (redistribution can reopen a stratum's target).
       for (let pass = 0; pass < 3 && filled(agent) < perAgent; pass++) {
         for (const lang of LANGUAGES) await fillAgentStratum(agent, lang);
