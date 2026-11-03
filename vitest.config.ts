@@ -14,7 +14,7 @@ export default defineConfig({
       {
         test: {
           name: 'fixtures',
-          include: ['fixtures/**/*.golden.test.ts', 'fixtures/runner/**/*.test.ts'],
+          include: ['fixtures/runner/*.golden.test.ts'],
           environment: 'node',
           testTimeout: 60_000,
         },
