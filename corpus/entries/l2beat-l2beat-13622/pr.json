@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/l2beat/l2beat/pull/13622",
+  "repo": "l2beat/l2beat",
+  "number": 13622,
+  "title": "Remove the flaky tapped-tooltip e2e test that blocks main",
+  "merged_at": "2026-10-29T12:55:33Z",
+  "stars": 659,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "acd561d666cdbddd3d63a4db532a45f7309b033e",
+  "head_sha": "b9fb583b59d35cee8c7de856dad0581325787119",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 68
+}

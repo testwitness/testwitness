@@ -1,0 +1,374 @@
+diff --git a/tests/python/basic_test.py b/tests/python/basic_test.py
+index bc2ac54..d331fd3 100644
+--- a/tests/python/basic_test.py
++++ b/tests/python/basic_test.py
+@@ -188,13 +188,6 @@ class TestSaveAndLoadFileExtensions:
+ 
+ 
+ class TestBasicFunctions:
+-    def test_protos_exist(self) -> None:
+-        # The proto classes should exist
+-        _ = onnx.AttributeProto
+-        _ = onnx.NodeProto
+-        _ = onnx.GraphProto
+-        _ = onnx.ModelProto
+-
+     def test_version_exists(self) -> None:
+         model = onnx.ModelProto()
+         # When we create it, graph should not have a version string.
+diff --git a/tests/python/numpy_helper_test.py b/tests/python/numpy_helper_test.py
+index a77d201..733a431 100644
+--- a/tests/python/numpy_helper_test.py
++++ b/tests/python/numpy_helper_test.py
+@@ -12,14 +12,20 @@ from onnx import helper, numpy_helper
+ 
+ 
+ class TestNumpyHelper:
+-    def _test_numpy_helper_float_type(self, dtype: np.number) -> None:
++    @pytest.mark.parametrize(
++        "dtype", [np.float32, np.float16, np.complex64, np.complex128]
++    )
++    def test_float_roundtrip(self, dtype) -> None:
+         a = np.random.rand(13, 37).astype(dtype)
+         tensor_def = numpy_helper.from_array(a, "test")
+         assert tensor_def.name == "test"
+         a_recover = numpy_helper.to_array(tensor_def)
+         np.testing.assert_equal(a, a_recover)
+ 
+-    def _test_numpy_helper_int_type(self, dtype: np.number) -> None:
++    @pytest.mark.parametrize(
++        "dtype", [np.uint8, np.int8, np.uint16, np.int16, np.int32, np.int64]
++    )
++    def test_int_roundtrip(self, dtype) -> None:
+         a = np.random.randint(
+             np.iinfo(dtype).min, np.iinfo(dtype).max, dtype=dtype, size=(13, 37)
+         )
+@@ -28,27 +34,6 @@ class TestNumpyHelper:
+         a_recover = numpy_helper.to_array(tensor_def)
+         np.testing.assert_equal(a, a_recover)
+ 
+-    def test_float(self) -> None:
+-        self._test_numpy_helper_float_type(np.float32)
+-
+-    def test_uint8(self) -> None:
+-        self._test_numpy_helper_int_type(np.uint8)
+-
+-    def test_int8(self) -> None:
+-        self._test_numpy_helper_int_type(np.int8)
+-
+-    def test_uint16(self) -> None:
+-        self._test_numpy_helper_int_type(np.uint16)
+-
+-    def test_int16(self) -> None:
+-        self._test_numpy_helper_int_type(np.int16)
+-
+-    def test_int32(self) -> None:
+-        self._test_numpy_helper_int_type(np.int32)
+-
+-    def test_int64(self) -> None:
+-        self._test_numpy_helper_int_type(np.int64)
+-
+     def test_string(self) -> None:
+         a = np.array(["Amy", "Billy", "Cindy", "David"]).astype(object)
+         tensor_def = numpy_helper.from_array(a, "test")
+@@ -63,40 +48,21 @@ class TestNumpyHelper:
+         a_recover = numpy_helper.to_array(tensor_def)
+         np.testing.assert_equal(a, a_recover)
+ 
+-    def test_float16(self) -> None:
+-        self._test_numpy_helper_float_type(np.float16)
+-
+-    def test_complex64(self) -> None:
+-        self._test_numpy_helper_float_type(np.complex64)
+-
+-    def test_complex128(self) -> None:
+-        self._test_numpy_helper_float_type(np.complex128)
+-
+-    def test_from_dict_values_are_np_arrays_of_float(self):
+-        map_proto = numpy_helper.from_dict({0: np.array(0.1), 1: np.array(0.9)})
+-        assert isinstance(map_proto, onnx.MapProto)
+-        assert numpy_helper.to_array(map_proto.values.tensor_values[0]) == np.array(0.1)
+-        assert numpy_helper.to_array(map_proto.values.tensor_values[1]) == np.array(0.9)
+-
+-    def test_from_dict_values_are_np_arrays_of_int(self):
+-        map_proto = numpy_helper.from_dict({0: np.array(1), 1: np.array(9)})
+-        assert isinstance(map_proto, onnx.MapProto)
+-        assert numpy_helper.to_array(map_proto.values.tensor_values[0]) == np.array(1)
+-        assert numpy_helper.to_array(map_proto.values.tensor_values[1]) == np.array(9)
+-
+-    def test_from_dict_values_are_np_arrays_of_ints(self):
+-        zero_array = np.array([1, 2])
+-        one_array = np.array([9, 10])
+-        map_proto = numpy_helper.from_dict({0: zero_array, 1: one_array})
++    @pytest.mark.parametrize(
++        "values",
++        [(0.1, 0.9), (1, 9), ([1, 2], [9, 10])],
++        ids=["float_scalars", "int_scalars", "int_vectors"],
++    )
++    def test_from_dict_array_values(self, values) -> None:
++        arrays = [np.array(value) for value in values]
++        map_proto = numpy_helper.from_dict(dict(enumerate(arrays)))
+         assert isinstance(map_proto, onnx.MapProto)
+-
+-        out_tensor = numpy_helper.to_array(map_proto.values.tensor_values[0])
+-        assert out_tensor[0] == zero_array[0]
+-        assert out_tensor[1] == zero_array[1]
+-
+-        out_tensor = numpy_helper.to_array(map_proto.values.tensor_values[1])
+-        assert out_tensor[0] == one_array[0]
+-        assert out_tensor[1] == one_array[1]
++        for tensor, expected in zip(
++            map_proto.values.tensor_values, arrays, strict=True
++        ):
++            np.testing.assert_array_equal(
++                numpy_helper.to_array(tensor), expected, strict=True
++            )
+ 
+     def test_from_dict_differing_key_types(self):
+         with pytest.raises(TypeError):
+@@ -150,12 +116,6 @@ class TestNumpyHelper:
+         if check_dtype:
+             assert start[0].dtype == back.dtype
+         again = numpy_helper.from_array(back, name="check")
+-        assert tp.data_type == again.data_type
+-        assert tp.name == again.name
+-        assert len(tp.raw_data) == len(again.raw_data)
+-        assert list(tp.raw_data) == list(again.raw_data)
+-        assert tp.raw_data == again.raw_data
+-        assert tuple(tp.dims) == tuple(again.dims)
+         assert tp.SerializeToString() == again.SerializeToString()
+         assert tp.data_type == helper.np_dtype_to_tensor_dtype(back.dtype)
+ 
+diff --git a/tests/python/schema_test.py b/tests/python/schema_test.py
+index b35dff4..ee4fb1b 100644
+--- a/tests/python/schema_test.py
++++ b/tests/python/schema_test.py
+@@ -31,9 +31,6 @@ class TestSchema:
+             relu_schema.node_determinism == defs.OpSchema.NodeDeterminism.Deterministic
+         )
+ 
+-    def test_typecheck(self) -> None:
+-        defs.get_schema("Conv")
+-
+     def test_attr_default_value(self) -> None:
+         v = defs.get_schema("BatchNormalization").attributes["epsilon"].default_value
+         assert type(v) is onnx.AttributeProto
+@@ -206,7 +203,7 @@ class TestSchema:
+         assert "A - trunc(A / B) * B" in mod28.doc
+ 
+     def test_range_supported_types(self) -> None:
+-        """Test Range operator supports all expected numeric types."""
++        """Test Range operator supports exactly the expected numeric types."""
+         range_schema = defs.get_schema("Range")
+ 
+         supported_types = set()
+@@ -224,28 +221,7 @@ class TestSchema:
+             "tensor(int64)",
+         }
+ 
+-        for expected_type in expected_types:
+-            assert expected_type in supported_types, (
+-                f"Range should support {expected_type}"
+-            )
+-
+-        # Verify no unexpected types are supported (regression check)
+-        allowed_type_families = {
+-            "float16",
+-            "bfloat16",
+-            "float",
+-            "double",
+-            "int16",
+-            "int32",
+-            "int64",
+-        }
+-
+-        for supported_type in supported_types:
+-            if supported_type.startswith("tensor(") and supported_type.endswith(")"):
+-                base_type = supported_type[7:-1]
+-                assert base_type in allowed_type_families, (
+-                    f"Unexpected type {supported_type} supported by Range"
+-                )
++        assert supported_types == expected_types
+ 
+     def test_range_type_consistency(self) -> None:
+         """Test Range operator type constraints are consistent."""
+@@ -274,47 +250,6 @@ class TestSchema:
+             "Range should have exactly one type constraint 'T'"
+         )
+ 
+-    def test_range_numeric_types_only(self) -> None:
+-        """Test Range operator only supports appropriate numeric types."""
+-        range_schema = defs.get_schema("Range")
+-
+-        supported_types = set()
+-        for constraint in range_schema.type_constraints:
+-            if constraint.type_param_str == "T":
+-                supported_types.update(constraint.allowed_type_strs)
+-
+-        unsupported_types = {
+-            "tensor(bool)",
+-            "tensor(string)",
+-            "tensor(uint8)",
+-            "tensor(uint16)",
+-            "tensor(uint32)",
+-            "tensor(uint64)",
+-            "tensor(int8)",
+-        }
+-
+-        for unsupported_type in unsupported_types:
+-            assert unsupported_type not in supported_types, (
+-                f"Range should not support {unsupported_type}"
+-            )
+-
+-        # All supported types should be appropriate for arithmetic operations
+-        for supported_type in supported_types:
+-            assert supported_type.startswith("tensor("), (
+-                f"All Range types should be tensors, got {supported_type}"
+-            )
+-
+-            base_type = supported_type[7:-1]
+-            assert base_type in [
+-                "float16",
+-                "bfloat16",
+-                "float",
+-                "double",
+-                "int16",
+-                "int32",
+-                "int64",
+-            ], f"Range type {base_type} should be a supported numeric type"
+-
+     def test_optional_type_constraints(self) -> None:
+         def tensor(ts):
+             return {f"tensor({t})" for t in ts}
+@@ -543,30 +478,6 @@ class TestSchema:
+ 
+ 
+ class TestOpSchema:
+-    def test_init(self):
+-        # Test that the constructor creates an OpSchema object
+-        schema = defs.OpSchema("test_op", "test_domain", 1)
+-        assert isinstance(schema, defs.OpSchema)
+-        assert schema.node_determinism == defs.OpSchema.NodeDeterminism.Deterministic
+-
+-    def test_init_with_inputs(self) -> None:
+-        op_schema = defs.OpSchema(
+-            "test_op",
+-            "test_domain",
+-            1,
+-            inputs=[defs.OpSchema.FormalParameter("input1", "T")],
+-            type_constraints=[("T", ["tensor(int64)"], "")],
+-        )
+-        assert op_schema.name == "test_op"
+-        assert op_schema.domain == "test_domain"
+-        assert op_schema.since_version == 1
+-        assert len(op_schema.inputs) == 1
+-        assert op_schema.inputs[0].name == "input1"
+-        assert op_schema.inputs[0].type_str == "T"
+-        assert len(op_schema.type_constraints) == 1
+-        assert op_schema.type_constraints[0].type_param_str == "T"
+-        assert op_schema.type_constraints[0].allowed_type_strs == ["tensor(int64)"]
+-
+     def test_init_creates_multi_input_output_schema(self) -> None:
+         expected_parameter_count = 2
+         op_schema = defs.OpSchema(
+@@ -614,6 +525,7 @@ class TestOpSchema:
+         assert len(op_schema.inputs) == 0
+         assert len(op_schema.outputs) == 0
+         assert len(op_schema.type_constraints) == 0
++        assert op_schema.node_determinism == defs.OpSchema.NodeDeterminism.Deterministic
+ 
+     def test_name(self):
+         # Test that the name parameter is required and is a string
+@@ -622,9 +534,6 @@ class TestOpSchema:
+         with pytest.raises(TypeError):
+             defs.OpSchema(123, "test_domain", 1)
+ 
+-        schema = defs.OpSchema("test_op", "test_domain", 1)
+-        assert schema.name == "test_op"
+-
+     def test_domain(self):
+         # Test that the domain parameter is required and is a string
+         with pytest.raises(TypeError):
+@@ -632,17 +541,11 @@ class TestOpSchema:
+         with pytest.raises(TypeError):
+             defs.OpSchema("test_op", 123, 1)
+ 
+-        schema = defs.OpSchema("test_op", "test_domain", 1)
+-        assert schema.domain == "test_domain"
+-
+     def test_since_version(self):
+         # Test that the since_version parameter is required and is an integer
+         with pytest.raises(TypeError):
+             defs.OpSchema("test_op", "test_domain")
+ 
+-        schema = defs.OpSchema("test_op", "test_domain", 1)
+-        assert schema.since_version == 1
+-
+     def test_doc(self):
+         schema = defs.OpSchema("test_op", "test_domain", 1, doc="test_doc")
+         assert schema.doc == "test_doc"
+diff --git a/tests/python/serialization_test.py b/tests/python/serialization_test.py
+index 9482953..baebd0d 100644
+--- a/tests/python/serialization_test.py
++++ b/tests/python/serialization_test.py
+@@ -85,14 +85,3 @@ class TestRegistry:
+             assert model.SerializeToString(
+                 deterministic=True
+             ) == loaded_model.SerializeToString(deterministic=True)
+-
+-
+-class TestCustomSerializer:
+-    def test_serialize_deserialize_model(self) -> None:
+-        serializer = _OnnxTestTextualSerializer()
+-        model = onnx.parser.parse_model(_TEST_MODEL)
+-        serialized = serializer.serialize_proto(model)
+-        deserialized = serializer.deserialize_proto(serialized, onnx.ModelProto())
+-        assert model.SerializeToString(
+-            deterministic=True
+-        ) == deserialized.SerializeToString(deterministic=True)
+diff --git a/tests/python/shape_inference_test.py b/tests/python/shape_inference_test.py
+index f3a6f47..77f3c9b 100644
+--- a/tests/python/shape_inference_test.py
++++ b/tests/python/shape_inference_test.py
+@@ -382,7 +382,8 @@ class TestShapeInference(TestShapeInferenceHelper):
+             opset_imports=[helper.make_opsetid(ONNX_DOMAIN, version)],
+         )
+ 
+-    @pytest.mark.xfail(reason="Issue #5960")
++    # Rejected only with check_type=True (set by the shared harness); the default
++    # infer_shapes() path is still affected by #5960.
+     def test_cast_to_complex(self) -> None:
+         graph = self._make_graph(
+             [("x", TensorProto.FLOAT, (2, 4, 3))],
+@@ -390,7 +391,9 @@ class TestShapeInference(TestShapeInferenceHelper):
+             [],
+         )
+ 
+-        with pytest.raises(onnx.shape_inference.InferenceError):
++        with pytest.raises(
++            onnx.shape_inference.InferenceError, match="has unsupported type"
++        ):
+             self._inferred(graph)
+ 
+     @pytest.mark.parametrize("version", all_versions_for("CastLike"))
+@@ -7859,7 +7862,8 @@ class TestShapeInference(TestShapeInferenceHelper):
+                 graph,
+             )
+ 
+-    @pytest.mark.xfail(reason="Issue #5960")
++    # Rejected only with check_type=True (set by the shared harness); the default
++    # infer_shapes() path is still affected by #5960.
+     def test_quantizelinear_invalid_output_dtype(self) -> None:
+         graph = self._make_graph(
+             [("x", TensorProto.FLOAT, (3, 4, 5)), ("y_scale", TensorProto.FLOAT, ())],
+@@ -7874,7 +7878,9 @@ class TestShapeInference(TestShapeInferenceHelper):
+             [],
+         )
+ 
+-        with pytest.raises(onnx.shape_inference.InferenceError):
++        with pytest.raises(
++            onnx.shape_inference.InferenceError, match="has unsupported type"
++        ):
+             self._inferred(
+                 graph,
+             )

@@ -180,6 +180,40 @@ export const S004: Rule = {
   },
 };
 
+
+
+/** W006 The integrity gate itself weakened. */
+export const W006: Rule = {
+  id: 'W006',
+  name: 'The integrity gate itself weakened',
+  group: 'W',
+  defaultSeverity: 'high',
+  since: '0.1.0',
+  languages: 'any',
+  needs: ['diff'],
+  docs: {
+    summary: 'The PR changes .testwitness.yml or the workflow step that runs testwitness (its version, inputs, mode or fail_on). Configuration is read from the base ref, so the change takes effect only after merge; this finding makes sure a maintainer sees it. It cannot be acknowledged by the PR author or by the label.',
+    falsePositives: 'Legitimate configuration changes. A maintainer acknowledges them with the comment command, and the change applies after merge.',
+    example: ' rules:\n-  R003: high\n+  R003: off',
+  },
+  async run(ctx) {
+    const out: Finding[] = [];
+    for (const f of ctx.files) {
+      const base = f.path.split('/').pop() ?? f.path;
+      if (base === '.testwitness.yml') {
+        out.push(makeFinding(ctx, 'W006', 'high', f, f.path, `${f.path} was ${f.status}; configuration changes apply after merge and need a maintainer acknowledgement`, { snippet: f.status, label: 'maintainer only' }));
+        continue;
+      }
+      if (f.kind !== 'ci-workflow') continue;
+      const inHunks = f.hunks.some((h) => [...h.added, ...h.removed].some((l) => /testwitness/i.test(l)));
+      const inFile = inHunks || /uses:\s*\S*testwitness/i.test((await ctx.readHead(f.path)) ?? '') || /uses:\s*\S*testwitness/i.test((await ctx.readBase(f.oldPath ?? f.path)) ?? '');
+      if (!inFile) continue;
+      out.push(makeFinding(ctx, 'W006', 'high', f, f.path, `${f.path} changes the testwitness workflow step`, { snippet: 'workflow', label: 'maintainer only' }));
+    }
+    return out;
+  },
+};
+
 export function rulesW(): Rule[] {
-  return [W003, S004];
+  return [W003, W006, S004];
 }

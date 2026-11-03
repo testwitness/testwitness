@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/trl/pull/7645",
+  "repo": "huggingface/trl",
+  "number": 7645,
+  "title": "Mark the fused LM head prefix-tuning test xfail on peft 0.17.1 and below",
+  "merged_at": "2026-10-13T08:06:52Z",
+  "stars": 19660,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R004",
+  "split": "heldout",
+  "base_sha": "d9b9f39b54324b272df051de7852e18761040edd",
+  "head_sha": "16d65534588ec805ea7f78e3a1e0def73f3738d6",
+  "files_changed": 1,
+  "additions": 9,
+  "deletions": 1
+}

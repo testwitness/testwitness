@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Qiskit/qiskit-ibm-runtime/pull/3509",
+  "repo": "Qiskit/qiskit-ibm-runtime",
+  "number": 3509,
+  "title": "Skip flaky `test_noise_learning_with_noise_injection` ",
+  "merged_at": "2026-10-22T18:19:25Z",
+  "stars": 240,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "004b9a114c92ae85728a61421cabbe924e62064b",
+  "head_sha": "69348a3932195ac5401b23c2c8cbd4c02d32e962",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

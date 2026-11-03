@@ -1,0 +1,13 @@
+diff --git a/packages-internal/undici-http-handler/src/undici-http-handler.bedrock-runtime.e2e.spec.ts b/packages-internal/undici-http-handler/src/undici-http-handler.bedrock-runtime.e2e.spec.ts
+index 7a01e03e..96e15fb6 100644
+--- a/packages-internal/undici-http-handler/src/undici-http-handler.bedrock-runtime.e2e.spec.ts
++++ b/packages-internal/undici-http-handler/src/undici-http-handler.bedrock-runtime.e2e.spec.ts
+@@ -13,7 +13,7 @@ describe("BedrockRuntime", () => {
+     client.destroy();
+   });
+ 
+-  it("invokeModelWithBidirectionalStream", async () => {
++  it.skip("invokeModelWithBidirectionalStream", async () => {
+     const promptName = "p";
+     const jsonBytes = (data: unknown) => Buffer.from(JSON.stringify(data));
+     const chunk = (event: unknown) => ({

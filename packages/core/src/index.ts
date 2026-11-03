@@ -13,3 +13,4 @@ export * from './inventory.js';
 export * from './provenance.js';
 export * from './evidence/normalise.js';
 export * from './evidence/claims.js';
+export * from './acknowledge.js';

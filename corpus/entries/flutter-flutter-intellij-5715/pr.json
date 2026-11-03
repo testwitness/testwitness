@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/flutter/flutter-intellij/pull/5715",
+  "repo": "flutter/flutter-intellij",
+  "number": 5715,
+  "title": "Delete two obsolete tests and attempt to de-flake others",
+  "merged_at": "2021-08-18T15:42:24Z",
+  "stars": 2018,
+  "license": "BSD-3-Clause",
+  "language": "java",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "7b9a6ceafa1dba59ec7a283ddb0c993f40ab69cf",
+  "head_sha": "bbb0ec3ff02644feba6984979165e9027a208b97",
+  "files_changed": 5,
+  "additions": 18,
+  "deletions": 25
+}

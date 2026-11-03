@@ -14,7 +14,9 @@ def run(cmd, cwd=None, check=True):
     return r.stdout
 def main():
     repo, num, cat = sys.argv[1], int(sys.argv[2]), sys.argv[3]
-    slug = sys.argv[4] if len(sys.argv) > 4 else f"{repo.replace('/','-').lower()}-{num}"
+    keep_body = "--body" in sys.argv
+    args = [a for a in sys.argv[4:] if not a.startswith("--")]
+    slug = args[0] if args else f"{repo.replace('/','-').lower()}-{num}"
     cache = f"{MIRRORS}/meta-{repo.replace('/','-')}.json"
     os.makedirs(MIRRORS, exist_ok=True)
     if os.path.exists(cache): r = json.load(open(cache))
@@ -73,6 +75,12 @@ def main():
     d = f"{ROOT}/entries/{slug}"; os.makedirs(d, exist_ok=True)
     with open(f"{d}/pr.json", "w") as fh: json.dump(entry, fh, indent=2); fh.write("\n")
     open(f"{d}/pr.diff", "w").write(diff)
+    if keep_body:
+        body = p.get("body") or ""
+        body = re.sub(r"<!--.*?-->", "", body, flags=re.S)
+        body = re.sub(r"@[A-Za-z0-9][A-Za-z0-9-]*(\[bot\])?", "[mention]", body)
+        body = re.sub(r"(?im)^\s*(co-authored-by|signed-off-by|author|reviewed-by):.*$", "", body)
+        open(f"{d}/pr-body.md", "w").write(body.strip() + "\n")
     print(f"OK {slug} [{cat}] {split} {language} lic={lic} stars={stars} +{adds} -{dels} files={len(files)}")
     for f in files: print("    ", f)
 main()

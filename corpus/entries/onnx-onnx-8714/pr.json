@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/onnx/onnx/pull/8714",
+  "repo": "onnx/onnx",
+  "number": 8714,
+  "title": "test: remove stale xfails and redundant checks",
+  "merged_at": "2026-11-02T23:30:10Z",
+  "stars": 21638,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R004",
+  "split": "heldout",
+  "base_sha": "0a253103157926201618657bdc40d8c3c7fc756a",
+  "head_sha": "bf71c55bb506bc65733a6664872d7aafb49c5937",
+  "files_changed": 5,
+  "additions": 35,
+  "deletions": 184
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/sktime/sktime/pull/11669",
+  "repo": "sktime/sktime",
+  "number": 11669,
+  "title": "[ENH] xfail `test_catch22_wrapper_on_basic_motions` due to change in feature calculation",
+  "merged_at": "2026-10-30T21:11:57Z",
+  "stars": 10090,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "R004",
+  "split": "tuning",
+  "base_sha": "5fc15889a7144d386db59f9f71911e56aa21cb17",
+  "head_sha": "1ae9727ba1444c9461096c3681063f1c3e364bae",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

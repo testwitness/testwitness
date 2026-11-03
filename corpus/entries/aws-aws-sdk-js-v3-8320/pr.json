@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-sdk-js-v3/pull/8320",
+  "repo": "aws/aws-sdk-js-v3",
+  "number": 8320,
+  "title": "test(undici-http-handler): temporarily skip e2e test",
+  "merged_at": "2026-09-29T15:36:03Z",
+  "stars": 3679,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "c935fdd2bc9b36c689ef8e17b75c57bf9a780990",
+  "head_sha": "3fe933811a24922da5d24c3e30eff875f2ae478e",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

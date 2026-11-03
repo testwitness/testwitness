@@ -72,3 +72,19 @@ describe('S004 snapshot update enabled', () => {
     expect(await S004.run(ctxWith(file('package.json', 'runner-config', ['    "test": "jest -u",'], ['    "test": "jest -u",'])), {})).toEqual([]);
   });
 });
+
+describe('W006 gate weakened', () => {
+  it('reports config file changes and workflow lines mentioning testwitness, ignores other workflows', async () => {
+    const { W006 } = await import('./W.js');
+    const cfg = file('.testwitness.yml', 'runner-config', ['  R003: off'], ['  R003: high']);
+    const wf = file('.github/workflows/testwitness.yml', 'ci-workflow', ['          mode: report'], ['          mode: strict']);
+    const other = file('.github/workflows/ci.yml', 'ci-workflow', ['      - run: npm test']);
+    const ctx = ctxWith(cfg, wf, other);
+    ctx.readHead = async (p) => (p.endsWith('testwitness.yml') ? 'steps:\n  - uses: testwitness/testwitness@v1\n    with:\n      mode: report' : 'steps:\n  - run: npm test');
+    const out = await W006.run(ctx, {});
+    expect(out.map((f) => [f.ruleId, f.severity, f.label, f.location.path])).toEqual([
+      ['W006', 'high', 'maintainer only', '.testwitness.yml'],
+      ['W006', 'high', 'maintainer only', '.github/workflows/testwitness.yml'],
+    ]);
+  });
+});

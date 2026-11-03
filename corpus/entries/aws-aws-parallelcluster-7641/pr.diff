@@ -1,0 +1,26 @@
+diff --git a/tests/integration-tests/configs/isolated_regions.yaml b/tests/integration-tests/configs/isolated_regions.yaml
+index 6b6743f..dc1b395 100644
+--- a/tests/integration-tests/configs/isolated_regions.yaml
++++ b/tests/integration-tests/configs/isolated_regions.yaml
+@@ -609,13 +609,14 @@ test-suites:
+ #          instances: {{ INSTANCES }}
+ #          oss: {{ OSS }}
+ #          schedulers: {{ SCHEDULERS }}
+-  pyxis:
+-    test_pyxis.py::test_pyxis:
+-      dimensions:
+-        - regions: {{ REGIONS }}
+-          instances: {{ INSTANCES }}
+-          oss: {{ OSS }}
+-          schedulers: {{ SCHEDULERS }}
++# This test has never passed in isolated regions because Docker image registry not available
++#  pyxis:
++#    test_pyxis.py::test_pyxis:
++#      dimensions:
++#        - regions: {{ REGIONS }}
++#          instances: {{ INSTANCES }}
++#          oss: {{ OSS }}
++#          schedulers: {{ SCHEDULERS }}
+   ultraserver:
+     test_gb200.py::test_gb200:
+       dimensions:

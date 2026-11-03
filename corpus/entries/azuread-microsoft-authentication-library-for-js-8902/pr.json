@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/AzureAD/microsoft-authentication-library-for-js/pull/8902",
+  "repo": "AzureAD/microsoft-authentication-library-for-js",
+  "number": 8902,
+  "title": "test: temporarily skip failing B2C user-flow suites",
+  "merged_at": "2026-10-12T21:56:18Z",
+  "stars": 4150,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "3b6450f8e6de5f12a2a859d8b6cf7ca6c7d00614",
+  "head_sha": "6b3daa962791fc562f47ee2f370a42a0a1f861fa",
+  "files_changed": 2,
+  "additions": 4,
+  "deletions": 2
+}
