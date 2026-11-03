@@ -266,14 +266,6 @@
   {
     "slug": "pandas-dev-pandas-25894",
     "split": "heldout",
-    "ruleId": "R004",
-    "severity": "high",
-    "verdict": "missed",
-    "subject": "TestTSPlot::test_time_change_xlim"
-  },
-  {
-    "slug": "pandas-dev-pandas-25894",
-    "split": "heldout",
     "ruleId": "R010",
     "severity": "low",
     "verdict": "expected-low",

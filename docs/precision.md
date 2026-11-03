@@ -21,8 +21,6 @@ Measured 2026-11-03 on 50 public pull requests (corpus/). Precision counts mediu
 | R003 | all | 4 | 7 | 0 | 0 | 1.00 | 0 |
 | R003 | heldout | 3 | 4 | 0 | 0 | 1.00 | 0 |
 | R003 | tuning | 1 | 3 | 0 | 0 | 1.00 | 0 |
-| R004 | all | 0 | 0 | 0 | 1 | n/a | 0 |
-| R004 | heldout | 0 | 0 | 0 | 1 | n/a | 0 |
 | R010 | all | 0 | 2 | 0 | 0 | n/a | 0 |
 | R010 | heldout | 0 | 1 | 0 | 0 | n/a | 0 |
 | R010 | tuning | 0 | 1 | 0 | 0 | n/a | 0 |
