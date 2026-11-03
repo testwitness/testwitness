@@ -1,4 +1,3 @@
 #!/usr/bin/env node
-// @ts-nocheck
 import { main } from '../dist/index.js';
 main(process.argv.slice(2)).then((code) => { process.exitCode = code; });
