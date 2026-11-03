@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs';
 
 const NUM_ROUTERS = 500;

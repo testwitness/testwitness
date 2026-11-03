@@ -2,6 +2,8 @@
  * @fileoverview Tests for eslint object.
  * @author Nicholas C. Zakas
  */
+// @ts-nocheck
+
 /* globals window */
 
 "use strict";

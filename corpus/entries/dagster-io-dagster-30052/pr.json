@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/dagster-io/dagster/pull/30052",
+  "repo": "dagster-io/dagster",
+  "number": 30052,
+  "title": "[dagster-fivetran] Remove flaky test in test suite for deprecated Fivetran resource",
+  "merged_at": "2025-05-16T22:26:39Z",
+  "stars": 16361,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "3f00109e6daea82a7790c4561fd702dbc5120898",
+  "head_sha": "402817b9f0f23793bc82c8079b5968ab753cab0e",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 255
+}

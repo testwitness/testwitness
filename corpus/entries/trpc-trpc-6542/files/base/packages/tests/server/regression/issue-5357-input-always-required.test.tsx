@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../react/__reactHelpers';
 import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
 import { initTRPC } from '@trpc/server';

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "TestXAIStandard::test_tool_calling",
+    "verdict": "tp",
+    "reason": "new parametrised override where the v1 case carries pytest.mark.xfail"
+  }
+]

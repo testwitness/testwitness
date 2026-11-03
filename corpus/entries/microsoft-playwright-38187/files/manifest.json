@@ -1,0 +1,62 @@
+[
+  {
+    "path": ".github/workflows/tests_primary.yml",
+    "status": "modified"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/html-reporter/playwright.config.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/html-reporter/playwright/index.html",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/html-reporter/playwright/index.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/html-reporter/src/chip.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/html-reporter/src/headerView.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/html-reporter/src/testCaseView.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/playwright/index.html",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/playwright/index.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/src/components/codeMirrorWrapper.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/src/components/expandable.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/src/components/splitView.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/web/src/shared/imageDiffView.spec.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "tests/library/trace-viewer.spec.ts",
+    "status": "modified"
+  }
+]

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Vitest doesn't play nice with JSOM ArrayBuffer's: https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1742028595
 // @vitest-environment node
 

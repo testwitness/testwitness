@@ -1,0 +1,10 @@
+[
+  {
+    "path": "libs/partners/xai/tests/integration_tests/test_chat_models.py",
+    "status": "modified"
+  },
+  {
+    "path": "libs/partners/xai/tests/integration_tests/test_chat_models_standard.py",
+    "status": "modified"
+  }
+]

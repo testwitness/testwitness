@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "SnappyOutputStreamTest#batchingOfWritesShouldNotAffectCompressedDataSize",
+    "verdict": "tp",
+    "reason": "big endian assertEquals branch removed"
+  }
+]

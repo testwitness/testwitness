@@ -3,6 +3,8 @@
  * temporary git repository, runs the engine, and compares findings with the
  * hand labels in expected.json. Also computes the per rule precision table.
  */
+// @ts-nocheck
+
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';

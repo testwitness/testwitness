@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "BedrockRuntime \u203a invokeModelWithBidirectionalStream",
+    "verdict": "tp",
+    "reason": "it changed to it.skip with no reason"
+  }
+]

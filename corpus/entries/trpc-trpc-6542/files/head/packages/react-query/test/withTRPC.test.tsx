@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 import { createAppRouter } from './__testHelpers';
 import type { DehydratedState } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
@@ -16,10 +18,10 @@ const ctx = konn()
 
 describe('withTRPC()', () => {
   test('useQuery', async () => {
-    // @ts-ignore
+    // 
     const { window } = global;
 
-    // @ts-ignore
+    // 
     delete globalThis.window;
     const { trpc, trpcClientOptions } = ctx;
     const App: AppType = () => {
@@ -38,7 +40,7 @@ describe('withTRPC()', () => {
       Component: <div />,
     } as any);
 
-    // @ts-ignore
+    // 
     globalThis.window = window;
     const utils = render(<Wrapped {...props} />);
     expect(utils.container).toHaveTextContent('first post');
@@ -46,9 +48,9 @@ describe('withTRPC()', () => {
 
   describe('NextPageContext conditional ssr', async () => {
     test('useQuery: conditional ssr', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -73,16 +75,16 @@ describe('withTRPC()', () => {
         Component: <div />,
         ctx: mockContext,
       } as any);
-      // @ts-ignore
+      // 
       globalThis.window = window;
       const utils = render(<Wrapped {...props} />);
       expect(utils.container).toHaveTextContent('first post');
     });
 
     test('useQuery: should not ssr when conditional function throws', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -107,16 +109,16 @@ describe('withTRPC()', () => {
         Component: <div />,
         ctx: mockContext,
       } as any);
-      // @ts-ignore
+      // 
       globalThis.window = window;
       const utils = render(<Wrapped {...props} />);
       expect(utils.container).not.toHaveTextContent('first post');
     });
 
     test('useQuery: conditional ssr false', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -141,16 +143,16 @@ describe('withTRPC()', () => {
         Component: <div />,
         ctx: mockContext,
       } as any);
-      // @ts-ignore
+      // 
       globalThis.window = window;
       const utils = render(<Wrapped {...props} />);
       expect(utils.container).not.toHaveTextContent('first post');
     });
 
     test('useQuery: async conditional ssr with delay', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -176,7 +178,7 @@ describe('withTRPC()', () => {
         Component: <div />,
         ctx: mockContext,
       } as any);
-      // @ts-ignore
+      // 
       globalThis.window = window;
       const utils = render(<Wrapped {...props} />);
       expect(utils.container).toHaveTextContent('first post');
@@ -212,7 +214,7 @@ describe('withTRPC()', () => {
     test('useInfiniteQuery with ssr: false in query but conditional ssr returns true', async () => {
       const { window } = global;
 
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
 
@@ -289,10 +291,10 @@ describe('withTRPC()', () => {
   });
 
   test('useQueries', async () => {
-    // @ts-ignore
+    // 
     const { window } = global;
 
-    // @ts-ignore
+    // 
     delete globalThis.window;
     const { trpc, trpcClientOptions } = ctx;
     const App: AppType = () => {
@@ -351,7 +353,7 @@ describe('withTRPC()', () => {
       ]
     `);
 
-    // @ts-ignore
+    // 
     globalThis.window = window;
 
     const utils = render(<Wrapped {...props} />);
@@ -361,7 +363,7 @@ describe('withTRPC()', () => {
   test('useInfiniteQuery', async () => {
     const { window } = global;
 
-    // @ts-ignore
+    // 
     delete globalThis.window;
     const { trpc, trpcClientOptions } = ctx;
     const App: AppType = () => {
@@ -422,7 +424,7 @@ describe('withTRPC()', () => {
     test('useQuery()', async () => {
       const { window } = global;
 
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -457,7 +459,7 @@ describe('withTRPC()', () => {
     test('useInfiniteQuery', async () => {
       const { window } = global;
 
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App: AppType = () => {
@@ -499,10 +501,10 @@ describe('withTRPC()', () => {
   });
 
   test('useQuery - ssr batching', async () => {
-    // @ts-ignore
+    // 
     const { window } = global;
 
-    // @ts-ignore
+    // 
     delete globalThis.window;
     const { trpc, trpcClientOptions, createContext } = ctx;
     const App: AppType = () => {
@@ -523,7 +525,7 @@ describe('withTRPC()', () => {
       Component: <div />,
     } as any);
 
-    // @ts-ignore
+    // 
     globalThis.window = window;
 
     const utils = render(<Wrapped {...props} />);
@@ -539,7 +541,7 @@ describe('withTRPC()', () => {
       test('query is not included in serialized state', async () => {
         const { window } = global;
 
-        // @ts-ignore
+        // 
         delete globalThis.window;
         const { trpc, trpcClientOptions } = ctx;
         const App: AppType = () => {
@@ -583,7 +585,7 @@ describe('withTRPC()', () => {
       test('query is not serialized when disabled or ssr: false', async () => {
         const { window } = global;
 
-        // @ts-ignore
+        // 
         delete globalThis.window;
         const { trpc, trpcClientOptions } = ctx;
         const App: AppType = () => {
@@ -632,7 +634,7 @@ describe('withTRPC()', () => {
       test('queryKey changes', async () => {
         const { window } = global;
 
-        // @ts-ignore
+        // 
         delete globalThis.window;
         const { trpc, trpcClientOptions } = ctx;
         const App: AppType = () => {
@@ -685,7 +687,7 @@ describe('withTRPC()', () => {
       test('queryKey does not change', async () => {
         const { window } = global;
 
-        // @ts-ignore
+        // 
         delete globalThis.window;
         const { trpc, trpcClientOptions } = ctx;
         const App: AppType = () => {
@@ -739,7 +741,7 @@ describe('withTRPC()', () => {
       test('queryKey changes', async () => {
         const { window } = global;
 
-        // @ts-ignore
+        // 
         delete globalThis.window;
         const { trpc, trpcClientOptions } = ctx;
         const App: AppType = () => {
@@ -794,10 +796,10 @@ describe('withTRPC()', () => {
 
   describe('individual pages', () => {
     test('useQuery', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
 
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App = () => {
@@ -809,7 +811,7 @@ describe('withTRPC()', () => {
         config: () => trpcClientOptions,
       })(App);
 
-      // @ts-ignore
+      // 
       globalThis.window = window;
 
       const utils = render(<Wrapped />);
@@ -821,10 +823,10 @@ describe('withTRPC()', () => {
       });
     });
     test('useQuery - ssr', async () => {
-      // @ts-ignore
+      // 
       const { window } = global;
 
-      // @ts-ignore
+      // 
       delete globalThis.window;
       const { trpc, trpcClientOptions } = ctx;
       const App = () => {
@@ -838,7 +840,7 @@ describe('withTRPC()', () => {
         ssrPrepass,
       })(App);
 
-      // @ts-ignore
+      // 
       globalThis.window = window;
 
       // ssr should not work

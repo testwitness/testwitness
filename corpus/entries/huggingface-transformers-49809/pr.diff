@@ -1,0 +1,47 @@
+diff --git a/tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py b/tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py
+index 9fb1f65e..dedd6417 100644
+--- a/tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py
++++ b/tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py
+@@ -159,6 +159,12 @@ class EmbeddingGemma2TextModelTest(ModelTesterMixin, unittest.TestCase):
+     def test_config(self):
+         self.config_tester.run_common_tests()
+ 
++    @unittest.skip(
++        reason="EmbeddingGemma 2 is bidirectional and always builds an attention mask, which the SDPA flash backend rejects"
++    )
++    def test_sdpa_can_dispatch_on_flash(self):
++        pass
++
+ 
+ class EmbeddingGemma2ModelTester:
+     """Builds a tiny composite config: text backbone + reused Gemma 4 vision and audio towers."""
+@@ -308,6 +314,12 @@ class EmbeddingGemma2ModelTest(ModelTesterMixin, unittest.TestCase):
+     # asserts a `vocab_size` attribute, which on a composite config only lives on `text_config`.
+     # Gemma 4's multimodal test leaves its config tester unused for the same reason.
+ 
++    @unittest.skip(
++        reason="EmbeddingGemma 2 is bidirectional and always builds an attention mask, which the SDPA flash backend rejects"
++    )
++    def test_sdpa_can_dispatch_on_flash(self):
++        pass
++
+     def test_vision_axial_rope(self):
+         # Override: the inherited Gemma 4 vision rope takes position IDs with a batch dim, which the
+         # common test omits. Same override as `Gemma4Vision2TextModelTest`.
+diff --git a/tests/models/nemotron_h_omni/test_modeling_nemotron_h_omni.py b/tests/models/nemotron_h_omni/test_modeling_nemotron_h_omni.py
+index 98b9294b..1c6c449a 100644
+--- a/tests/models/nemotron_h_omni/test_modeling_nemotron_h_omni.py
++++ b/tests/models/nemotron_h_omni/test_modeling_nemotron_h_omni.py
+@@ -449,6 +449,12 @@ class NemotronHOmniAudio2TextModelTest(NemotronHOmniModelTestMixin, ALMModelTest
+     def test_generate_from_multimodal_encoder_outputs_and_raw_data(self):
+         pass
+ 
++    @unittest.skip(
++        reason="The Parakeet audio encoder always builds an attention mask, which the SDPA flash backend rejects"
++    )
++    def test_sdpa_can_dispatch_on_flash(self):
++        pass
++
+ 
+ @slow
+ @require_torch_gpu

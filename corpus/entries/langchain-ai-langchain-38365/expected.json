@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestGroq::test_tool_choice",
+    "verdict": "tp",
+    "reason": "xfail with reason 'Retry flaky tool choice behavior', no issue"
+  }
+]

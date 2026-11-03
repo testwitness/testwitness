@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createAppRouter } from './__testHelpers';
 import { createServerSideHelpers } from '@trpc/react-query/server';
 

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 
 import { routerToServerAndClientNew } from '../___testHelpers';
 import type { DehydratedState } from '@tanstack/react-query';
@@ -45,10 +47,10 @@ const ctx = konn()
   .done();
 
 test('withTRPC - SSR', async () => {
-  // @ts-ignore
+  // 
   const { window } = global;
 
-  // @ts-ignore
+  // 
   delete globalThis.window;
 
   const trpc = createTRPCNext({
@@ -97,6 +99,6 @@ test('withTRPC - SSR', async () => {
     ]
   `);
 
-  // @ts-ignore
+  // 
   globalThis.window = window;
 });

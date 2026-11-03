@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "TestKandinsky6SRVAEMemory::test_cpu_offload",
+    "verdict": "tp",
+    "reason": "new override decorated with a module level xfail alias"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors",
+    "verdict": "tp",
+    "reason": "new override decorated with a module level xfail alias"
+  }
+]

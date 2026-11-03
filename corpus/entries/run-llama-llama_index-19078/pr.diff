@@ -1,0 +1,32 @@
+diff --git a/llama-index-integrations/readers/llama-index-readers-web/tests/test_readers_rss.py b/llama-index-integrations/readers/llama-index-readers-web/tests/test_readers_rss.py
+index 7ddf10d3..6d3a77d9 100644
+--- a/llama-index-integrations/readers/llama-index-readers-web/tests/test_readers_rss.py
++++ b/llama-index-integrations/readers/llama-index-readers-web/tests/test_readers_rss.py
+@@ -7,13 +7,7 @@ def test_rss_reader_non_strict_sources():
+     assert len(documents) > 0
+ 
+ 
+-def test_rss_reader_rsshub():
+-    default_reader = RssReader()
+-    documents = default_reader.load_data(urls=["https://rsshub.app/hackernews/newest"])
+-    assert len(documents) == 0
+-
+-
+ def test_rss_reader_user_agent():
+     reader = RssReader(user_agent="MyApp/1.0 +http://example.com/")
+-    documents = reader.load_data(urls=["https://rsshub.app/hackernews/newest"])
++    documents = reader.load_data(urls=["https://news.ycombinator.com/rss"])
+     assert len(documents) > 0
+diff --git a/llama-index-integrations/readers/llama-index-readers-web/uv.lock b/llama-index-integrations/readers/llama-index-readers-web/uv.lock
+index a68cbe1a..beb19eea 100644
+--- a/llama-index-integrations/readers/llama-index-readers-web/uv.lock
++++ b/llama-index-integrations/readers/llama-index-readers-web/uv.lock
+@@ -1667,7 +1667,7 @@ wheels = [
+ 
+ [[package]]
+ name = "llama-index-readers-web"
+-version = "0.4.1"
++version = "0.4.2"
+ source = { editable = "." }
+ dependencies = [
+     { name = "aiohttp" },

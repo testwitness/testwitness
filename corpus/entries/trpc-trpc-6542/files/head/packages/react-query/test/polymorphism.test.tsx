@@ -8,6 +8,8 @@
   The polymorphism types can be used to generate abstract types which routers sharing a common 
   interface are compatible with, and allow you to pass around deep router paths to generic components with ease.
 */
+// @ts-nocheck
+
 
 import { testServerAndClientResource } from '@trpc/client/__tests__/testClientResource';
 import {

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/74561",
+  "repo": "vercel/next.js",
+  "number": 74561,
+  "title": "Delete set-cache-busting-search-param.test.ts",
+  "merged_at": "2025-01-06T21:04:15Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R002",
+  "split": "heldout",
+  "base_sha": "18ee3672adefdf57c1aa9514565ea7a83e84fb48",
+  "head_sha": "7711553fac9cf876448d1199cec30712319703c9",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 78
+}

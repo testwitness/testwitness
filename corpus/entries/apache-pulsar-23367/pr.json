@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/pulsar/pull/23367",
+  "repo": "apache/pulsar",
+  "number": 23367,
+  "title": "[fix][build] Disable flaky test BrokerRegistryIntegrationTest",
+  "merged_at": "2024-09-28T17:10:54Z",
+  "stars": 15351,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "95bd1d1dd3d447f0705a96092afbc9d6bd6cd1dc",
+  "head_sha": "738981e9c837b29f0a942304a893b202a66993fb",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

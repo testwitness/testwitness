@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { beforeAll, describe, expect, test } from 'vitest'
 import {
   browserLogs,

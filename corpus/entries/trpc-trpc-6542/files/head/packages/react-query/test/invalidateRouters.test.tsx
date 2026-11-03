@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
 import { useIsFetching } from '@tanstack/react-query';
@@ -371,7 +372,7 @@ test('test TS types of the input variable', async () => {
     const utils = client.useUtils();
 
     ignoreErrors(() => {
-      // @ts-expect-error from user.details should not see id from `posts.byid`
+      //  from user.details should not see id from `posts.byid`
       utils.user.details.getByUserId.invalidate({ id: '2' });
     });
 

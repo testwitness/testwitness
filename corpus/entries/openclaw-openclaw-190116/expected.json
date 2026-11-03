@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "leaves admitted plugin path resolution to the relative-path operation",
+    "verdict": "tp",
+    "reason": "test deleted, production kept"
+  }
+]

@@ -1,0 +1,6 @@
+[
+  {
+    "path": "components/camel-jms/src/test/java/org/apache/camel/component/jms/RestartBrokerBeforeCommitIT.java",
+    "status": "modified"
+  }
+]

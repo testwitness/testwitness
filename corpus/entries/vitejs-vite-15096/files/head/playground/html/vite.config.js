@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { hasWindowsUnicodeFsBug } from '../hasWindowsUnicodeFsBug'

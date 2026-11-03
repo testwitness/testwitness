@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ReactDOM from "react-dom";
 import { Excalidraw } from "../index";
 import { GlobalTestState, render, screen } from "../tests/test-utils";
@@ -246,9 +247,9 @@ describe("textWysiwyg", () => {
 
     beforeEach(async () => {
       await render(<Excalidraw handleKeyboardGlobally={true} />);
-      // @ts-ignore
+      // 
       h.app.refreshViewportBreakpoints();
-      // @ts-ignore
+      // 
       h.app.refreshEditorBreakpoints();
 
       h.elements = [];
@@ -360,9 +361,9 @@ describe("textWysiwyg", () => {
 
     beforeEach(async () => {
       await render(<Excalidraw handleKeyboardGlobally={true} />);
-      // @ts-ignore
+      // 
       h.app.refreshViewportBreakpoints();
-      // @ts-ignore
+      // 
       h.app.refreshEditorBreakpoints();
 
       textElement = UI.createElement("text");

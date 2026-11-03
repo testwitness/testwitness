@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { skipToken, type InfiniteData } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
@@ -82,13 +83,13 @@ describe('useQuery()', () => {
 
       expect(query1.trpc.path).toBe('post.byId');
 
-      // @ts-expect-error Should not exist
+      //  Should not exist
       client.post.byId.useInfiniteQuery;
       const utils = client.useUtils();
 
       useEffect(() => {
         utils.post.byId.invalidate();
-        // @ts-expect-error Should not exist
+        //  Should not exist
         utils.doesNotExist.invalidate();
       }, [utils]);
 

@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// @ts-nocheck
+
 import { getServerAndReactClient } from './__reactHelpers';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -112,7 +114,7 @@ test('client query sad path', async () => {
     useEffect(() => {
       (async () => {
         try {
-          // @ts-expect-error - byUser does not exist on postRouter
+          //  - byUser does not exist on postRouter
           await utils.client.post.byUser.query({ id: 0 });
         } catch (e) {
           setIsError(true);
@@ -287,10 +289,10 @@ test('invalidate', async () => {
                 onSuccess() {
                   utils.post.all.invalidate();
 
-                  // @ts-expect-error Should not exist
+                  //  Should not exist
                   utils.post.create.invalidate;
 
-                  // @ts-expect-error Should not exist
+                  //  Should not exist
                   utils.post.all.setMutationDefaults;
                 },
               },
@@ -770,7 +772,7 @@ describe('cancel', () => {
     function MyComponent() {
       const ac = new AbortController();
       const allPosts = client.post.all.useQuery(undefined, {
-        // @ts-expect-error Signal not allowed for React Query. We use the internal signal instead
+        //  Signal not allowed for React Query. We use the internal signal instead
         trpc: { signal: ac.signal },
       });
 

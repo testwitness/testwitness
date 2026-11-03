@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/34555",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 34555,
+  "title": "MNT Xfail multithreaded test on WASM",
+  "merged_at": "2026-07-23T11:09:29Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "R004",
+  "split": "heldout",
+  "base_sha": "d35b8f73d052f5037c4d9a0456e4971fed16e95a",
+  "head_sha": "1123cde7b138aa8cf06f802aca398c727f3840b3",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

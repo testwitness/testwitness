@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_load_from_instance",
+    "verdict": "tp",
+    "reason": "parametrised test deleted for flakiness, production kept"
+  }
+]

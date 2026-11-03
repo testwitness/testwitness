@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "a tapped chart tooltip stays inside its chart on a phone",
+    "verdict": "tp",
+    "reason": "e2e test deleted because it was flaky, production unchanged"
+  }
+]

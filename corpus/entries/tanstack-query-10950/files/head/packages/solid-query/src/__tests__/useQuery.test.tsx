@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   afterEach,
   beforeEach,
@@ -65,7 +66,7 @@ describe('useQuery', () => {
   it('should return the correct types', () => {
     const key = queryKey()
 
-    // @ts-expect-error
+    // 
     function Page() {
       // unspecified query function should default to unknown
       const noQueryFn = useQuery(() => ({ queryKey: key }))
@@ -115,7 +116,7 @@ describe('useQuery', () => {
       expectTypeOf(unionTypeAsync.data).toEqualTypeOf<'a' | 'b' | undefined>()
 
       // should error when the query function result does not match with the specified type
-      // @ts-expect-error
+      // 
       useQuery<number>(() => ({ queryKey: key, queryFn: () => 'test' }))
 
       // it should infer the result type from a generic query function

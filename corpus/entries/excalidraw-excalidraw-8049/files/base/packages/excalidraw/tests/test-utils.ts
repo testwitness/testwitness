@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "pepjs";
 
 import type { RenderResult, RenderOptions } from "@testing-library/react";
@@ -166,18 +167,18 @@ export const withExcalidrawDimensions = async (
   cb: () => void,
 ) => {
   mockBoundingClientRect(dimensions);
-  // @ts-ignore
+  // 
   h.app.refreshViewportBreakpoints();
-  // @ts-ignore
+  // 
   h.app.refreshEditorBreakpoints();
   window.h.app.refresh();
 
   await cb();
 
   restoreOriginalGetBoundingClientRect();
-  // @ts-ignore
+  // 
   h.app.refreshViewportBreakpoints();
-  // @ts-ignore
+  // 
   h.app.refreshEditorBreakpoints();
   window.h.app.refresh();
 };

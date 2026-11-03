@@ -1,0 +1,10 @@
+[
+  {
+    "path": "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/nemotron_h_omni/test_modeling_nemotron_h_omni.py",
+    "status": "modified"
+  }
+]

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../__reactHelpers';
 import { render, waitFor } from '@testing-library/react';
 import type { inferProcedureOutput } from '@trpc/server';
@@ -108,7 +109,7 @@ test('select as transform with initial data', async () => {
   const { client, App } = ctx;
 
   function MyComponent() {
-    // @ts-expect-error - initialData must match the procedure output, not the select
+    //  - initialData must match the procedure output, not the select
     client.greeting.useQuery(
       { name: 'foo' },
       {

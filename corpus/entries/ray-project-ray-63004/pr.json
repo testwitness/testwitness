@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ray-project/ray/pull/63004",
+  "repo": "ray-project/ray",
+  "number": 63004,
+  "title": "Remove redundant flaky integration test in favor of unit tests",
+  "merged_at": "2026-04-30T21:18:30Z",
+  "stars": 44187,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "f229d5376eb87b09a3fa0b991323450de84df890",
+  "head_sha": "91dbb4dd925be25d4234a42347be30aa2349beb4",
+  "files_changed": 2,
+  "additions": 31,
+  "deletions": 318
+}

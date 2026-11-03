@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../__reactHelpers';
 import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
 import { initTRPC } from '@trpc/server';
@@ -36,7 +37,7 @@ describe('placeholderData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData() {
           return {
             barbaz: null,
@@ -45,7 +46,7 @@ describe('placeholderData', async () => {
       });
 
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData() {
           return {
             barbaz: null,
@@ -56,13 +57,13 @@ describe('placeholderData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData() {
           return 123;
         },
       });
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData() {
           return 123;
         },
@@ -72,7 +73,7 @@ describe('placeholderData', async () => {
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
         placeholderData: {
-          // @ts-expect-error can't return data that doesn't match the output type
+          //  can't return data that doesn't match the output type
           barbaz: null,
         },
       });
@@ -80,11 +81,11 @@ describe('placeholderData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData: 123,
       });
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         placeholderData: 123,
       });
     });
@@ -121,7 +122,7 @@ describe('initialData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData() {
           return {
             barbaz: null,
@@ -129,7 +130,7 @@ describe('initialData', async () => {
         },
       });
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData() {
           return {
             barbaz: null,
@@ -140,13 +141,13 @@ describe('initialData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData() {
           return 123;
         },
       });
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData() {
           return 123;
         },
@@ -156,13 +157,13 @@ describe('initialData', async () => {
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
         initialData: {
-          // @ts-expect-error can't return data that doesn't match the output type
+          //  can't return data that doesn't match the output type
           barbaz: null,
         },
       });
       client.post.list.useSuspenseQuery(undefined, {
         initialData: {
-          // @ts-expect-error can't return data that doesn't match the output type
+          //  can't return data that doesn't match the output type
           barbaz: null,
         },
       });
@@ -170,11 +171,11 @@ describe('initialData', async () => {
 
     ignoreErrors(() => {
       client.post.list.useQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData: 123,
       });
       client.post.list.useSuspenseQuery(undefined, {
-        // @ts-expect-error can't return data that doesn't match the output type
+        //  can't return data that doesn't match the output type
         initialData: 123,
       });
     });

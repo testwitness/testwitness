@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint",
+    "verdict": "tp",
+    "reason": "@Disabled flaky on CI, no issue"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint",
+    "verdict": "tp",
+    "reason": "@Disabled flaky on CI, no issue"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint",
+    "verdict": "tp",
+    "reason": "@Disabled flaky on CI, no issue"
+  }
+]

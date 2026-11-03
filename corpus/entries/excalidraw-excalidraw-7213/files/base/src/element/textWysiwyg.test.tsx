@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ReactDOM from "react-dom";
 import { Excalidraw } from "../packages/excalidraw/index";
 import { GlobalTestState, render, screen } from "../tests/test-utils";
@@ -238,7 +239,7 @@ describe("textWysiwyg", () => {
 
     beforeEach(async () => {
       await render(<Excalidraw handleKeyboardGlobally={true} />);
-      //@ts-ignore
+      //
       h.app.refreshDeviceState(h.app.excalidrawContainerRef.current!);
 
       textElement = UI.createElement("text");

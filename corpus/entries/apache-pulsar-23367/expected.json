@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "BrokerRegistryIntegrationTest#testRecoverFromNodeDeletion",
+    "verdict": "tp",
+    "reason": "TestNG @Test(enabled = false) added"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "BrokerRegistryIntegrationTest#testRegisterAgain",
+    "verdict": "tp",
+    "reason": "TestNG @Test(enabled = false) added"
+  }
+]

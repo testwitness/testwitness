@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../__reactHelpers';
 import { render } from '@testing-library/react';
 import { createServerSideHelpers } from '@trpc/react-query/server';

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "medium",
+    "subject": "TestPeftModelFusedLMHead",
+    "verdict": "tp",
+    "reason": "conditional strict xfail with an issue reference added to a parametrize case"
+  }
+]

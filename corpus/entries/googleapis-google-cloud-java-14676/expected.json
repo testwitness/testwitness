@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "ITAppendableUploadTest#appendableUpload_bytes",
+    "verdict": "tp",
+    "reason": "@Ignore with a flaky remark and an internal bug id only"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "ITAppendableUploadTest#explicitFlush",
+    "verdict": "tp",
+    "reason": "@Ignore with a flaky remark and an internal bug id only"
+  }
+]

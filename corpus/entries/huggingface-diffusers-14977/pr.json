@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/diffusers/pull/14977",
+  "repo": "huggingface/diffusers",
+  "number": 14977,
+  "title": "[tests] xfail some kandinsky6 tests",
+  "merged_at": "2026-10-21T04:51:05Z",
+  "stars": 34854,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R010",
+  "split": "tuning",
+  "base_sha": "537887041938fc6fe61ad583c3ae77477c9ebac9",
+  "head_sha": "2be8b7b63ae9bb3eb2b38a39dfa5a8c9deb6988f",
+  "files_changed": 4,
+  "additions": 156,
+  "deletions": 15
+}

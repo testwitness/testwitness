@@ -1,0 +1,20 @@
+[
+  {
+    "path": "tests/models/autoencoders/test_models_autoencoder_kandinsky6_sr.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/autoencoders/test_models_autoencoder_mmaudio.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/autoencoders/test_models_kandinsky6_vocoder.py",
+    "status": "renamed",
+    "oldPath": "tests/models/autoencoders/test_models_vocoder.py"
+  },
+  {
+    "path": "tests/models/latent_upscaler/test_models_kandinsky6_latent_upscaler.py",
+    "status": "renamed",
+    "oldPath": "tests/models/latent_upscaler/test_models_latent_upscaler.py"
+  }
+]

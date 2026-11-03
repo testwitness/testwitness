@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/8415",
+  "repo": "mlflow/mlflow",
+  "number": 8415,
+  "title": "Remove flaky assert in tests/store/artifact/test_databricks_artifact_repo.py",
+  "merged_at": "2023-05-11T10:04:05Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "A001",
+  "split": "heldout",
+  "base_sha": "f09496f56f0efddb4d0fcdb74f27c36ba534efc4",
+  "head_sha": "9698570686ef515583e6a968c30af08d66a11b6a",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 1
+}

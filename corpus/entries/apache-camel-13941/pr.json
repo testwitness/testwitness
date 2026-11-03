@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/camel/pull/13941",
+  "repo": "apache/camel",
+  "number": 13941,
+  "title": "CAMEL-20521: disable flaky/unstable test",
+  "merged_at": "2024-04-26T04:00:15Z",
+  "stars": 6390,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "760658259b8e15984308fb5240b71bb342b39524",
+  "head_sha": "395e56feff321bc6c6b685f564aad77d026de912",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 1
+}

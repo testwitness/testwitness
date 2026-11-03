@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/run-llama/llama_index/pull/19078",
+  "repo": "run-llama/llama_index",
+  "number": 19078,
+  "title": "fix: remove flaky test",
+  "merged_at": "2025-06-13T14:31:03Z",
+  "stars": 52785,
+  "license": "MIT",
+  "language": "python",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "ec05d450efa4e948c1bd2e785f17726b51676ddf",
+  "head_sha": "e1001e68a548cbec7255c848d01bf58b13863d3a",
+  "files_changed": 2,
+  "additions": 2,
+  "deletions": 8
+}

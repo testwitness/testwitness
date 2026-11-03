@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/puppeteer/puppeteer/pull/8368",
+  "repo": "puppeteer/puppeteer",
+  "number": 8368,
+  "title": "chore: continue on error for Firefox tests",
+  "merged_at": "2022-05-19T07:17:56Z",
+  "stars": 95792,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "W003",
+  "split": "tuning",
+  "base_sha": "10537d81639b940c4777d94eeba6a7acaca65545",
+  "head_sha": "30e27bdfc67df06de0ea1f20a0b89410b2982fa4",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

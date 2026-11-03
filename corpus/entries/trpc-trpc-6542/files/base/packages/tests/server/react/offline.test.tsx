@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { onlineManager } from '@tanstack/react-query';

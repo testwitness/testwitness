@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "preserves independent stdout and stderr parser state",
+    "verdict": "tp",
+    "reason": "expect(...).not.toContain assertion removed"
+  }
+]

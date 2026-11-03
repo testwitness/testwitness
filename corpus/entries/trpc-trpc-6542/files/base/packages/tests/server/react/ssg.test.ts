@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { InfiniteData } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
 import { createServerSideHelpers } from '@trpc/react-query/server';

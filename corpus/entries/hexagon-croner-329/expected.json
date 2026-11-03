@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "Maximum valid positive UTC offset (870 minutes = +14:30) should work",
+    "verdict": "tp",
+    "reason": "new test asserts only nextRun() !== null"
+  },
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "Maximum valid negative UTC offset (-870 minutes = -14:30) should work",
+    "verdict": "tp",
+    "reason": "new test asserts only nextRun() !== null"
+  }
+]

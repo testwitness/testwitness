@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   afterEach,
   beforeEach,
@@ -94,7 +95,7 @@ describe('useQueries', () => {
     const key2 = queryKey()
     const key3 = queryKey()
 
-    // @ts-expect-error (Page component is not rendered)
+    //  (Page component is not rendered)
     function Page() {
       const result1 = useQueries<
         [[number], [string], [Array<string>, boolean]]
@@ -164,7 +165,7 @@ describe('useQueries', () => {
                 return a.toLowerCase()
               },
               placeholderData: 'string',
-              // @ts-expect-error (initialData: string)
+              //  (initialData: string)
               initialData: 123,
             },
             {
@@ -175,7 +176,7 @@ describe('useQueries', () => {
                 return parseInt(a)
               },
               placeholderData: 'string',
-              // @ts-expect-error (initialData: string)
+              //  (initialData: string)
               initialData: 123,
             },
           ],
@@ -199,7 +200,7 @@ describe('useQueries', () => {
     const key2 = queryKey()
     const key3 = queryKey()
 
-    // @ts-expect-error (Page component is not rendered)
+    //  (Page component is not rendered)
     function Page() {
       const result1 = useQueries<
         [
@@ -306,7 +307,7 @@ describe('useQueries', () => {
               return a.toLowerCase()
             },
             placeholderData: 'string',
-            // @ts-expect-error (initialData: string)
+            //  (initialData: string)
             initialData: 123,
           },
           {
@@ -317,7 +318,7 @@ describe('useQueries', () => {
               return parseInt(a)
             },
             placeholderData: 'string',
-            // @ts-expect-error (initialData: string)
+            //  (initialData: string)
             initialData: 123,
           },
         ],
@@ -341,7 +342,7 @@ describe('useQueries', () => {
     const key3 = queryKey()
     const key4 = queryKey()
 
-    // @ts-expect-error (Page component is not rendered)
+    //  (Page component is not rendered)
     function Page() {
       // Array.map preserves TQueryFnData
       const result1 = useQueries(() => ({
@@ -401,13 +402,13 @@ describe('useQueries', () => {
             queryKey: key1,
             queryFn: () => 'string',
             placeholderData: 'string',
-            // @ts-expect-error (initialData: string)
+            //  (initialData: string)
             initialData: 123,
           },
           {
             queryKey: key2,
             queryFn: () => 123,
-            // @ts-expect-error (placeholderData: number)
+            //  (placeholderData: number)
             placeholderData: 'string',
             initialData: 123,
           },
@@ -521,7 +522,7 @@ describe('useQueries', () => {
 
       // field names should be enforced - Array.map() result
       useQueries(() => ({
-        // @ts-expect-error (invalidField)
+        //  (invalidField)
         queries: Array(10).map(() => ({
           someInvalidField: '',
         })),
@@ -614,7 +615,7 @@ describe('useQueries', () => {
       }))
     }
 
-    // @ts-expect-error (Page component is not rendered)
+    //  (Page component is not rendered)
     function Page() {
       const result = useQueries(() => ({
         queries: [

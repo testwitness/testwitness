@@ -1,0 +1,14 @@
+diff --git a/.github/workflows/ecosystem-tests.yml b/.github/workflows/ecosystem-tests.yml
+index 84ee272..39453e6 100644
+--- a/.github/workflows/ecosystem-tests.yml
++++ b/.github/workflows/ecosystem-tests.yml
+@@ -21,7 +21,8 @@ jobs:
+               with:
+                   node-version: "lts/*"
+             - run: npm install
+-            - id: tester
++            - continue-on-error: true
++              id: tester
+               run: npm run test:ecosystem -- --plugin all
+             - if: steps.tester.outcome == 'failure' && github.head_ref == 'main'
+               env:

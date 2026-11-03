@@ -1,5 +1,45 @@
 [
   {
+    "slug": "apache-camel-13941",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "RestartBrokerBeforeCommitIT#commitShouldThrowJmsException"
+  },
+  {
+    "slug": "apache-druid-18495",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "IngestionBackwardCompatibilityDockerTest#test_runIndexTask_andKillData"
+  },
+  {
+    "slug": "apache-iceberg-10802",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint"
+  },
+  {
+    "slug": "apache-iceberg-10802",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint"
+  },
+  {
+    "slug": "apache-iceberg-10802",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestIcebergSourceFailover#testBoundedWithSavepoint"
+  },
+  {
     "slug": "apache-kafka-22875",
     "split": "heldout",
     "ruleId": "R001",
@@ -30,6 +70,22 @@
     "severity": "medium",
     "verdict": "fp",
     "subject": "KRaftClusterTest#testDefaultClientQuotas"
+  },
+  {
+    "slug": "apache-pulsar-23367",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "BrokerRegistryIntegrationTest#testRecoverFromNodeDeletion"
+  },
+  {
+    "slug": "apache-pulsar-23367",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "BrokerRegistryIntegrationTest#testRegisterAgain"
   },
   {
     "slug": "assertj-assertj-1729",
@@ -140,6 +196,46 @@
     "label": "parameterised"
   },
   {
+    "slug": "aws-aws-sdk-js-v3-8320",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "BedrockRuntime › invokeModelWithBidirectionalStream"
+  },
+  {
+    "slug": "azuread-microsoft-authentication-library-for-js-8902",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "B2C User Flow Tests › User flows (local account) › Performs edit profile"
+  },
+  {
+    "slug": "azuread-microsoft-authentication-library-for-js-8902",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "B2C User Flow Tests › User flows (msa account) › Performs edit profile"
+  },
+  {
+    "slug": "dagster-io-dagster-30052",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_load_from_instance"
+  },
+  {
+    "slug": "eslint-eslint-20818",
+    "split": "tuning",
+    "ruleId": "W003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": ".github/workflows/ecosystem-tests.yml"
+  },
+  {
     "slug": "excalidraw-excalidraw-7213",
     "split": "heldout",
     "ruleId": "R003",
@@ -164,6 +260,408 @@
     "verdict": "expected-low",
     "subject": "test_embedded_union_still_rejects_a_string",
     "label": "replaced"
+  },
+  {
+    "slug": "flutter-flutter-intellij-5715",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "FlutterModuleUtilsTest#isDeprecatedFlutterModuleType_true"
+  },
+  {
+    "slug": "flutter-flutter-intellij-5715",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "FlutterModuleUtilsTest#isDeprecatedFlutterModuleType_false_JAVA_MODULE"
+  },
+  {
+    "slug": "flutter-flutter-intellij-5715",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "ProjectWatchTest#shouldSendEventWhenModuleRootsChange"
+  },
+  {
+    "slug": "google-gemini-gemini-cli-6481",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "IdeClient › reads port from file and connects"
+  },
+  {
+    "slug": "google-gemini-gemini-cli-6481",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "getIdeProcessId › should return the pid of the parent process"
+  },
+  {
+    "slug": "googleapis-google-cloud-java-14676",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "ITAppendableUploadTest#appendableUpload_bytes"
+  },
+  {
+    "slug": "googleapis-google-cloud-java-14676",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "ITAppendableUploadTest#explicitFlush"
+  },
+  {
+    "slug": "hexagon-croner-329",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "Maximum valid positive UTC offset (870 minutes = +14:30) should work",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-329",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "Maximum valid negative UTC offset (-870 minutes = -14:30) should work",
+    "label": "smoke"
+  },
+  {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "DownloadTests::test_download_no_safety_checker"
+  },
+  {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "DownloadTests::test_cached_files_are_used_when_no_internet"
+  },
+  {
+    "slug": "huggingface-diffusers-13454",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "missed",
+    "subject": "TestKandinsky6SRVAEMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "missed",
+    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRVAEMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRVAEMemory::test_disk_offload_with_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEModel::test_from_save_pretrained_dtype_inference"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_memory"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_layerwise_casting_training"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_group_offloading"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_group_offloading_with_layerwise_casting"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_group_offloading_with_disk"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVAEMemory::test_disk_offload_with_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVocoderMemory::test_group_offloading"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVocoderMemory::test_group_offloading_with_layerwise_casting"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestMMAudioVocoderMemory::test_group_offloading_with_disk"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_cpu_offload"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_without_safetensors"
+  },
+  {
+    "slug": "huggingface-diffusers-14977",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_with_safetensors"
+  },
+  {
+    "slug": "huggingface-transformers-49809",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "EmbeddingGemma2TextModelTest::test_sdpa_can_dispatch_on_flash"
+  },
+  {
+    "slug": "huggingface-transformers-49809",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "EmbeddingGemma2ModelTest::test_sdpa_can_dispatch_on_flash"
+  },
+  {
+    "slug": "huggingface-transformers-49809",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "NemotronHOmniAudio2TextModelTest::test_sdpa_can_dispatch_on_flash"
+  },
+  {
+    "slug": "huggingface-trl-7645",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "TestPeftModelFusedLMHead"
+  },
+  {
+    "slug": "l2beat-l2beat-13622",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "a tapped chart tooltip stays inside its chart on a phone"
+  },
+  {
+    "slug": "langchain-ai-langchain-37612",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "missed",
+    "subject": "TestXAIStandard::test_tool_calling"
+  },
+  {
+    "slug": "langchain-ai-langchain-37612",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "TestXAIStandard::test_tool_calling"
+  },
+  {
+    "slug": "langchain-ai-langchain-37612",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_web_search"
+  },
+  {
+    "slug": "langchain-ai-langchain-38365",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "TestGroq::test_tool_choice"
+  },
+  {
+    "slug": "langchain-ai-langchain-38365",
+    "split": "heldout",
+    "ruleId": "R010",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestGroq::test_tool_choice"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/html-reporter/src/chip.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/html-reporter/src/headerView.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/html-reporter/src/testCaseView.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/web/src/components/codeMirrorWrapper.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/web/src/components/expandable.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/web/src/components/splitView.spec.tsx"
+  },
+  {
+    "slug": "microsoft-playwright-38187",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/web/src/shared/imageDiffView.spec.tsx"
+  },
+  {
+    "slug": "mlflow-mlflow-8415",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_multipart_upload_abort"
   },
   {
     "slug": "mui-material-ui-26407",
@@ -226,6 +724,30 @@
     "severity": "medium",
     "verdict": "tp",
     "subject": "SingleThreadIoEventLoopTest#testSuspendingWhileRegistrationActive"
+  },
+  {
+    "slug": "openclaw-openclaw-190116",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "leaves admitted plugin path resolution to the relative-path operation"
+  },
+  {
+    "slug": "openclaw-openclaw-191558",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "preserves independent stdout and stderr parser state"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1546",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "src/test/java/net/openhft/chronicle/queue/impl/single/TestTailAfterRoll.java"
   },
   {
     "slug": "pallets-click-1858",
@@ -710,6 +1232,30 @@
     "label": "conditional"
   },
   {
+    "slug": "prestodb-presto-28724",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "AbstractTestNativeGeneralQueries#testTimestampWithTimeZone"
+  },
+  {
+    "slug": "puppeteer-puppeteer-8368",
+    "split": "tuning",
+    "ruleId": "W003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": ".github/workflows/main.yml"
+  },
+  {
+    "slug": "puppeteer-puppeteer-8632",
+    "split": "heldout",
+    "ruleId": "W003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": ".github/workflows/ci.yml"
+  },
+  {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
@@ -890,12 +1436,92 @@
     "label": "replaced"
   },
   {
+    "slug": "qiskit-qiskit-ibm-runtime-3509",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestNoiseLearnerV3::test_noise_learning_with_noise_injection"
+  },
+  {
     "slug": "quarkusio-quarkus-55429",
     "split": "tuning",
     "ruleId": "R003",
     "severity": "medium",
     "verdict": "tp",
     "subject": "AccessLogTestCase#testAccessLogContent"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_restartable_actor_oom_retry_off_throws_oom_error"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_memory_pressure_kill_newest_worker"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_memory_pressure_kill_task_if_actor_submitted_task_first"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_task_oom_no_oom_retry_fails_immediately"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_task_oom_only_uses_oom_retry"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_newer_task_not_retriable_kill_older_retriable_task_first"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_put_object_task_usage_slightly_below_limit_does_not_crash"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_last_task_of_the_group_fail_immediately"
+  },
+  {
+    "slug": "ray-project-ray-63004",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_one_actor_max_lifo_kill_next_actor"
   },
   {
     "slug": "reactivex-rxjava-8253",
@@ -1057,6 +1683,14 @@
     "label": "moved"
   },
   {
+    "slug": "run-llama-llama_index-19078",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_rss_reader_rsshub"
+  },
+  {
     "slug": "scikit-learn-scikit-learn-17850",
     "split": "tuning",
     "ruleId": "R001",
@@ -1198,6 +1832,22 @@
     "subject": "test_fowlkes_mallows_sparse_deprecated"
   },
   {
+    "slug": "scikit-learn-scikit-learn-34555",
+    "split": "heldout",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "missed",
+    "subject": "test_kd_tree_numerical_consistency"
+  },
+  {
+    "slug": "sktime-sktime-11669",
+    "split": "tuning",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "test_catch22_wrapper_on_basic_motions"
+  },
+  {
     "slug": "tanstack-query-11250",
     "split": "tuning",
     "ruleId": "R002",
@@ -1214,6 +1864,31 @@
     "verdict": "expected-low",
     "subject": "packages/lit-query/src/__tests__/client-switch-controllers.test.ts",
     "label": "moved"
+  },
+  {
+    "slug": "timefoldai-timefold-solver-2577",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "EmployeeScheduleResourceTest#solveEmployeeScheduleWithWatching"
+  },
+  {
+    "slug": "tinygrad-tinygrad-10036",
+    "split": "tuning",
+    "ruleId": "R004",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "TestLinearizer::test_tensor_cores_padded_amd"
+  },
+  {
+    "slug": "tinygrad-tinygrad-10036",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestLinearizer::test_tensor_cores_padded_amd",
+    "label": "tracked"
   },
   {
     "slug": "tox-dev-tox-4078",
@@ -1243,12 +1918,45 @@
     "label": "conditional"
   },
   {
+    "slug": "trinodb-trino-31228",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect"
+  },
+  {
+    "slug": "trinodb-trino-31228",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestPostgreSqlRollbacks#testRollbackMerge"
+  },
+  {
+    "slug": "trinodb-trino-31228",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect",
+    "label": "consolidated"
+  },
+  {
     "slug": "trpc-trpc-1709",
     "split": "heldout",
     "ruleId": "R003",
     "severity": "medium",
     "verdict": "tp",
     "subject": "$subscription() - server randomly stop and restart (this test might be flaky, try re-running)"
+  },
+  {
+    "slug": "vercel-next.js-74561",
+    "split": "heldout",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "packages/next/src/client/components/router-reducer/set-cache-busting-search-param.test.ts"
   },
   {
     "slug": "vitejs-vite-15096",
@@ -1276,5 +1984,29 @@
     "verdict": "expected-low",
     "subject": "Unicode path › spa fallback",
     "label": "conditional"
+  },
+  {
+    "slug": "wevm-ox-187",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "behavior: network"
+  },
+  {
+    "slug": "wevm-ox-188",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "behavior: network"
+  },
+  {
+    "slug": "xerial-snappy-java-745",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "SnappyOutputStreamTest#batchingOfWritesShouldNotAffectCompressedDataSize"
   }
 ]

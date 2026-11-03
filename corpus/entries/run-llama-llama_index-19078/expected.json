@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_rss_reader_rsshub",
+    "verdict": "tp",
+    "reason": "test deleted for flakiness, production kept"
+  }
+]

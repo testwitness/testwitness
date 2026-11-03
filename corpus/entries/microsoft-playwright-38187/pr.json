@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/38187",
+  "repo": "microsoft/playwright",
+  "number": 38187,
+  "title": "chore: delete component tests for web and html-reporter",
+  "merged_at": "2025-11-11T22:31:07Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R002",
+  "split": "tuning",
+  "base_sha": "0b7307de2bb1b42cc9c18754901c609d27b3c89a",
+  "head_sha": "b2499e81142283451033885416399056b03c2702",
+  "files_changed": 15,
+  "additions": 16,
+  "deletions": 855
+}

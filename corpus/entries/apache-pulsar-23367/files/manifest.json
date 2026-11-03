@@ -1,0 +1,6 @@
+[
+  {
+    "path": "pulsar-broker/src/test/java/org/apache/pulsar/broker/loadbalance/extensions/BrokerRegistryIntegrationTest.java",
+    "status": "modified"
+  }
+]

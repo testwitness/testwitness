@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/langchain-ai/langchain/pull/38365",
+  "repo": "langchain-ai/langchain",
+  "number": 38365,
+  "title": "test(groq): xfail flaky tool choice test",
+  "merged_at": "2026-06-22T16:00:18Z",
+  "stars": 148923,
+  "license": "MIT",
+  "language": "python",
+  "category": "R004",
+  "split": "heldout",
+  "base_sha": "946fbbbead849fc948e50ef726242c47013a43b7",
+  "head_sha": "714f7c318af9f78d863cd7cc1612814f0b320f6e",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 0
+}

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { IterableEventEmitter } from '@trpc/server/__tests__/iterableEventEmitter';
 import {

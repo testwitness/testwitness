@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "IngestionBackwardCompatibilityDockerTest#test_runIndexTask_andKillData",
+    "verdict": "tp",
+    "reason": "inherited test overridden only to add @Disabled with a flaky remark"
+  }
+]

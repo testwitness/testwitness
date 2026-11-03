@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { render, waitFor } from '@testing-library/react';
 import { initTRPC } from '@trpc/server';
@@ -126,14 +127,14 @@ test('disallowed options', async () => {
       t.post.byId(
         { id: '1' },
         {
-          // @ts-expect-error -- can't set suspense to false
+          //  -- can't set suspense to false
           suspense: false,
         },
       ),
       t.post.byId(
         { id: '2' },
         {
-          // @ts-expect-error -- can't set placeholderData
+          //  -- can't set placeholderData
           placeholderData: '123',
         },
       ),

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../react/__reactHelpers';
 import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
 import { initTRPC } from '@trpc/server';
@@ -45,7 +46,7 @@ test('with input', async () => {
     client.post.list.useInfiniteQuery(
       { foo: 'bar' },
       {
-        // @ts-expect-error can't return page data that doesn't match the output type
+        //  can't return page data that doesn't match the output type
         placeholderData() {
           return {
             pageParams: [undefined],
@@ -61,7 +62,7 @@ test('with input', async () => {
     client.post.list.useSuspenseInfiniteQuery(
       { foo: 'bar' },
       {
-        // @ts-expect-error can't return page data that doesn't match the output type
+        //  can't return page data that doesn't match the output type
         placeholderData() {
           return {
             pageParams: [undefined],

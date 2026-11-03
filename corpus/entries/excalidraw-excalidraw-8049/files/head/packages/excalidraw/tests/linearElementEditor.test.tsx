@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ReactDOM from "react-dom";
 import type {
   ExcalidrawElement,

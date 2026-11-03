@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/eslint/eslint/pull/20818",
+  "repo": "eslint/eslint",
+  "number": 20818,
+  "title": "chore: add missing continue-on-error to ecosystem-tests.yml",
+  "merged_at": "2026-04-28T16:11:26Z",
+  "stars": 27603,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "W003",
+  "split": "tuning",
+  "base_sha": "88bf0024cb36caebf2880516d9a1f81aa75dafe2",
+  "head_sha": "816518a045e7bf08f6177e453f20e43a27a7c44b",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 1
+}

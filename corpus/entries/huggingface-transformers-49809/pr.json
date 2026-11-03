@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/transformers/pull/49809",
+  "repo": "huggingface/transformers",
+  "number": 49809,
+  "title": "skip `sdpa_can_dispatch_on_flash` tests for 3 models",
+  "merged_at": "2026-10-22T11:34:27Z",
+  "stars": 168462,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R010",
+  "split": "heldout",
+  "base_sha": "60f49549e0db78f022ee30aa1571d9ab6e4a15bf",
+  "head_sha": "b4290b1f6228bb024a4957bd681a773d5ea4090a",
+  "files_changed": 2,
+  "additions": 18,
+  "deletions": 0
+}

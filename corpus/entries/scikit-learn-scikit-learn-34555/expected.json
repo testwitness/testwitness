@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_kd_tree_numerical_consistency",
+    "verdict": "tp",
+    "reason": "xfail added with condition _IS_WASM and a reason, no issue"
+  }
+]

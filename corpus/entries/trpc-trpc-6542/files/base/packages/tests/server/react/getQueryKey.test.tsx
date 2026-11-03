@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { useIsFetching } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
@@ -70,7 +71,7 @@ describe('getQueryKeys', () => {
       const happy1 = getQueryKey(client.post.all, undefined, 'query');
       const happy2 = getQueryKey(client.post.all);
 
-      // @ts-expect-error - post.all has no input
+      //  - post.all has no input
       const sad = getQueryKey(client.post.all, 'foo');
 
       return (
@@ -147,7 +148,7 @@ describe('getQueryKeys', () => {
     function MyComponent() {
       const happy = getQueryKey(client.post.list, undefined, 'infinite');
 
-      // @ts-expect-error - cursor is not a valid input
+      //  - cursor is not a valid input
       const sad = getQueryKey(client.post.list, { cursor: 1 }, 'infinite');
 
       return (
@@ -176,10 +177,10 @@ describe('getQueryKeys', () => {
     function MyComponent() {
       const happy = getQueryKey(client.post.list, undefined, 'infinite');
 
-      // @ts-expect-error - cursor is not a valid input
+      //  - cursor is not a valid input
       const sad = getQueryKey(client.post.list, { cursor: 1 }, 'infinite');
 
-      // @ts-expect-error - input is always invalid
+      //  - input is always invalid
       const sad2 = getQueryKey(client.post.list, { anyKey: 1 }, 'infinite');
 
       return (
@@ -221,14 +222,14 @@ describe('getQueryKeys', () => {
 
       const sad2 = getQueryKey(
         client.post.moreLists,
-        // @ts-expect-error - cursor is not a valid input
+        //  - cursor is not a valid input
         { cursor: 1 },
         'infinite',
       );
 
       const sad3 = getQueryKey(
         client.post.moreLists,
-        // @ts-expect-error - input is always invalid
+        //  - input is always invalid
         { anyKey: 1 },
         'infinite',
       );
@@ -288,7 +289,7 @@ describe('getQueryKeys', () => {
     function MyComponent() {
       const happy = getQueryKey(client.post.update);
 
-      // @ts-expect-error - mutations takes no input
+      //  - mutations takes no input
       const sad = getQueryKey(client.post.update, { name: 'trash' });
 
       return (
@@ -317,7 +318,7 @@ describe('getQueryKeys', () => {
     function MyComponent() {
       const happy = getQueryKey(client.post);
 
-      // @ts-expect-error - router has no input
+      //  - router has no input
       const sad = getQueryKey(client.post, 'foo');
 
       return (

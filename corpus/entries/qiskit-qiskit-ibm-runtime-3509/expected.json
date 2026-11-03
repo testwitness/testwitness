@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "TestNoiseLearnerV3::test_noise_learning_with_noise_injection",
+    "verdict": "tp",
+    "reason": "pytest.mark.skip with reason 'Skipping due to flaky test', no issue"
+  }
+]

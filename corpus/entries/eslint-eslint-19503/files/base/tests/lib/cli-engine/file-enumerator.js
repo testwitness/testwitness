@@ -2,6 +2,8 @@
  * @fileoverview Tests for FileEnumerator class.
  * @author Toru Nagashima <https://github.com/mysticatea>
  */
+// @ts-nocheck
+
 "use strict";
 
 //------------------------------------------------------------------------------

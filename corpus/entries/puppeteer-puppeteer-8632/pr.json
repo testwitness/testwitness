@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/puppeteer/puppeteer/pull/8632",
+  "repo": "puppeteer/puppeteer",
+  "number": 8632,
+  "title": "chore: `continue-on-error` for non-Linux tests",
+  "merged_at": "2022-07-06T06:23:39Z",
+  "stars": 95792,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "W003",
+  "split": "heldout",
+  "base_sha": "b5a345b06bddc32510dbfd4d11db9e6c1772942b",
+  "head_sha": "2178fa8ee24f7877c6780ed0b1f7d225625590da",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

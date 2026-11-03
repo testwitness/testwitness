@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "EmbeddingGemma2TextModelTest::test_sdpa_can_dispatch_on_flash",
+    "verdict": "tp",
+    "reason": "new override added with unittest.skip and a pass body"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "EmbeddingGemma2ModelTest::test_sdpa_can_dispatch_on_flash",
+    "verdict": "tp",
+    "reason": "new override added with unittest.skip and a pass body"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "NemotronHOmniAudio2TextModelTest::test_sdpa_can_dispatch_on_flash",
+    "verdict": "tp",
+    "reason": "new override added with unittest.skip and a pass body"
+  }
+]

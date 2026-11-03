@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestLinearizer::test_tensor_cores_padded_amd",
+    "verdict": "tp",
+    "reason": "@unittest.expectedFailure added to an existing test"
+  }
+]

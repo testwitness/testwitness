@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "AbstractTestNativeGeneralQueries#testTimestampWithTimeZone",
+    "verdict": "tp",
+    "reason": "assertQuery call removed"
+  }
+]

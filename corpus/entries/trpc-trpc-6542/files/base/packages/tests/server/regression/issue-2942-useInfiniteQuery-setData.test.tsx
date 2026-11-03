@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../react/__reactHelpers';
 import type { DehydratedState, InfiniteData } from '@tanstack/react-query';
 import { dehydrate } from '@tanstack/react-query';

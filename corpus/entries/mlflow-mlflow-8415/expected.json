@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "test_multipart_upload_abort",
+    "verdict": "tp",
+    "reason": "bare assert on part_upload_calls removed"
+  }
+]

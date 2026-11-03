@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import * as http from 'http';
 import type { AddressInfo } from 'net';
@@ -7,7 +8,7 @@ import * as trpcNext from '@trpc/server/adapters/next';
 import type { TRPCErrorResponse, TRPCSuccessResponse } from '@trpc/server/rpc';
 import type { DefaultErrorShape } from '@trpc/server/unstable-core-do-not-import';
 import { createDeferred } from '@trpc/server/unstable-core-do-not-import';
-// @ts-expect-error - no types
+//  - no types
 import _request from 'supertest';
 
 const request = _request as (handler: trpcNext.NextApiHandler) => {

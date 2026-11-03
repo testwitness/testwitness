@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "EmployeeScheduleResourceTest#solveEmployeeScheduleWithWatching",
+    "verdict": "tp",
+    "reason": "@Disabled(\"Flaky test\") added, no issue"
+  }
+]

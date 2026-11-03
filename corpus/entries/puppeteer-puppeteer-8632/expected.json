@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "medium",
+    "subject": ".github/workflows/ci.yml",
+    "verdict": "tp",
+    "reason": "continue-on-error: true added to a test job"
+  }
+]

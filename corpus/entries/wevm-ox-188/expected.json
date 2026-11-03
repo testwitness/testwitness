@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "behavior: network",
+    "verdict": "tp",
+    "reason": "toMatchInlineSnapshot replaced by toMatchObject on a subset of fields"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/druid/pull/18495",
+  "repo": "apache/druid",
+  "number": 18495,
+  "title": "Disable flaky ingestion test",
+  "merged_at": "2025-09-08T15:54:47Z",
+  "stars": 14093,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "cb04e71d6a1ec43b062c707e0037a859e5656bb6",
+  "head_sha": "b80ffa269bd43bdc30fc1202301f6cdec1f08e21",
+  "files_changed": 1,
+  "additions": 8,
+  "deletions": 0
+}

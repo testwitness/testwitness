@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/google-gemini/gemini-cli/pull/6481",
+  "repo": "google-gemini/gemini-cli",
+  "number": 6481,
+  "title": "Disable failing IDE tests.",
+  "merged_at": "2025-08-18T17:58:13Z",
+  "stars": 108687,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "065eb7897d89033cfd6602c911ad5b01af1a161e",
+  "head_sha": "bff2548fa74a65e743550d08367f2f3c8ca3d709",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 2
+}

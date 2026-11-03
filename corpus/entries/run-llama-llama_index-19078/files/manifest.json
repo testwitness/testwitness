@@ -1,0 +1,10 @@
+[
+  {
+    "path": "llama-index-integrations/readers/llama-index-readers-web/tests/test_readers_rss.py",
+    "status": "modified"
+  },
+  {
+    "path": "llama-index-integrations/readers/llama-index-readers-web/uv.lock",
+    "status": "modified"
+  }
+]

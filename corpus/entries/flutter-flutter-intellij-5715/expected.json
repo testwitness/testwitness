@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "FlutterModuleUtilsTest#isDeprecatedFlutterModuleType_true",
+    "verdict": "tp",
+    "reason": "test deleted, production kept"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "FlutterModuleUtilsTest#isDeprecatedFlutterModuleType_false_JAVA_MODULE",
+    "verdict": "tp",
+    "reason": "test deleted, production kept"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "ProjectWatchTest#shouldSendEventWhenModuleRootsChange",
+    "verdict": "tp",
+    "reason": "assertEquals(1, count) loosened to assertNotEquals(0, count)"
+  }
+]

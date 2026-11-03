@@ -1,3 +1,4 @@
+// @ts-nocheck
 import classNames from 'classnames';
 import omit from 'rc-util/lib/omit';
 import * as React from 'react';

@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+// @ts-nocheck
+
 
 import * as os from 'os';
 import * as path from 'path';

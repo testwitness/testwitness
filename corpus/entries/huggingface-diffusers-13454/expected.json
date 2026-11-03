@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "DownloadTests::test_download_no_safety_checker",
+    "verdict": "tp",
+    "reason": "conditional xfail strict=False with issue link"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "DownloadTests::test_cached_files_are_used_when_no_internet",
+    "verdict": "tp",
+    "reason": "conditional xfail strict=False with issue link"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "DownloadTests::test_local_files_only_are_used_when_no_internet",
+    "verdict": "tp",
+    "reason": "conditional xfail strict=False with issue link"
+  }
+]

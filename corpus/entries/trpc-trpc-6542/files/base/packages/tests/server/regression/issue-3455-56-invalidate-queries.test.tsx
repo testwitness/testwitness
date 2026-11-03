@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from '../react/__reactHelpers';
 import { useQuery } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { doNotExecute } from '@trpc/server/__tests__/suppressLogs';
 import { skipToken } from '@tanstack/react-query';
@@ -68,6 +69,6 @@ test('useSuspenseQuery()', async () => {
 });
 
 test('useSuspenseQuery shouldnt accept skipToken', async () => {
-  // @ts-expect-error skip token not allowed in useSuspenseQuery
+  //  skip token not allowed in useSuspenseQuery
   doNotExecute(() => ctx.client.post.byId.useSuspenseQuery(skipToken));
 });

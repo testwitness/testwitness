@@ -1,0 +1,51 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/html-reporter/src/chip.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/html-reporter/src/headerView.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/html-reporter/src/testCaseView.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/web/src/components/codeMirrorWrapper.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/web/src/components/expandable.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/web/src/components/splitView.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  },
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/web/src/shared/imageDiffView.spec.tsx",
+    "verdict": "tp",
+    "reason": "component test file deleted"
+  }
+]

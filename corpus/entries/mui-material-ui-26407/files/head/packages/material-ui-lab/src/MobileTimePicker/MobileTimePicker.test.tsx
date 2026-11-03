@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from 'react';
 import TextField from '@material-ui/core/TextField';
 import { spy } from 'sinon';

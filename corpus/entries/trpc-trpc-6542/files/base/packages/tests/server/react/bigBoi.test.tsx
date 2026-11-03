@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { appRouter } from '../__generated__/bigBoi/_app';
 import { getServerAndReactClient } from './__reactHelpers';
 import { render, waitFor } from '@testing-library/react';

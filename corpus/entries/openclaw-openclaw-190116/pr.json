@@ -7,7 +7,7 @@
   "stars": 393760,
   "license": "MIT",
   "language": "typescript",
-  "category": "A001",
+  "category": "R001",
   "split": "tuning",
   "base_sha": "589fa5d255e13d8c286199d7e6b9a148d57e3191",
   "head_sha": "a53730a4a361196476a7e75f34f0002a15c37b4e",

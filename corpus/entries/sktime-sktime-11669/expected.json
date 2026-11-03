@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_catch22_wrapper_on_basic_motions",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added with a reason and no issue"
+  }
+]

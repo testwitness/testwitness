@@ -1,0 +1,65 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_restartable_actor_oom_retry_off_throws_oom_error",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_memory_pressure_kill_newest_worker",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_memory_pressure_kill_task_if_actor_submitted_task_first",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_task_oom_no_oom_retry_fails_immediately",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_task_oom_only_uses_oom_retry",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_newer_task_not_retriable_kill_older_retriable_task_first",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_put_object_task_usage_slightly_below_limit_does_not_crash",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_last_task_of_the_group_fail_immediately",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_one_actor_max_lifo_kill_next_actor",
+    "verdict": "tp",
+    "reason": "integration test deleted, replaced by C++ unit tests the engine cannot see"
+  }
+]

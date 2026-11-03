@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "src/test/java/net/openhft/chronicle/queue/impl/single/TestTailAfterRoll.java",
+    "verdict": "tp",
+    "reason": "test file deleted"
+  }
+]
