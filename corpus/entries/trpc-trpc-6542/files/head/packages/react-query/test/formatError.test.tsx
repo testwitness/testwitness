@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createAppRouter } from './__testHelpers';
 import { render, waitFor } from '@testing-library/react';
 import type { DefaultErrorShape } from '@trpc/server/unstable-core-do-not-import';

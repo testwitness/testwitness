@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createQueryClient } from '../__queryClient';
 import { createAppRouter } from './__testHelpers';
 import { QueryClientProvider } from '@tanstack/react-query';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import {
   infiniteQueryOptions,

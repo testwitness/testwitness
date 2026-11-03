@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import Alert from '..';

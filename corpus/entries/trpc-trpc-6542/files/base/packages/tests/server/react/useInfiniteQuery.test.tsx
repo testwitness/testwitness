@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Post } from './__testHelpers';
 import { createAppRouter } from './__testHelpers';
 import { render, waitFor } from '@testing-library/react';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from 'react';
 import { createMount, describeConformance } from 'test/utils';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';

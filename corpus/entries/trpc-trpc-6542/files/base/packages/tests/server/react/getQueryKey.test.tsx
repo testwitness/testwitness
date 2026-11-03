@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { useIsFetching } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';

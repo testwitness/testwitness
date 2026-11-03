@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { routerToServerAndClientNew } from '../___testHelpers';
 import { createQueryClient } from '../__queryClient';
 import { QueryClientProvider, useIsFetching } from '@tanstack/react-query';

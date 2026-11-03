@@ -1,4 +1,3 @@
-// @ts-nocheck
 import ReactDOM from "react-dom";
 import { Excalidraw } from "../index";
 import { GlobalTestState, render, screen } from "../tests/test-utils";

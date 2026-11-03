@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { vi } from 'vitest'
 import { Show, createEffect, createSignal, onCleanup } from 'solid-js'
 import { onlineManager } from '@tanstack/query-core'

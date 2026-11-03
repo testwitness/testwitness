@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { ignoreErrors } from '@trpc/server/__tests__/suppressLogs';
 import { useIsFetching } from '@tanstack/react-query';

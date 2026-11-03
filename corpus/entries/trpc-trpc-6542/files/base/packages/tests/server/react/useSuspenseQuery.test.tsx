@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { doNotExecute } from '@trpc/server/__tests__/suppressLogs';
 import { skipToken } from '@tanstack/react-query';

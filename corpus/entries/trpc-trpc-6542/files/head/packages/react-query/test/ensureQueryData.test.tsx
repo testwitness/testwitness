@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createAppRouter } from './__testHelpers';
 import { useQueryClient } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getServerAndReactClient } from './__reactHelpers';
 import { render, waitFor } from '@testing-library/react';
 import type { inferReactQueryProcedureOptions } from '@trpc/react-query';

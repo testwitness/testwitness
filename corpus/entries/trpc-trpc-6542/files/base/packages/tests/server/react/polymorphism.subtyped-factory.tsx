@@ -1,4 +1,3 @@
-// @ts-nocheck
 //
 // This file extends polymorphism.factory.tsx into a sub-typed router,
 //  which can be used with existing components, but has extra data for other use cases
