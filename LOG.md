@@ -83,3 +83,23 @@ Open for Sajjad: GitHub noreply email for the author rewrite; the JUnit 5 Maven 
 - Engine changes from the corpus: override only tests, class existence for override semantics, Java disabled overrides of inherited tests, Python module level mark aliases, per case marks, W002 step names and retry actions, W003 gradle scripts, Python is None strength.
 - Study scripts (study/) complete with a 13 PR smoke run; full 500 PR sampling needs several hours of paced GitHub search and is a Sajjad decision on when to spend it.
 - Still empty of true positives: R006, A009, O001, O006, E001, S004, A002 (its 3 corpus labels are v0.2 shapes), V003/V005/V006 (need XML). The collector found no public PRs for these at or above 100 stars within the rate limit; golden fixtures prove recall for them.
+
+## 2026-11-04 (day 4)
+
+Sajjad at 02:21: clearance confirmed again (personal laptop, personal accounts), Maven JUnit 5 XML produced on his Mac and granted the ~/testwitness folder, so the two Surefire files were pulled directly. Decisions at 04:17: Option A (all 22 rules enabled, README keeps the measured and unmeasured split), O001 ships at low until mutation on request exists, A002 semantic pairing before the public launch, then JSON schema plus MCP server, then the rest of the roadmap in order; a quiet week on 3 to 5 friendly repositories before Show HN.
+
+Verified by running (counts at 05:20):
+- Unit 790 passing (44 files), golden fixtures 601 cases (610 tests with the per project "has cases"), lint and typecheck clean, pnpm pack:check passing (tarball 23 files, 772 kB packed, three language check from a fresh npm install), benchmark large case 12.0 to 12.8 s wall and 365 MB RSS on 2 cores (budget 30 s).
+- Corpus 134 entries, 0 verify errors. Engine confirmed true positives: R001 17, R002 9, R003 21, R004 11, R005 6, R010 5, A001 8, A002 27, A009 2, O001 5 (low), O002 9, E001 1, W002 7, W003 1, V004 6. Medium or high false positives: R001 9, O002 5, A009 1, all others 0. Nothing found in public PRs for R006, O006, S004 after a full day of search (every "commented out test" PR was R001 or R003).
+- A002 rewritten: one strength lattice across the three languages (equality, ordered, containment, bound, non empty, existence), subject normalisation (identity accessors, boolean wrappers, local bindings, spread copies, comprehensions), matcher chains (AssertJ, Hamcrest, PyHamcrest, Chai), QUnit added. 3 to 27 confirmed true positives, 0 false positives, property tests with fast-check.
+- A001: assertions replaced one for one by new helper calls drop a step with label "replaced by call" (pip 17 false positives to 0); precision 0.21 to 1.00.
+- O001: assertions in nested scopes (anonymous classes, lambdas, local classes, nested defs, callbacks) now count in Java and Python; default severity low.
+- JUnit reader: the same raw test failed in one file and passed in another is flaky (Surefire rerun split across TEST-*.xml). 11 Maven JUnit 5 evidence cases on the real XML.
+- Action: PR author and user.type from the event payload reach provenance; proven on a real shaped payload and a bundle run from /tmp. Dogfood workflow reviewed, nothing broken (fork PRs: annotations and summary, comment fails soft).
+- Packaging: one unscoped npm package `testwitness` (bundled CLI plus grammars and queries), the five internal packages private; the @testwitness npm scope belongs to an unrelated project (QA evidence capture extension, created 27 Oct 2026). Release workflow: npm 11 trusted publishing, first 0.1.0 publish is manual by Sajjad, publish step skips a version already on the registry. EPIPE on a closed pipe exits 0.
+- Docs: docs/launch/push.md (first push runbook, every command Sajjad runs), docs/launch/communities.md (rules read live on 4 Nov where reachable; reddit and Lobsters blocked from here), docs/launch/quiet-week.md (8 candidate repositories and a maintainer note), docs/ASSESSMENT-AND-ROADMAP.md (honest assessment, gaps, how it gets intelligent without a model, order of work with the 4 Nov decisions).
+- Study: full 500 plus 150 sampling started 04:10 in the background (study/logs/).
+
+Open for Sajjad: GitHub noreply address (or run the rewrite command in push.md after cloning the next bundle), first push per docs/launch/push.md, pick the quiet week repositories, Maven version used on the Mac for PRODUCER.md.
+
+Known gaps carried: R001 9 false positives (cross file rewrites), O002 5, A009 1 (cached call compared with itself); W002 expressions and W003 in shell scripts (corpus misses, documented); the published manifest keeps a development exports condition pointing at src (CLI use unaffected).
