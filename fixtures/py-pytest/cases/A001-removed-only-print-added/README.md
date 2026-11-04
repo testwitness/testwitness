@@ -1,0 +1,1 @@
+Positive. One assertion on files_created is removed and the only new line is a print of the same value. A print call never stands in for an assertion, so the replaced by call control does not apply and the finding stays medium.

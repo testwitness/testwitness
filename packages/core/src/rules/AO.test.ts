@@ -45,6 +45,38 @@ describe('A001 assertion removed', () => {
   });
 });
 
+describe('A001 replaced by call', () => {
+  const lostTwo = () => t({ name: 'a', body: 'x', assertions: [eq('res.status', '200'), eq('res.created', 'a'), eq('res.deleted', 'b')], calls: [{ callee: 'pip', line: 2, statement: false }] });
+  const run = async (head: ReturnType<typeof t>, base = lostTwo(), changedProduction: string[] = []) =>
+    A001.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }], changedProduction }), {});
+
+  it('reports low when new call statements match the lost assertions one for one, naming the first callee', async () => {
+    const head = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'pip', line: 2, statement: false }, { callee: 'res.did_create', line: 3 }, { callee: 'res.did_not_create', line: 4 }] });
+    const out = await run(head);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ severity: 'low', label: 'replaced by call' });
+    expect(out[0]!.message).toContain('first did_create');
+    // Production changed: high drops one step to medium, never to low.
+    expect((await run(head, lostTwo(), ['src/res.ts']))[0]).toMatchObject({ severity: 'medium', label: 'replaced by call' });
+  });
+
+  it('stays medium when the new calls are fewer than the lost assertions, are logs, or were already called in the base', async () => {
+    const one = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'res.did_create', line: 3 }] });
+    expect((await run(one))[0]).toMatchObject({ severity: 'medium' });
+    const logs = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'console.log', line: 3 }, { callee: 'print', line: 4 }, { callee: 'logger.info', line: 5 }] });
+    expect((await run(logs))[0]).toMatchObject({ severity: 'medium' });
+    const again = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'pip', line: 3 }, { callee: 'other.pip', line: 4 }] });
+    expect((await run(again))[0]).toMatchObject({ severity: 'medium' });
+    const nested = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'res.did_create', line: 3, statement: false }, { callee: 'res.did_not_create', line: 4, statement: false }] });
+    expect((await run(nested))[0]).toMatchObject({ severity: 'medium' });
+  });
+
+  it('does not count a call on the line of a surviving assertion', async () => {
+    const head = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'expect(res.status).toBe', line: 2 }, { callee: 'res.did_create', line: 5 }] });
+    expect((await run(head))[0]).toMatchObject({ severity: 'medium' });
+  });
+});
+
 describe('A002 assertion loosened', () => {
   it('reports a two step drop as high and a one step drop as medium', async () => {
     const base = t({ name: 'a', body: 'x', assertions: [eq('invoice.total()', '12.50', 3)] });

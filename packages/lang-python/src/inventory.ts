@@ -10,6 +10,7 @@ import { countParseErrors, normaliseText, shortHash } from '@testwitness/core';
 import type {
   Assertion,
   AssertionKind,
+  CallSite,
   FrameworkProfile,
   Node,
   Query,
@@ -858,6 +859,28 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
   return out;
 }
 
+/** Every call in a test body, in source order; `statement` marks a call that is a whole expression statement, possibly awaited. */
+function collectCalls(block: Node | null): CallSite[] {
+  if (!block) return [];
+  const out: CallSite[] = [];
+  const visit = (node: Node): void => {
+    for (const child of node.namedChildren) {
+      if (child.type === 'call') {
+        const fn = child.childForFieldName('function');
+        if (fn) {
+          const callee = chainText(fn).replace(/\s+/g, '');
+          let up = child.parent;
+          while (up && (up.type === 'await' || up.type === 'parenthesized_expression')) up = up.parent;
+          out.push({ callee, name: callee.split('.').pop() ?? callee, line: line(child), statement: up?.type === 'expression_statement' && up.namedChildCount === 1 });
+        }
+      }
+      visit(child);
+    }
+  };
+  visit(block);
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Mocks
 
@@ -1079,6 +1102,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
       assertions: collectAssertions(c.body, { ...ctx, literalParams: literalParametrizeNames(c.def, aliases) }),
       markers,
       mocks: collectMocks(mockNodes, grammar.queries.mocks, aliases),
+      calls: collectCalls(c.body),
       framework,
     };
     if (parameterCount !== undefined) test.parameterCount = parameterCount;

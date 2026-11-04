@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "install \u203a creates the package directory"
+  }
+]

@@ -1043,3 +1043,22 @@ describe('inherited test overridden to disable it', () => {
     expect(inv.tests.map((t) => [t.name, t.overrideOnly, t.markers[0]?.kind])).toEqual([['test_runIndexTask_andKillData', true, 'skip']]);
   });
 });
+
+describe('calls (A001 replaced by call)', () => {
+  it('lists every method invocation and marks whole expression statements', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test
+  void installs() {
+    InstallResult result = InstallResult.install("guava");
+    result.didCreate(path("lib/guava"));
+    System.out.println(result);
+    assertEquals(0, result.code());
+  }
+}
+`);
+    const calls = (t.calls ?? []).map((c) => `${c.callee}:${c.statement ? 'stmt' : 'nested'}`);
+    expect(calls).toEqual(['InstallResult.install:nested', 'result.didCreate:stmt', 'path:nested', 'System.out.println:stmt', 'assertEquals:stmt', 'result.code:nested']);
+    expect(t.calls?.find((c) => c.name === 'didCreate')?.line).toBe(t.assertions[0]!.line - 2);
+  });
+});

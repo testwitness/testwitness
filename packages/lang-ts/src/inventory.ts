@@ -9,7 +9,7 @@
  */
 
 import { countParseErrors, normaliseText, parseSource, shortHash } from '@testwitness/core';
-import type { Assertion, AssertionKind, CatchAll, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
+import type { Assertion, AssertionKind, CallSite, CatchAll, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
 import type { Query } from '@testwitness/core';
 import { grammarFor, grammarForPath } from './grammar.js';
 import type { GrammarId } from './grammar.js';
@@ -351,6 +351,32 @@ export function countStatements(body: Node | undefined): number {
   return 1;
 }
 
+/** Every call in a test body (callbacks included), in source order; `statement` marks a call that is a whole expression statement, possibly awaited. */
+export function collectCalls(body: Node | undefined): CallSite[] {
+  if (!body || !isFunctionNode(body)) return [];
+  const inner = body.childForFieldName('body');
+  if (!inner) return [];
+  const out: CallSite[] = [];
+  const record = (call: Node): void => {
+    const fn = call.childForFieldName('function');
+    if (!fn) return;
+    const callee = fn.text.replace(/\s+/g, '');
+    const f = unwrapExpression(fn);
+    const name = f.type === 'member_expression' ? (f.childForFieldName('property')?.text ?? callee) : callee;
+    let up = call.parent;
+    while (up && (up.type === 'await_expression' || up.type === 'parenthesized_expression' || up.type === 'non_null_expression')) up = up.parent;
+    // An expression bodied arrow (`() => client.flush()`) is a single statement.
+    const statement = up !== null && (up.type === 'expression_statement' || up.id === body.id);
+    out.push({ callee, name, line: line(call), statement });
+  };
+  const visit = (node: Node): void => {
+    if (node.type === 'call_expression') record(node);
+    for (const child of node.namedChildren) if (child) visit(child);
+  };
+  visit(inner);
+  return out;
+}
+
 function isCountableExpression(expr: Node): boolean {
   const e = unwrapExpression(expr);
   return e.type !== 'string' && e.type !== 'template_string' && e.type !== 'comment';
@@ -664,6 +690,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
       assertions: (testAssertions.get(decl.node.id) ?? []).sort((a, b) => a.line - b.line),
       markers,
       mocks: [...mocks],
+      calls: collectCalls(decl.body),
       framework,
     };
     if (parameterCount !== undefined) tc.parameterCount = parameterCount;

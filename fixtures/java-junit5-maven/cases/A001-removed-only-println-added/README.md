@@ -1,0 +1,1 @@
+Positive, JUnit 5. One assertTrue on filesCreated is removed and the only new line is System.out.println of the same value. A print call never stands in for an assertion, so the replaced by call control does not apply and the finding stays medium.

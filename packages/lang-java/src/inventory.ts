@@ -15,6 +15,7 @@ import {
 import type {
   Assertion,
   AssertionKind,
+  CallSite,
   CatchAll,
   FrameworkProfile,
   Node,
@@ -711,6 +712,27 @@ export function countStatements(body: Node): number {
   return n;
 }
 
+/** Every method invocation in a test body (lambdas included), in source order; `statement` marks one that is a whole expression statement. */
+export function collectCalls(body: Node): CallSite[] {
+  const out: CallSite[] = [];
+  const visit = (node: Node): void => {
+    for (const child of node.namedChildren) {
+      if (child.type === 'method_invocation') {
+        const name = child.childForFieldName('name')?.text ?? '';
+        const obj = child.childForFieldName('object');
+        if (name) {
+          let up = child.parent;
+          while (up && up.type === 'parenthesized_expression') up = up.parent;
+          out.push({ callee: (obj ? `${obj.text}.${name}` : name).replace(/\s+/g, ''), name, line: line(child), statement: up?.type === 'expression_statement' });
+        }
+      }
+      visit(child);
+    }
+  };
+  visit(body);
+  return out;
+}
+
 /* ------------------------------------------------------------------------ */
 /* Markers                                                                   */
 /* ------------------------------------------------------------------------ */
@@ -1183,6 +1205,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
         assertions,
         markers,
         mocks,
+        calls: collectCalls(m.body),
         framework,
       };
       if (parameterCount !== undefined) test.parameterCount = parameterCount;

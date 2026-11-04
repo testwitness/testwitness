@@ -533,3 +533,26 @@ describe('jest catch alls', () => {
     ]);
   });
 });
+
+describe('calls (A001 replaced by call)', () => {
+  it('lists every call and marks whole expression statements, awaited ones included', async () => {
+    const t = await single(src(`
+      it('installs', async () => {
+        const result = runInstall('leftpad');
+        result.didCreate(join('node_modules', 'leftpad'));
+        await client.flush();
+        expect(result.code).toBe(0);
+      });
+    `));
+    const calls = (t.calls ?? []).map((c) => `${c.name}:${c.statement ? 'stmt' : 'nested'}`);
+    expect(calls).toEqual(['runInstall:nested', 'didCreate:stmt', 'join:nested', 'flush:stmt', 'toBe:stmt', 'expect:nested']);
+    expect(t.calls?.find((c) => c.name === 'didCreate')).toMatchObject({ callee: 'result.didCreate', line: 3 });
+  });
+
+  it('treats an expression bodied arrow as one call statement', async () => {
+    const t = await single(src(`
+      it('flushes', () => client.flush());
+    `));
+    expect(t.calls).toEqual([{ callee: 'client.flush', name: 'flush', line: 1, statement: true }]);
+  });
+});

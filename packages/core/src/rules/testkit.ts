@@ -2,7 +2,7 @@
  * Helpers for unit testing rules without tree-sitter: build inventories by hand.
  * Exported from the package so fixture and plugin authors can reuse them.
  */
-import type { Assertion, ChangedFile, Evidence, InventoryPair, LanguageId, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
+import type { Assertion, CallSite, ChangedFile, Evidence, InventoryPair, LanguageId, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
 import { defaultConfig } from '../config.js';
 import { fingerprint } from '../hash.js';
 import { shortHash } from '../hash.js';
@@ -17,6 +17,8 @@ export interface TestSpec {
   parameterCount?: number;
   mocks?: string[];
   line?: number;
+  /** Call sites; `statement` defaults to true and `name` to the last segment of the callee. */
+  calls?: Array<Partial<CallSite> & { callee: string; line: number }>;
 }
 
 export function test(spec: TestSpec): TestCase {
@@ -37,6 +39,7 @@ export function test(spec: TestSpec): TestCase {
     framework: 'synthetic',
   };
   if (spec.parameterCount !== undefined) t.parameterCount = spec.parameterCount;
+  if (spec.calls) t.calls = spec.calls.map((c) => ({ name: c.callee.split('.').pop() ?? c.callee, statement: true, ...c }));
   return t;
 }
 

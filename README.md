@@ -57,15 +57,15 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 
 | Rule | Finding | Default | True positives | False positives (medium or high) | Precision |
 |---|---|---|---|---|---|
-| R001 | Test function deleted | medium | 15 | 9 | 0.63 |
+| R001 | Test function deleted | medium | 16 | 9 | 0.64 |
 | R002 | Test file deleted | high | 9 | 0 | 1.00 |
-| R003 | Test newly skipped or disabled | medium | 20 | 0 | 1.00 |
+| R003 | Test newly skipped or disabled | medium | 21 | 0 | 1.00 |
 | R004 | Test converted to expected failure | high | 11 | 0 | 1.00 |
 | R005 | Focused test added | high | 6 | 0 | 1.00 |
 | R010 | Test added then skipped | low | 5 | 0 | 1.00 |
-| A001 | Assertion removed | medium | 5 | 19 | 0.21 |
+| A001 | Assertion removed | medium | 5 | 2 | 0.71 |
 | O002 | New test with a smoke oracle only | low | 2 | 0 | 1.00 |
-| W002 | continue-on-error added to a test step or job | high | 4 | 0 | 1.00 |
+| W002 | continue-on-error added to a test step or job | high | 4 | 1 | 0.80 |
 | W003 | Failure suppressed in the run command | high | 1 | 0 | 1.00 |
 | V004 | Claim in PR text not supported by results | medium | 6 | 0 | 1.00 |
 

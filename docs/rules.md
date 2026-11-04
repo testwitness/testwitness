@@ -101,7 +101,7 @@ Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A modified test lost one or more assertions and gained no replacement on the same subject.
 
-**False positive controls.** Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll) is reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper in the same file are still counted.
+**False positive controls.** Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll) is reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper in the same file are still counted. When the test gained at least as many new call statements as it lost assertions (a callee name not called anywhere in the base body, not a print, log or sleep call), the assertions were probably replaced by a helper defined elsewhere, such as result.did_create(path): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.
 
 ```diff
    expect(res.status).toBe(200);

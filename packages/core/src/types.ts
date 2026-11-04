@@ -121,7 +121,23 @@ export interface TestCase {
   overrideOnly?: boolean;
   /** Mock or stub targets declared in the body. */
   mocks: string[];
+  /**
+   * Every call in the body, in source order, including assertions and calls nested in arguments or callbacks. Used by
+   * A001 to tell an assertion replaced by a helper call it cannot resolve from a plain removal. Optional: a front end
+   * that does not fill it makes A001 behave as if no call was added.
+   */
+  calls?: CallSite[];
   framework: string;
+}
+
+export interface CallSite {
+  /** Callee as written, whitespace removed: `result.did_create`, `console.log`, `assertThat(x).isEqualTo`. */
+  callee: string;
+  /** Last name segment of the callee: `did_create`, `log`, `isEqualTo`. */
+  name: string;
+  line: number;
+  /** True when the call is the whole expression of an expression statement, possibly awaited. */
+  statement: boolean;
 }
 
 export interface TestInventory {

@@ -1138,3 +1138,22 @@ describe('module level mark aliases', () => {
     expect(inv.tests.map((t) => [t.name, t.markers[0]?.kind, t.markers[0]?.reason])).toEqual([['test_a', 'xfail', 'too slow'], ['test_b', 'skip', 'no gpu']]);
   });
 });
+
+describe('calls (A001 replaced by call)', () => {
+  it('lists every call and marks whole expression statements, awaited ones included', async () => {
+    const t = only(await inv(`
+import pytest
+
+async def test_install(script):
+    result = script.pip("install", "initools")
+    result.did_create(join(script.site_packages, "initools"))
+    await client.flush()
+    with pytest.raises(ValueError):
+        result.did_not_create("x")
+    assert result.ok
+`));
+    const calls = (t.calls ?? []).map((c) => `${c.name}:${c.statement ? 'stmt' : 'nested'}`);
+    expect(calls).toEqual(['pip:nested', 'did_create:stmt', 'join:nested', 'flush:stmt', 'raises:nested', 'did_not_create:stmt']);
+    expect(t.calls?.find((c) => c.name === 'did_create')).toMatchObject({ callee: 'result.did_create', line: 6 });
+  });
+});
