@@ -82,3 +82,35 @@ describe('readJunitString', () => {
     expect([...data.records.values()].map((r) => r.name)).toEqual(['a › b']);
   });
 });
+
+describe('duplicate keys across files', () => {
+  const MAVEN = join(import.meta.dirname, '../../../fixtures/java-junit5-maven/junit');
+
+  it('treats the same raw test failed in one file and passed in another as flaky (Surefire rerun split across TEST-*.xml)', async () => {
+    const d = await readJunitFiles([join(MAVEN, 'TEST-demo.CalculatorTest$Division.xml'), join(MAVEN, 'TEST-demo.CalculatorTest.xml')]);
+    const flaky = d.records.get('calculatortest::flakypassesonsecondattempt');
+    expect(flaky?.status).toBe('flaky');
+    expect(flaky?.reruns).toBe(1);
+    // failed in both files stays failed and keeps the rerunFailure count
+    const failed = d.records.get('calculatortest::failsonpurpose');
+    expect(failed?.status).toBe('failed');
+    expect(failed?.reruns).toBe(1);
+    // nested class tests keep their own class key
+    expect(d.records.get('calculatortest$division::dividesevenly')?.status).toBe('passed');
+    expect(d.totals).toEqual({ total: 8, passed: 6, failed: 1, errored: 0, skipped: 1, flaky: 1 });
+  });
+
+  it('keeps the worst status when different parametrised rows normalise to one key', async () => {
+    const d = await readJunitString(
+      '<testsuite name="s"><testcase classname="demo.T" name="rows(int)[1]"/><testcase classname="demo.T" name="rows(int)[2]"><failure/></testcase></testsuite>',
+    );
+    expect(d.records.get('t::rows')?.status).toBe('failed');
+  });
+
+  it('keeps the worst status when the same raw name repeats inside one file', async () => {
+    const d = await readJunitString(
+      '<testsuite name="s"><testcase classname="demo.T" name="a"><failure/></testcase><testcase classname="demo.T" name="a"/></testsuite>',
+    );
+    expect(d.records.get('t::a')?.status).toBe('failed');
+  });
+});

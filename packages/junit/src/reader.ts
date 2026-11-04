@@ -145,6 +145,17 @@ function addRecord(data: ResultIndexData, rec: TestRecord): void {
   const existing = data.records.get(rec.key);
   if (existing) {
     const rank: Record<TestStatus, number> = { passed: 0, flaky: 1, skipped: 2, failed: 3, error: 4 };
+    // The same raw test written again in another file is a rerun (Surefire with rerunFailingTestsCount writes the
+    // retry of a top level test into a second TEST-*.xml). Failed in one file and passed in another is flaky, not failed.
+    const sameRawTest = existing.classname === rec.classname && existing.name === rec.name && existing.source !== rec.source;
+    const outcomes = new Set([existing.status, rec.status]);
+    const hasPass = outcomes.has('passed') || outcomes.has('flaky');
+    const hasFail = outcomes.has('failed') || outcomes.has('error');
+    if (sameRawTest && hasPass && hasFail) {
+      existing.status = 'flaky';
+      existing.reruns += rec.reruns + 1;
+      return;
+    }
     if (rank[rec.status] > rank[existing.status]) existing.status = rec.status;
     existing.reruns += rec.reruns;
     return;

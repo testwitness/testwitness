@@ -1,6 +1,6 @@
 # JUnit XML fixtures
 
-Every file under `fixtures/<name>/junit/` was produced by running the real framework in this workspace on 1 Nov 2026. Nothing was hand written or edited. Each `junit/PRODUCER.md` records versions and the exact command. This page is the input for the XML normaliser, so attribute formats are quoted exactly as emitted.
+Every file under `fixtures/<name>/junit/` was produced by running the real framework, eight projects in this workspace on 1 Nov 2026 and java-junit5-maven on the maintainer's Mac on 4 Nov 2026 because Maven Central is blocked from the workspace. Nothing was hand written or edited. Each `junit/PRODUCER.md` records versions and the exact command. This page is the input for the XML normaliser, so attribute formats are quoted exactly as emitted.
 
 Environment constraint: the workspace proxy denies Maven Central (`repo.maven.apache.org`, `repo1.maven.org`) and the Gradle plugin portal with HTTP 403 on CONNECT. npm and PyPI work. Consequences are noted per fixture.
 
@@ -8,7 +8,7 @@ Environment constraint: the workspace proxy denies Maven Central (`repo.maven.ap
 
 | Fixture | Producer | Versions | Files (bytes) | Status |
 |---|---|---|---|---|
-| java-junit5-maven | Maven surefire (intended) | surefire 3.5.2, JUnit Jupiter 5.11.4, AssertJ 3.26.3, Mockito 5.14.2 | none | NOT PRODUCED. Maven cannot resolve any plugin because Central is denied. A Gradle offline fallback was checked and is impossible: `~/.m2` and `~/.gradle/caches` hold no Jupiter jars (`No cached version of org.junit.jupiter:junit-jupiter:5.11.4 available for offline mode`). Project and pom are committed and ready to run. |
+| java-junit5-maven | Maven surefire | Maven 3.9.x, surefire 3.5.2, JUnit Jupiter 5.11.4, AssertJ 3.26.3, Mockito 5.14.2, openjdk 21 on macOS arm64 | `TEST-demo.CalculatorTest$Division.xml` (9568), `TEST-demo.CalculatorTest.xml` (8739) | OK. Produced on 4 Nov 2026 by the maintainer with `mvn -B test -Dmaven.test.failure.ignore=true`, outside the agent workspace. Surefire wrote the outer class tests into the Division file together with the two nested tests, and the outer file holds only the reruns (flakyPassesOnSecondAttempt passed on retry, failsOnPurpose failed with a rerunFailure). The reader reads flakyPassesOnSecondAttempt as flaky because it failed in one file and passed in the other. |
 | java-junit4-gradle | Gradle built in JUnit XML writer | Gradle 8.14.3, JUnit 4.13.2, hamcrest-core 1.3, Java 21 | `TEST-demo.StackTest.xml` (4708), `TEST-demo.StackSizeTest.xml` (582) | OK. Jars taken from `$GRADLE_HOME/lib` via `files(...)` because Central is denied; same artifacts as Central. |
 | java-testng-maven | Gradle TestNG runner (fallback) plus TestNG native reporters | Gradle 8.14.3, TestNG 6.3.1, Java 21 | `TEST-demo.PricingTest.xml` (4440, Gradle format), `testng-results.xml` (10568, TestNG native), `testng-junitreports/TEST-demo.PricingTest.xml` (4313, TestNG JUnitReportReporter) | PARTIAL. pom.xml with surefire 3.5.2 and TestNG 7.10.2 is committed but could not run. XML comes from `build.gradle` in the same project using the TestNG 6.3.1 jar bundled with Gradle. No surefire format TestNG XML exists yet. |
 | ts-jest | jest-junit | jest 30.5.2, jest-junit 17.0.0 | `junit.xml` (3938), `junit-titles.xml` (3626) | OK |
