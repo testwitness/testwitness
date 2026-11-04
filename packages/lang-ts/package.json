@@ -1,6 +1,7 @@
 {
   "name": "@testwitness/lang-ts",
   "version": "0.1.0",
+  "private": true,
   "description": "TypeScript and JavaScript front end (Jest, Vitest, Mocha, Playwright Test)",
   "license": "Apache-2.0",
   "type": "module",

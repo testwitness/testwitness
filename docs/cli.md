@@ -1,7 +1,25 @@
 # CLI
 
+The CLI is the npm package `testwitness`. It needs Node 20 or newer and ships as a single bundle with its tree-sitter grammars, so it has no runtime dependencies.
+
 ```bash
-npx testwitness check [options]
+npx testwitness check [options]   # run without installing
+npm i -g testwitness              # or install once
+testwitness check [options]
+testwitness --version
+```
+
+Run it from the repository root (or pass `--cwd`). It needs the git history for both refs, so in CI fetch with full depth (for example `fetch-depth: 0` on `actions/checkout`).
+
+On GitHub, prefer the Action, which wraps the same engine and adds the PR comment and annotations:
+
+```yaml
+- uses: actions/checkout@v5
+  with:
+    fetch-depth: 0
+- uses: testwitness/testwitness@v0
+  with:
+    junit: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
 
 | Option | Meaning | Default |
@@ -15,9 +33,15 @@ npx testwitness check [options]
 | `--mode <mode>` | `report`, `require-ack`, `strict` | from config |
 | `--fail-on <sev>` | `high`, `medium`, `low` | from config |
 | `--pr-title <t>`, `--pr-body-file <f>` | PR text for claim checks | |
+| `--author <login>`, `--author-type <type>` | PR author and account type, shown in provenance | |
 | `--cwd <dir>` | repository directory | current |
+| `-q, --quiet` | no progress on stderr | |
 
 `testwitness rules` lists the built in rules.
+
+Exit codes: `0` pass, or any result in `report` mode; `1` review needed under `require-ack` or `strict`; `2` config or git error; `3` no test results under `strict` with `require_evidence`.
+
+The grammars and queries are read from `assets` next to the bundle. Set `TESTWITNESS_ASSET_DIR` to load them from another directory.
 
 GitLab CI:
 

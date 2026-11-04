@@ -29,11 +29,16 @@ jobs:
 
 That is the whole install when your test job already writes JUnit XML into the workspace (Surefire and Gradle do by default; pytest needs `--junitxml`, Jest needs jest-junit, Vitest `--reporter=junit`, Playwright the `junit` reporter). Without any XML the diff rules still run and the evidence section reads `unreadable`.
 
-Locally or in any CI:
+Locally or in any CI, with Node 20 or newer, the same engine ships as one npm package with no runtime dependencies:
 
 ```bash
 npx testwitness check --base origin/main --head HEAD --junit "**/junit*.xml"
+# or install it once
+npm i -g testwitness
+testwitness check --base origin/main --junit "**/junit*.xml"
 ```
+
+See [docs/cli.md](docs/cli.md) for every option.
 
 ## What it reports
 

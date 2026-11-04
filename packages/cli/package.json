@@ -1,38 +1,54 @@
 {
   "name": "testwitness",
   "version": "0.1.0",
-  "description": "testwitness CLI",
+  "description": "Did this PR weaken its tests, and did they actually run? Flags deleted, skipped and loosened tests and checks JUnit XML evidence.",
+  "keywords": [
+    "testing",
+    "test-integrity",
+    "code-review",
+    "pull-request",
+    "junit",
+    "tree-sitter",
+    "ci",
+    "github-action"
+  ],
   "license": "Apache-2.0",
+  "homepage": "https://github.com/testwitness/testwitness#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testwitness/testwitness.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/testwitness/testwitness/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=20"
   },
+  "bin": {
+    "testwitness": "./bin/testwitness.js"
+  },
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+      "default": "./dist/cli.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist",
-    "queries",
+    "dist/cli.js",
+    "dist/assets",
+    "bin",
     "README.md",
-    "bin"
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -b",
+    "bundle": "node ../../scripts/bundle-cli.mjs"
   },
-  "dependencies": {
-    "@testwitness/core": "workspace:*",
-    "@testwitness/junit": "workspace:*",
-    "@testwitness/lang-java": "workspace:*",
-    "@testwitness/lang-python": "workspace:*",
-    "@testwitness/lang-ts": "workspace:*",
+  "devDependencies": {
     "commander": "^14.0.0",
     "fast-glob": "^3.3.3"
-  },
-  "bin": {
-    "testwitness": "./bin/testwitness.js"
   }
 }

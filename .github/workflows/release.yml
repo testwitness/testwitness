@@ -1,3 +1,11 @@
+# Release: on a v* tag, check, bundle the Action into dist/, prove the npm package
+# installs and runs on its own (pack:check), then publish `testwitness` to npm.
+#
+# The FIRST npm publish (0.1.0) is manual: npm cannot attach a trusted publisher to a
+# package that does not exist yet, so the maintainer runs `npm publish --access public`
+# from packages/cli (after `pnpm pack:check`), then configures this workflow as the
+# trusted publisher on npmjs.com. From then on this workflow publishes with OIDC and
+# provenance, and skips the publish step when the tagged version is already on npm.
 name: release
 on:
   push:
@@ -19,6 +27,8 @@ jobs:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      # Trusted publishing (OIDC) needs npm 11.5.1 or newer; Node 22 ships npm 10.
+      - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm bundle:action
@@ -35,8 +45,17 @@ jobs:
       - uses: actions/attest-build-provenance@v2
         with:
           subject-path: dist/index.js
+      # Bundles packages/cli, packs it, installs the tarball with plain npm and runs a check.
+      - run: pnpm pack:check
       - name: Publish npm package with provenance (trusted publishing)
-        run: pnpm --filter testwitness publish --access public --provenance --no-git-checks
+        working-directory: packages/cli
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$(npm view "testwitness@${VERSION}" version 2>/dev/null)" = "${VERSION}" ]; then
+            echo "testwitness@${VERSION} already published, skipping"
+          else
+            npm publish --provenance --access public
+          fi
       - name: GitHub release
         uses: softprops/action-gh-release@v2
         with:
