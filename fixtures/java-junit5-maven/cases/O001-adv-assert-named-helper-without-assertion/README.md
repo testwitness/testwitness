@@ -1,1 +1,1 @@
-Adversarial. The helper is named assertCartReady but its body contains no assertion. The name does not make it an oracle, so the new test is reported at high. A detector trusting the assert prefix would stay quiet.
+Adversarial. The helper is named assertCartReady but its body contains no assertion. The name does not make it an oracle, so the new test is reported at medium. A detector trusting the assert prefix would stay quiet.

@@ -1,1 +1,1 @@
-Positive. A new Mocha test posts two entries and asserts nothing. High.
+Positive. A new Mocha test posts two entries and asserts nothing. Medium.

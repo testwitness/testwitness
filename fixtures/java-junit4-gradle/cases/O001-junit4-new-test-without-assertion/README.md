@@ -1,1 +1,1 @@
-Positive, JUnit 4. A new test with no assertion. High.
+Positive, JUnit 4. A new test with no assertion. Medium.

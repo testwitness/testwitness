@@ -1,1 +1,1 @@
-The exact equality lives in a nested function that is never called; the test itself only asserts is not None. Nested assertions do not count, so this is still a smoke only test and is reported low.
+The exact equality lives in a nested function and the test itself also asserts is not None. Nested assertions count, so the test has a real oracle and O002 stays quiet.

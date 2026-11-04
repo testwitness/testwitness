@@ -44,7 +44,7 @@
     "slug": "alphagov-govuk-frontend-6590",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "fp",
     "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
   },
@@ -1032,14 +1032,6 @@
     "label": "one case"
   },
   {
-    "slug": "langchain-ai-langchain-37612",
-    "split": "heldout",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_web_search"
-  },
-  {
     "slug": "langchain-ai-langchain-38365",
     "split": "heldout",
     "ruleId": "R004",
@@ -1428,16 +1420,16 @@
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
-    "ruleId": "O001",
+    "ruleId": "A009",
     "severity": "high",
-    "verdict": "tp",
+    "verdict": "missed",
     "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "tp",
     "subject": "ExcerptCommonTest#testSync"
   },
@@ -1445,7 +1437,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "tp",
     "subject": "ExcerptAppenderTest#testPretouch"
   },
@@ -1453,7 +1445,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "tp",
     "subject": "ExcerptAppenderTest#testNormaliseEOFs"
   },
@@ -1461,7 +1453,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "tp",
     "subject": "NoMessageHistoryTest#testResetWithParameters"
   },
@@ -1469,7 +1461,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "tp",
     "subject": "NoMessageHistoryTest#testResetWithoutParameters"
   },
@@ -1503,19 +1495,10 @@
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
-    "ruleId": "O001",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "ChronicleQueueTest#testDumpCallsOutputStreamWriter"
-  },
-  {
-    "slug": "openhft-chronicle-queue-1630",
-    "split": "tuning",
-    "ruleId": "O002",
+    "ruleId": "A009",
     "severity": "medium",
     "verdict": "fp",
-    "subject": "ChronicleHistoryReaderMainTest#testSetupChronicleHistoryReader",
-    "label": "smoke"
+    "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
@@ -2381,7 +2364,7 @@
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "fp",
     "subject": "FlowableFlatMapIsolatedTest#innerCompleteCancelRace"
   },
@@ -2389,7 +2372,7 @@
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "fp",
     "subject": "FlowableFlatMapMaybeIsolatedTest#requestCancelRace"
   },
@@ -2397,7 +2380,7 @@
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "fp",
     "subject": "FlowableFlatMapSingleIsolatedTest#requestCancelRace"
   },
@@ -2610,7 +2593,7 @@
     "slug": "scikit-learn-scikit-learn-17850",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "verdict": "fp",
     "subject": "test_verbose"
   },
@@ -2676,14 +2659,6 @@
     "verdict": "expected-low",
     "subject": "test_roc_curve_from_cv_results_pos_label_inferred",
     "label": "rewritten"
-  },
-  {
-    "slug": "scikit-learn-scikit-learn-33223",
-    "split": "heldout",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_plot_roc_curve_pos_label"
   },
   {
     "slug": "scikit-learn-scikit-learn-33761",

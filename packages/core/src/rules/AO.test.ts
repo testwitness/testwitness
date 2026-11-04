@@ -126,7 +126,7 @@ describe('A009 tautology', () => {
 });
 
 describe('O001 new test without assertion', () => {
-  it('reports high, low with smoke label for smoke named tests, nothing for skipped or empty', async () => {
+  it('reports medium, low with smoke label for smoke named tests, nothing for skipped or empty', async () => {
     const none = t({ name: 'processesBatch', body: 'service.process(batch)' });
     const smoke = t({ name: 'contextLoads', body: 'ctx.start()' });
     const skipped = t({ name: 'later', body: 'x', markers: [{ marker: 'skip', kind: 'skip', constant: true }] });
@@ -134,7 +134,7 @@ describe('O001 new test without assertion', () => {
     const withAssert = t({ name: 'ok', body: 'x', assertions: [eq('a', '1')] });
     const out = await O001.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [none, smoke, skipped, empty, withAssert]) }] }), {});
     expect(out.map((f) => [f.subject, f.severity, f.label])).toEqual([
-      ['processesBatch', 'high', undefined],
+      ['processesBatch', 'medium', undefined],
       ['contextLoads', 'low', 'smoke'],
     ]);
   });

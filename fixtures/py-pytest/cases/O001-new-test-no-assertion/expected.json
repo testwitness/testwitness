@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "subject": "test_add_accepts_fractional_price"
   }
 ]

@@ -11,14 +11,14 @@ export const O001: Rule = {
   id: 'O001',
   name: 'New test without an assertion',
   group: 'O',
-  defaultSeverity: 'high',
+  defaultSeverity: 'medium',
   since: RULE_SINCE,
   languages: 'any',
   needs: ['diff', 'ast'],
   docs: {
     summary: 'A test added in this PR has no assertion: no framework assertion, no exception expectation, no snapshot, and no call to an assertion helper defined in the file or configured in assertions.extra.',
     falsePositives:
-      'Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions one level deep. Tests delegating to helpers in another module need assertions.extra.',
+      'Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions one level deep. Tests delegating to helpers in another module need assertions.extra. Assertions inside nested scopes of the test body (callbacks, lambdas, anonymous and local classes, inner functions) are counted. The default is medium, not high: on public PRs half of the new tests without an assertion were intentional smoke tests (race tests, verbose output tests, does not throw tests), so the rule cannot carry high.',
     example: '+  @Test\n+  void processesBatch() {\n+    service.process(batch);\n+  }',
   },
   run(ctx) {
@@ -32,7 +32,7 @@ export const O001: Rule = {
       if (isSkipped(t) || isXfail(t)) continue;
       const smoke = SMOKE_NAME.test(t.name);
       out.push(
-        makeFinding(ctx, 'O001', smoke ? 'low' : 'high', pair.file, t.qualifiedName, `New test ${t.qualifiedName} has no assertion`, {
+        makeFinding(ctx, 'O001', smoke ? 'low' : 'medium', pair.file, t.qualifiedName, `New test ${t.qualifiedName} has no assertion`, {
           line: t.startLine,
           endLine: t.endLine,
           ...(smoke ? { label: 'smoke' } : {}),

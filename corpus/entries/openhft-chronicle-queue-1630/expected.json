@@ -1,75 +1,75 @@
 [
-  {
-    "ruleId": "A009",
-    "severity": "high",
-    "subject": "ChronicleReaderMainTest#testMainWithValidArguments",
-    "verdict": "tp",
-    "reason": "assertTrue(\"Expected valid arguments to run without issues.\", true) after running main"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "ExcerptCommonTest#testSync",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "ExcerptAppenderTest#testPretouch",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "ExcerptAppenderTest#testNormaliseEOFs",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "NoMessageHistoryTest#testResetWithParameters",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O001",
-    "severity": "high",
-    "subject": "NoMessageHistoryTest#testResetWithoutParameters",
-    "verdict": "tp",
-    "reason": "new generated test calls the subject and asserts nothing at the test level"
-  },
-  {
-    "ruleId": "O002",
-    "severity": "medium",
-    "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer",
-    "verdict": "tp",
-    "reason": "new generated test asserts only assertNotNull while its name claims more",
-    "label": "smoke"
-  },
-  {
-    "ruleId": "O002",
-    "severity": "medium",
-    "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData",
-    "verdict": "tp",
-    "reason": "new generated test asserts only assertNotNull while its name claims more",
-    "label": "smoke"
-  },
-  {
-    "ruleId": "O002",
-    "severity": "medium",
-    "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
-    "verdict": "tp",
-    "reason": "new generated test asserts only assertNotNull while its name claims more",
-    "label": "smoke"
-  }
+ {
+  "ruleId": "A009",
+  "severity": "high",
+  "subject": "ChronicleReaderMainTest#testMainWithValidArguments",
+  "verdict": "tp",
+  "reason": "assertTrue(\"Expected valid arguments to run without issues.\", true) after running main"
+ },
+ {
+  "ruleId": "A009",
+  "severity": "high",
+  "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader",
+  "verdict": "tp",
+  "reason": "assertTrue(true) inside an anonymous class is the only assertion"
+ },
+ {
+  "ruleId": "O001",
+  "severity": "medium",
+  "subject": "ExcerptCommonTest#testSync",
+  "verdict": "tp",
+  "reason": "new generated test calls the subject and asserts nothing at the test level"
+ },
+ {
+  "ruleId": "O001",
+  "severity": "medium",
+  "subject": "ExcerptAppenderTest#testPretouch",
+  "verdict": "tp",
+  "reason": "new generated test calls the subject and asserts nothing at the test level"
+ },
+ {
+  "ruleId": "O001",
+  "severity": "medium",
+  "subject": "ExcerptAppenderTest#testNormaliseEOFs",
+  "verdict": "tp",
+  "reason": "new generated test calls the subject and asserts nothing at the test level"
+ },
+ {
+  "ruleId": "O001",
+  "severity": "medium",
+  "subject": "NoMessageHistoryTest#testResetWithParameters",
+  "verdict": "tp",
+  "reason": "new generated test calls the subject and asserts nothing at the test level"
+ },
+ {
+  "ruleId": "O001",
+  "severity": "medium",
+  "subject": "NoMessageHistoryTest#testResetWithoutParameters",
+  "verdict": "tp",
+  "reason": "new generated test calls the subject and asserts nothing at the test level"
+ },
+ {
+  "ruleId": "O002",
+  "severity": "medium",
+  "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer",
+  "verdict": "tp",
+  "reason": "new generated test asserts only assertNotNull while its name claims more",
+  "label": "smoke"
+ },
+ {
+  "ruleId": "O002",
+  "severity": "medium",
+  "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData",
+  "verdict": "tp",
+  "reason": "new generated test asserts only assertNotNull while its name claims more",
+  "label": "smoke"
+ },
+ {
+  "ruleId": "O002",
+  "severity": "medium",
+  "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
+  "verdict": "tp",
+  "reason": "new generated test asserts only assertNotNull while its name claims more",
+  "label": "smoke"
+ }
 ]

@@ -1,0 +1,1 @@
+Negative control. The new test defines a nested function check, hands it to the cart as a callback, and the only assert statement sits inside that nested function. Assertions in nested scopes of the test body count, so O001 stays quiet.

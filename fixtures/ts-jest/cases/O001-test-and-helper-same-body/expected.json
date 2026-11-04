@@ -1,1 +1,1 @@
-[{"ruleId":"O001","severity":"high","subject":"cart › warms the cache"}]
+[{"ruleId":"O001","severity":"medium","subject":"cart › warms the cache"}]

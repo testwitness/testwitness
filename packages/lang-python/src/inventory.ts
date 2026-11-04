@@ -812,10 +812,39 @@ function callAssertion(stmt: Node, call: Node, ctx: FileContext): Assertion | un
   return undefined;
 }
 
-/** All assertions in a body, descending into compound statements but not nested definitions. */
+/** The body block of a nested def or class, looking through decorators. */
+function definitionBody(stmt: Node): Node | null {
+  const def = stmt.type === 'decorated_definition' ? stmt.childForFieldName('definition') : stmt;
+  return def ? def.childForFieldName('body') : null;
+}
+
+/** Calls that are the whole body of a lambda in the expression parts of a statement (nested blocks and definitions are visited by the caller). */
+function lambdaAssertions(stmt: Node, ctx: FileContext, out: Assertion[]): void {
+  const visit = (node: Node): void => {
+    for (const child of node.namedChildren) {
+      if (child.type === 'block' || child.type === 'function_definition' || child.type === 'class_definition') continue;
+      if (child.type === 'lambda') {
+        const body = child.childForFieldName('body');
+        const u = body ? unwrap(body) : undefined;
+        if (u && u.type === 'call') {
+          const a = callAssertion(stmt, u, ctx);
+          if (a) out.push(a);
+        }
+      }
+      visit(child);
+    }
+  };
+  visit(stmt);
+}
+
+/** All assertions in a body, descending into compound statements and nested scopes (inner def, local class, lambda). */
 function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[] = []): Assertion[] {
   for (const stmt of statements(block)) {
-    if (isDefinition(stmt)) continue;
+    if (isDefinition(stmt)) {
+      collectAssertions(definitionBody(stmt), ctx, out);
+      continue;
+    }
+    lambdaAssertions(stmt, ctx, out);
     if (stmt.type === 'assert_statement') {
       out.push(bareAssert(stmt, ctx.aliases, ctx.literalParams));
       continue;

@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "O001",
-    "severity": "high",
+    "severity": "medium",
     "subject": "test_receipt_total_via_support"
   }
 ]

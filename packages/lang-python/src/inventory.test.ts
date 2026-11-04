@@ -497,7 +497,7 @@ def test_a():
     expect(as[1]!.kind).toBe('value');
   });
 
-  it('finds assertions nested in if, for, try and with blocks but not in nested defs', async () => {
+  it('finds assertions nested in if, for, try and with blocks and in nested defs', async () => {
     const i = await inv(`
 def test_a():
     for item in items:
@@ -512,8 +512,33 @@ def test_a():
     def inner():
         assert "ignored"
 `);
-    expect(only(i).assertions).toHaveLength(3);
-    expect(only(i).assertions.map((a) => a.line)).toEqual([5, 9, 11]);
+    expect(only(i).assertions).toHaveLength(4);
+    expect(only(i).assertions.map((a) => a.line)).toEqual([5, 9, 11, 13]);
+  });
+
+  it('counts assertions inside a nested def, a local class and a lambda', async () => {
+    const i = await inv(`
+import unittest
+
+def test_nested_def():
+    def check(value):
+        assert value == 1
+    run(check)
+
+def test_local_class():
+    class Handler:
+        def on_event(self, e):
+            assert e.name == "x"
+    bus.subscribe(Handler())
+
+class TestLambda(unittest.TestCase):
+    def test_lambda(self):
+        bus.subscribe(lambda e: self.assertEqual(e.name, "x"))
+`);
+    expect(only(i, 'test_nested_def').assertions).toHaveLength(1);
+    expect(only(i, 'test_local_class').assertions).toHaveLength(1);
+    const l = only(i, 'TestLambda::test_lambda');
+    expect(l.assertions.map((a) => a.callee)).toEqual(['self.assertEqual']);
   });
 });
 

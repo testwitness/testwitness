@@ -1,1 +1,1 @@
-The new test calls check_receipt imported from tests/support.py. Helpers in other modules are only recognised through assertions.extra, which is not configured, and the name does not start with assert, so the rule documents that this is reported high.
+The new test calls check_receipt imported from tests/support.py. Helpers in other modules are only recognised through assertions.extra, which is not configured, and the name does not start with assert, so the rule documents that this is reported medium.

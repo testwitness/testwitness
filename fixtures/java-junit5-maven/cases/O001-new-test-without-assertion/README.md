@@ -1,1 +1,1 @@
-Positive. The new test calls production code and asserts nothing. High.
+Positive. The new test calls production code and asserts nothing. Medium.

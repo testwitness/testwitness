@@ -1,0 +1,1 @@
+Negative control. The new test registers an anonymous CartListener and its only assertion sits inside the overridden totalChanged method. Assertions in nested scopes of the test body count, so O001 stays quiet.

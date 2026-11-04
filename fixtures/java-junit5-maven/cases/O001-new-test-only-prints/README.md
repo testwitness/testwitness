@@ -1,1 +1,1 @@
-Positive. Printing the total is not an oracle. High.
+Positive. Printing the total is not an oracle. Medium.

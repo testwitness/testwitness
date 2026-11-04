@@ -63,11 +63,11 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 | R004 | Test converted to expected failure | high | 11 | 0 | 1.00 |
 | R005 | Focused test added | high | 6 | 0 | 1.00 |
 | R010 | Test added then skipped | low | 5 | 0 | 1.00 |
-| A001 | Assertion removed | medium | 8 | 2 | 0.80 |
+| A001 | Assertion removed | medium | 8 | 0 | 1.00 |
 | A002 | Assertion loosened | medium | 3 | 0 | 1.00 |
-| A009 | Tautological assertion | high | 2 | 0 | 1.00 |
-| O001 | New test without an assertion | high | 6 | 6 | 0.50 |
-| O002 | New test with a smoke oracle only | low | 9 | 6 | 0.60 |
+| A009 | Tautological assertion | high | 2 | 1 | 0.67 |
+| O001 | New test without an assertion | medium | 5 | 5 | 0.50 |
+| O002 | New test with a smoke oracle only | low | 9 | 5 | 0.64 |
 | E001 | Catch all added in a test | high | 1 | 0 | 1.00 |
 | W002 | continue-on-error added to a test step or job | high | 7 | 0 | 1.00 |
 | W003 | Failure suppressed in the run command | high | 1 | 0 | 1.00 |

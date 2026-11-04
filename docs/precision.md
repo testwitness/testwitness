@@ -4,22 +4,22 @@ Measured 2026-11-04 on 134 public pull requests (corpus/). Precision counts medi
 
 | Rule | Split | True positives | Low (informational) | False positives (medium or high) | Missed | Precision | High severity false positives |
 |---|---|---|---|---|---|---|---|
-| A001 | all | 8 | 23 | 2 | 1 | 0.80 | 0 |
-| A001 | heldout | 5 | 4 | 2 | 0 | 0.71 | 0 |
+| A001 | all | 8 | 23 | 0 | 1 | 1.00 | 0 |
+| A001 | heldout | 5 | 4 | 0 | 0 | 1.00 | 0 |
 | A001 | tuning | 3 | 19 | 0 | 1 | 1.00 | 0 |
 | A002 | all | 3 | 0 | 0 | 21 | 1.00 | 0 |
 | A002 | heldout | 0 | 0 | 0 | 12 | n/a | 0 |
 | A002 | tuning | 3 | 0 | 0 | 9 | 1.00 | 0 |
-| A009 | all | 2 | 0 | 0 | 0 | 1.00 | 0 |
-| A009 | tuning | 2 | 0 | 0 | 0 | 1.00 | 0 |
+| A009 | all | 2 | 0 | 1 | 1 | 0.67 | 0 |
+| A009 | tuning | 2 | 0 | 1 | 1 | 0.67 | 0 |
 | E001 | all | 1 | 0 | 0 | 0 | 1.00 | 0 |
 | E001 | tuning | 1 | 0 | 0 | 0 | 1.00 | 0 |
-| O001 | all | 6 | 0 | 6 | 0 | 0.50 | 6 |
-| O001 | heldout | 0 | 0 | 3 | 0 | 0.00 | 3 |
-| O001 | tuning | 6 | 0 | 3 | 0 | 0.67 | 3 |
-| O002 | all | 9 | 29 | 6 | 0 | 0.60 | 0 |
+| O001 | all | 5 | 0 | 5 | 0 | 0.50 | 0 |
+| O001 | heldout | 0 | 0 | 3 | 0 | 0.00 | 0 |
+| O001 | tuning | 5 | 0 | 2 | 0 | 0.71 | 0 |
+| O002 | all | 9 | 29 | 5 | 0 | 0.64 | 0 |
 | O002 | heldout | 0 | 1 | 0 | 0 | n/a | 0 |
-| O002 | tuning | 9 | 28 | 6 | 0 | 0.60 | 0 |
+| O002 | tuning | 9 | 28 | 5 | 0 | 0.64 | 0 |
 | R001 | all | 17 | 97 | 9 | 2 | 0.65 | 2 |
 | R001 | heldout | 13 | 55 | 6 | 2 | 0.68 | 2 |
 | R001 | tuning | 4 | 42 | 3 | 0 | 0.57 | 0 |

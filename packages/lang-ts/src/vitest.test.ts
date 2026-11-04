@@ -120,3 +120,39 @@ describe('vitest assertions and mocks', () => {
     ]);
   });
 });
+
+describe('assertions in nested scopes', () => {
+  it('counts expect calls inside an arrow function callback', async () => {
+    const t = await single(src(`
+      import { it, expect } from 'vitest';
+      it('listens', () => {
+        bus.on('x', (e) => { expect(e.name).toBe('x'); });
+        bus.emit('x');
+      });
+    `));
+    expect(t.assertions.map((a) => a.callee)).toEqual(['expect.toBe']);
+  });
+
+  it('counts expect calls inside a function expression', async () => {
+    const t = await single(src(`
+      import { it, expect } from 'vitest';
+      it('listens', () => {
+        bus.on('x', function (e) { expect(e.name).toBe('x'); });
+        bus.emit('x');
+      });
+    `));
+    expect(t.assertions).toHaveLength(1);
+  });
+
+  it('counts expect calls inside a callback passed to a call', async () => {
+    const t = await single(src(`
+      import { it, expect } from 'vitest';
+      it('reads', async () => {
+        await withFile('a.txt', async (file) => {
+          expect(await file.read()).toBe('a');
+        });
+      });
+    `));
+    expect(t.assertions).toHaveLength(1);
+  });
+});

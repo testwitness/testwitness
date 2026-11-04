@@ -649,36 +649,24 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
   return [];
 }
 
-/** Collect assertions in a body. Nested lambdas (assertAll, assertThrows) are visited too. */
+/** Collect assertions in a body, including every nested scope: lambdas, anonymous class bodies and local classes. */
 function collectAssertions(body: Node, query: Query, ctx: FileContext): Assertion[] {
   const seen = new Set<number>();
   const out: Assertion[] = [];
   for (const match of query.matches(body)) {
     const call = match.captures.find((c) => c.name === 'call')?.node;
     if (!call) continue;
-    // Skip calls that live inside an anonymous class body or a local class: those are not test statements.
-    if (insideLocalClass(call, body)) continue;
     const top = outermostCall(call);
     if (seen.has(top.id)) continue;
     seen.add(top.id);
     out.push(...classifyChain(flattenChain(top), ctx));
   }
   for (const stmt of body.descendantsOfType('assert_statement')) {
-    if (insideLocalClass(stmt, body)) continue;
     const expr = stmt.namedChildren[0];
     out.push({ callee: 'assert', text: stmt.text.trim(), line: line(stmt), kind: 'value', ...(expr ? { subject: normaliseText(expr.text) } : {}) });
   }
   out.sort((a, b) => a.line - b.line);
   return out;
-}
-
-function insideLocalClass(node: Node, stop: Node): boolean {
-  let cur = node.parent;
-  while (cur && cur.id !== stop.id) {
-    if (cur.type === 'class_body' || cur.type === 'interface_body' || cur.type === 'enum_body') return true;
-    cur = cur.parent;
-  }
-  return false;
 }
 
 /* ------------------------------------------------------------------------ */

@@ -139,7 +139,42 @@ class FooTest {
   }
 }`);
     expect(i.tests.map((t) => t.name)).toEqual(['a']);
-    expect(i.tests[0]!.assertions.map((a) => a.callee)).toEqual(['assertNotNull']);
+    expect(i.tests[0]!.assertions.map((a) => a.callee)).toEqual(['assertTrue', 'assertNotNull']);
+  });
+
+  it('counts assertions inside an anonymous class method declared in the test body', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void dumps() {
+    Writer w = new StringWriter() {
+      @Override public void write(String s) { assertEquals("x", s); }
+    };
+    dump(w);
+  }
+}`);
+    expect(t.assertions.map((a) => a.callee)).toEqual(['assertEquals']);
+  });
+
+  it('counts assertions inside a lambda body that is not an assertion argument', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void listens() {
+    bus.subscribe(event -> { assertEquals("x", event.name()); });
+    bus.publish(new Event("x"));
+  }
+}`);
+    expect(t.assertions.map((a) => a.callee)).toEqual(['assertEquals']);
+  });
+
+  it('counts assertions inside a local class method', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void local() {
+    class Check { void run(int n) { assertTrue(n > 0); } }
+    new Check().run(compute());
+  }
+}`);
+    expect(t.assertions.map((a) => a.callee)).toEqual(['assertTrue']);
   });
 
   it('TestNG class level @Test makes public methods tests', async () => {
