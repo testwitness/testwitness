@@ -21,3 +21,16 @@ describe('detectProvenance', () => {
     expect(detectProvenance(['fix typo'])).toEqual({ agents: [] });
   });
 });
+
+describe('detectProvenance author object', () => {
+  it('sets botAuthor for user.type Bot', () => {
+    expect(detectProvenance([], undefined, { login: 'some-app', type: 'Bot' }).botAuthor).toBe('some-app');
+  });
+  it('sets botAuthor for any login ending in [bot]', () => {
+    expect(detectProvenance([], undefined, { login: 'acme-helper[bot]', type: 'User' }).botAuthor).toBe('acme-helper[bot]');
+    expect(detectProvenance([], undefined, 'acme-helper[bot]').botAuthor).toBe('acme-helper[bot]');
+  });
+  it('leaves botAuthor unset for a normal user', () => {
+    expect(detectProvenance([], undefined, { login: 'maple-ridge-dev', type: 'User' }).botAuthor).toBeUndefined();
+  });
+});

@@ -32,6 +32,10 @@ export interface CheckOptions {
   out?: string | undefined;
   prTitle?: string | undefined;
   prBodyFile?: string | undefined;
+  /** PR author login, for provenance display only. */
+  author?: string | undefined;
+  /** PR author account type, e.g. User or Bot. */
+  authorType?: string | undefined;
   mode?: ResolvedConfig['mode'] | undefined;
   failOn?: ResolvedConfig['failOn'] | undefined;
   quiet?: boolean;
@@ -99,6 +103,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     evidence,
     evidenceNotes: notes,
     prText,
+    ...(opts.author ? { author: { login: opts.author, type: opts.authorType } } : {}),
     log,
   });
   return { report, exitCode: exitCodeFor(report, config), config };

@@ -19,10 +19,16 @@ const COMMIT_SIGNALS: Signal[] = [
   { agent: 'Gemini', pattern: /^co-authored-by:.*(gemini|jules)/im, label: 'Co-authored-by trailer' },
 ];
 
+/** PR author as the platform reports it (GitHub: pull_request.user.login and user.type). */
+export interface PullRequestAuthor {
+  login: string;
+  type?: string | undefined;
+}
+
 const BOT_AUTHORS = ['copilot-swe-agent[bot]', 'devin-ai-integration[bot]', 'cursor[bot]', 'google-labs-jules[bot]', 'dependabot[bot]', 'renovate[bot]'];
 
 /** Detect agent provenance from commit messages and PR text. Shown, never used to change rules. */
-export function detectProvenance(commitMessages: string[], pr?: PullRequestText, author?: string): ProvenanceInfo {
+export function detectProvenance(commitMessages: string[], pr?: PullRequestText, author?: string | PullRequestAuthor): ProvenanceInfo {
   const agents = new Map<string, Set<string>>();
   const add = (agent: string, signal: string) => {
     const s = agents.get(agent) ?? new Set<string>();
@@ -44,6 +50,8 @@ export function detectProvenance(commitMessages: string[], pr?: PullRequestText,
     }
   }
   const info: ProvenanceInfo = { agents: [...agents.entries()].map(([name, signals]) => ({ name, signals: [...signals] })) };
-  if (author && BOT_AUTHORS.includes(author)) info.botAuthor = author;
+  const login = typeof author === 'string' ? author : author?.login;
+  const type = typeof author === 'string' ? undefined : author?.type;
+  if (login && (BOT_AUTHORS.includes(login) || /\[bot\]$/i.test(login) || type?.toLowerCase() === 'bot')) info.botAuthor = login;
   return info;
 }

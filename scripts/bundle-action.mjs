@@ -12,7 +12,7 @@ rmSync(dist, { recursive: true, force: true });
 mkdirSync(assets, { recursive: true });
 
 await build({
-  entryPoints: [join(root, 'packages/action/src/main.ts')],
+  entryPoints: [join(root, 'packages/action/src/entry.ts')],
   bundle: true,
   platform: 'node',
   target: 'node20',

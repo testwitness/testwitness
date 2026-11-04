@@ -9,7 +9,7 @@
   "exports": { ".": { "development": "./src/index.ts", "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "bundle": "esbuild src/main.ts --bundle --platform=node --target=node20 --format=esm --outfile=../../dist/index.js --conditions=development --external:web-tree-sitter --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
+    "bundle": "esbuild src/entry.ts --bundle --platform=node --target=node20 --format=esm --outfile=../../dist/index.js --conditions=development --external:web-tree-sitter --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
     "@actions/core": "^1.11.1",

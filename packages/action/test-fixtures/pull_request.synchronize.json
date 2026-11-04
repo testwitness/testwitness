@@ -1,0 +1,50 @@
+{
+  "action": "synchronize",
+  "number": 482,
+  "before": "1111111111111111111111111111111111111111",
+  "after": "BASESHA_PLACEHOLDER",
+  "pull_request": {
+    "url": "https://api.github.com/repos/acme-widgets/ledger-core/pulls/482",
+    "id": 1912345678,
+    "number": 482,
+    "state": "open",
+    "locked": false,
+    "title": "Speed up invoice rounding",
+    "user": {
+      "login": "maple-ridge-dev",
+      "id": 4821730,
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "Rounds invoice totals once instead of per line.\n\nGenerated with [Claude Code](https://claude.com/claude-code)",
+    "created_at": "2026-10-30T14:02:11Z",
+    "updated_at": "2026-10-30T14:20:45Z",
+    "draft": false,
+    "head": {
+      "label": "acme-widgets:fast-rounding",
+      "ref": "fast-rounding",
+      "sha": "HEADSHA_PLACEHOLDER",
+      "user": { "login": "acme-widgets", "id": 9921004, "type": "Organization" },
+      "repo": { "id": 770011223, "name": "ledger-core", "full_name": "acme-widgets/ledger-core", "private": false }
+    },
+    "base": {
+      "label": "acme-widgets:main",
+      "ref": "main",
+      "sha": "BASESHA_PLACEHOLDER",
+      "user": { "login": "acme-widgets", "id": 9921004, "type": "Organization" },
+      "repo": { "id": 770011223, "name": "ledger-core", "full_name": "acme-widgets/ledger-core", "private": false }
+    },
+    "author_association": "MEMBER",
+    "merged": false,
+    "commits": 1,
+    "changed_files": 1
+  },
+  "repository": {
+    "id": 770011223,
+    "name": "ledger-core",
+    "full_name": "acme-widgets/ledger-core",
+    "private": false,
+    "owner": { "login": "acme-widgets", "id": 9921004, "type": "Organization" }
+  },
+  "sender": { "login": "maple-ridge-dev", "id": 4821730, "type": "User" }
+}

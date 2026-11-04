@@ -39,6 +39,8 @@ export interface EngineOptions {
   /** Why evidence is missing or partial, for the report. */
   evidenceNotes?: string[];
   prText?: PullRequestText | undefined;
+  /** PR author, for provenance display only. */
+  author?: { login: string; type?: string | undefined } | undefined;
   /** Already resolved: skip merge base computation (used by fixtures). */
   resolved?: boolean;
   log?: (msg: string) => void;
@@ -204,7 +206,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
   let provenance: ProvenanceInfo = { agents: [] };
   try {
     const msgs = await commitMessages(baseSha, headSha, git);
-    provenance = detectProvenance(msgs, opts.prText);
+    provenance = detectProvenance(msgs, opts.prText, opts.author);
   } catch {
     /* shallow clones may not have history; provenance is optional */
   }

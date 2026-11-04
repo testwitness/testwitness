@@ -25,6 +25,8 @@ export async function main(argv: string[]): Promise<number> {
     .option('--fail-on <sev>', 'high | medium | low (overrides config)')
     .option('--pr-title <title>', 'pull request title, for claim checks')
     .option('--pr-body-file <path>', 'file holding the pull request body')
+    .option('--author <login>', 'pull request author login, shown in provenance')
+    .option('--author-type <type>', 'pull request author account type, for example User or Bot')
     .option('--cwd <dir>', 'repository directory', process.cwd())
     .option('-q, --quiet', 'no progress on stderr', false)
     .action(async (o) => {
@@ -39,6 +41,8 @@ export async function main(argv: string[]): Promise<number> {
           out: o.out,
           prTitle: o.prTitle,
           prBodyFile: o.prBodyFile,
+          author: o.author,
+          authorType: o.authorType,
           mode: o.mode,
           failOn: o.failOn,
           quiet: o.quiet,
