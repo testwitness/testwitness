@@ -52,6 +52,8 @@ What would make it great, in order
 
 ## 2. Decision for Sajjad: the 7 unmeasured rules
 
+Decided 4 Nov 2026 at 04:17: Option A. All 22 rules enabled, the README keeps the measured and unmeasured split. O001 ships at low by default until mutation on request exists. A002 semantic pairing happens before the public launch and is measured on the corpus before merge. After A002: the JSON schema and MCP server, then the rest of section 5 in order. Before Show HN, a quiet week: install on 3 to 5 friendly public repositories (Sajjad asks the maintainers) and fold every false positive report into the corpus.
+
 Seven rules ship in v0.1 with no true positive in the corpus: R006 test body
 emptied, O006 test file with no tests collected, W006 integrity gate weakened,
 S004 snapshot update forced in the test command, V003 changed test did not run,
@@ -209,16 +211,22 @@ PRs with results attached, skip rate, assertion density) so a team sees whether
 their test integrity is drifting, and so the study can be repeated every
 quarter with the same method.
 
-## 5. Order of work after v0.1
+## 5. Order of work
 
-1. A002 semantic pairing (section 4.1), measured on the corpus. Two to three days.
-2. Study published (sampling is running now).
-3. JSON schema plus MCP server for agents (4.7). One day.
-4. Helper resolution across the repository (4.2). Two days.
-5. Coverage readers and the C rule family (4.3). Three days.
-6. Run history and dynamic severity (4.5). Three days.
-7. Mutation on request (4.4). Three days, behind an opt in.
-8. TAP and JSON reporters, then Kotlin and Go.
+Before the public launch:
+1. A002 semantic pairing (section 4.1), measured on the corpus before merge.
+2. First push to github.com/testwitness/testwitness, npm 0.1.0, dogfood on our own PRs.
+3. Quiet week on 3 to 5 friendly public repositories; every false positive report becomes a corpus entry before the fix merges.
+4. Study published (sampling is running now).
+5. Show HN and the community posts.
+
+After the launch, in order:
+6. JSON schema plus MCP server for agents (4.7). One day.
+7. Helper resolution across the repository (4.2). Two days.
+8. Coverage readers and the C rule family (4.3). Three days.
+9. Run history and dynamic severity (4.5). Three days.
+10. Mutation on request (4.4). Three days, behind an opt in. O001 moves back to medium once it exists.
+11. TAP and JSON reporters, then Kotlin and Go.
 
 Everything above keeps the three promises: no model inside, no network, never
 runs the scanned repository's code unless the maintainer opts in to the
