@@ -1,0 +1,13 @@
+diff --git a/tests/playwright-test/reporter-base.spec.ts b/tests/playwright-test/reporter-base.spec.ts
+index bd04cb2d..6d6e4996 100644
+--- a/tests/playwright-test/reporter-base.spec.ts
++++ b/tests/playwright-test/reporter-base.spec.ts
+@@ -232,7 +232,7 @@ for (const useIntermediateMergeReport of [false, true] as const) {
+       expect(result.passed).toBe(1);
+       // TODO: uncomment once https://github.com/microsoft/playwright/issues/30550 is fixed.
+       // expect(result.interrupted).toBe(1);
+-      expect(result.didNotRun).toBe(1);
++      // expect(result.didNotRun).toBe(1);
+       expect(result.output).toContain('Timed out waiting 3s for the test suite to run');
+     });
+ 

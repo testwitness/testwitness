@@ -1,0 +1,10 @@
+[
+  {
+    "path": "src/main/java/com/microsoft/sqlserver/jdbc/SQLServerVSMEnclaveProvider.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/com/microsoft/sqlserver/jdbc/AlwaysEncrypted/ParameterMetaDataCacheTest.java",
+    "status": "modified"
+  }
+]

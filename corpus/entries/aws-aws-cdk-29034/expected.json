@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "cdk migrate --from-scan with AND/OR filters correctly filters resources",
+    "verdict": "tp",
+    "reason": "integTest block commented out"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "cdk migrate --from-scan for resources with Write Only Properties generates warnings",
+    "verdict": "tp",
+    "reason": "integTest block commented out"
+  }
+]

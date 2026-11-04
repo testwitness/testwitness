@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "TestFeaturestore::test_create_get_list_featurestore",
+    "verdict": "tp",
+    "reason": "count equality (len(list) - base) == 1 loosened to membership of the created resource name"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "TestFeaturestore::test_create_get_list_entity_types",
+    "verdict": "tp",
+    "reason": "assert len(list_entity_types) == 2 loosened to membership of one resource name"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "TestFeaturestore::test_create_get_list_features",
+    "verdict": "tp",
+    "reason": "assert len(list_user_features) == 3 loosened to membership checks, and the == 0 check before creation removed"
+  }
+]

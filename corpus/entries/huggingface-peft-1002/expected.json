@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "StableDiffusionModelTester::test_merge_layers",
+    "verdict": "tp",
+    "reason": "self.skipTest added for the LoHa parametrised case because it is flaky, TODO only"
+  }
+]

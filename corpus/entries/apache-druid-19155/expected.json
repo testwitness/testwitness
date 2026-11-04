@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "CostBasedAutoScalerIntegrationTest#test_autoScaler_scalesUpAndDown_withSlowPublish",
+    "verdict": "tp",
+    "reason": "hasValueMatching(Matchers.equalTo(4L)) loosened to hasValueMatching(Matchers.greaterThan(1L))"
+  }
+]

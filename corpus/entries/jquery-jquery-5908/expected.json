@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "jQuery.parseXML - error reporting",
+    "verdict": "tp",
+    "reason": "assert.strictEqual(line, \"1\") and assert.strictEqual(column, \"11\") loosened to assert.ok on a regex match"
+  }
+]

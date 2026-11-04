@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-sdk-java-v2/pull/6888",
+  "repo": "aws/aws-sdk-java-v2",
+  "number": 6888,
+  "title": "Temporarily comment out S3 unit test",
+  "merged_at": "2026-04-22T19:18:27Z",
+  "stars": 2630,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "c6cc83d4afa69881c1011f931f22cb3e2258dabb",
+  "head_sha": "bb595071093f9d428653818058364b4624dcf622",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 2
+}

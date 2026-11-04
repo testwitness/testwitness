@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/micronaut-projects/micronaut-core/pull/12499",
+  "repo": "micronaut-projects/micronaut-core",
+  "number": 12499,
+  "title": "Relax FormBindingDeadlockTest JSON assertion",
+  "merged_at": "2026-03-17T08:13:41Z",
+  "stars": 6435,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "37df660d17460c498437507c24c5397390b0b87a",
+  "head_sha": "20026b0a323ae71b352c22cf49881eec9d72f213",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 1
+}

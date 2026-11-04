@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jquery/jquery/pull/5908",
+  "repo": "jquery/jquery",
+  "number": 5908,
+  "title": "Tests: Make the \"jQuery.parseXML - error reporting\" test less strict",
+  "merged_at": "2026-09-01T20:38:27Z",
+  "stars": 59821,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "e77f87c89ea78ffa086d0cf2778cdab652507e55",
+  "head_sha": "58814762655262bea92460db605ba24eb347d51d",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 8
+}

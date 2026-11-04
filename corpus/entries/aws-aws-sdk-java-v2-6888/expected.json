@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "MultipartClientChecksumTest#multipartUpload_withChecksumValueProvided_shouldUseSameAlgorithmForUploadAndAddChecksumTypeFullObject",
+    "verdict": "tp",
+    "reason": "parameterized test commented out in a block comment with a TODO, production kept"
+  }
+]

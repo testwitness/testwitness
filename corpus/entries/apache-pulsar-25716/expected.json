@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "V5ConsumerPriorityLevelTest#testLowerPriorityConsumerReceivesOverflow",
+    "verdict": "tp",
+    "reason": "assertEquals(size >= total - 2q - 1, true) loosened to assertTrue(size > 0)"
+  }
+]

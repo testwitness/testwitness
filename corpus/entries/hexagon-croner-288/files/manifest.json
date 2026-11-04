@@ -1,0 +1,42 @@
+[
+  {
+    "path": ".github/workflows/copilot-setup-steps.yml",
+    "status": "added"
+  },
+  {
+    "path": "AGENTS.md",
+    "status": "added"
+  },
+  {
+    "path": "src/date.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/pattern.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/ocps-1.0.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/ocps-1.1.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/ocps-1.2.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/ocps-1.3.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/ocps-1.4.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/pattern.test.ts",
+    "status": "modified"
+  }
+]

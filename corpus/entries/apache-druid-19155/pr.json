@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/druid/pull/19155",
+  "repo": "apache/druid",
+  "number": 19155,
+  "title": "Relax condition in slow-publish cost-based autoscaler test",
+  "merged_at": "2026-03-15T06:36:40Z",
+  "stars": 14093,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "0aedeb9cd4630ef76d9be26439a902b5bf1502d6",
+  "head_sha": "29b98e75f7d7ccd316b1560c63e6acd67964971c",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

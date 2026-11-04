@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "step level continue-on-error: true on the extension Python test step, with a TODO"
+  }
+]

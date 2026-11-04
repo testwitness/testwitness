@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ray-project/ray/pull/47092",
+  "repo": "ray-project/ray",
+  "number": 47092,
+  "title": "[Data] Make `test_fsspec_filesystem` less brittle",
+  "merged_at": "2024-08-12T22:03:34Z",
+  "stars": 44187,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "A001",
+  "split": "heldout",
+  "base_sha": "768108ff45cac653396d12cacf11ef16bb20417a",
+  "head_sha": "a4e4c0c1476c1cdb432bcf9a8d580b71c8dd8441",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 9
+}

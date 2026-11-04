@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/JnyJny/busylight/pull/686",
+  "repo": "JnyJny/busylight",
+  "number": 686,
+  "title": "ci: allow Python 3.14 test failures",
+  "merged_at": "2026-03-25T17:42:45Z",
+  "stars": 344,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "W002",
+  "split": "tuning",
+  "base_sha": "4642544e5e4efc112acb966a2b22a7faad8d1d1b",
+  "head_sha": "afbae6f1583e7cc85eee28b8f0eb065957c95a6f",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

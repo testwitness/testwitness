@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Hexagon/croner/pull/288",
+  "repo": "Hexagon/croner",
+  "number": 288,
+  "title": "Add OCPS 1.0-1.4 compliance: year field, + modifier, @midnight/@reboot",
+  "merged_at": "2025-11-02T18:56:28Z",
+  "stars": 2614,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "O002",
+  "split": "tuning",
+  "base_sha": "7184104fe195d95554d1bb95f9890c71467fa890",
+  "head_sha": "a1c8f9335e3632a553089c2fade28a988f90e453",
+  "files_changed": 10,
+  "additions": 1269,
+  "deletions": 17
+}

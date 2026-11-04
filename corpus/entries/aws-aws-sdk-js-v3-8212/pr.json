@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-sdk-js-v3/pull/8212",
+  "repo": "aws/aws-sdk-js-v3",
+  "number": 8212,
+  "title": "test(middleware-sdk-route53): loosen date in path assertion",
+  "merged_at": "2026-07-20T17:20:10Z",
+  "stars": 3679,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "eb268edacd02afb14b7a41ecce7171df6760a20b",
+  "head_sha": "01bb4b68c0dbdaebd5f84264621b8237c10cad92",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

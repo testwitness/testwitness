@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "JsonCodecAdditionalTypeTest#itIsPossibleToCanRegisterAdditionTypesForJsonCodec",
+    "verdict": "tp",
+    "reason": "assertEquals on the Content-Type header loosened to assertTrue(header.contains(...))"
+  }
+]

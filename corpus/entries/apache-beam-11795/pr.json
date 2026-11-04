@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/beam/pull/11795",
+  "repo": "apache/beam",
+  "number": 11795,
+  "title": "[BEAM-10058] Provide less strict assertion to make the test more resistant against future changes in a model",
+  "merged_at": "2020-05-25T10:45:02Z",
+  "stars": 8705,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "93f605db3034cb0c814ec6baa474b718fbbcf47a",
+  "head_sha": "6766d0c2b929f74152c4d4a60bd0898c918ad667",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 2
+}

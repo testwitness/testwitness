@@ -1,0 +1,24 @@
+diff --git a/http-server-tck/src/main/java/io/micronaut/http/server/tck/tests/codec/JsonCodecAdditionalTypeTest.java b/http-server-tck/src/main/java/io/micronaut/http/server/tck/tests/codec/JsonCodecAdditionalTypeTest.java
+index 9216111a..d745698f 100644
+--- a/http-server-tck/src/main/java/io/micronaut/http/server/tck/tests/codec/JsonCodecAdditionalTypeTest.java
++++ b/http-server-tck/src/main/java/io/micronaut/http/server/tck/tests/codec/JsonCodecAdditionalTypeTest.java
+@@ -35,6 +35,7 @@ import java.util.Map;
+ 
+ import static io.micronaut.http.tck.TestScenario.asserts;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertTrue;
+ 
+ 
+ @SuppressWarnings({
+@@ -51,9 +52,8 @@ public class JsonCodecAdditionalTypeTest {
+         HttpResponseAssertion assertion = HttpResponseAssertion.builder()
+             .body(BodyAssertion.builder().body("https://jsonfeed.org").contains())
+             .status(HttpStatus.OK)
+-            .assertResponse(response -> {
+-                assertEquals("application/json+feed", response.header("Content-Type"));
+-            }).build();
++            .assertResponse(response -> assertTrue(response.header("Content-Type").contains(APPLICATION_JSON_FEED)))
++            .build();
+ 
+         Map<String, Object> config = Collections.singletonMap("micronaut.codec.json.additional-types", Collections.singletonList(APPLICATION_JSON_FEED));
+         asserts(SPEC_NAME,

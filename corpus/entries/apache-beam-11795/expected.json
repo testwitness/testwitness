@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "VideoIntelligenceMlTestIT::test_label_detection_with_video_context",
+    "verdict": "tp",
+    "reason": "hc.has_items('bicycle', 'dinosaur') loosened to hc.has_item(hc.contains_string('bicycle'))"
+  }
+]

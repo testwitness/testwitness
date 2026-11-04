@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/15397",
+  "repo": "microsoft/playwright",
+  "number": 15397,
+  "title": "test: relax expectation to work for webkit",
+  "merged_at": "2022-07-06T05:15:40Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "ee82837fb5aac44478bd75cd0788731bcf61b214",
+  "head_sha": "9b4100b596e349f164266955517f14d6ba7b04ad",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

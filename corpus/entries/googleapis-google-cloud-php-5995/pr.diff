@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/tests.yaml b/.github/workflows/tests.yaml
+index 48256678..fce4fae5 100644
+--- a/.github/workflows/tests.yaml
++++ b/.github/workflows/tests.yaml
+@@ -21,6 +21,7 @@ jobs:
+             phpunit-filename: phpunit
+     name: PHP ${{ matrix.php }} Unit Test (${{ matrix.platform }})
+     runs-on: ${{ matrix.platform }}
++    continue-on-error: true
+     steps:
+     - uses: actions/checkout@v3
+     - name: Setup PHP

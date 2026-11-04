@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "job level continue-on-error bound to matrix.ruby == 'head' on the rake test job"
+  }
+]

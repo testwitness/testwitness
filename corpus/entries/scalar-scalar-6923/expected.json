@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "bundle \u203a external urls \u203a does not modify external URLs when already defined by $id property",
+    "verdict": "tp",
+    "reason": "it changed to it.todo to silence a flaky test, no issue"
+  }
+]

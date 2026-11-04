@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/googleapis/google-cloud-php/pull/5995",
+  "repo": "googleapis/google-cloud-php",
+  "number": 5995,
+  "title": "chore(ci): continue unit tests on error",
+  "merged_at": "2023-03-23T17:49:23Z",
+  "stars": 1180,
+  "license": "Apache-2.0",
+  "language": "php",
+  "category": "W002",
+  "split": "tuning",
+  "base_sha": "f4134c2e06f6b7bf62e9f1786b6b6439478b3665",
+  "head_sha": "3936eb9cae3c16ca5d88acf4bfbc7660ee1f5119",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

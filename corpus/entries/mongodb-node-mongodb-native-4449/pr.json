@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mongodb/node-mongodb-native/pull/4449",
+  "repo": "mongodb/node-mongodb-native",
+  "number": 4449,
+  "title": "ci(NODE-5068, NODE-5078): relax assertion on aggregate events in consecutive resume tests",
+  "merged_at": "2025-03-05T17:16:31Z",
+  "stars": 10171,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "398e361f02bdfd22f3f899828930a0674374fa33",
+  "head_sha": "91d451be4ff4bd996d9cfafb905664af80ddc8ec",
+  "files_changed": 1,
+  "additions": 13,
+  "deletions": 4
+}

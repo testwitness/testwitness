@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "|| true appended to the ctest command in appveyor.yml"
+  }
+]

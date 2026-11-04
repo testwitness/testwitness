@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/doris/pull/51134",
+  "repo": "apache/doris",
+  "number": 51134,
+  "title": "[chore](feut) add maven.test.failure.ignore",
+  "merged_at": "2025-05-28T02:40:18Z",
+  "stars": 16178,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "W003",
+  "split": "heldout",
+  "base_sha": "98d87b216557031a35dde63609015373eee0d309",
+  "head_sha": "43bf1f16966e5244e1f4b25cf706890882fc33ad",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

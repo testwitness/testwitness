@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/main/java/net/openhft/chronicle/queue/ChronicleHistoryReaderMain.java",
+    "status": "modified"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ChronicleHistoryReaderMainTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ChronicleQueueTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ChronicleReaderMainTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ExcerptAppenderTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ExcerptCommonTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/ExcerptTailerTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/NoMessageHistoryTest.java",
+    "status": "added"
+  },
+  {
+    "path": "src/test/java/net/openhft/chronicle/queue/util/FileUtilTest.java",
+    "status": "modified"
+  }
+]

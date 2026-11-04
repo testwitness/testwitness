@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/alibaba/neug/pull/18",
+  "repo": "alibaba/neug",
+  "number": 18,
+  "title": "ci: temporarily allow extension tests to fail without blocking CI",
+  "merged_at": "2026-03-09T10:35:24Z",
+  "stars": 176,
+  "license": "Apache-2.0",
+  "language": "c++",
+  "category": "W002",
+  "split": "heldout",
+  "base_sha": "d28cb2db48479c129bd3b08c7a8780aa3ea9b593",
+  "head_sha": "db6eedb2025fcbf1ad8fd2a88704fd75da78b024",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

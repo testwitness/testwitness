@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "tp",
+    "reason": "expect(values[0]).toBe(expected) in the checkMeta helper loosened to expect(values.includes(expected)).toBe(expected !== undefined)"
+  }
+]

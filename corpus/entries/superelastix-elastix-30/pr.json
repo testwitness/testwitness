@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/SuperElastix/elastix/pull/30",
+  "repo": "SuperElastix/elastix",
+  "number": 30,
+  "title": "CI: Make AppVeyor tests always return exit code 0",
+  "merged_at": "2017-10-07T15:49:09Z",
+  "stars": 591,
+  "license": "Apache-2.0",
+  "language": "c++",
+  "category": "W003",
+  "split": "tuning",
+  "base_sha": "2ac905afdb1a5a841c05ed6abf92a1bf232d1e89",
+  "head_sha": "b54a19380c540758d9a92fd8814b2ff0095afb3f",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

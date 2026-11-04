@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "input-format stream-json \u203a Agent tool with general-purpose subagent works",
+    "verdict": "tp",
+    "reason": "expect(result?.result?.trim()).toBe(expectedReport) loosened to expect(result?.result).toContain(expectedReport)"
+  }
+]

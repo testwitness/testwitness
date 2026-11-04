@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/lineofflight/peddler/pull/262",
+  "repo": "lineofflight/peddler",
+  "number": 262,
+  "title": "Allow ruby-head test failures",
+  "merged_at": "2026-06-05T22:01:02Z",
+  "stars": 319,
+  "license": "MIT",
+  "language": "ruby",
+  "category": "W002",
+  "split": "tuning",
+  "base_sha": "27086270470979246f0bace99efb57ff908d3e7e",
+  "head_sha": "7993ecee9ff7a8f53d87bcea94c854e189ad8f44",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

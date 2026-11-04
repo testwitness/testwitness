@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "-Dmaven.test.failure.ignore=true added to the mvn test command in run-fe-ut.sh (coverage branch)"
+  }
+]

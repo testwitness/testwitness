@@ -57,19 +57,23 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 
 | Rule | Finding | Default | True positives | False positives (medium or high) | Precision |
 |---|---|---|---|---|---|
-| R001 | Test function deleted | medium | 16 | 9 | 0.64 |
+| R001 | Test function deleted | medium | 17 | 9 | 0.65 |
 | R002 | Test file deleted | high | 9 | 0 | 1.00 |
 | R003 | Test newly skipped or disabled | medium | 21 | 0 | 1.00 |
 | R004 | Test converted to expected failure | high | 11 | 0 | 1.00 |
 | R005 | Focused test added | high | 6 | 0 | 1.00 |
 | R010 | Test added then skipped | low | 5 | 0 | 1.00 |
-| A001 | Assertion removed | medium | 5 | 2 | 0.71 |
-| O002 | New test with a smoke oracle only | low | 2 | 0 | 1.00 |
-| W002 | continue-on-error added to a test step or job | high | 4 | 1 | 0.80 |
+| A001 | Assertion removed | medium | 8 | 2 | 0.80 |
+| A002 | Assertion loosened | medium | 3 | 0 | 1.00 |
+| A009 | Tautological assertion | high | 2 | 0 | 1.00 |
+| O001 | New test without an assertion | high | 6 | 6 | 0.50 |
+| O002 | New test with a smoke oracle only | low | 9 | 6 | 0.60 |
+| E001 | Catch all added in a test | high | 1 | 0 | 1.00 |
+| W002 | continue-on-error added to a test step or job | high | 7 | 0 | 1.00 |
 | W003 | Failure suppressed in the run command | high | 1 | 0 | 1.00 |
 | V004 | Claim in PR text not supported by results | medium | 6 | 0 | 1.00 |
 
-11 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; A002 Assertion loosened; A009 Tautological assertion; O001 New test without an assertion; O006 New test file with no tests collected; E001 Catch all added in a test; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
+7 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; O006 New test file with no tests collected; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
 <!-- rules:end -->
 
 ## Precision

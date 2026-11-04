@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/letta-ai/letta-code/pull/5345",
+  "repo": "letta-ai/letta-code",
+  "number": 5345,
+  "title": "test(headless): match the subagent report token instead of exact output",
+  "merged_at": "2026-10-29T04:44:38Z",
+  "stars": 3778,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "08dd839e3ea38ab6e3775358f8b470ead2617fe9",
+  "head_sha": "7973555c37a370ad31f3b0df2584b34b51a289d3",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 1
+}

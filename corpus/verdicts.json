@@ -1,5 +1,13 @@
 [
   {
+    "slug": "alibaba-neug-18",
+    "split": "heldout",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "name: Run Extension Python Test"
+  },
+  {
     "slug": "alphagov-govuk-frontend-4030",
     "split": "tuning",
     "ruleId": "R005",
@@ -49,12 +57,27 @@
     "subject": "Components › Sass render › renders CSS for all components"
   },
   {
+    "slug": "apache-beam-11795",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "VideoIntelligenceMlTestIT::test_label_detection_with_video_context"
+  },
+  {
     "slug": "apache-camel-13941",
     "split": "heldout",
     "ruleId": "R003",
     "severity": "medium",
     "verdict": "tp",
     "subject": "RestartBrokerBeforeCommitIT#commitShouldThrowJmsException"
+  },
+  {
+    "slug": "apache-doris-51134",
+    "split": "heldout",
+    "ruleId": "W003",
+    "severity": "high",
+    "verdict": "missed"
   },
   {
     "slug": "apache-druid-18495",
@@ -64,6 +87,14 @@
     "verdict": "tp",
     "subject": "IngestionBackwardCompatibilityDockerTest#test_runIndexTask_andKillData",
     "label": "override"
+  },
+  {
+    "slug": "apache-druid-19155",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "CostBasedAutoScalerIntegrationTest#test_autoScaler_scalesUpAndDown_withSlowPublish"
   },
   {
     "slug": "apache-iceberg-10802",
@@ -136,6 +167,14 @@
     "severity": "medium",
     "verdict": "tp",
     "subject": "BrokerRegistryIntegrationTest#testRegisterAgain"
+  },
+  {
+    "slug": "apache-pulsar-25716",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "V5ConsumerPriorityLevelTest#testLowerPriorityConsumerReceivesOverflow"
   },
   {
     "slug": "assertj-assertj-1729",
@@ -244,6 +283,38 @@
     "verdict": "expected-low",
     "subject": "Uris_assertHasParameter_Test#should_pass_if_parameter_without_value_is_found",
     "label": "parameterised"
+  },
+  {
+    "slug": "aws-aws-cdk-29034",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "cdk migrate --from-scan with AND/OR filters correctly filters resources"
+  },
+  {
+    "slug": "aws-aws-cdk-29034",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "cdk migrate --from-scan for resources with Write Only Properties generates warnings"
+  },
+  {
+    "slug": "aws-aws-sdk-java-v2-6888",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "MultipartClientChecksumTest#multipartUpload_withChecksumValueProvided_shouldUseSameAlgorithmForUploadAndAddChecksumTypeFullObject"
+  },
+  {
+    "slug": "aws-aws-sdk-js-v3-8212",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "middleware-sdk-route53 › Route53 › should normalize param names Id"
   },
   {
     "slug": "aws-aws-sdk-js-v3-8320",
@@ -382,6 +453,335 @@
     "severity": "medium",
     "verdict": "tp",
     "subject": "ITAppendableUploadTest#explicitFlush"
+  },
+  {
+    "slug": "googleapis-google-cloud-php-5995",
+    "split": "tuning",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "name: Run Unit Test Suite (Windows)"
+  },
+  {
+    "slug": "googleapis-python-aiplatform-1040",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "TestFeaturestore::test_create_get_list_featurestore"
+  },
+  {
+    "slug": "googleapis-python-aiplatform-1040",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "TestFeaturestore::test_create_get_list_entity_types"
+  },
+  {
+    "slug": "googleapis-python-aiplatform-1040",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "TestFeaturestore::test_create_get_list_features"
+  },
+  {
+    "slug": "googleapis-python-aiplatform-1040",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "TestFeaturestore::test_search_features",
+    "label": "assertions moved"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "OCPS 1.0: Wildcard (*) should match all values",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "OCPS 1.0: Should combine comma and range",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "OCPS 1.0: Should combine range and step",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "tp",
+    "subject": "OCPS 1.1: Nicknames should not be combined with other expressions",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept 5-field pattern",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept 5-field pattern with leading/trailing whitespace",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept pattern with multiple consecutive whitespace",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept pattern with tab delimiters",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept valid minute values (0-59)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept valid hour values (0-23)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept valid day of month values (1-31)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept valid month values (1-12)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept month names (case-insensitive)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Should accept day of week names (case-insensitive)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Range (-) should specify inclusive range",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.0: Day of month and day of week should use OR logic by default (legacy mode)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.1: Nickname with whitespace should work",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.2: Year field should support ranges",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.3: W on a weekday should run on that day",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.3: W on Saturday should run on Friday",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.3: W should not cross month boundaries",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.3: W at end of month should not cross boundaries",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.3: Should support L in both day-of-month and day-of-week in same pattern",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: Default OR logic for day-of-month and day-of-week",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: ? character should work as wildcard alias",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: ? should work in day-of-month field",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: ? should work in day-of-week field",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: DST Gap (Spring Forward) - job should be skipped",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: DST Overlap (Fall Back) - job should run once at first occurrence",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "OCPS 1.4: Year search should not infinite loop",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "7-field pattern should be supported (OCPS 1.2)",
+    "label": "smoke"
+  },
+  {
+    "slug": "hexagon-croner-288",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Long pattern should throw",
+    "label": "rewritten"
   },
   {
     "slug": "hexagon-croner-329",
@@ -543,6 +943,14 @@
     "subject": "TestKandinsky6SRLatentUpscalerBankMemory::test_disk_offload_with_safetensors"
   },
   {
+    "slug": "huggingface-peft-1002",
+    "split": "tuning",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "StableDiffusionModelTester::test_merge_layers"
+  },
+  {
     "slug": "huggingface-transformers-49809",
     "split": "heldout",
     "ruleId": "R010",
@@ -576,12 +984,43 @@
     "label": "conditional"
   },
   {
+    "slug": "jnyjny-busylight-686",
+    "split": "tuning",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "missed"
+  },
+  {
+    "slug": "jquery-jquery-5908",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "jQuery.parseXML - error reporting"
+  },
+  {
     "slug": "l2beat-l2beat-13622",
     "split": "heldout",
     "ruleId": "R001",
     "severity": "medium",
     "verdict": "tp",
     "subject": "a tapped chart tooltip stays inside its chart on a phone"
+  },
+  {
+    "slug": "langchain-ai-langchain-31319",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "test_openai_streaming_callback"
+  },
+  {
+    "slug": "langchain-ai-langchain-31319",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "test_openai_async_streaming_callback"
   },
   {
     "slug": "langchain-ai-langchain-37612",
@@ -610,6 +1049,37 @@
     "label": "override"
   },
   {
+    "slug": "letta-ai-letta-code-5345",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "input-format stream-json › Agent tool with general-purpose subagent works"
+  },
+  {
+    "slug": "lineofflight-peddler-262",
+    "split": "tuning",
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "missed"
+  },
+  {
+    "slug": "micronaut-projects-micronaut-core-12499",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "FormBindingDeadlockTest#halfAsyncFail"
+  },
+  {
+    "slug": "micronaut-projects-micronaut-core-9308",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "JsonCodecAdditionalTypeTest#itIsPossibleToCanRegisterAdditionTypesForJsonCodec"
+  },
+  {
     "slug": "microsoft-agent-framework-8377",
     "split": "heldout",
     "ruleId": "V004",
@@ -626,6 +1096,38 @@
     "verdict": "expected-low",
     "subject": "tests-pass",
     "label": "unreadable"
+  },
+  {
+    "slug": "microsoft-mssql-jdbc-2014",
+    "split": "tuning",
+    "ruleId": "E001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ParameterMetaDataCacheTest#testParameterMetaDataCacheTrim"
+  },
+  {
+    "slug": "microsoft-mssql-jdbc-2832",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "CallableStatementTest#testFourPartSyntaxCallEscapeSyntax"
+  },
+  {
+    "slug": "microsoft-playwright-15397",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "should emit error from unhandled rejects"
+  },
+  {
+    "slug": "microsoft-playwright-30558",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "`${useIntermediateMergeReport ? 'merged' : 'created'}` › should print if globalTimeout is reached"
   },
   {
     "slug": "microsoft-playwright-38187",
@@ -774,12 +1276,60 @@
     "label": "unreadable"
   },
   {
+    "slug": "mlflow-mlflow-21066",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "test_tracer_parallel_workflow"
+  },
+  {
+    "slug": "mlflow-mlflow-21066",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "test_tracer_parallel_workflow_with_custom_spans"
+  },
+  {
     "slug": "mlflow-mlflow-8415",
     "split": "heldout",
     "ruleId": "A001",
     "severity": "medium",
     "verdict": "tp",
     "subject": "test_multipart_upload_abort"
+  },
+  {
+    "slug": "mongodb-node-mongodb-native-4449",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "ChangeStream resumability › iterator api › #next › `supports consecutive resumes on error code ${code} ${error}`"
+  },
+  {
+    "slug": "mongodb-node-mongodb-native-4449",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "ChangeStream resumability › iterator api › #hasNext › `supports consecutive resumes on error code ${code} ${error}`"
+  },
+  {
+    "slug": "mongodb-node-mongodb-native-4449",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "ChangeStream resumability › iterator api › #tryNext › `supports consecutive resumes on error code ${code} ${error}`"
+  },
+  {
+    "slug": "mongodb-node-mongodb-native-4449",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed",
+    "subject": "ChangeStream resumability › event emitter based iteration › `supports consecutive resumes on error code ${code} (${error})`"
   },
   {
     "slug": "mui-material-ui-26407",
@@ -866,6 +1416,151 @@
     "severity": "high",
     "verdict": "tp",
     "subject": "src/test/java/net/openhft/chronicle/queue/impl/single/TestTailAfterRoll.java"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "A009",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ChronicleReaderMainTest#testMainWithValidArguments"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ExcerptCommonTest#testSync"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ExcerptAppenderTest#testPretouch"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "ExcerptAppenderTest#testNormaliseEOFs"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "NoMessageHistoryTest#testResetWithParameters"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "NoMessageHistoryTest#testResetWithoutParameters"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "ChronicleQueueTest#testDumpCallsOutputStreamWriter"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "ChronicleHistoryReaderMainTest#testSetupChronicleHistoryReader",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "ChronicleHistoryReaderMainTest#testOptionsConfiguration",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "ChronicleQueueTest#testSingleBuilderCreatesNewInstance",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "ChronicleQueueTest#testCreateTailerCreatesNewExcerptTailer",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "ChronicleReaderMainTest#testOptionsConfiguration",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "NoMessageHistoryTest#testSingletonInstance",
+    "label": "smoke"
   },
   {
     "slug": "pallets-click-1858",
@@ -1382,140 +2077,165 @@
     "subject": "run: npm run test:firefox"
   },
   {
-    "slug": "pypa-pip-8366",
+    "slug": "pydantic-pydantic-core-817",
     "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_basic_uninstall"
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "subject": "run: pdm run pytest"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_basic_uninstall_namespace_package"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_basic_uninstall",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_uninstall_overlapping_package"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_basic_uninstall_namespace_package",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_uninstall_console_scripts"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_uninstall_overlapping_package",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_uninstall_easy_installed_console_scripts"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_uninstall_console_scripts",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_uninstall_wheel"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_uninstall_easy_installed_console_scripts",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_success"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_uninstall_wheel",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_build_cache"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_success",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_basic_pip_wheel_downloads_wheels"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_build_cache",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_builds_editable_deps"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_basic_pip_wheel_downloads_wheels",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_builds_editable"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_builds_editable_deps",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_fail"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_builds_editable",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_source_deps"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_fail",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_with_pep518_build_reqs"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_source_deps",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pip_wheel_with_pep518_build_reqs_no_isolation"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_with_pep518_build_reqs",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_pep517_wheels_are_not_confused_with_other_files"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pip_wheel_with_pep518_build_reqs_no_isolation",
+    "label": "replaced by call"
   },
   {
     "slug": "pypa-pip-8366",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_legacy_wheels_are_not_confused_with_other_files"
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_pep517_wheels_are_not_confused_with_other_files",
+    "label": "replaced by call"
+  },
+  {
+    "slug": "pypa-pip-8366",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_legacy_wheels_are_not_confused_with_other_files",
+    "label": "replaced by call"
   },
   {
     "slug": "pytest-dev-pytest-14292",
@@ -1576,6 +2296,14 @@
     "severity": "medium",
     "verdict": "tp",
     "subject": "AccessLogTestCase#testAccessLogContent"
+  },
+  {
+    "slug": "ray-project-ray-47092",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_fsspec_filesystem"
   },
   {
     "slug": "ray-project-ray-63004",
@@ -1817,6 +2545,14 @@
     "subject": "test_rss_reader_rsshub"
   },
   {
+    "slug": "scalar-scalar-6923",
+    "split": "heldout",
+    "ruleId": "R003",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "bundle › external urls › does not modify external URLs when already defined by $id property"
+  },
+  {
     "slug": "scikit-learn-scikit-learn-17850",
     "split": "tuning",
     "ruleId": "R001",
@@ -1975,6 +2711,29 @@
     "subject": "test_catch22_wrapper_on_basic_motions"
   },
   {
+    "slug": "sktime-sktime-5511",
+    "split": "tuning",
+    "ruleId": "A009",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestAllNetworks::test_dummy"
+  },
+  {
+    "slug": "sktime-sktime-8824",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_teaser_on_unit_test_data"
+  },
+  {
+    "slug": "superelastix-elastix-30",
+    "split": "tuning",
+    "ruleId": "W003",
+    "severity": "high",
+    "verdict": "missed"
+  },
+  {
     "slug": "tanstack-query-11250",
     "split": "tuning",
     "ruleId": "R002",
@@ -2076,6 +2835,13 @@
     "severity": "medium",
     "verdict": "tp",
     "subject": "$subscription() - server randomly stop and restart (this test might be flaky, try re-running)"
+  },
+  {
+    "slug": "vercel-next.js-52007",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "missed"
   },
   {
     "slug": "vercel-next.js-74561",

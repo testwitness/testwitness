@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "should emit error from unhandled rejects",
+    "verdict": "tp",
+    "reason": "expect(error.message).toBe('sad :(') loosened to toContain('sad :(')"
+  }
+]

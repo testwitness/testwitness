@@ -1,0 +1,24 @@
+diff --git a/.changeset/curvy-squids-decide.md b/.changeset/curvy-squids-decide.md
+new file mode 100644
+index 0000000..45f379d
+--- /dev/null
++++ b/.changeset/curvy-squids-decide.md
+@@ -0,0 +1,5 @@
++---
++'@scalar/json-magic': patch
++---
++
++fix: comment out flaky test for now
+diff --git a/packages/json-magic/src/bundle/bundle.test.ts b/packages/json-magic/src/bundle/bundle.test.ts
+index 6d1f452..6191672 100644
+--- a/packages/json-magic/src/bundle/bundle.test.ts
++++ b/packages/json-magic/src/bundle/bundle.test.ts
+@@ -1329,7 +1329,7 @@ describe('bundle', () => {
+       })
+     })
+ 
+-    it('does not modify external URLs when already defined by $id property', async () => {
++    it.todo('does not modify external URLs when already defined by $id property', async () => {
+       const url = `http://localhost:${port}`
+ 
+       const input = {

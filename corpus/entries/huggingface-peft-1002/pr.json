@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/peft/pull/1002",
+  "repo": "huggingface/peft",
+  "number": 1002,
+  "title": "TST: Comment out flaky LoHA test",
+  "merged_at": "2023-10-09T08:33:55Z",
+  "stars": 21872,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "99f792e8a3be001c55e71d148a7a8d25b931181f",
+  "head_sha": "cb993c1c5fe2a70e235d358fb3bf9199e2abe8c7",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 0
+}

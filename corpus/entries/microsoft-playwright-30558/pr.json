@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/30558",
+  "repo": "microsoft/playwright",
+  "number": 30558,
+  "title": "test: relax \"should print if globalTimeout is reached\" expectation",
+  "merged_at": "2024-04-26T01:40:58Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "A001",
+  "split": "heldout",
+  "base_sha": "6d20da568e8123dc657abeffce8714af861b89f1",
+  "head_sha": "59aee58fba5d5a08fccea9e45b961593dd08c5c8",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

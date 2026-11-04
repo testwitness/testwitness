@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A009",
+    "severity": "medium",
+    "subject": "TestAllNetworks::test_dummy",
+    "verdict": "tp",
+    "reason": "new placeholder test whose only assertion is assert 42 == 42"
+  }
+]

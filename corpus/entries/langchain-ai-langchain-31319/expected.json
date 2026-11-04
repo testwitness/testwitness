@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "high",
+    "subject": "test_openai_streaming_callback",
+    "verdict": "tp",
+    "reason": "assert llm_streams == 12 loosened to assert llm_streams < 15"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "high",
+    "subject": "test_openai_async_streaming_callback",
+    "verdict": "tp",
+    "reason": "assert llm_streams == 12 loosened to assert llm_streams < 15"
+  }
+]

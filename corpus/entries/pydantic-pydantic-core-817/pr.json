@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pydantic/pydantic-core/pull/817",
+  "repo": "pydantic/pydantic-core",
+  "number": 817,
+  "title": "use github continue-on-error to avoid red CI with test-pydantic-integration",
+  "merged_at": "2023-07-24T14:45:27Z",
+  "stars": 1766,
+  "license": "MIT",
+  "language": "python",
+  "category": "W002",
+  "split": "tuning",
+  "base_sha": "f89c8b28e896d4b41bbcdd2ad6955b793b07bfd6",
+  "head_sha": "f4a29c2f46c9f47b0ef88ba0d74b616dfb0e0510",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 2
+}

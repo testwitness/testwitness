@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/mssql-jdbc/pull/2832",
+  "repo": "microsoft/mssql-jdbc",
+  "number": 2832,
+  "title": "Comment out test testFourPartSyntaxCallEscapeSyntax() due to linked server issue with sql server 2025",
+  "merged_at": "2025-11-06T13:04:00Z",
+  "stars": 1138,
+  "license": "MIT",
+  "language": "java",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "ed649c44351b50f63ad9e4a702dc60ee1096ce95",
+  "head_sha": "5626769fb407192c0c375cb53d284b98b62e3dde",
+  "files_changed": 1,
+  "additions": 84,
+  "deletions": 83
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-cdk/pull/29034",
+  "repo": "aws/aws-cdk",
+  "number": 29034,
+  "title": "chore: comment out broken tests",
+  "merged_at": "2024-02-08T18:15:56Z",
+  "stars": 12961,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "1027d8773e49120dc31163d219376fadf8006243",
+  "head_sha": "d2419e7ea7dd0d731b568843d4282ac6aee43ce9",
+  "files_changed": 1,
+  "additions": 70,
+  "deletions": 70
+}

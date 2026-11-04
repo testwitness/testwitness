@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/pulsar/pull/25716",
+  "repo": "apache/pulsar",
+  "number": 25716,
+  "title": "[fix][test] Relax V5ConsumerPriorityLevelTest.testLowerPriorityConsumerReceivesOverflow",
+  "merged_at": "2026-05-08T17:15:45Z",
+  "stars": 15351,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "cd0ab9d6ad33f9cde9bcf56177a3f6f9deb9f510",
+  "head_sha": "037a62d01e3aeeade3f275cd7c2bb101001acbaa",
+  "files_changed": 1,
+  "additions": 9,
+  "deletions": 4
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "E001",
+    "severity": "high",
+    "subject": "ParameterMetaDataCacheTest#testParameterMetaDataCacheTrim",
+    "verdict": "tp",
+    "reason": "reflection setup that forces the cache sizes to zero is wrapped in try with an empty catch (Exception)"
+  }
+]

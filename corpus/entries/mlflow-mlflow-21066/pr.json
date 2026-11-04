@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/21066",
+  "repo": "mlflow/mlflow",
+  "number": 21066,
+  "title": "Make asserts for llama-index tracing tests less strict",
+  "merged_at": "2026-02-24T09:02:32Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "A002",
+  "split": "heldout",
+  "base_sha": "59c449afda886221189df2fed81e73220ab48be3",
+  "head_sha": "185303259da929d654eb8080c3d5e37cd64ecab2",
+  "files_changed": 1,
+  "additions": 14,
+  "deletions": 4
+}

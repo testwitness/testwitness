@@ -1,0 +1,11 @@
+diff --git a/tests/page/page-event-pageerror.spec.ts b/tests/page/page-event-pageerror.spec.ts
+index 07ce00e4..517e2eb1 100644
+--- a/tests/page/page-event-pageerror.spec.ts
++++ b/tests/page/page-event-pageerror.spec.ts
+@@ -144,5 +144,5 @@ it('should emit error from unhandled rejects', async ({ page, browserName }) =>
+         </script>
+     `),
+   ]);
+-  expect(error.message).toBe('sad :(');
++  expect(error.message).toContain('sad :(');
+ });

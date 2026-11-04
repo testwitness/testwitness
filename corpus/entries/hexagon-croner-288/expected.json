@@ -1,0 +1,34 @@
+[
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "OCPS 1.0: Wildcard (*) should match all values",
+    "verdict": "tp",
+    "reason": "new test asserts only nextRun() !== null",
+    "label": "smoke"
+  },
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "OCPS 1.0: Should combine comma and range",
+    "verdict": "tp",
+    "reason": "new test asserts only nextRun() !== null",
+    "label": "smoke"
+  },
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "OCPS 1.0: Should combine range and step",
+    "verdict": "tp",
+    "reason": "new test asserts only nextRun() !== null",
+    "label": "smoke"
+  },
+  {
+    "ruleId": "O002",
+    "severity": "low",
+    "subject": "OCPS 1.1: Nicknames should not be combined with other expressions",
+    "verdict": "tp",
+    "reason": "new test asserts only that the Cron instance is not null and never exercises the combination its title names",
+    "label": "smoke"
+  }
+]

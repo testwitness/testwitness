@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/micronaut-projects/micronaut-core/pull/9308",
+  "repo": "micronaut-projects/micronaut-core",
+  "number": 9308,
+  "title": "test: make content type assertion less strict",
+  "merged_at": "2023-06-08T07:50:01Z",
+  "stars": 6435,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A002",
+  "split": "tuning",
+  "base_sha": "18e887360a08bae9ddbcb1802f06593e17b42323",
+  "head_sha": "bcad9a03ea6a5dcc95bf6b055f10698282757af6",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

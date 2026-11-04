@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "`${useIntermediateMergeReport ? 'merged' : 'created'}` \u203a should print if globalTimeout is reached",
+    "verdict": "tp",
+    "reason": "expect(result.didNotRun).toBe(1) commented out"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "CallableStatementTest#testFourPartSyntaxCallEscapeSyntax",
+    "verdict": "tp",
+    "reason": "test method commented out in full, annotations included, production kept"
+  }
+]

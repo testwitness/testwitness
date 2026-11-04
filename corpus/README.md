@@ -73,7 +73,8 @@ Slug is `<owner>-<repo>-<number>` in lower case.
 - `skip`: a conditional skip added for a platform or optional dependency with a reason.
 - `deleted`: a test deleted because the feature it covered was removed.
 - `tp`: the first five clearly weakened tests (true positives), kept separate from the controls.
-- `R001`, `R002`, `R003`, `R004`, `R005`, `R010`, `A001`, `A002`, `O002`, `W003`, `V004`: true positive entries collected per rule; the category is the rule id the entry was collected for and every finding in expected.json has verdict `tp`. Severities follow the rule defaults (R002 high, R010 low) and the catalogue notes (R004 medium when strict with an issue reference).
+- `R001`, `R002`, `R003`, `R004`, `R005`, `R010`, `A001`, `A002`, `A009`, `E001`, `O002`, `W002`, `W003`, `V004`: true positive entries collected per rule; the category is the rule id the entry was collected for and every finding in expected.json has verdict `tp`. Severities follow the rule defaults (R002 high, R010 low) and the catalogue notes (R004 medium when strict with an issue reference); where the engine grades a finding by a documented rule (A002 high when the strength drops two levels, O002 medium when the PR title matches its regression wording, A009 medium when the tautology is the only assertion of a new test) the label uses that severity.
+- Entries whose finding the engine does not emit yet (an unrecognised framework, wrapper or CI file) keep verdict `tp` and show as missed in the precision table. Where the weakening sits in a file files.py does not copy (a shell script, appveyor.yml, a Gradle script applied from the build), its base and head versions were copied unedited from the git mirror and NOTES.md says so.
 
 A `pr-body.md` file (PR body with mentions and sign off lines stripped) is stored only for V004 entries. The corpus runner passes it to the engine as the PR body when present; every other entry is checked against the title only.
 
@@ -86,7 +87,9 @@ label `conditional` for a platform or optional dependency condition), R004
 xfail or expectedFailure added (high; medium when strict with an issue
 reference), A001 assertion removed, A002 assertion loosened, A009 tautology,
 O001 new test without assertion, O002 smoke oracle only, O006 new test file with
-no tests.
+no tests, E001 catch all added in a test, W002 continue-on-error on a test step
+or job, W003 failure suppressed in the run command, V004 claim in the PR text
+not supported.
 
 Each finding is `{ruleId, severity, subject?, label?, verdict, reason?}`.
 `verdict` says what the finding points at: `tp` when the test really was

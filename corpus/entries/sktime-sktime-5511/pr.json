@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/sktime/sktime/pull/5511",
+  "repo": "sktime/sktime",
+  "number": 5511,
+  "title": "[ENH] add placeholder test suite for neural networks",
+  "merged_at": "2023-11-02T21:36:57Z",
+  "stars": 10090,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "A009",
+  "split": "tuning",
+  "base_sha": "b6fc794863faa573b7ed5d740a32a697145d485f",
+  "head_sha": "939b6bc76423b7ff9f2a9e13255def919524b9bc",
+  "files_changed": 1,
+  "additions": 33,
+  "deletions": 0
+}

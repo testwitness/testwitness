@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "test_tracer_parallel_workflow",
+    "verdict": "tp",
+    "reason": "assert root_span.inputs == {...} loosened to a per key superset check with all(...)"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "test_tracer_parallel_workflow_with_custom_spans",
+    "verdict": "tp",
+    "reason": "assert workflow_span.inputs == {...} loosened to a per key superset check with all(...)"
+  }
+]

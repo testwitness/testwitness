@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "job level continue-on-error bound to matrix.python-version == '3.14' on the pytest job"
+  }
+]

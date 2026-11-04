@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/OpenHFT/Chronicle-Queue/pull/1630",
+  "repo": "OpenHFT/Chronicle-Queue",
+  "number": 1630,
+  "title": "ChronicleHistoryReader CLI UX fix + new tests for reader/queue defaults + stable temp file creation",
+  "merged_at": "2025-10-17T10:57:44Z",
+  "stars": 3827,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A009",
+  "split": "tuning",
+  "base_sha": "f6dda45b0441b952e2d2894eff8857b9a76b1a05",
+  "head_sha": "8047994ce9b7a9b6b2b5385e54595f3b9b79d3bf",
+  "files_changed": 9,
+  "additions": 905,
+  "deletions": 3
+}

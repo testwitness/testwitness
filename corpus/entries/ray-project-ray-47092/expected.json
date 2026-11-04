@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "test_fsspec_filesystem",
+    "verdict": "tp",
+    "reason": "file name assertion and ordered DataFrame equality removed; replaced by set equality of rows"
+  }
+]

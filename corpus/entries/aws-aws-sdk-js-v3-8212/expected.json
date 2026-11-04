@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "middleware-sdk-route53 \u203a Route53 \u203a should normalize param names Id",
+    "verdict": "tp",
+    "reason": "exact path string in requireRequestsFrom(...).toMatch loosened to a regex that accepts any date"
+  }
+]

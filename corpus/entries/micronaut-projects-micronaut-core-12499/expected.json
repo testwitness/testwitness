@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "FormBindingDeadlockTest#halfAsyncFail",
+    "verdict": "tp",
+    "reason": "assertEquals on the whole JSON error body loosened to assertTrue(body.contains(message))"
+  }
+]

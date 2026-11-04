@@ -1,0 +1,30 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "ChangeStream resumability \u203a iterator api \u203a #next \u203a `supports consecutive resumes on error code ${code} ${error}`",
+    "verdict": "tp",
+    "reason": "expect(aggregateEvents).to.have.lengthOf(6) loosened to expect(aggregateEvents.length).to.be.greaterThan(1)"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "ChangeStream resumability \u203a iterator api \u203a #hasNext \u203a `supports consecutive resumes on error code ${code} ${error}`",
+    "verdict": "tp",
+    "reason": "lengthOf(6) loosened to length greaterThan(1)"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "ChangeStream resumability \u203a iterator api \u203a #tryNext \u203a `supports consecutive resumes on error code ${code} ${error}`",
+    "verdict": "tp",
+    "reason": "lengthOf(6) loosened to length greaterThan(1)"
+  },
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "ChangeStream resumability \u203a event emitter based iteration \u203a `supports consecutive resumes on error code ${code} (${error})`",
+    "verdict": "tp",
+    "reason": "lengthOf(6) loosened to length greaterThan(1)"
+  }
+]

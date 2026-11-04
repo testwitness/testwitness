@@ -1,0 +1,17 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index fe8130a..bde2609 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -38,10 +38,12 @@ jobs:
+ 
+   test:
+     strategy:
++      fail-fast: false
+       matrix:
+         ruby: ["3.3", "3.4", "4.0", "head"]
+         http: ["~> 5.3", "~> 6.0"]
+     runs-on: ubuntu-latest
++    continue-on-error: ${{ matrix.ruby == 'head' }}
+     env:
+       HTTP_VERSION: ${{ matrix.http }}
+     steps:

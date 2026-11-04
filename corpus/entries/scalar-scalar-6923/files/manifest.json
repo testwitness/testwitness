@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".changeset/curvy-squids-decide.md",
+    "status": "added"
+  },
+  {
+    "path": "packages/json-magic/src/bundle/bundle.test.ts",
+    "status": "modified"
+  }
+]
