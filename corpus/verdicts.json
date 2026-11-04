@@ -43,18 +43,18 @@
   {
     "slug": "alphagov-govuk-frontend-6590",
     "split": "tuning",
-    "ruleId": "O001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
-  },
-  {
-    "slug": "alphagov-govuk-frontend-6590",
-    "split": "tuning",
     "ruleId": "R001",
     "severity": "medium",
     "verdict": "fp",
     "subject": "Components › Sass render › renders CSS for all components"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-6590",
+    "split": "tuning",
+    "ruleId": "O001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
   },
   {
     "slug": "apache-beam-11795",
@@ -1429,7 +1429,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "ExcerptCommonTest#testSync"
   },
@@ -1437,7 +1437,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "ExcerptAppenderTest#testPretouch"
   },
@@ -1445,7 +1445,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "ExcerptAppenderTest#testNormaliseEOFs"
   },
@@ -1453,7 +1453,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "NoMessageHistoryTest#testResetWithParameters"
   },
@@ -1461,7 +1461,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "NoMessageHistoryTest#testResetWithoutParameters"
   },
@@ -2364,24 +2364,24 @@
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "FlowableFlatMapIsolatedTest#innerCompleteCancelRace"
   },
   {
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "FlowableFlatMapMaybeIsolatedTest#requestCancelRace"
   },
   {
     "slug": "reactivex-rxjava-8253",
     "split": "heldout",
     "ruleId": "O001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "FlowableFlatMapSingleIsolatedTest#requestCancelRace"
   },
   {
@@ -2593,8 +2593,8 @@
     "slug": "scikit-learn-scikit-learn-17850",
     "split": "tuning",
     "ruleId": "O001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_verbose"
   },
   {

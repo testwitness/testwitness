@@ -66,7 +66,7 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 | A001 | Assertion removed | medium | 8 | 0 | 1.00 |
 | A002 | Assertion loosened | medium | 3 | 0 | 1.00 |
 | A009 | Tautological assertion | high | 2 | 1 | 0.67 |
-| O001 | New test without an assertion | medium | 5 | 5 | 0.50 |
+| O001 | New test without an assertion | low | 5 | 0 | 1.00 |
 | O002 | New test with a smoke oracle only | low | 9 | 5 | 0.64 |
 | E001 | Catch all added in a test | high | 1 | 0 | 1.00 |
 | W002 | continue-on-error added to a test step or job | high | 7 | 0 | 1.00 |

@@ -1,7 +1,7 @@
 [
-  {
-    "ruleId": "O001",
-    "severity": "medium",
-    "subject": "TestLedger::test_handles_empty"
-  }
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "TestLedger::test_handles_empty"
+ }
 ]

@@ -1,1 +1,7 @@
-[{"ruleId":"O001","severity":"medium","subject":"ledger › posts two entries"}]
+[
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "ledger \u203a posts two entries"
+ }
+]

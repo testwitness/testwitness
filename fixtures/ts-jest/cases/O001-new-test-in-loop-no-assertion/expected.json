@@ -1,1 +1,7 @@
-[{"ruleId":"O001","severity":"medium","subject":"cart › `prices quantity ${qty}`"}]
+[
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "cart \u203a `prices quantity ${qty}`"
+ }
+]

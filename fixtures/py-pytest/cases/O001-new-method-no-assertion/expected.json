@@ -1,7 +1,7 @@
 [
-  {
-    "ruleId": "O001",
-    "severity": "medium",
-    "subject": "TestCart::test_add_accepts_fractional_price"
-  }
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "TestCart::test_add_accepts_fractional_price"
+ }
 ]

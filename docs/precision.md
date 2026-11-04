@@ -14,9 +14,9 @@ Measured 2026-11-04 on 134 public pull requests (corpus/). Precision counts medi
 | A009 | tuning | 2 | 0 | 1 | 1 | 0.67 | 0 |
 | E001 | all | 1 | 0 | 0 | 0 | 1.00 | 0 |
 | E001 | tuning | 1 | 0 | 0 | 0 | 1.00 | 0 |
-| O001 | all | 5 | 0 | 5 | 0 | 0.50 | 0 |
-| O001 | heldout | 0 | 0 | 3 | 0 | 0.00 | 0 |
-| O001 | tuning | 5 | 0 | 2 | 0 | 0.71 | 0 |
+| O001 | all | 5 | 5 | 0 | 0 | 1.00 | 0 |
+| O001 | heldout | 0 | 3 | 0 | 0 | n/a | 0 |
+| O001 | tuning | 5 | 2 | 0 | 0 | 1.00 | 0 |
 | O002 | all | 9 | 29 | 5 | 0 | 0.64 | 0 |
 | O002 | heldout | 0 | 1 | 0 | 0 | n/a | 0 |
 | O002 | tuning | 9 | 28 | 5 | 0 | 0.64 | 0 |

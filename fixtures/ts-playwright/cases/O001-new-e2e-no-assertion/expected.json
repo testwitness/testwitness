@@ -1,1 +1,7 @@
-[{"ruleId":"O001","severity":"medium","subject":"checkout › applies a promo code"}]
+[
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "checkout \u203a applies a promo code"
+ }
+]

@@ -1,7 +1,7 @@
 [
-  {
-    "ruleId": "O001",
-    "severity": "medium",
-    "subject": "LedgerTest::test_post_accepts_memo"
-  }
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "LedgerTest::test_post_accepts_memo"
+ }
 ]

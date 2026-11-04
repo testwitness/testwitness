@@ -1,7 +1,7 @@
 [
-  {
-    "ruleId": "O001",
-    "severity": "medium",
-    "subject": "CartTest#checkoutRuns"
-  }
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "CartTest#checkoutRuns"
+ }
 ]

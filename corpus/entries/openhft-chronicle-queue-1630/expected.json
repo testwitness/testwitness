@@ -15,35 +15,35 @@
  },
  {
   "ruleId": "O001",
-  "severity": "medium",
+  "severity": "low",
   "subject": "ExcerptCommonTest#testSync",
   "verdict": "tp",
   "reason": "new generated test calls the subject and asserts nothing at the test level"
  },
  {
   "ruleId": "O001",
-  "severity": "medium",
+  "severity": "low",
   "subject": "ExcerptAppenderTest#testPretouch",
   "verdict": "tp",
   "reason": "new generated test calls the subject and asserts nothing at the test level"
  },
  {
   "ruleId": "O001",
-  "severity": "medium",
+  "severity": "low",
   "subject": "ExcerptAppenderTest#testNormaliseEOFs",
   "verdict": "tp",
   "reason": "new generated test calls the subject and asserts nothing at the test level"
  },
  {
   "ruleId": "O001",
-  "severity": "medium",
+  "severity": "low",
   "subject": "NoMessageHistoryTest#testResetWithParameters",
   "verdict": "tp",
   "reason": "new generated test calls the subject and asserts nothing at the test level"
  },
  {
   "ruleId": "O001",
-  "severity": "medium",
+  "severity": "low",
   "subject": "NoMessageHistoryTest#testResetWithoutParameters",
   "verdict": "tp",
   "reason": "new generated test calls the subject and asserts nothing at the test level"

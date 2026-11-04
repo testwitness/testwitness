@@ -1,1 +1,7 @@
-[{"ruleId":"O001","severity":"medium","subject":"cart › adds a line"}]
+[
+ {
+  "ruleId": "O001",
+  "severity": "low",
+  "subject": "cart \u203a adds a line"
+ }
+]
