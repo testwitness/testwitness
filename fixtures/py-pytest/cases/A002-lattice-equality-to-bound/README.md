@@ -1,0 +1,1 @@
+Positive. A count equality becomes a lower bound on the same subject text, a pair the v0.1 pytest strength scale already reads (literal equality 5 to comparison 3). Within one library family the v0.1 grading holds: two steps down is high.

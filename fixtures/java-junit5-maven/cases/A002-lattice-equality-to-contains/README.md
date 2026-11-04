@@ -1,0 +1,1 @@
+Positive. assertEquals on receipt.summary() becomes assertTrue(receipt.summary().contains("12.50")). The boolean wrapper is unwrapped to its receiver, so the pair is equality to containment on receipt.summary(). The pairing needed the normalised subject, so the lattice grades it: medium.

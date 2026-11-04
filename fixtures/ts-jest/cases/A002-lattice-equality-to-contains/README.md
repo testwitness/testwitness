@@ -1,0 +1,1 @@
+Positive. toBe on receipt.summary.trim() becomes toContain on receipt.summary. trim() is an identity accessor, so the subjects pair: equality to containment, medium. The shape comes from letta-code#5345.

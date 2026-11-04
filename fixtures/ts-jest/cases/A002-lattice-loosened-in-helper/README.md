@@ -1,0 +1,1 @@
+Positive. The test is unchanged; the assertion helper it calls loosens toBe to toBeGreaterThan(0). A002 compares the assertions of each helper defined in the test file and reports once on the helper, labelled in helper and capped at medium. The shape comes from vercel/next.js#52007.

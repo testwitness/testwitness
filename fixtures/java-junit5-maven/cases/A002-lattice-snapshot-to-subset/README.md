@@ -1,0 +1,1 @@
+Positive. A snapshot of the whole receipt becomes an AssertJ check of one field. The libraries differ, so the v0.1 strength scale could not compare them; on the shared lattice a snapshot is exact and a field check is containment: medium.

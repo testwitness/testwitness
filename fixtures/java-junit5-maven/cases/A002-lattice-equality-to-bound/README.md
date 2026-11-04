@@ -1,0 +1,1 @@
+Positive. A size equality becomes a lower bound written as assertTrue(size > 1). The comparison is read inside the wrapper and size() is an identity accessor, so both sides pair on receipt.lines(): equality to bound, medium.

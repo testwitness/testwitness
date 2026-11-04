@@ -1,0 +1,1 @@
+Positive. toHaveLength(3) becomes a lower bound on .length. .length is an identity accessor, so both sides pair on receipt.lines: size equality to bound, medium. Mongo node driver #4449 has the Chai spelling of the same move.

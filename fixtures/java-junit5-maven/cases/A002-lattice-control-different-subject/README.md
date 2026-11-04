@@ -1,0 +1,1 @@
+Negative control. An equality on receipt.total() is replaced by a not null check on customer(), an unrelated subject. The leftovers match one for one but share no identifier word, so they are not paired and A002 is silent. The assertion count did not drop, so A001 is quiet too.

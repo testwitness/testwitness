@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "high",
+    "subject": "receipt \u203a prints totals"
+  }
+]

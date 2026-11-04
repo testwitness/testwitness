@@ -1,10 +1,17 @@
 [
-  {
-    "ruleId": "R004",
-    "severity": "medium",
-    "verdict": "tp",
-    "reason": "engine shape; see NOTES.md",
-    "subject": "TestXAIStandard::test_tool_calling",
-    "label": "one case"
-  }
+ {
+  "ruleId": "R004",
+  "severity": "medium",
+  "verdict": "tp",
+  "reason": "engine shape; see NOTES.md",
+  "subject": "TestXAIStandard::test_tool_calling",
+  "label": "one case"
+ },
+ {
+  "ruleId": "A002",
+  "severity": "medium",
+  "subject": "test_web_search",
+  "verdict": "tp",
+  "reason": "set equality on content types became per type presence checks"
+ }
 ]

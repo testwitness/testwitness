@@ -1,0 +1,1 @@
+Positive. The exact invoice number becomes String.matches on a pattern. matches is a full match, so the pattern pins the shape of the whole value but not the value: equality to ordered match, one step, medium.

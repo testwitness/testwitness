@@ -9,6 +9,7 @@
 ;;   tests        it test specify xit xtest xspecify fit ftest fspecify
 ;;   containers   describe context suite xdescribe xcontext xsuite fdescribe fcontext fsuite
 ;;   playwright   test.describe (root test, handled by the chain analysis)
+;;   qunit        QUnit.test, QUnit.module and QUnit.test<Name> wrappers
 
 ;; it('title', fn)
 ((call_expression
@@ -20,6 +21,12 @@
    function: (member_expression
      object: (identifier) @root)) @call
  (#match? @root "^(it|test|specify|describe|context|suite|xit|xtest|xspecify|xdescribe|xcontext|xsuite|fit|ftest|fspecify|fdescribe|fcontext|fsuite)$"))
+
+;; QUnit.test('title', function (assert) {}), QUnit.module('name', fn), QUnit.testUnlessIE('title', fn)
+((call_expression
+   function: (member_expression
+     object: (identifier) @root)) @call
+ (#eq? @root "QUnit"))
 
 ;; test.describe.only('title', fn), test.concurrent.skip('title', fn)
 ((call_expression

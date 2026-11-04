@@ -1,0 +1,1 @@
+Positive. A Hamcrest matcher passed to a project method (hasValueMatching) is not an assertion the front end can name, so it is recorded as a nested check on the receiver. equalTo(4L) to greaterThan(1L) is equality to bound; nested checks are capped at medium and labelled nested. The shape comes from apache/druid#19155.

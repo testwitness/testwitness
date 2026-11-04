@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "_check_balance",
+    "label": "in helper"
+  }
+]

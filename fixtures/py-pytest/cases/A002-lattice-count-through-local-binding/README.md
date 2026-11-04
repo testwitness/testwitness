@@ -1,0 +1,1 @@
+Positive. The head checks membership in a local list built from receipt.lines. A name bound once to a projection of another reference is followed to that reference, so the pair is a count equality to containment on receipt.lines: medium. The shape comes from googleapis/python-aiplatform#1040.

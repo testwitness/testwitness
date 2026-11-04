@@ -1,0 +1,1 @@
+Positive. Equality of the whole receipt with a stored snapshot becomes a per key subset check written with all(...). The generator is read as a subset of receipt.as_dict(): equality to containment, medium. The shape comes from mlflow#21066.

@@ -147,6 +147,13 @@ function isStringLike(node: Node | undefined): boolean {
   return node !== undefined && (node.type === 'string' || node.type === 'template_string');
 }
 
+/** `describe(Route53.name, fn)`: the title is the class or function name, which is the identifier itself. */
+function isClassNameTitle(node: Node | undefined): node is Node {
+  if (!node || node.type !== 'member_expression') return false;
+  const obj = node.childForFieldName('object');
+  return node.childForFieldName('property')?.text === 'name' && obj?.type === 'identifier';
+}
+
 /** Title text: unquoted for plain strings, raw source for template literals and anything dynamic. */
 function titleOf(node: Node): string {
   if (node.type === 'string') {
@@ -228,10 +235,45 @@ function markerFor(name: string, kind: MarkerKind, at: Node, extra: Partial<Skip
   return m;
 }
 
+/**
+ * QUnit declarations: QUnit.test, QUnit.only, QUnit.skip, QUnit.todo, a project wrapper QUnit.test<Name>, and
+ * QUnit.module with a callback (nested modules). A module without a callback only names the tests that follow it,
+ * which stay top level here.
+ */
+function analyseQUnit(call: Node, chain: Chain): Declaration | undefined {
+  const named = chain.segments.filter((s) => s.name !== '()');
+  const first = named[0];
+  if (!first || named.length > 2) return undefined;
+  const last = chain.segments[chain.segments.length - 1];
+  const args = argList(last?.args);
+  const titleNode = args[0];
+  if (!titleNode || !isStringLike(titleNode)) return undefined;
+  const body = args.slice(1).find((a) => isFunctionNode(a));
+  const markers: SkipMarker[] = [];
+  const names = named.map((s) => s.name);
+  const prefix = ['QUnit', ...names].join('.');
+  let base: 'test' | 'container';
+  if (names[0] === 'module') {
+    if (!body) return undefined;
+    base = 'container';
+  } else if (/^test/.test(names[0]!) || names[0] === 'only' || names[0] === 'skip' || names[0] === 'todo') {
+    base = 'test';
+  } else return undefined;
+  for (const n of names) {
+    if (n === 'skip') markers.push(markerFor(prefix, 'skip', call, { constant: true }));
+    else if (n === 'only') markers.push(markerFor(prefix, 'focus', call, { constant: true }));
+    else if (n === 'todo') markers.push(markerFor(prefix, 'todo', call, { constant: true }));
+  }
+  const decl: Declaration = { node: call, base, title: titleOf(titleNode), markers };
+  if (body) decl.body = body;
+  return decl;
+}
+
 /** Decide whether a matched call is a test or container declaration. */
 function analyseDeclaration(call: Node): Declaration | undefined {
   const chain = unwindChain(call);
   if (!chain || !chain.root || chain.root.type !== 'identifier') return undefined;
+  if (chain.rootName === 'QUnit') return analyseQUnit(call, chain);
   const alias = ROOT_ALIASES[chain.rootName];
   if (!alias) return undefined;
 
@@ -283,9 +325,9 @@ function analyseDeclaration(call: Node): Declaration | undefined {
   const declArgs = last ? last.args : chain.rootArgs;
   const args = argList(declArgs);
   const titleNode = args[0];
-  if (!titleNode || !isStringLike(titleNode)) return undefined;
+  if (!titleNode || !(isStringLike(titleNode) || isClassNameTitle(titleNode))) return undefined;
 
-  const decl: Declaration = { node: call, base, title: titleOf(titleNode), markers };
+  const decl: Declaration = { node: call, base, title: isClassNameTitle(titleNode) ? titleNode.childForFieldName('object')!.text : titleOf(titleNode), markers };
   if (parameterCount !== undefined) decl.parameterCount = parameterCount;
   if (parameterised) decl.parameterised = true;
 
@@ -603,35 +645,34 @@ export async function buildInventory(path: string, source: string, profile: Fram
 
   // 2. Assertion helpers: named functions outside tests whose body asserts.
   const assertionHelpers = new Set<string>();
+  const helperAssertions: Record<string, Assertion[]> = {};
   const extra = new Set(profile.extraAssertions);
   const candidates = assertionCandidates(queries.assertions, root);
   for (const { stmt, expr } of candidates) {
     const scope = scopeOf(stmt);
     if (scope.kind === 'test') continue;
-    if (!analyseAssertion(expr, extra)) continue;
+    const analysis = analyseAssertion(expr, extra);
+    if (!analysis) continue;
     const name = enclosingFunctionName(stmt, containers);
-    if (name && !looksLikeTestName(name)) assertionHelpers.add(name);
+    if (name && !looksLikeTestName(name)) {
+      assertionHelpers.add(name);
+      (helperAssertions[name] ??= []).push(toAssertion(stmt, expr, analysis));
+    }
   }
   const helperNames = new Set([...assertionHelpers, ...extra]);
 
   // 3. Assertions attributed to tests.
   const testAssertions = new Map<NodeId, Assertion[]>();
+  const testEmbedded = new Map<NodeId, Assertion[]>();
   for (const { stmt, expr } of candidates) {
     const scope = scopeOf(stmt);
     if (scope.kind !== 'test' || !scope.decl) continue;
     const analysis = analyseAssertion(expr, helperNames);
-    if (!analysis) continue;
-    const a: Assertion = {
-      callee: analysis.callee,
-      text: squash(stmt.type === 'arrow_function' ? expr.text : stmt.text),
-      line: line(expr),
-      kind: analysis.kind,
-    };
-    if (analysis.subject !== undefined) a.subject = analysis.subject;
-    if (analysis.expected !== undefined) a.expected = analysis.expected;
-    if (analysis.family !== undefined) a.family = analysis.family;
-    if (analysis.strength !== undefined) a.strength = analysis.strength;
-    push(testAssertions, scope.decl.node.id, a);
+    if (!analysis) {
+      for (const e of expectationObject(expr)) push(testEmbedded, scope.decl.node.id, e);
+      continue;
+    }
+    push(testAssertions, scope.decl.node.id, toAssertion(stmt, expr, analysis));
   }
 
   // 4. Inline markers.
@@ -697,6 +738,10 @@ export async function buildInventory(path: string, source: string, profile: Fram
     if (parameterised) tc.parameterised = true;
     const catchAlls = collectCatchAlls(decl.body);
     if (catchAlls.length > 0) tc.catchAlls = catchAlls;
+    const embedded = testEmbedded.get(decl.node.id);
+    if (embedded?.length) tc.embedded = embedded.sort((a, b) => a.line - b.line);
+    const locals = collectLocals(decl.body);
+    if (Object.keys(locals).length > 0) tc.locals = locals;
     cases.push(tc);
   }
   cases.sort((a, b) => a.startLine - b.startLine || a.qualifiedName.localeCompare(b.qualifiedName));
@@ -707,12 +752,107 @@ export async function buildInventory(path: string, source: string, profile: Fram
     framework,
     tests: cases,
     assertionHelpers,
+    helperAssertions,
     imports,
     fileMarkers,
     parseErrors: countParseErrors(root),
   };
   tree.delete();
   return inventory;
+}
+
+function toAssertion(stmt: Node, expr: Node, analysis: AssertionAnalysis): Assertion {
+  const a: Assertion = {
+    callee: analysis.callee,
+    text: squash(stmt.type === 'arrow_function' ? expr.text : stmt.text),
+    line: line(expr),
+    kind: analysis.kind,
+  };
+  if (analysis.subject !== undefined) a.subject = analysis.subject;
+  if (analysis.expected !== undefined) a.expected = analysis.expected;
+  if (analysis.family !== undefined) a.family = analysis.family;
+  if (analysis.strength !== undefined) a.strength = analysis.strength;
+  return a;
+}
+
+/** Matcher names a project helper may borrow for an expectation object: `requireRequestsFrom(client).toMatch({ path: '/x' })`. */
+const EXPECTATION_MATCHERS = new Set(['toMatch', 'toMatchObject', 'toEqual', 'match', 'matches', 'toHaveRequested', 'expectRequest']);
+
+/**
+ * An expectation object passed to a project matcher that is not a framework assertion. Each property with a literal
+ * or regex value is one embedded check on `<receiver>.<key>`: a string pins the value, a regex matches it.
+ */
+function expectationObject(expr: Node): Assertion[] {
+  const e = unwrapExpression(expr);
+  if (e.type !== 'call_expression') return [];
+  const chain = unwindChain(e);
+  if (!chain || !chain.root || ASSERTION_ROOTS.has(chain.rootName) || chain.rootName === 'chai' || chain.rootName === 'sinon' || chain.shouldSubject !== undefined) return [];
+  const named = chain.segments.filter((s) => s.name !== '()');
+  const terminal = named[named.length - 1];
+  if (!terminal || !EXPECTATION_MATCHERS.has(terminal.name)) return [];
+  const args = argList(terminal.args);
+  const obj = args[0];
+  if (args.length !== 1 || !obj || obj.type !== 'object') return [];
+  const fn = e.childForFieldName('function');
+  const receiver = fn && fn.type === 'member_expression' ? squash(fn.childForFieldName('object')?.text ?? chain.rootName) : chain.rootName;
+  const out: Assertion[] = [];
+  for (const pair of obj.namedChildren) {
+    if (!pair || pair.type !== 'pair') continue;
+    const key = pair.childForFieldName('key');
+    const value = pair.childForFieldName('value');
+    if (!key || !value) continue;
+    const literal = value.type === 'string' || value.type === 'number' || value.type === 'true' || value.type === 'false' || value.type === 'null' || (value.type === 'template_string' && !value.text.includes('${'));
+    if (value.type !== 'regex' && !literal) continue;
+    const k = stringValue(key) ?? key.text;
+    out.push({
+      callee: `${terminal.name}.${value.type === 'regex' ? 'toMatch' : 'toBe'}`,
+      matcher: value.type === 'regex' ? 'toMatch' : 'toBe',
+      subject: `${receiver}.${k}`,
+      expected: squash(value.text),
+      text: squash(pair.text),
+      line: line(pair),
+      kind: 'value',
+      family: 'value',
+    });
+  }
+  return out;
+}
+
+/**
+ * Names bound once in the test body (`const names = rows.map((r) => r.name)`), mapped to the initialiser text.
+ * Nested functions are not entered; a name declared or assigned twice is left out.
+ */
+function collectLocals(body: Node | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!body || !isFunctionNode(body)) return out;
+  const start = body.childForFieldName('body');
+  if (!start || start.type !== 'statement_block') return out;
+  const bindings = new Map<string, { count: number; value?: string }>();
+  const bind = (name: string, value: Node | null | undefined): void => {
+    const b = bindings.get(name) ?? { count: 0 };
+    if (value) {
+      b.count++;
+      b.value = squash(value.text);
+    }
+    bindings.set(name, b);
+  };
+  const stack: Node[] = [start];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node.id !== start.id && isFunctionNode(node)) continue;
+    if (node.type === 'variable_declarator') {
+      const name = node.childForFieldName('name');
+      if (name && name.type === 'identifier') bind(name.text, node.childForFieldName('value'));
+    } else if (node.type === 'assignment_expression' || node.type === 'augmented_assignment_expression') {
+      const left = node.childForFieldName('left');
+      // `let x; x = f()` is one binding; `x += 1` or a second assignment makes the name unreliable.
+      if (left && left.type === 'identifier') bind(left.text, node.type === 'assignment_expression' ? node.childForFieldName('right') : node);
+      if (left && left.type === 'identifier' && node.type === 'augmented_assignment_expression') bind(left.text, node);
+    }
+    for (const c of node.namedChildren) if (c) stack.push(c);
+  }
+  for (const [k, b] of bindings) if (b.count === 1 && b.value !== undefined) out[k] = b.value;
+  return out;
 }
 
 /** Text hashed for bodyHash: the function body alone, so arrow and function forms with the same body hash the same. */

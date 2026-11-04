@@ -1,0 +1,1 @@
+Positive. assertEquals(1, n) becomes assertNotEquals(0, n). Negative checks are normally never paired with positive ones, but not equal to zero on a count is a lower bound, so the pair is equality to non empty: medium. The shape comes from flutter-intellij#5715.

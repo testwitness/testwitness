@@ -72,6 +72,12 @@ export interface Assertion {
   /** Position in the strength lattice for A002, when the family is known. */
   family?: string;
   strength?: number;
+  /**
+   * Matcher or operator as the front end read it when the callee does not carry it: the comparison operator of a bare
+   * Python assert (`==`, `in`, `is not`, `>=`), `truthy` or `not` for a bare truthiness check. Core reads the
+   * terminal name of the callee otherwise. See assertion-meaning.ts.
+   */
+  matcher?: string;
 }
 
 export interface SkipMarker {
@@ -127,6 +133,18 @@ export interface TestCase {
    * that does not fill it makes A001 behave as if no call was added.
    */
   calls?: CallSite[];
+  /**
+   * Local names bound once in the test body, mapped to the initialiser text (`names = [f.name for f in features]`).
+   * A002 resolves an assertion subject through a binding when the initialiser is a projection of another plain
+   * reference, so `assert x in names` pairs with `assert len(features) == 3`. Optional.
+   */
+  locals?: Record<string, string>;
+  /**
+   * Matcher checks nested inside a project helper or matcher the front end cannot read as an assertion of its own:
+   * a Hamcrest matcher passed to `event.hasValueMatching(...)`, an expectation object passed to a project
+   * `requireRequestsFrom(client).toMatch({...})`. A002 compares them like assertions; A001 and O001 never count them.
+   */
+  embedded?: Assertion[];
   framework: string;
 }
 
@@ -147,6 +165,8 @@ export interface TestInventory {
   tests: TestCase[];
   /** Helper functions in the file whose body contains assertions, by name. */
   assertionHelpers: Set<string>;
+  /** The assertions inside each assertion helper, by helper name, in source order. Optional; A002 compares them across base and head. */
+  helperAssertions?: Record<string, Assertion[]>;
   imports: string[];
   /** Module level skip markers (for example `pytestmark = pytest.mark.skip`). */
   fileMarkers: SkipMarker[];

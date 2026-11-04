@@ -1,0 +1,1 @@
+Positive. An inline snapshot of the whole receipt (with one field overridden) becomes toMatchObject on a subset. A copy with a few fields overridden is the same subject, and a snapshot is exact: equality to containment, medium. The shape comes from wevm/ox#187.

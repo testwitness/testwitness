@@ -61,7 +61,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "VideoIntelligenceMlTestIT::test_label_detection_with_video_context"
   },
   {
@@ -93,8 +93,9 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "CostBasedAutoScalerIntegrationTest#test_autoScaler_scalesUpAndDown_withSlowPublish"
+    "verdict": "tp",
+    "subject": "CostBasedAutoScalerIntegrationTest#test_autoScaler_scalesUpAndDown_withSlowPublish",
+    "label": "nested"
   },
   {
     "slug": "apache-iceberg-10802",
@@ -173,7 +174,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "V5ConsumerPriorityLevelTest#testLowerPriorityConsumerReceivesOverflow"
   },
   {
@@ -313,8 +314,9 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "middleware-sdk-route53 › Route53 › should normalize param names Id"
+    "verdict": "tp",
+    "subject": "middleware-sdk-route53 › Route53 › should normalize param names Id",
+    "label": "nested"
   },
   {
     "slug": "aws-aws-sdk-js-v3-8320",
@@ -411,7 +413,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "ProjectWatchTest#shouldSendEventWhenModuleRootsChange"
   },
   {
@@ -467,7 +469,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "TestFeaturestore::test_create_get_list_featurestore"
   },
   {
@@ -475,7 +477,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "TestFeaturestore::test_create_get_list_entity_types"
   },
   {
@@ -483,8 +485,16 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "TestFeaturestore::test_create_get_list_features"
+  },
+  {
+    "slug": "googleapis-python-aiplatform-1040",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "TestFeaturestore::test_batch_create_features"
   },
   {
     "slug": "googleapis-python-aiplatform-1040",
@@ -995,7 +1005,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "jQuery.parseXML - error reporting"
   },
   {
@@ -1032,6 +1042,14 @@
     "label": "one case"
   },
   {
+    "slug": "langchain-ai-langchain-37612",
+    "split": "heldout",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "test_web_search"
+  },
+  {
     "slug": "langchain-ai-langchain-38365",
     "split": "heldout",
     "ruleId": "R004",
@@ -1045,7 +1063,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "input-format stream-json › Agent tool with general-purpose subagent works"
   },
   {
@@ -1060,7 +1078,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "FormBindingDeadlockTest#halfAsyncFail"
   },
   {
@@ -1068,7 +1086,7 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "JsonCodecAdditionalTypeTest#itIsPossibleToCanRegisterAdditionTypesForJsonCodec"
   },
   {
@@ -1272,7 +1290,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "test_tracer_parallel_workflow"
   },
   {
@@ -1280,7 +1298,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "test_tracer_parallel_workflow_with_custom_spans"
   },
   {
@@ -1296,7 +1314,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "ChangeStream resumability › iterator api › #next › `supports consecutive resumes on error code ${code} ${error}`"
   },
   {
@@ -1304,7 +1322,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "ChangeStream resumability › iterator api › #hasNext › `supports consecutive resumes on error code ${code} ${error}`"
   },
   {
@@ -1312,7 +1330,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "ChangeStream resumability › iterator api › #tryNext › `supports consecutive resumes on error code ${code} ${error}`"
   },
   {
@@ -1320,7 +1338,7 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
+    "verdict": "tp",
     "subject": "ChangeStream resumability › event emitter based iteration › `supports consecutive resumes on error code ${code} (${error})`"
   },
   {
@@ -2816,7 +2834,9 @@
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed"
+    "verdict": "tp",
+    "subject": "checkMeta",
+    "label": "in helper"
   },
   {
     "slug": "vercel-next.js-74561",
@@ -2883,16 +2903,24 @@
     "split": "heldout",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "behavior: network"
+    "verdict": "tp",
+    "subject": "toRpc › behavior: network"
   },
   {
     "slug": "wevm-ox-188",
     "split": "tuning",
     "ruleId": "A002",
     "severity": "medium",
-    "verdict": "missed",
-    "subject": "behavior: network"
+    "verdict": "tp",
+    "subject": "serialize › behavior: network"
+  },
+  {
+    "slug": "wevm-ox-188",
+    "split": "tuning",
+    "ruleId": "A002",
+    "severity": "medium",
+    "verdict": "tp",
+    "subject": "toRpc › behavior: network"
   },
   {
     "slug": "xerial-snappy-java-745",

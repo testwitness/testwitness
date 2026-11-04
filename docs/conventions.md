@@ -81,7 +81,22 @@ and compiled once with `compileQuery`.
     identifiable (first argument of `expect`, the actual operand of
     `assertEquals`, the left side of a pytest `==`).
   - `family` and `strength` follow the A002 lattice tables in `frameworks.ts`
-    (higher is stronger). Leave undefined when not in a known family.
+    (higher is stronger). Leave undefined when not in a known family. Core
+    also reads every assertion onto one lattice shared by all languages
+    (`packages/core/src/assertion-meaning.ts`) from `callee`, `subject` and
+    `expected`; a front end only needs to keep those three faithful.
+  - `matcher` is set when the callee does not carry the matcher: the
+    comparison operator of a bare Python assert (`==`, `in`, `is not`, `>=`),
+    `truthy` or `not` for a bare truthiness check.
+- `locals` (optional, per test): names bound once in the test body mapped to
+  the initialiser text. A002 follows a subject through a binding whose
+  initialiser projects another plain reference.
+- `embedded` (optional, per test): matcher checks nested in a project helper
+  or matcher that is not an assertion of its own (a Hamcrest matcher passed to
+  `event.hasValueMatching(...)`, an expectation object passed to a project
+  `toMatch({...})`). A002 compares them; A001 and O001 never count them.
+- `helperAssertions` (optional, per file): the assertions inside each
+  assertion helper, by helper name. A002 compares them across base and head.
 - `markers` are per test. `kind`: `skip`, `focus`, `todo`, `fixme`, `xfail`,
   `conditional-skip`. Set `constant: true` when the condition is a literal
   `true`/`True` or the marker is unconditional. Set `reason` when a reason
@@ -95,7 +110,7 @@ and compiled once with `compileQuery`.
   `mock.patch('app.billing.charge')` gives `app.billing.charge`).
 - `framework`: detected per file from imports and annotations, one of
   `junit5`, `junit4`, `testng`, `jest`, `vitest`, `mocha`, `playwright`,
-  `pytest`, `unittest`; fall back to the profile, then to the language default
+  `qunit`, `pytest`, `unittest`; fall back to the profile, then to the language default
   (`junit5`, `jest`, `pytest`).
 - `assertionHelpers`: names of functions defined in the file whose body has an
   assertion and whose name does not make it a test.

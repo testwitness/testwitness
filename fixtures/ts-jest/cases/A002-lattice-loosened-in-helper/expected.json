@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "A002",
+    "severity": "medium",
+    "subject": "checkTotal",
+    "label": "in helper"
+  }
+]

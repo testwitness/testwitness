@@ -8,7 +8,7 @@
 
 import type { AssertionKind, SkipMarker } from '@testwitness/core';
 
-export type FrameworkId = 'jest' | 'vitest' | 'mocha' | 'playwright';
+export type FrameworkId = 'jest' | 'vitest' | 'mocha' | 'playwright' | 'qunit';
 
 export type MarkerKind = SkipMarker['kind'];
 
@@ -443,6 +443,21 @@ export const FRAMEWORKS: FrameworkTable[] = [
     sleepCalls: [...COMMON_SLEEPS, 'page.waitForTimeout'],
     retryCalls: ['test.describe.configure({ retries })'],
   },
+  {
+    // QUnit: QUnit.module(name, hooks?, fn?) and QUnit.test(name, function (assert) { ... }). A project wrapper named
+    // QUnit.test<Something> (jQuery's QUnit.testUnlessIE) declares a test too. Assertions go through the `assert` argument.
+    id: 'qunit',
+    importSources: ['qunit', 'qunitjs'],
+    globalRoots: ['QUnit'],
+    testNames: ['QUnit.test', 'QUnit.only', 'QUnit.skip', 'QUnit.todo'],
+    containerNames: ['QUnit.module'],
+    modifiers: ['skip', 'only', 'todo', 'each'],
+    assertionRoots: ['assert'],
+    mockCalls: [],
+    timeoutCalls: ['assert.timeout'],
+    sleepCalls: COMMON_SLEEPS,
+    retryCalls: ['QUnit.test.retry'],
+  },
 ];
 
 export const FRAMEWORK_BY_ID: Record<FrameworkId, FrameworkTable> = Object.fromEntries(
@@ -450,7 +465,7 @@ export const FRAMEWORK_BY_ID: Record<FrameworkId, FrameworkTable> = Object.fromE
 ) as Record<FrameworkId, FrameworkTable>;
 
 /** Detection order when several frameworks are imported in one file. */
-export const FRAMEWORK_PRIORITY: FrameworkId[] = ['playwright', 'vitest', 'jest', 'mocha'];
+export const FRAMEWORK_PRIORITY: FrameworkId[] = ['playwright', 'vitest', 'jest', 'qunit', 'mocha'];
 
 export const DEFAULT_FRAMEWORK: FrameworkId = 'jest';
 
@@ -468,6 +483,7 @@ export function detectFramework(imports: string[], source: string, profileFramew
   }
   if (/\bvi\.(mock|fn|spyOn|useFakeTimers|mocked|stubGlobal|setConfig)\b/.test(source)) return 'vitest';
   if (/\bjest\.(mock|fn|spyOn|useFakeTimers|setTimeout|mocked|requireActual)\b/.test(source)) return 'jest';
+  if (/\bQUnit\.(test|module|skip|only|todo)\w*\s*\(/.test(source)) return 'qunit';
   if (/\btest\.describe\s*\(|\btest\s*\(\s*(['"`][^'"`]*['"`])\s*,\s*async\s*\(\s*\{\s*page\b/.test(source)) return 'playwright';
   if (/\bthis\.(skip|timeout|retries)\s*\(|\.should\.|\bcontext\s*\(|\bspecify\s*\(|\bsuite\s*\(/.test(source)) return 'mocha';
   for (const id of FRAMEWORK_PRIORITY) {

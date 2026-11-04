@@ -1,0 +1,1 @@
+Positive. The same toBe on a trimmed value to toContain move as A002-lattice-equality-to-contains, but this PR also changes src/receipt.ts, the production file the test imports. A loosening judged on the lattice is high when the test exercises production code the PR changed, the same signal A001 uses.

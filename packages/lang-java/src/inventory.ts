@@ -322,7 +322,11 @@ function enclosingStatement(node: Node): Node {
   while (cur) {
     if (cur.type.endsWith(STATEMENT_SUFFIX) || cur.type === 'local_variable_declaration') return cur;
     if (cur.type === 'block' || cur.type === 'method_declaration') break;
-    cur = cur.parent;
+    const parent: Node | null = cur.parent;
+    // `response -> assertTrue(...)`: the expression body of a lambda is the statement the author wrote, not the
+    // declaration that receives the lambda, so two assertions in one builder chain keep distinct texts.
+    if (parent && parent.type === 'lambda_expression' && parent.childForFieldName('body')?.id === cur.id) return cur;
+    cur = parent;
   }
   return node;
 }
@@ -649,8 +653,41 @@ function classifyChain(chain: Chain, ctx: FileContext): Assertion[] {
   return [];
 }
 
+/** Hamcrest matcher factories as written in a project call: `Matchers.equalTo(4L)`, or a bare `equalTo(4L)` with Hamcrest imported. */
+function hamcrestMatcherCall(node: Node, ctx: FileContext): string | undefined {
+  if (node.type !== 'method_invocation') return undefined;
+  const name = node.childForFieldName('name')?.text ?? '';
+  if (!hamcrestMatchers[name]) return undefined;
+  const object = node.childForFieldName('object');
+  if (object) return /^(org\.hamcrest\.)?(Matchers|CoreMatchers|Is|IsEqual|OrderingComparison|IsCollectionContaining|StringContains)$/.test(object.text) ? name : undefined;
+  return ctx.families.has('hamcrest') ? name : undefined;
+}
+
+/**
+ * Matcher checks nested in a chain that is not an assertion of its own: `event.hasMetricName(m).hasValueMatching(Matchers.equalTo(4L))`.
+ * One embedded assertion per call whose argument is a Hamcrest matcher; the receiver of that call is the subject.
+ */
+function embeddedMatchers(chain: Chain, ctx: FileContext): Assertion[] {
+  const out: Assertion[] = [];
+  const root = chain.calls[0];
+  if (!root || root.name === 'assertThat' || root.name === 'assumeThat') return out;
+  for (const call of chain.calls) {
+    for (const arg of call.args) {
+      const factory = hamcrestMatcherCall(arg, ctx);
+      if (!factory) continue;
+      const matcher = outerMatcherName(arg) ?? factory;
+      const shape = hamcrestMatchers[matcher];
+      const receiver = call.node.childForFieldName('object') ?? undefined;
+      const a = makeAssertion(chain, `${call.name}.${matcher}`, shape?.kind ?? 'value', 'hamcrest', shape?.strength ?? 2, receiver, call.node, arg);
+      a.text = normaliseText(call.node.text);
+      out.push(a);
+    }
+  }
+  return out;
+}
+
 /** Collect assertions in a body, including every nested scope: lambdas, anonymous class bodies and local classes. */
-function collectAssertions(body: Node, query: Query, ctx: FileContext): Assertion[] {
+function collectAssertions(body: Node, query: Query, ctx: FileContext, embedded?: Assertion[]): Assertion[] {
   const seen = new Set<number>();
   const out: Assertion[] = [];
   for (const match of query.matches(body)) {
@@ -659,13 +696,41 @@ function collectAssertions(body: Node, query: Query, ctx: FileContext): Assertio
     const top = outermostCall(call);
     if (seen.has(top.id)) continue;
     seen.add(top.id);
-    out.push(...classifyChain(flattenChain(top), ctx));
+    const chain = flattenChain(top);
+    const found = classifyChain(chain, ctx);
+    out.push(...found);
+    if (found.length === 0 && embedded) embedded.push(...embeddedMatchers(chain, ctx));
   }
+  embedded?.sort((a, b) => a.line - b.line);
   for (const stmt of body.descendantsOfType('assert_statement')) {
     const expr = stmt.namedChildren[0];
     out.push({ callee: 'assert', text: stmt.text.trim(), line: line(stmt), kind: 'value', ...(expr ? { subject: normaliseText(expr.text) } : {}) });
   }
   out.sort((a, b) => a.line - b.line);
+  return out;
+}
+
+/**
+ * Locals declared once with an initialiser (`String normalized = body.get().replace("\\n", "");`), mapped to the
+ * initialiser text. A name declared or assigned more than once is left out.
+ */
+function collectLocals(body: Node): Record<string, string> {
+  const seen = new Map<string, string | undefined>();
+  for (const decl of body.descendantsOfType('local_variable_declaration')) {
+    for (const d of decl.namedChildren) {
+      if (!d || d.type !== 'variable_declarator') continue;
+      const name = d.childForFieldName('name')?.text;
+      const value = d.childForFieldName('value');
+      if (!name) continue;
+      seen.set(name, seen.has(name) || !value ? undefined : normaliseText(value.text));
+    }
+  }
+  for (const asg of body.descendantsOfType('assignment_expression')) {
+    const left = asg.childForFieldName('left');
+    if (left && left.type === 'identifier' && seen.has(left.text)) seen.set(left.text, undefined);
+  }
+  const out: Record<string, string> = {};
+  for (const [k, v] of seen) if (v !== undefined) out[k] = v;
   return out;
 }
 
@@ -1146,9 +1211,14 @@ export async function buildJavaInventory(path: string, source: string, profile: 
 
     // Assertion helpers: non test, non lifecycle methods whose body asserts (one level deep).
     const helpers = new Set<string>();
+    const helperAssertions: Record<string, Assertion[]> = {};
     for (const m of methods) {
       if (testIds.has(m.node.id) || isLifecycle(m)) continue;
-      if (collectAssertions(m.body, queries.assertions, ctx).length > 0) helpers.add(m.name);
+      const found = collectAssertions(m.body, queries.assertions, ctx);
+      if (found.length > 0) {
+        helpers.add(m.name);
+        (helperAssertions[m.name] ??= []).push(...found);
+      }
     }
     ctx.helpers = helpers;
 
@@ -1165,7 +1235,8 @@ export async function buildJavaInventory(path: string, source: string, profile: 
         ...markersFromFirstStatement(m.body, framework),
       ];
 
-      const assertions = collectAssertions(m.body, queries.assertions, ctx);
+      const embedded: Assertion[] = [];
+      const assertions = collectAssertions(m.body, queries.assertions, ctx, embedded);
       for (const a of m.annotations) {
         if (a.name !== 'Test') continue;
         for (const key of [...junit4.expectedExceptionKeys, ...testng.expectedExceptionKeys]) {
@@ -1201,6 +1272,9 @@ export async function buildJavaInventory(path: string, source: string, profile: 
       const catchAlls = collectCatchAlls(m.body);
       if (catchAlls.length) test.catchAlls = catchAlls;
       if (m.body && isOverrideOnly(m.body)) test.overrideOnly = true;
+      if (embedded.length) test.embedded = embedded;
+      const locals = collectLocals(m.body);
+      if (Object.keys(locals).length) test.locals = locals;
       tests.push(test);
 
       const timeout = timeoutFrom(m.annotations, table) ?? timeoutFrom(classAnnotations, table);
@@ -1227,6 +1301,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
       framework,
       tests,
       assertionHelpers: helpers,
+      helperAssertions,
       imports: imports.map((i) => (i.isStatic ? `static ${i.path}` : i.path)),
       fileMarkers,
       parseErrors: countParseErrors(root),

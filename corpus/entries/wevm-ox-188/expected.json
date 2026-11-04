@@ -1,9 +1,16 @@
 [
-  {
-    "ruleId": "A002",
-    "severity": "medium",
-    "subject": "behavior: network",
-    "verdict": "tp",
-    "reason": "toMatchInlineSnapshot replaced by toMatchObject on a subset of fields"
-  }
+ {
+  "ruleId": "A002",
+  "severity": "medium",
+  "subject": "behavior: network",
+  "verdict": "tp",
+  "reason": "toMatchInlineSnapshot replaced by toMatchObject on a subset of fields"
+ },
+ {
+  "ruleId": "A002",
+  "severity": "medium",
+  "subject": "toRpc \u203a behavior: network",
+  "verdict": "tp",
+  "reason": "toMatchInlineSnapshot replaced by toMatchObject on a subset of fields, second file"
+ }
 ]

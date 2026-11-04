@@ -689,11 +689,16 @@ function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Se
     a.subject = swapped ? right!.text : left.text;
     // The expected operand of a two operand comparison, for tautology checks (A009).
     if (right && ops.length === 1) a.expected = swapped ? left.text : right.text;
+    // The operator as written, for the A002 lattice in core. A swapped literal mirrors an ordering operator.
+    const mirror: Record<string, string> = { '<': '>', '>': '<', '<=': '>=', '>=': '<=' };
+    a.matcher = approx ? 'approx' : ops.length > 1 ? 'compare' : swapped ? (mirror[op] ?? op) : op;
     if (approx) return withLattice(a, 'assert.approx');
     if (ops.length > 1) return withLattice(a, 'assert.compare');
     switch (op) {
       case '==': {
-        const literalRight = !!right && (isLiteral(right) || (right.type === 'identifier' && !!literalParams?.has(right.text)));
+        // The expected operand is the right one, or the left one when a literal was written first (`3 == len(x)`).
+        const expectedOperand = swapped ? left : right;
+        const literalRight = !!expectedOperand && (isLiteral(expectedOperand) || (expectedOperand.type === 'identifier' && !!literalParams?.has(expectedOperand.text)));
         return withLattice(a, literalRight ? 'assert.==.literal' : 'assert.==');
       }
       case '!=':
@@ -717,16 +722,19 @@ function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Se
   if (e.type === 'not_operator') {
     const inner = e.namedChildren[0];
     a.subject = inner?.text ?? e.text;
+    a.matcher = 'not';
     a.kind = 'smoke';
     return withLattice(a, 'assert.falsy');
   }
   const parts = callParts(e, aliases);
   if (parts && parts.node.type === 'call' && parts.chain === 'isinstance') {
     a.subject = parts.positional[0]?.text ?? e.text;
+    a.matcher = 'isinstance';
     a.kind = 'smoke';
     return withLattice(a, 'assert.isinstance');
   }
   a.subject = e.text;
+  a.matcher = 'truthy';
   a.kind = 'smoke';
   return withLattice(a, 'assert.truthy');
 }
@@ -807,6 +815,9 @@ function callAssertion(stmt: Node, call: Node, ctx: FileContext): Assertion | un
   if (/^assert[A-Z_][A-Za-z_]*$/.test(tail)) {
     base.kind = 'value';
     if (firstArg) base.subject = firstArg.text;
+    // assert_that(actual, matcher) in PyHamcrest and Beam's testing util: the matcher is the expected operand.
+    const secondArg = parts.positional[1];
+    if (secondArg && /^assert_?[tT]hat$/.test(tail)) base.expected = secondArg.text;
     return base;
   }
   return undefined;
@@ -885,6 +896,40 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
     }
     for (const b of childBlocks(stmt)) collectAssertions(b, ctx, out);
   }
+  return out;
+}
+
+/**
+ * Names assigned exactly once in the test body (`names = [f.name for f in features]`), mapped to the initialiser text.
+ * Nested functions and classes are not entered. A name assigned twice, or by augmented or tuple assignment, is left out.
+ */
+function collectLocals(block: Node | null): Record<string, string> {
+  const seen = new Map<string, string | undefined>();
+  const visit = (b: Node | null): void => {
+    for (const stmt of statements(b)) {
+      if (isDefinition(stmt)) continue;
+      if (stmt.type === 'expression_statement') {
+        const u = stmt.namedChildren[0];
+        if (u && (u.type === 'assignment' || u.type === 'augmented_assignment')) {
+          const left = u.childForFieldName('left');
+          const right = u.childForFieldName('right');
+          if (left && left.type === 'identifier') {
+            const name = left.text;
+            seen.set(name, seen.has(name) || u.type === 'augmented_assignment' || !right ? undefined : normaliseText(right.text));
+          }
+        }
+      }
+      if (stmt.type === 'for_statement' || stmt.type === 'with_statement') {
+        // Loop and context manager targets rebind on every pass.
+        const target = stmt.childForFieldName('left');
+        if (target && target.type === 'identifier') seen.set(target.text, undefined);
+      }
+      for (const cb of childBlocks(stmt)) visit(cb);
+    }
+  };
+  visit(block);
+  const out: Record<string, string> = {};
+  for (const [k, v] of seen) if (v !== undefined) out[k] = v;
   return out;
 }
 
@@ -1082,9 +1127,15 @@ export async function buildInventory(path: string, source: string, profile: Fram
   // Pass 2: assertion helpers, one level deep (direct assertions only).
   const helperCtx: FileContext = { aliases, helpers: new Set(), framework };
   const helpers = new Set<string>();
+  const helperAssertions: Record<string, Assertion[]> = {};
   for (const c of candidates) {
     if (TEST_NAME.test(c.name)) continue;
-    if (collectAssertions(c.body, helperCtx).length > 0) helpers.add(c.name);
+    const found = collectAssertions(c.body, helperCtx);
+    if (found.length > 0) {
+      helpers.add(c.name);
+      // Two helpers with one name (methods of different classes) are compared as one list in source order.
+      (helperAssertions[c.name] ??= []).push(...found);
+    }
   }
   for (const name of profile.extraAssertions) helpers.add(name);
   const ctx: FileContext = { aliases, helpers, framework };
@@ -1139,6 +1190,8 @@ export async function buildInventory(path: string, source: string, profile: Fram
     const catchAlls = collectCatchAlls(c.body);
     if (catchAlls.length) test.catchAlls = catchAlls;
     if (isOverrideOnly(c.body)) test.overrideOnly = true;
+    const locals = collectLocals(c.body);
+    if (Object.keys(locals).length) test.locals = locals;
     tests.push(test);
   }
 
@@ -1148,6 +1201,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
     framework,
     tests,
     assertionHelpers: new Set([...helpers].filter((h) => !profile.extraAssertions.includes(h))),
+    helperAssertions,
     imports,
     fileMarkers,
     parseErrors: countParseErrors(root),

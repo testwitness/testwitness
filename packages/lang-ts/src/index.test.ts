@@ -55,8 +55,8 @@ describe('isTestFile', () => {
 });
 
 describe('framework tables', () => {
-  it('lists the four frameworks with their tables', () => {
-    expect(FRAMEWORKS.map((f) => f.id)).toEqual(['jest', 'vitest', 'mocha', 'playwright']);
+  it('lists the five frameworks with their tables', () => {
+    expect(FRAMEWORKS.map((f) => f.id)).toEqual(['jest', 'vitest', 'mocha', 'playwright', 'qunit']);
     expect(FRAMEWORK_BY_ID.mocha.assertionRoots).toContain('should');
     expect(FRAMEWORK_BY_ID.playwright.sleepCalls).toContain('page.waitForTimeout');
     expect(FRAMEWORK_BY_ID.jest.retryCalls).toContain('jest.retryTimes');

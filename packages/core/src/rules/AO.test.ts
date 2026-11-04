@@ -104,6 +104,59 @@ describe('A002 assertion loosened', () => {
   });
 });
 
+describe('A002 lattice pairing', () => {
+  const run = async (base: ReturnType<typeof t>, head: ReturnType<typeof t>) => A002.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }] }), {});
+  const val = (callee: string, subject: string, expected?: string, strength = 3) => ({ callee, subject, ...(expected ? { expected } : {}), text: `${callee}(${subject}${expected ? `, ${expected}` : ''})`, family: 'value', strength });
+
+  it('pairs through identity accessors and grades on the lattice', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [val('expect.toHaveLength', 'rows', '3', 2)] });
+    const head = t({ name: 'a', body: 'y', assertions: [val('expect.toBeGreaterThan', 'rows.length', '1', 2)] });
+    const out = await run(base, head);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ severity: 'medium' });
+    expect(out[0]!.message).toBe('Test a: equality (expect.toHaveLength) on rows became bound (expect.toBeGreaterThan) on rows.length');
+  });
+
+  it('is high when the head checks nothing about the value on the same normalised subject', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [val('expect.toBe', 'res.body.trim()', '"ok"')] });
+    const head = t({ name: 'a', body: 'y', assertions: [{ ...val('expect.toBeDefined', 'res.body', undefined, 1), kind: 'smoke' as const }] });
+    expect((await run(base, head))[0]).toMatchObject({ severity: 'high' });
+  });
+
+  it('pairs by position only among related leftovers of equal number, and caps that at medium', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [val('assert.strictEqual', 'line', '"1"'), val('assert.strictEqual', 'column', '"11"')] });
+    const head = t({ name: 'a', body: 'y', assertions: [val('assert.ok', 'lineMatch', undefined, 1), val('assert.ok', 'columnMatch', undefined, 1)] });
+    const out = await run(base, head);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ severity: 'medium' });
+    expect(out[0]!.message).toContain('1 more assertion was loosened');
+    const unrelated = t({ name: 'a', body: 'y', assertions: [val('assert.ok', 'customer', undefined, 1), val('assert.ok', 'columnMatch', undefined, 1)] });
+    expect((await run(base, unrelated))[0]!.message).not.toContain('more');
+    const fewer = t({ name: 'a', body: 'y', assertions: [val('assert.ok', 'lineMatch', undefined, 1)] });
+    expect(await run(base, fewer)).toEqual([]);
+  });
+
+  it('is silent on reordered, stronger and same rank assertions', async () => {
+    const two = [val('expect.toBe', 'a', '1'), val('expect.toContain', 'b', '"x"', 2)];
+    expect(await run(t({ name: 'a', body: 'x', assertions: two }), t({ name: 'a', body: 'y', assertions: [...two].reverse() }))).toEqual([]);
+    expect(await run(t({ name: 'a', body: 'x', assertions: [val('expect.toContain', 'b', '"x"', 2)] }), t({ name: 'a', body: 'y', assertions: [val('expect.toBe', 'b', '"x"')] }))).toEqual([]);
+    expect(await run(t({ name: 'a', body: 'x', assertions: [val('expect.toBe', 'b.length', '3')] }), t({ name: 'a', body: 'y', assertions: [val('expect.toHaveLength', 'b', '3', 2)] }))).toEqual([]);
+  });
+
+  it('reports nested checks at most medium with the nested label, and helpers once with the in helper label', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [] });
+    base.embedded = [{ callee: 'hasValueMatching.equalTo', subject: 'event', expected: 'equalTo(4L)', text: 'hasValueMatching(equalTo(4L))', line: 2, kind: 'value', family: 'hamcrest', strength: 4 }];
+    const head = t({ name: 'a', body: 'y', assertions: [] });
+    head.embedded = [{ callee: 'hasValueMatching.notNullValue', subject: 'event', expected: 'notNullValue()', text: 'hasValueMatching(notNullValue())', line: 2, kind: 'smoke', family: 'hamcrest', strength: 1 }];
+    expect(await run(base, head)).toMatchObject([{ severity: 'medium', label: 'nested' }]);
+    const helperBase = inventory(P, [], { helperAssertions: { check: [{ ...val('expect.toBe', 'r.total', 'n'), line: 3, kind: 'value' }] } });
+    const helperHead = inventory(P, [], { helperAssertions: { check: [{ ...val('expect.toBeDefined', 'r.total', undefined, 1), line: 3, kind: 'smoke' }] } });
+    const out = await A002.run(context({ pairs: [{ file: changedFile(P), base: helperBase, head: helperHead }] }), {});
+    expect(out).toMatchObject([{ severity: 'medium', subject: 'check', label: 'in helper' }]);
+    expect(out[0]!.message).toMatch(/^Helper check: /);
+  });
+});
+
 describe('A009 tautology', () => {
   it('reports same operand assertions added to a test', async () => {
     const base = t({ name: 'a', body: 'x', assertions: [eq('r', '1')] });
