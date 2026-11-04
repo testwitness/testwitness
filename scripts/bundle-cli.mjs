@@ -11,8 +11,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pkgDir = join(root, 'packages/cli');
 const dist = join(pkgDir, 'dist');
 const assets = join(dist, 'assets');
-// Clear the whole dist so stale tsc output never sits next to the bundle.
-rmSync(dist, { recursive: true, force: true });
+// Replace only the bundle and its assets. tsc output (index.js, .d.ts) stays, because typecheck of
+// packages/action depends on it and the package files list ships dist/cli.js and dist/assets only.
+rmSync(join(dist, 'cli.js'), { force: true });
+rmSync(assets, { recursive: true, force: true });
 mkdirSync(assets, { recursive: true });
 
 await build({
