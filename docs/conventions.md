@@ -5,7 +5,7 @@ page is the contract between packages so parallel work fits together.
 
 ## Repository rules
 
-- TypeScript, strict, ESM, Node 20 or newer. `verbatimModuleSyntax` is on, so
+- TypeScript, strict, ESM. Node 22 or newer for development; the published CLI supports Node 20 or newer. `verbatimModuleSyntax` is on, so
   type imports use `import type`.
 - Tests: vitest, files named `*.test.ts` next to the code. Property tests use
   fast-check. Every exported function with logic has a test.

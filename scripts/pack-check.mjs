@@ -15,6 +15,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const keep = process.argv.includes('--keep');
+// The node binary that runs the installed CLI. Defaults to the current node; CI points it at
+// an older Node to prove the published package still runs there while pnpm stays on Node 22.
+const cliNode = process.env.PACK_CHECK_NODE || process.execPath;
 const work = mkdtempSync(join(tmpdir(), 'testwitness-pack-'));
 const failures = [];
 const fail = (msg) => {
@@ -87,11 +90,14 @@ try {
   mkdirSync(proj);
   writeFileSync(join(proj, 'package.json'), JSON.stringify({ name: 'pack-check-consumer', version: '0.0.0', private: true }, null, 2));
   run('npm', ['install', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org/', tarball], { cwd: proj, env: cleanEnv });
-  const bin = join(proj, 'node_modules', '.bin', 'testwitness');
+  const binJs = join(proj, 'node_modules', 'testwitness', 'bin', 'testwitness.js');
+  const bin = cliNode;
+  const cli = (args, opts = {}) => run(bin, [binJs, ...args], opts);
   ok('npm install of the tarball');
+  process.stdout.write(`CLI runs on node ${run(bin, ['-v']).trim()} (${bin})\n`);
 
   // 4a. --version
-  const version = run(bin, ['--version'], { env: cleanEnv }).trim();
+  const version = cli(['--version'], { env: cleanEnv }).trim();
   process.stdout.write(`testwitness --version: ${version}\n`);
   if (version !== manifest.version) fail(`--version printed ${version}, manifest says ${manifest.version}`);
   else ok('--version matches the manifest');
@@ -101,7 +107,7 @@ try {
   makeWeakenedRepo(repo);
   const reportPath = join(work, 'report.json');
   const args = ['check', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json', '--out', reportPath, '--mode', 'require-ack', '--fail-on', 'medium', '--quiet'];
-  const res = spawnSync(bin, args, { encoding: 'utf8', env: cleanEnv });
+  const res = spawnSync(bin, [binJs, ...args], { encoding: 'utf8', env: cleanEnv });
   process.stdout.write(`testwitness check exit code: ${res.status}\n`);
   if (res.stderr.trim()) process.stdout.write(`stderr: ${res.stderr.trim()}\n`);
   const report = JSON.parse(readFileSync(reportPath, 'utf8'));
@@ -121,7 +127,7 @@ try {
   // (the engine logs the failure per file and drops the inventory, so no R001 findings remain).
   const empty = join(work, 'empty-assets');
   mkdirSync(empty);
-  const res2 = spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json'], {
+  const res2 = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json'], {
     encoding: 'utf8',
     env: { ...cleanEnv, TESTWITNESS_ASSET_DIR: empty },
   });
