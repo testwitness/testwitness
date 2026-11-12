@@ -37,14 +37,15 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: 20
+          package-manager-cache: false
       - name: remember the Node 20 binary
         run: |
           node -v
           echo "PACK_CHECK_NODE=$(command -v node)" >> "$GITHUB_ENV"
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: 22
