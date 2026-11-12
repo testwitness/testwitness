@@ -8,9 +8,9 @@
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -43,14 +43,12 @@ try {
   if (tarballs.length !== 1) throw new Error(`expected one tarball, found ${tarballs.join(', ') || 'none'}`);
   const tarball = join(packDir, tarballs[0]);
 
-  const listing = run('tar', ['-tvzf', tarball])
-    .trim()
-    .split('\n')
-    .map((line) => {
-      const parts = line.trim().split(/\s+/);
-      return { size: Number(parts[2]), path: parts.slice(5).join(' ') };
-    })
-    .filter((e) => !e.path.endsWith('/'));
+  // Extract the tarball and stat the files. Parsing `tar -tv` output is not portable:
+  // GNU tar and macOS bsdtar print different columns.
+  const extractDir = join(work, 'extract');
+  mkdirSync(extractDir);
+  run('tar', ['-xzf', tarball, '-C', extractDir]);
+  const listing = walk(extractDir).map((abs) => ({ size: statSync(abs).size, path: relative(extractDir, abs).split(sep).join('/') }));
   const unpacked = listing.reduce((n, e) => n + e.size, 0);
   const packed = readFileSync(tarball).length;
   process.stdout.write(`\ntarball ${tarballs[0]}\n`);
@@ -84,6 +82,11 @@ try {
   if (internal.length) fail(`published manifest references internal packages: ${internal.join(', ')}`);
   else ok('no @testwitness/* references in the published manifest');
   if (manifest.private) fail('published manifest is private');
+  // npm 11 drops a bin entry whose path starts with ./ ("script name was invalid and removed"),
+  // which would publish a package with no testwitness command.
+  const binPath = manifest.bin?.testwitness;
+  if (typeof binPath === 'string' && /^bin\/[A-Za-z0-9._-]+\.js$/.test(binPath)) ok(`bin path is ${binPath}`);
+  else fail(`bin.testwitness is ${JSON.stringify(binPath)}, expected a plain bin/<name>.js path`);
 
   // 3. install into a fresh project with plain npm
   const proj = join(work, 'project');
@@ -94,6 +97,8 @@ try {
   const bin = cliNode;
   const cli = (args, opts = {}) => run(bin, [binJs, ...args], opts);
   ok('npm install of the tarball');
+  if (statSync(join(proj, 'node_modules', '.bin', 'testwitness'), { throwIfNoEntry: false })) ok('npm linked the testwitness command');
+  else fail('npm did not link node_modules/.bin/testwitness (bin entry missing from the published manifest)');
   process.stdout.write(`CLI runs on node ${run(bin, ['-v']).trim()} (${bin})\n`);
 
   // 4a. --version
@@ -146,6 +151,16 @@ if (failures.length) {
   process.exit(1);
 }
 process.stdout.write('\npack:check passed\n');
+
+function walk(dir) {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) out.push(...walk(p));
+    else out.push(p);
+  }
+  return out.sort();
+}
 
 function makeWeakenedRepo(dir) {
   const git = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: dir });

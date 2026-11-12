@@ -27,7 +27,7 @@
     "node": ">=20"
   },
   "bin": {
-    "testwitness": "./bin/testwitness.js"
+    "testwitness": "bin/testwitness.js"
   },
   "exports": {
     ".": {
