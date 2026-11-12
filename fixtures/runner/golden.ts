@@ -11,7 +11,7 @@
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { check } from 'testwitness';
 import type { Finding, Report } from '@testwitness/core';
 
@@ -96,7 +96,8 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       cwd: repo,
       base: baseSha,
       head: headSha,
-      junit: c.junit ? join(c.junit, '**/*.xml') : 'no-xml-for-this-case/**/*.xml',
+      // A glob, not a path: always forward slashes, also on Windows.
+      junit: c.junit ? `${c.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,

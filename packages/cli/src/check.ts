@@ -73,7 +73,14 @@ export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
 }
 
 export async function loadEvidence(cwd: string, globs: string, log: (s: string) => void): Promise<{ evidence: Evidence | undefined; notes: string[] }> {
-  const patterns = globs.split(',').map((s) => s.trim()).filter(Boolean);
+  // fast-glob only understands forward slashes. On Windows a pattern built with path.join
+  // arrives with backslashes, so convert those; a pattern without backslashes is left alone
+  // so that glob syntax such as [abc] keeps its meaning.
+  const patterns = globs
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((p) => (process.platform === 'win32' && p.includes('\\') ? fg.convertPathToPattern(p) : p));
   if (!patterns.length) return { evidence: undefined, notes: [] };
   const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
   if (!files.length) {

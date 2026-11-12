@@ -6,12 +6,12 @@ on:
 permissions:
   contents: read
 jobs:
-  check:
+  test:
+    name: test (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [20, 22]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -20,9 +20,44 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+
+  # The published CLI claims Node 20 or newer. Development needs Node 22 (Stryker 10),
+  # so this job builds on 22, then installs the packed tarball and runs it on Node 20.
+  cli-node20:
+    name: cli on node 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc -b
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: node -v
+      - run: pnpm pack:check
+
+  # Single status for branch protection: green only when every matrix job is green.
+  check:
+    name: check
+    needs: [test, cli-node20]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: all jobs passed
+        run: |
+          echo "test: ${{ needs.test.result }}"
+          echo "cli-node20: ${{ needs.cli-node20.result }}"
+          test "${{ needs.test.result }}" = "success" && test "${{ needs.cli-node20.result }}" = "success"

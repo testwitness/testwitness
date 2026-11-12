@@ -11,7 +11,7 @@ pnpm fixtures         # golden cases (about two minutes)
 pnpm corpus:report    # precision on the public PR corpus; writes docs/precision.md
 ```
 
-Node 20 or newer, pnpm 10. The fixture projects under `fixtures/*/project` are real projects; their JUnit XML was produced by running them and must never be edited by hand (see `fixtures/JUNIT-FIXTURES.md`).
+Node 22 or newer and pnpm 10 for development (Stryker 10 needs Node 22). The published CLI itself runs on Node 20 or newer, and CI proves that on every change. The fixture projects under `fixtures/*/project` are real projects; their JUnit XML was produced by running them and must never be edited by hand (see `fixtures/JUNIT-FIXTURES.md`).
 
 ## Adding a rule
 

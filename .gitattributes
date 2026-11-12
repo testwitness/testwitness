@@ -1,0 +1,6 @@
+# Keep line endings as committed on every platform, including Windows runners.
+* text=auto eol=lf
+*.wasm binary
+*.png binary
+*.gif binary
+*.jar binary
