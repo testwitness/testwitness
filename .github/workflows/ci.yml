@@ -27,8 +27,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
 
-  # The published CLI claims Node 20 or newer. Development needs Node 22 (Stryker 10),
-  # so this job builds on 22, then installs the packed tarball and runs it on Node 20.
+  # The published CLI claims Node 20 or newer. Development needs Node 22 (Stryker 10, and
+  # the workspace is engine strict), so pnpm and the build stay on 22 and only the installed
+  # CLI is executed with Node 20 (scripts/pack-check.mjs honours PACK_CHECK_NODE).
   cli-node20:
     name: cli on node 20
     runs-on: ubuntu-latest
@@ -36,23 +37,22 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: remember the Node 20 binary
+        run: |
+          node -v
+          echo "PACK_CHECK_NODE=$(command -v node)" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
+      - run: node -v && "$PACK_CHECK_NODE" -v
       - run: pnpm install --frozen-lockfile
       - run: pnpm tsc -b
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-      - run: node -v
-      # The workspace manifest says Node 22 and .npmrc is engine strict, which is right for
-      # development. This step deliberately runs the packed CLI on Node 20, so the strict
-      # check is lifted for this one command only.
       - run: pnpm pack:check
-        env:
-          npm_config_engine_strict: "false"
 
   # Single status for branch protection: green only when every matrix job is green.
   check:
