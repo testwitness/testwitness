@@ -47,7 +47,12 @@ jobs:
         with:
           node-version: 20
       - run: node -v
+      # The workspace manifest says Node 22 and .npmrc is engine strict, which is right for
+      # development. This step deliberately runs the packed CLI on Node 20, so the strict
+      # check is lifted for this one command only.
       - run: pnpm pack:check
+        env:
+          npm_config_engine_strict: "false"
 
   # Single status for branch protection: green only when every matrix job is green.
   check:
