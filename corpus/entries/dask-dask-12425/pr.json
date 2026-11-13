@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/dask/dask/pull/12425",
+  "repo": "dask/dask",
+  "number": 12425,
+  "title": "More thorough tests for Series.map (XFAIL'ed); fix pandas nightly CI",
+  "merged_at": "2026-05-29T16:21:06Z",
+  "stars": 13948,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "R010",
+  "split": "tuning",
+  "base_sha": "7a193febd30388f694fb6ded570e2700ab2182d8",
+  "head_sha": "a76477543c3236a31374920fcaf6e4ff6d1b85b5",
+  "files_changed": 5,
+  "additions": 250,
+  "deletions": 146
+}

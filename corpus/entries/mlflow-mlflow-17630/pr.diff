@@ -1,0 +1,10 @@
+diff --git a/.github/workflows/master.yml b/.github/workflows/master.yml
+index 5a766816..0f047d6e 100644
+--- a/.github/workflows/master.yml
++++ b/.github/workflows/master.yml
+@@ -411,4 +411,4 @@ jobs:
+           # Run Windows tests
+           pytest --splits=${{ matrix.splits }} --group=${{ matrix.group }} \
+             --ignore-flavors --ignore=tests/projects --ignore=tests/examples --ignore=tests/evaluate --ignore=tests/optuna \
+-            --ignore=tests/pyspark/optuna --ignore=tests/genai tests
++            --ignore=tests/pyspark/optuna --ignore=tests/genai --ignore=tests/sagemaker tests

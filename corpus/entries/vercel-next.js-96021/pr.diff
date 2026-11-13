@@ -1,0 +1,371 @@
+diff --git a/packages/next/src/client/dev/hot-reloader/app/hot-reloader-app.tsx b/packages/next/src/client/dev/hot-reloader/app/hot-reloader-app.tsx
+index b03e568b7..35af5e073 100644
+--- a/packages/next/src/client/dev/hot-reloader/app/hot-reloader-app.tsx
++++ b/packages/next/src/client/dev/hot-reloader/app/hot-reloader-app.tsx
+@@ -443,6 +443,27 @@ export function processMessage(
+ 
+       return
+     }
++    case HMR_MESSAGE_SENT_TO_BROWSER.STATIC_PARAMS_CHANGED: {
++      // Re-fetch the current router tree so the render picks up the new set of
++      // statically-known params (and thus the fresh `fallbackParams`). Unlike
++      // `SERVER_COMPONENT_CHANGES` this does not store an HMR refresh hash, so
++      // it doesn't invalidate `"use cache"` entries.
++      if (
++        RuntimeErrorHandler.hadRuntimeError ||
++        document.documentElement.id === '__next_error__'
++      ) {
++        if (reloading) return
++        reloading = true
++        return window.location.reload()
++      }
++
++      startTransition(() => {
++        publicAppRouterInstance.hmrRefresh()
++        dispatcher.onRefresh()
++      })
++
++      return
++    }
+     case HMR_MESSAGE_SENT_TO_BROWSER.RELOAD_PAGE: {
+       turbopackHmr?.onReloadPage()
+       sendMessage(
+diff --git a/packages/next/src/client/dev/hot-reloader/pages/hot-reloader-pages.ts b/packages/next/src/client/dev/hot-reloader/pages/hot-reloader-pages.ts
+index 94315cf62..ace2164d4 100644
+--- a/packages/next/src/client/dev/hot-reloader/pages/hot-reloader-pages.ts
++++ b/packages/next/src/client/dev/hot-reloader/pages/hot-reloader-pages.ts
+@@ -346,6 +346,10 @@ function processMessage(message: HmrMessageSentToBrowser) {
+       }
+       return
+     }
++    case HMR_MESSAGE_SENT_TO_BROWSER.STATIC_PARAMS_CHANGED: {
++      // Only relevant to the App Router; ignored in the Pages Router client.
++      return
++    }
+     case HMR_MESSAGE_SENT_TO_BROWSER.SERVER_ERROR: {
+       const { errorJSON } = message
+       if (errorJSON) {
+diff --git a/packages/next/src/client/page-bootstrap.ts b/packages/next/src/client/page-bootstrap.ts
+index da163c527..1a8da9aaa 100644
+--- a/packages/next/src/client/page-bootstrap.ts
++++ b/packages/next/src/client/page-bootstrap.ts
+@@ -113,6 +113,7 @@ export function pageBootstrap(assetPrefix: string) {
+         case HMR_MESSAGE_SENT_TO_BROWSER.ADDED_PAGE:
+         case HMR_MESSAGE_SENT_TO_BROWSER.REMOVED_PAGE:
+         case HMR_MESSAGE_SENT_TO_BROWSER.SERVER_COMPONENT_CHANGES:
++        case HMR_MESSAGE_SENT_TO_BROWSER.STATIC_PARAMS_CHANGED:
+         case HMR_MESSAGE_SENT_TO_BROWSER.SYNC:
+         case HMR_MESSAGE_SENT_TO_BROWSER.BUILT:
+         case HMR_MESSAGE_SENT_TO_BROWSER.BUILDING:
+diff --git a/packages/next/src/server/dev/hot-reloader-types.ts b/packages/next/src/server/dev/hot-reloader-types.ts
+index c72b51236..73479447a 100644
+--- a/packages/next/src/server/dev/hot-reloader-types.ts
++++ b/packages/next/src/server/dev/hot-reloader-types.ts
+@@ -26,6 +26,7 @@ export const enum HMR_MESSAGE_SENT_TO_BROWSER {
+   REMOVED_PAGE = 'removedPage',
+   RELOAD_PAGE = 'reloadPage',
+   SERVER_COMPONENT_CHANGES = 'serverComponentChanges',
++  STATIC_PARAMS_CHANGED = 'staticParamsChanged',
+   MIDDLEWARE_CHANGES = 'middlewareChanges',
+   CLIENT_CHANGES = 'clientChanges',
+   SERVER_ONLY_CHANGES = 'serverOnlyChanges',
+@@ -119,6 +120,14 @@ export interface ServerComponentChangesMessage {
+   hash: string
+ }
+ 
++/**
++ * Sent in dev when a route's set of statically-known params changed, e.g.
++ * because `generateStaticParams` was added, removed, or edited.
++ */
++export interface StaticParamsChangedMessage {
++  type: HMR_MESSAGE_SENT_TO_BROWSER.STATIC_PARAMS_CHANGED
++}
++
+ export interface MiddlewareChangesMessage {
+   type: HMR_MESSAGE_SENT_TO_BROWSER.MIDDLEWARE_CHANGES
+ }
+@@ -200,6 +209,7 @@ export type HmrMessageSentToBrowser =
+   | RemovedPageMessage
+   | ReloadPageMessage
+   | ServerComponentChangesMessage
++  | StaticParamsChangedMessage
+   | ClientChangesMessage
+   | MiddlewareChangesMessage
+   | ServerOnlyChangesMessage
+diff --git a/packages/next/src/server/dev/next-dev-server.ts b/packages/next/src/server/dev/next-dev-server.ts
+index 9ab6b2548..7be8cd643 100644
+--- a/packages/next/src/server/dev/next-dev-server.ts
++++ b/packages/next/src/server/dev/next-dev-server.ts
+@@ -866,24 +866,6 @@ export default class DevServer extends Server {
+               )
+             }
+           }
+-
+-          // Since generateStaticParams run on the background, when accessing the
+-          // fallbackParams during the render, it is still set to the previous
+-          // result from the cache. Therefore when the result has changed, re-render
+-          // the Server Component to sync the fallbackParams with the new result.
+-          if (
+-            isAppPath &&
+-            this.nextConfig.cacheComponents &&
+-            // Ensure this is not the first invocation.
+-            result &&
+-            // Ideally, we would want to compare the whole objects, but that is too expensive.
+-            result.prerenderedRoutes?.length !== prerenderedRoutes?.length
+-          ) {
+-            this.bundlerService.sendHmrMessage({
+-              type: HMR_MESSAGE_SENT_TO_BROWSER.SERVER_COMPONENT_CHANGES,
+-              hash: `generateStaticParams-${Date.now()}`,
+-            })
+-          }
+         }
+ 
+         if (!isAppPath && this.nextConfig.output === 'export') {
+@@ -962,6 +944,27 @@ export default class DevServer extends Server {
+           }
+         }
+         this.staticPathsCache.set(pathname, value)
++
++        // Since generateStaticParams runs in the background, the fallbackParams
++        // accessed during a render are derived from the previous result served
++        // by the static paths cache. Now that the cache holds the new result,
++        // trigger a refresh so the next render picks up the new fallbackParams
++        // (e.g. so blocking-route validation reflects params that just became
++        // statically known).
++        if (
++          isAppPath &&
++          this.nextConfig.cacheComponents &&
++          // Ensure this is not the first invocation.
++          result &&
++          // Comparing lengths rather than the whole objects, which is too
++          // expensive.
++          result.prerenderedRoutes?.length !== prerenderedRoutes?.length
++        ) {
++          this.bundlerService.sendHmrMessage({
++            type: HMR_MESSAGE_SENT_TO_BROWSER.STATIC_PARAMS_CHANGED,
++          })
++        }
++
+         return value
+       })
+       .catch((err) => {
+diff --git a/test/e2e/app-dir/cache-components-errors/use-cache.util.ts b/test/e2e/app-dir/cache-components-errors/use-cache.util.ts
+index 206cf7408..20c77c8b2 100644
+--- a/test/e2e/app-dir/cache-components-errors/use-cache.util.ts
++++ b/test/e2e/app-dir/cache-components-errors/use-cache.util.ts
+@@ -1,5 +1,5 @@
+ import { isNextDev } from 'e2e-utils'
+-import { retry } from 'next-test-utils'
++import { retry, waitForNoRedbox } from 'next-test-utils'
+ import { getDeterministicOutput, getPrerenderOutput } from './utils'
+ import type { CacheComponentsErrorsContext } from './shared.util'
+ 
+@@ -1253,6 +1253,50 @@ Learn more: https://nextjs.org/docs/messages/blocking-prerender-dynamic`
+            }
+           `)
+         })
++
++        it('should clear the redbox after adding generateStaticParams via HMR', async () => {
++          // Regression test for NAR-491: after adding `generateStaticParams`
++          // that covers the requested slug, the slug is no longer a fallback
++          // param, so the blocking-route validation must clear. This requires
++          // the render to pick up the fresh `fallbackParams`. Because
++          // `generateStaticParams` is recomputed in the background (the static
++          // paths cache serves the previous result until then), the render
++          // triggered by the edit itself still uses the stale `fallbackParams`;
++          // a follow-up HMR update, sent once the recompute lands, is what
++          // syncs them.
++          const browser = await next.browser('/use-cache-params/foo')
++
++          await expect(browser).toDisplayCollapsedRedbox(`
++             {
++               "code": "E1427",
++               "description": "Next.js encountered runtime data during prerendering.",
++               "environmentLabel": "Server",
++               "label": "Blocking Route",
++               "source": null,
++               "stack": [
++                 "Page [Prerender] <anonymous>",
++               ],
++             }
++            `)
++
++          // The recompute is deliberately delayed so it resolves only after the
++          // edit's own HMR refresh has re-rendered with the stale fallback
++          // params. That way the redbox can only clear via the follow-up static
++          // paths sync update, not the edit's refresh itself, which keeps this
++          // an accurate regression test.
++          await next.patchFile(
++            'app/use-cache-params/[slug]/page.tsx',
++            (content) =>
++              `export async function generateStaticParams() {\n` +
++              `  await new Promise((resolve) => setTimeout(resolve, 2000))\n` +
++              `  return [{ slug: 'foo' }]\n` +
++              `}\n\n` +
++              content,
++            async () => {
++              await waitForNoRedbox(browser)
++            }
++          )
++        })
+       } else {
+         it('should error the build', async () => {
+           try {
+diff --git a/test/e2e/app-dir/use-cache-dev/app/api/cached/route.ts b/test/e2e/app-dir/use-cache-dev/app/api/cached/route.ts
+new file mode 100644
+index 000000000..276d4387d
+--- /dev/null
++++ b/test/e2e/app-dir/use-cache-dev/app/api/cached/route.ts
+@@ -0,0 +1,16 @@
++async function getCachedData() {
++  'use cache'
++
++  return { text: 'foo', mathRandom: Math.random() }
++}
++
++export async function GET() {
++  const { text, mathRandom } = await getCachedData()
++
++  // Read outside of "use cache" so it reflects the recompiled module on every
++  // request. This lets the test distinguish a stale cache hit (where `text`
++  // keeps its old value) from the module never having recompiled at all.
++  const uncachedText = 'foo'
++
++  return Response.json({ text, mathRandom, uncachedText })
++}
+diff --git a/test/e2e/app-dir/use-cache-dev/app/cached-page/page.tsx b/test/e2e/app-dir/use-cache-dev/app/cached-page/page.tsx
+new file mode 100644
+index 000000000..a4cbae69d
+--- /dev/null
++++ b/test/e2e/app-dir/use-cache-dev/app/cached-page/page.tsx
+@@ -0,0 +1,22 @@
++async function getCachedData() {
++  'use cache'
++
++  return { text: 'foo', mathRandom: Math.random() }
++}
++
++export default async function Page() {
++  const { text, mathRandom } = await getCachedData()
++
++  // Read outside of "use cache" so it reflects the recompiled module on every
++  // request. This lets the test distinguish a stale cache hit (where `text`
++  // keeps its old value) from the module never having recompiled at all.
++  const uncachedText = 'foo'
++
++  return (
++    <div id="container">
++      <span id="text">{text}</span>
++      <span id="mathRandom">{mathRandom}</span>
++      <span id="uncachedText">{uncachedText}</span>
++    </div>
++  )
++}
+diff --git a/test/e2e/app-dir/use-cache-dev/use-cache-dev.test.ts b/test/e2e/app-dir/use-cache-dev/use-cache-dev.test.ts
+index 8a81049a3..da4e0a220 100644
+--- a/test/e2e/app-dir/use-cache-dev/use-cache-dev.test.ts
++++ b/test/e2e/app-dir/use-cache-dev/use-cache-dev.test.ts
+@@ -108,6 +108,103 @@ describe('use-cache-dev', () => {
+       )
+     })
+ 
++    // These two currently fail in both Turbopack and Webpack. Dev "use cache"
++    // invalidation relies on the __next_hmr_refresh_hash__ cookie that the
++    // browser HMR client sets after an edit; a client that fetches directly
++    // (curl, a plain fetch, a second device) never sends that cookie, so the
++    // "use cache" key does not change across the edit and the stale entry is
++    // reused. Change these to `it` once editing a file invalidates cached data
++    // for requests that do not carry the cookie, covering both route handlers
++    // and pages.
++    it.failing(
++      'should update cached data used by a route handler after editing a file',
++      async () => {
++        const initialData = await next
++          .fetch('/api/cached')
++          .then((res) => res.json())
++
++        expect(initialData.text).toBe('foo')
++        expect(initialData.uncachedText).toBe('foo')
++        expect(initialData.mathRandom).toEqual(expect.any(Number))
++
++        // A subsequent fetch returns the same cached value.
++        const cachedData = await next
++          .fetch('/api/cached')
++          .then((res) => res.json())
++
++        expect(cachedData.text).toBe('foo')
++        expect(cachedData.mathRandom).toBe(initialData.mathRandom)
++
++        // Edit the source literals inside and outside of "use cache".
++        await next.patchFile('app/api/cached/route.ts', (content) =>
++          content.replaceAll('foo', 'bar')
++        )
++
++        // Wait until the route handler module has recompiled. The uncached
++        // value is read outside of "use cache", so it reflects the edited
++        // source. This ensures we then assert the cached value against the
++        // post-edit module, not a request that raced the recompilation.
++        await retry(async () => {
++          const recompiledData = await next
++            .fetch('/api/cached')
++            .then((res) => res.json())
++
++          expect(recompiledData.uncachedText).toBe('bar')
++        })
++
++        const newData = await next
++          .fetch('/api/cached')
++          .then((res) => res.json())
++
++        // The cached function should return the edited value and recompute its
++        // random value due to a cache miss.
++        expect(newData.text).toBe('bar')
++        expect(newData.mathRandom).not.toBe(initialData.mathRandom)
++      }
++    )
++
++    it.failing(
++      'should update cached data used by a page fetched without a cookie after editing a file',
++      async () => {
++        // `next.render$` fetches directly, without the browser HMR client, so
++        // the request does not carry the __next_hmr_refresh_hash__ cookie.
++        let $ = await next.render$('/cached-page')
++        const initialText = $('#text').text()
++        const initialMathRandom = $('#mathRandom').text()
++
++        expect(initialText).toBe('foo')
++        expect($('#uncachedText').text()).toBe('foo')
++
++        // A subsequent fetch returns the same cached value.
++        $ = await next.render$('/cached-page')
++
++        expect($('#text').text()).toBe('foo')
++        expect($('#mathRandom').text()).toBe(initialMathRandom)
++
++        // Edit the source literals inside and outside of "use cache".
++        await next.patchFile('app/cached-page/page.tsx', (content) =>
++          content.replaceAll('foo', 'bar')
++        )
++
++        // Wait until the page module has recompiled. The uncached value is read
++        // outside of "use cache", so it reflects the edited source. This
++        // ensures we then assert the cached value against the post-edit module,
++        // not a request that raced the recompilation.
++        await retry(async () => {
++          const $$ = await next.render$('/cached-page')
++
++          expect($$('#uncachedText').text()).toBe('bar')
++        })
++
++        $ = await next.render$('/cached-page')
++
++        // The cached function should return the edited value and recompute its
++        // random value due to a cache miss.
++        expect($('#text').text()).toBe('bar')
++        expect($('#mathRandom').text()).not.toBe(initialMathRandom)
++      }
++    )
++
+     it('should return cached data after reload', async () => {
+       let $ = await next.render$('/')
+       const initialContent = $('#container').text()

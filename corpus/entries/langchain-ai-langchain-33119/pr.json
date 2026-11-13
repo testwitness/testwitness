@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/langchain-ai/langchain/pull/33119",
+  "repo": "langchain-ai/langchain",
+  "number": 33119,
+  "title": "test(mistralai): add xfail for structured output test",
+  "merged_at": "2025-09-25T17:05:31Z",
+  "stars": 148923,
+  "license": "MIT",
+  "language": "python",
+  "category": "R004",
+  "split": "tuning",
+  "base_sha": "12daba63ff3f3fab77a872e0228183ae4195ff82",
+  "head_sha": "deb25db83e267bab02dc4d607f1d92dde203b787",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 0
+}

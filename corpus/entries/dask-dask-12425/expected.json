@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_series_map_dtype_all_mapped",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_series_map_dtype_unmapped",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_series_map_dtype_null_base",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  }
+]

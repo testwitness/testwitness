@@ -1,0 +1,568 @@
+diff --git a/tests/config/source/test_toml_pyproject.py b/tests/config/source/test_toml_pyproject.py
+index 846eac1..972f9ae 100644
+--- a/tests/config/source/test_toml_pyproject.py
++++ b/tests/config/source/test_toml_pyproject.py
+@@ -103,28 +103,24 @@ def test_config_in_toml_replace_from_section_absolute_nok(tox_project: ToxProjec
+     )
+ 
+ 
+-def test_config_in_toml_replace_posargs_default(tox_project: ToxProjectCreator) -> None:
+-    project = tox_project({
+-        "pyproject.toml": """
+-        [tool.tox.env.A]
+-        commands = [["python", { replace = "posargs", default = ["a", "b"], extend = true } ]]
+-        """
+-    })
+-    outcome = project.run("c", "-e", "A", "-k", "commands")
+-    outcome.assert_success()
+-    outcome.assert_out_err("[testenv:A]\ncommands = python a b\n", "")
+-
+-
+-def test_config_in_toml_replace_posargs_empty(tox_project: ToxProjectCreator) -> None:
++@pytest.mark.parametrize(
++    ("posargs", "expected"),
++    [
++        pytest.param([], "python a b", id="default"),
++        pytest.param(["--"], "python", id="empty"),
++        pytest.param(["--", "c", "d"], "python c d", id="set"),
++    ],
++)
++def test_config_in_toml_replace_posargs(tox_project: ToxProjectCreator, posargs: list[str], expected: str) -> None:
+     project = tox_project({
+         "pyproject.toml": """
+         [tool.tox.env.A]
+         commands = [["python", { replace = "posargs", default = ["a", "b"], extend = true } ]]
+         """
+     })
+-    outcome = project.run("c", "-e", "A", "-k", "commands", "--")
++    outcome = project.run("c", "-e", "A", "-k", "commands", *posargs)
+     outcome.assert_success()
+-    outcome.assert_out_err("[testenv:A]\ncommands = python\n", "")
++    outcome.assert_out_err(f"[testenv:A]\ncommands = {expected}\n", "")
+ 
+ 
+ def test_config_in_toml_replace_posargs_empty_optional(tox_project: ToxProjectCreator) -> None:
+@@ -139,18 +135,6 @@ def test_config_in_toml_replace_posargs_empty_optional(tox_project: ToxProjectCr
+     outcome.assert_out_err("[testenv:A]\ncommands = python\n", "")
+ 
+ 
+-def test_config_in_toml_replace_posargs_set(tox_project: ToxProjectCreator) -> None:
+-    project = tox_project({
+-        "pyproject.toml": """
+-        [tool.tox.env.A]
+-        commands = [["python", { replace = "posargs", default = ["a", "b"], extend = true } ]]
+-        """
+-    })
+-    outcome = project.run("c", "-e", "A", "-k", "commands", "--", "c", "d")
+-    outcome.assert_success()
+-    outcome.assert_out_err("[testenv:A]\ncommands = python c d\n", "")
+-
+-
+ def test_config_in_toml_replace_env_default(tox_project: ToxProjectCreator, monkeypatch: pytest.MonkeyPatch) -> None:
+     project = tox_project({
+         "pyproject.toml": """
+@@ -732,29 +716,30 @@ def test_config_in_toml_replace_if_error(tox_project: ToxProjectCreator, conditi
+         project.run("c", "-e", "A", "-k", "description")
+ 
+ 
+-def test_config_in_toml_replace_if_factor_positive(tox_project: ToxProjectCreator) -> None:
+-
+-    project = tox_project({
+-        "pyproject.toml": dedent("""
+-        [tool.tox.env."3.13-django50"]
+-        description = { replace = "if", condition = "factor.django50", then = "has django50", else = "no django50" }
+-        """),
+-    })
+-    outcome = project.run("c", "-e", "3.13-django50", "-k", "description")
+-    outcome.assert_success()
+-    outcome.assert_out_err("[testenv:3.13-django50]\ndescription = has django50\n", "")
+-
+-
+-def test_config_in_toml_replace_if_factor_negative(tox_project: ToxProjectCreator) -> None:
++@pytest.mark.parametrize(
++    ("env", "condition", "then", "else_", "expected"),
++    [
++        pytest.param("3.13-django50", "factor.django50", "has django50", "no django50", "has django50", id="positive"),
++        pytest.param("3.13", "factor.django50", "has django50", "no django50", "no django50", id="negative"),
++        pytest.param("py313-django50", "factor.django50 and factor.py313", "both", "not both", "both", id="and"),
++        pytest.param("py313", "factor.django50 or factor.py313", "at least one", "neither", "at least one", id="or"),
++    ],
++)
++def test_config_in_toml_replace_if_factor(
++    tox_project: ToxProjectCreator, env: str, condition: str, then: str, else_: str, expected: str
++) -> None:
+     project = tox_project({
+-        "pyproject.toml": dedent("""
+-        [tool.tox.env."3.13"]
+-        description = { replace = "if", condition = "factor.django50", then = "has django50", else = "no django50" }
++        "pyproject.toml": dedent(f"""
++        [tool.tox.env."{env}"]
++        description.replace = "if"
++        description.condition = "{condition}"
++        description.then = "{then}"
++        description.else = "{else_}"
+         """),
+     })
+-    outcome = project.run("c", "-e", "3.13", "-k", "description")
++    outcome = project.run("c", "-e", env, "-k", "description")
+     outcome.assert_success()
+-    outcome.assert_out_err("[testenv:3.13]\ndescription = no django50\n", "")
++    outcome.assert_out_err(f"[testenv:{env}]\ndescription = {expected}\n", "")
+ 
+ 
+ def test_config_in_toml_replace_if_factor_platform(tox_project: ToxProjectCreator) -> None:
+@@ -785,36 +770,6 @@ def test_config_in_toml_replace_if_factor_not(tox_project: ToxProjectCreator) ->
+     outcome.assert_out_err(f"[testenv:3.13]\ndescription = {expected}\n", "")
+ 
+ 
+-def test_config_in_toml_replace_if_factor_and(tox_project: ToxProjectCreator) -> None:
+-    project = tox_project({
+-        "pyproject.toml": dedent("""
+-        [tool.tox.env.py313-django50]
+-        description.replace = "if"
+-        description.condition = "factor.django50 and factor.py313"
+-        description.then = "both"
+-        description.else = "not both"
+-        """),
+-    })
+-    outcome = project.run("c", "-e", "py313-django50", "-k", "description")
+-    outcome.assert_success()
+-    outcome.assert_out_err("[testenv:py313-django50]\ndescription = both\n", "")
+-
+-
+-def test_config_in_toml_replace_if_factor_or(tox_project: ToxProjectCreator) -> None:
+-    project = tox_project({
+-        "pyproject.toml": dedent("""
+-        [tool.tox.env.py313]
+-        description.replace = "if"
+-        description.condition = "factor.django50 or factor.py313"
+-        description.then = "at least one"
+-        description.else = "neither"
+-        """),
+-    })
+-    outcome = project.run("c", "-e", "py313", "-k", "description")
+-    outcome.assert_success()
+-    outcome.assert_out_err("[testenv:py313]\ndescription = at least one\n", "")
+-
+-
+ def test_config_in_toml_replace_if_factor_combined_with_env(
+     tox_project: ToxProjectCreator, monkeypatch: pytest.MonkeyPatch
+ ) -> None:
+diff --git a/tests/config/test_sets.py b/tests/config/test_sets.py
+index e847b2c..ad90a47 100644
+--- a/tests/config/test_sets.py
++++ b/tests/config/test_sets.py
+@@ -117,18 +117,6 @@ def test_config_lazy_constant(conf_builder: ConfBuilder) -> None:
+     assert lazy_const == 2
+ 
+ 
+-def test_config_constant_repr(conf_builder: ConfBuilder) -> None:
+-    config_set = conf_builder("")
+-    defined = config_set.add_constant(keys="a", value=1, desc="ok")
+-    assert repr(defined)
+-
+-
+-def test_config_dynamic_repr(conf_builder: ConfBuilder) -> None:
+-    config_set = conf_builder("path = path")
+-    defined = config_set.add_config(keys="path", of_type=Path, default=Path(), desc="path")
+-    assert repr(defined)
+-
+-
+ def test_config_redefine_constant_fail(conf_builder: ConfBuilder) -> None:
+     config_set = conf_builder("path = path")
+     config_set.add_constant(keys="path", desc="desc", value="value")
+diff --git a/tests/session/cmd/test_depends.py b/tests/session/cmd/test_depends.py
+index 299259a..103739d 100644
+--- a/tests/session/cmd/test_depends.py
++++ b/tests/session/cmd/test_depends.py
+@@ -1,9 +1,12 @@
+ from __future__ import annotations
+ 
++import json
+ import sys
+ from textwrap import dedent
+ from typing import TYPE_CHECKING
+ 
++import pytest
++
+ if TYPE_CHECKING:
+     from tests.conftest import PatchPrevPy
+     from tox.pytest import ToxProjectCreator
+@@ -95,247 +98,110 @@ def test_depends_sdist(tox_project: ToxProjectCreator, patch_prev_py: PatchPrevP
+     assert outcome.out == dedent(expected).lstrip()
+ 
+ 
+-def test_depends_glob_star(tox_project: ToxProjectCreator) -> None:
+-    toml = """
+-    env_list = ["3.12", "3.13", "3.14", "lint", "cov"]
+-    [env_run_base]
+-    package = "skip"
+-    [env.cov]
+-    depends = ["3.*"]
+-    """
+-    project = tox_project({"tox.toml": toml})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: 3.12, 3.13, 3.14, lint, cov
+-    ALL
+-       3.12
+-       3.13
+-       3.14
+-       lint
+-       cov
+-          3.12
+-          3.13
+-          3.14
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_glob_question_mark(tox_project: ToxProjectCreator) -> None:
+-    toml = """
+-    env_list = ["a1", "a2", "ab", "cov"]
+-    [env_run_base]
+-    package = "skip"
+-    [env.cov]
+-    depends = ["a?"]
+-    """
+-    project = tox_project({"tox.toml": toml})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: a1, a2, ab, cov
+-    ALL
+-       a1
+-       a2
+-       ab
+-       cov
+-          a1
+-          a2
+-          ab
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_glob_no_match(tox_project: ToxProjectCreator) -> None:
+-    toml = """
+-    env_list = ["lint", "cov"]
+-    [env_run_base]
+-    package = "skip"
+-    [env.cov]
+-    depends = ["py*"]
+-    """
+-    project = tox_project({"tox.toml": toml})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: lint, cov
+-    ALL
+-       lint
+-       cov
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_glob_mixed(tox_project: ToxProjectCreator) -> None:
+-    toml = """
+-    env_list = ["3.13", "3.14", "lint", "cov"]
+-    [env_run_base]
+-    package = "skip"
+-    [env.cov]
+-    depends = ["lint", "3.*"]
+-    """
+-    project = tox_project({"tox.toml": toml})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: 3.13, 3.14, lint, cov
+-    ALL
+-       3.13
+-       3.14
+-       lint
+-       cov
+-          3.13
+-          3.14
+-          lint
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_glob_excludes_self(tox_project: ToxProjectCreator) -> None:
+-    toml = """
+-    env_list = ["a", "b", "cov"]
+-    [env_run_base]
+-    package = "skip"
+-    [env.cov]
+-    depends = ["*"]
+-    """
+-    project = tox_project({"tox.toml": toml})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: a, b, cov
+-    ALL
+-       a
+-       b
+-       cov
+-          a
+-          b
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_ini_glob_star(tox_project: ToxProjectCreator) -> None:
+-    ini = """
+-    [tox]
+-    env_list = 3.12,3.13,3.14,lint,cov
+-    [testenv]
+-    skip_install = true
+-    [testenv:cov]
+-    depends = 3.*
+-    """
+-    project = tox_project({"tox.ini": ini})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: 3.12, 3.13, 3.14, lint, cov
+-    ALL
+-       3.12
+-       3.13
+-       3.14
+-       lint
+-       cov
+-          3.12
+-          3.13
+-          3.14
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_ini_glob_question_mark(tox_project: ToxProjectCreator) -> None:
+-    ini = """
+-    [tox]
+-    env_list = a1,a2,ab,cov
+-    [testenv]
+-    skip_install = true
+-    [testenv:cov]
+-    depends = a?
+-    """
+-    project = tox_project({"tox.ini": ini})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: a1, a2, ab, cov
+-    ALL
+-       a1
+-       a2
+-       ab
+-       cov
+-          a1
+-          a2
+-          ab
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_ini_glob_no_match(tox_project: ToxProjectCreator) -> None:
+-    ini = """
+-    [tox]
+-    env_list = lint,cov
+-    [testenv]
+-    skip_install = true
+-    [testenv:cov]
+-    depends = py*
+-    """
+-    project = tox_project({"tox.ini": ini})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: lint, cov
+-    ALL
+-       lint
+-       cov
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_ini_glob_mixed(tox_project: ToxProjectCreator) -> None:
+-    ini = """
+-    [tox]
+-    env_list = 3.13,3.14,lint,cov
+-    [testenv]
+-    skip_install = true
+-    [testenv:cov]
+-    depends = lint,3.*
+-    """
+-    project = tox_project({"tox.ini": ini})
++@pytest.mark.parametrize("fmt", ["toml", "ini"])
++@pytest.mark.parametrize(
++    ("env_list", "depends", "expected"),
++    [
++        pytest.param(
++            ["3.12", "3.13", "3.14", "lint", "cov"],
++            ["3.*"],
++            """\
++            Execution order: 3.12, 3.13, 3.14, lint, cov
++            ALL
++               3.12
++               3.13
++               3.14
++               lint
++               cov
++                  3.12
++                  3.13
++                  3.14
++            """,
++            id="star",
++        ),
++        pytest.param(
++            ["a1", "a2", "ab", "cov"],
++            ["a?"],
++            """\
++            Execution order: a1, a2, ab, cov
++            ALL
++               a1
++               a2
++               ab
++               cov
++                  a1
++                  a2
++                  ab
++            """,
++            id="question_mark",
++        ),
++        pytest.param(
++            ["lint", "cov"],
++            ["py*"],
++            """\
++            Execution order: lint, cov
++            ALL
++               lint
++               cov
++            """,
++            id="no_match",
++        ),
++        pytest.param(
++            ["3.13", "3.14", "lint", "cov"],
++            ["lint", "3.*"],
++            """\
++            Execution order: 3.13, 3.14, lint, cov
++            ALL
++               3.13
++               3.14
++               lint
++               cov
++                  3.13
++                  3.14
++                  lint
++            """,
++            id="mixed",
++        ),
++        pytest.param(
++            ["a", "b", "cov"],
++            ["*"],
++            """\
++            Execution order: a, b, cov
++            ALL
++               a
++               b
++               cov
++                  a
++                  b
++            """,
++            id="excludes_self",
++        ),
++    ],
++)
++def test_depends_glob(
++    tox_project: ToxProjectCreator, fmt: str, env_list: list[str], depends: list[str], expected: str
++) -> None:
++    if fmt == "toml":
++        conf = f"""
++        env_list = {json.dumps(env_list)}
++        [env_run_base]
++        package = "skip"
++        [env.cov]
++        depends = {json.dumps(depends)}
++        """
++    else:
++        conf = f"""
++        [tox]
++        env_list = {",".join(env_list)}
++        [testenv]
++        skip_install = true
++        [testenv:cov]
++        depends = {",".join(depends)}
++        """
++    project = tox_project({f"tox.{fmt}": conf})
+     outcome = project.run("de")
+     outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: 3.13, 3.14, lint, cov
+-    ALL
+-       3.13
+-       3.14
+-       lint
+-       cov
+-          3.13
+-          3.14
+-          lint
+-    """)
+-    assert outcome.out == expected
+-
+-
+-def test_depends_ini_glob_excludes_self(tox_project: ToxProjectCreator) -> None:
+-    ini = """
+-    [tox]
+-    env_list = a,b,cov
+-    [testenv]
+-    skip_install = true
+-    [testenv:cov]
+-    depends = *
+-    """
+-    project = tox_project({"tox.ini": ini})
+-    outcome = project.run("de")
+-    outcome.assert_success()
+-    expected = dedent("""\
+-    Execution order: a, b, cov
+-    ALL
+-       a
+-       b
+-       cov
+-          a
+-          b
+-    """)
+-    assert outcome.out == expected
++    assert outcome.out == dedent(expected)
+ 
+ 
+ def test_depends_help(tox_project: ToxProjectCreator) -> None:
+diff --git a/tests/test_version.py b/tests/test_version.py
+index dd9d996..3a58f49 100644
+--- a/tests/test_version.py
++++ b/tests/test_version.py
+@@ -14,10 +14,6 @@ if TYPE_CHECKING:
+     from tox.pytest import ToxProjectCreator
+ 
+ 
+-def test_version() -> None:
+-    assert __version__
+-
+-
+ def test_version_without_plugin(tox_project: ToxProjectCreator) -> None:
+     outcome = tox_project({"tox.ini": ""}).run("--version")
+     outcome.assert_success()
+diff --git a/tests/util/test_cpu.py b/tests/util/test_cpu.py
+index bd2544d..08d95b8 100644
+--- a/tests/util/test_cpu.py
++++ b/tests/util/test_cpu.py
+@@ -9,6 +9,8 @@ if TYPE_CHECKING:
+     from pytest_mock import MockerFixture
+ 
+ 
++# kept after test-pruning defense (do not re-nominate): making auto_detect_cpus always return 1 fails only
++# this test across the whole suite, the fallback test below cannot tell 1 from the real count
+ def test_auto_detect_cpus() -> None:
+     num_cpus_actual = multiprocessing.cpu_count()
+     assert auto_detect_cpus() == num_cpus_actual

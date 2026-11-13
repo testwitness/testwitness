@@ -1,0 +1,83 @@
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
+index 9d2493f8a..131cb3a5d 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
+@@ -160,7 +160,7 @@ test.describe("Connections Page - CRUD Operations", () => {
+     await context.close();
+   });
+ 
+-  test("should create a new connection and display it in list", async () => {
++  test.fixme("should create a new connection and display it in list", async () => {
+     test.setTimeout(120_000);
+     await connectionsPage.navigate();
+ 
+@@ -173,7 +173,7 @@ test.describe("Connections Page - CRUD Operations", () => {
+     await connectionsPage.verifyConnectionInList(newConnection.connection_id, newConnection.conn_type);
+   });
+ 
+-  test("should edit an existing connection", async () => {
++  test.fixme("should edit an existing connection", async () => {
+     test.setTimeout(120_000);
+     await connectionsPage.navigate();
+ 
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
+index f6160e560..11b58a22f 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
+@@ -121,7 +121,7 @@ test.describe("DAG Calendar Tab", () => {
+   // can override the PATCH-to-failed state back to success before tests run
+   // because the shared testDag may already be unpaused by parallel tests.
+ 
+-  test("verify hover shows correct run states", async () => {
++  test.fixme("verify hover shows correct run states", async () => {
+     await calendar.switchToHourly();
+ 
+     const states = await calendar.getManualRunStates();
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
+index f4577873e..00ef07e96 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
+@@ -31,7 +31,7 @@ test.describe("DAG Code Tab", () => {
+     await codePage.navigateToCodeTab(dagId);
+   });
+ 
+-  test("Verify DAG source code is displayed", async () => {
++  test.fixme("Verify DAG source code is displayed", async () => {
+     await codePage.verifySourceCodeDisplayed();
+   });
+ 
+@@ -43,7 +43,7 @@ test.describe("DAG Code Tab", () => {
+     await codePage.verifyCodeIsScrollable();
+   });
+ 
+-  test("Verify line numbers are displayed", async () => {
++  test.fixme("Verify line numbers are displayed", async () => {
+     await codePage.verifyLineNumbersDisplayed();
+   });
+ });
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
+index d8638e702..bf7536c1f 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
+@@ -102,7 +102,7 @@ test.describe("Events with Generated Data", () => {
+     await eventsPage.verifyLogEntriesWithData();
+   });
+ 
+-  test("verify search for specific event type and filtered results", async () => {
++  test.fixme("verify search for specific event type and filtered results", async () => {
+     await eventsPage.navigate();
+ 
+     const initialRowCount = await eventsPage.getTableRowCount();
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/requiredAction.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/requiredAction.spec.ts
+index 3588720ea..e84e09edd 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/requiredAction.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/requiredAction.spec.ts
+@@ -40,7 +40,7 @@ test.describe("Verify Required Action page", () => {
+     await context.close();
+   });
+ 
+-  test("Verify the actions list/table is displayed (or empty state if none)", async ({ page }) => {
++  test.fixme("Verify the actions list/table is displayed (or empty state if none)", async ({ page }) => {
+     const browsePage = new RequiredActionsPage(page);
+ 
+     await browsePage.navigateToRequiredActionsPage();

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/streamlit/streamlit/pull/13821",
+  "repo": "streamlit/streamlit",
+  "number": 13821,
+  "title": "Increase coverage change threshold to 0.05%",
+  "merged_at": "2026-02-04T16:02:09Z",
+  "stars": 46220,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "732dd9bbd3e4464abdf9787e99abc92db102f3d4",
+  "head_sha": "2ca8d55a4a1966a5aa6a3529b7e12a60b9bbc12e",
+  "files_changed": 2,
+  "additions": 2,
+  "deletions": 2
+}

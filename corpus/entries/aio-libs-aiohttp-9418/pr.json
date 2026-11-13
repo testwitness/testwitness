@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aio-libs/aiohttp/pull/9418",
+  "repo": "aio-libs/aiohttp",
+  "number": 9418,
+  "title": "Add xfail test for #9336",
+  "merged_at": "2024-10-06T20:30:20Z",
+  "stars": 16605,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R010",
+  "split": "tuning",
+  "base_sha": "24b0e6f7c9d5a0815aebdc0dde5ff9a860a550d9",
+  "head_sha": "aecd744c74edaa986df839c6d4c0471c12c93e29",
+  "files_changed": 1,
+  "additions": 19,
+  "deletions": 1
+}

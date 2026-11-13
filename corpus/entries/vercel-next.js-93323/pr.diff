@@ -1,0 +1,77 @@
+diff --git a/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/index.js b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/index.js
+new file mode 100644
+index 000000000..c7327e64a
+--- /dev/null
++++ b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/index.js
+@@ -0,0 +1,15 @@
++import { used } from './lib'
++
++it('should skip over module', () => {
++  expect(used()).toBe('used')
++
++  const modules = Array.from(__turbopack_modules__.keys())
++
++  expect(modules).toContainEqual(
++    expect.stringMatching(/cross-function\/input\/lib\.js/)
++  )
++  // TODO the side-effect inference is currently not smart enough to perform cross-function analysis
++  // expect(modules).not.toContainEqual(
++  //   expect.stringMatching(/cross-function\/input\/util\.js/)
++  // )
++})
+diff --git a/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/lib.js b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/lib.js
+new file mode 100644
+index 000000000..c0b4314dc
+--- /dev/null
++++ b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/lib.js
+@@ -0,0 +1,9 @@
++import { exec } from './util.js'
++
++export function unused() {
++  return exec
++}
++
++export function used() {
++  return 'used'
++}
+diff --git a/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/util.js b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/util.js
+new file mode 100644
+index 000000000..53a02964d
+--- /dev/null
++++ b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/util.js
+@@ -0,0 +1,26 @@
++export function cached(getter) {
++  const set = false
++  return {
++    get value() {
++      if (!set) {
++        const value = getter()
++        Object.defineProperty(this, 'value', { value })
++        return value
++      }
++      throw new Error('cached value already set')
++    },
++  }
++}
++export const allowsEval = cached(() => {
++  try {
++    const F = Function
++    new F('')
++    return true
++  } catch (_) {
++    return false
++  }
++})
++
++export function exec(foo) {
++  return 'x ' + foo
++}
+diff --git a/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/options.json b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/options.json
+new file mode 100644
+index 000000000..bf30b867b
+--- /dev/null
++++ b/turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/options.json
+@@ -0,0 +1,3 @@
++{
++  "scopeHoisting": false
++}

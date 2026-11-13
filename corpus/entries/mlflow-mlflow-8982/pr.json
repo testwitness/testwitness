@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/8982",
+  "repo": "mlflow/mlflow",
+  "number": 8982,
+  "title": "Ignore `tests/evaluate` in python job",
+  "merged_at": "2023-07-06T12:02:02Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "4119269e2417917b7cb9b316e7eaf1c69dafd971",
+  "head_sha": "6c8205e1f52064def28623420ebbdcd676f75fca",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

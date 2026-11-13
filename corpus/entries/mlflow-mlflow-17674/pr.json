@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/17674",
+  "repo": "mlflow/mlflow",
+  "number": 17674,
+  "title": "Ignore `tests/gateway` in `protobuf-cross-test.yml`",
+  "merged_at": "2025-09-11T23:31:49Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "9b8acf20c6db6ea602b732ada7c9a4b1404b209d",
+  "head_sha": "0e85614490142730ad6dc4d5e7fa2762180ed63c",
+  "files_changed": 1,
+  "additions": 10,
+  "deletions": 3
+}

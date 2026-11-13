@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_cookies_with_not_quoted_cookie_jar",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  }
+]

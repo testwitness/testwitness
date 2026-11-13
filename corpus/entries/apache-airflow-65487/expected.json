@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Assets Page \u203a verify asset details and dependencies",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Connections Page - CRUD Operations \u203a should delete a connection",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  }
+]

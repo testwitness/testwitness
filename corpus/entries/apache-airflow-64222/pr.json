@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/64222",
+  "repo": "apache/airflow",
+  "number": 64222,
+  "title": "Ignore tests results for DB if no tests where collected due to no DB tests available",
+  "merged_at": "2026-03-25T22:34:55Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "W003",
+  "split": "tuning",
+  "base_sha": "64f22f81b436ec26c9d8d7e5beecafb15e1d1433",
+  "head_sha": "3c72592f23ab1a7bba8ed4f9f48c20332a7ab7c9",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 1
+}

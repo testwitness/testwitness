@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_config_constant_repr",
+    "verdict": "tp",
+    "reason": "smoke test deleted with no replacement, production unchanged"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_config_dynamic_repr",
+    "verdict": "tp",
+    "reason": "smoke test deleted with no replacement, production unchanged"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_version",
+    "verdict": "tp",
+    "reason": "smoke test deleted with no replacement, production unchanged"
+  }
+]

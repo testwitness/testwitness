@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestMistralStandard::test_structured_output_pydantic_2_v1",
+    "verdict": "tp",
+    "reason": "override adds non strict xfail to an inherited test"
+  }
+]

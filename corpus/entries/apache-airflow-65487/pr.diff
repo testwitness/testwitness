@@ -1,0 +1,26 @@
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/asset.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/asset.spec.ts
+index f1f11eed5..d40cee8a0 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/asset.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/asset.spec.ts
+@@ -71,7 +71,7 @@ test.describe("Assets Page", () => {
+       .toBe(true);
+   });
+ 
+-  test("verify asset details and dependencies", async ({ assetDetailPage }) => {
++  test.fixme("verify asset details and dependencies", async ({ assetDetailPage }) => {
+     const assetName = testConfig.asset.name;
+ 
+     await assetDetailPage.goto();
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
+index 131cb3a5d..510a49316 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts
+@@ -191,7 +191,7 @@ test.describe("Connections Page - CRUD Operations", () => {
+     expect(stillExists).toBeTruthy();
+   });
+ 
+-  test("should delete a connection", async () => {
++  test.fixme("should delete a connection", async () => {
+     test.setTimeout(120_000);
+ 
+     // Create a temporary connection for deletion test

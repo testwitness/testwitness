@@ -1,0 +1,513 @@
+diff --git a/dask/dataframe/core.py b/dask/dataframe/core.py
+index 70436d9..cdf0426 100644
+--- a/dask/dataframe/core.py
++++ b/dask/dataframe/core.py
+@@ -2,6 +2,7 @@ from __future__ import annotations
+ 
+ import warnings
+ from collections.abc import Iterator
++from typing import Any
+ 
+ import numpy as np
+ import pandas as pd
+@@ -406,12 +407,12 @@ def has_parallel_type(x):
+     return get_parallel_type(x) is not Scalar
+ 
+ 
+-def meta_warning(df, method="apply"):
++def meta_warning(df: Any, method: str) -> str:
+     """
+     Provide an informative message when the user is asked to provide metadata
+     """
+     if is_dataframe_like(df):
+-        meta_str = {k: str(v) for k, v in df.dtypes.to_dict().items()}
++        meta_str: object = {k: str(v) for k, v in df.dtypes.to_dict().items()}
+     elif is_series_like(df):
+         meta_str = (df.name, str(df.dtype))
+     else:
+@@ -428,7 +429,7 @@ def meta_warning(df, method="apply"):
+         msg += (
+             "\n"
+             f"  Before: .{method}(func)\n"
+-            f"  After:  .{method}(func, meta=%s)\n" % str(meta_str)
++            f"  After:  .{method}(func, meta={meta_str}\n"
+         )
+     return msg
+ 
+diff --git a/dask/dataframe/dask_expr/_collection.py b/dask/dataframe/dask_expr/_collection.py
+index 35c17da..adf7811 100644
+--- a/dask/dataframe/dask_expr/_collection.py
++++ b/dask/dataframe/dask_expr/_collection.py
+@@ -3253,7 +3253,7 @@ class DataFrame(FrameBase):
+             meta = expr.emulate(
+                 M.apply, self, function, args=args, udf=True, axis=axis, **kwargs
+             )
+-            warnings.warn(meta_warning(meta))
++            warnings.warn(meta_warning(meta, method="apply"))
+         return new_collection(
+             self.expr.apply(function, *args, meta=meta, axis=axis, **kwargs)
+         )
+@@ -4415,7 +4415,7 @@ class Series(FrameBase):
+         self._validate_axis(axis)
+         if meta is no_default:
+             meta = expr.emulate(M.apply, self, function, args=args, udf=True, **kwargs)
+-            warnings.warn(meta_warning(meta))
++            warnings.warn(meta_warning(meta, method="apply"))
+         return new_collection(self.expr.apply(function, *args, meta=meta, **kwargs))
+ 
+     @classmethod
+diff --git a/dask/dataframe/dask_expr/tests/test_collection.py b/dask/dataframe/dask_expr/tests/test_collection.py
+index ae2b629..e31c2fb 100644
+--- a/dask/dataframe/dask_expr/tests/test_collection.py
++++ b/dask/dataframe/dask_expr/tests/test_collection.py
+@@ -273,21 +273,6 @@ def test_bool(df):
+             bool(cond)
+ 
+ 
+-def test_map_index():
+-    df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
+-    ddf = from_pandas(df, npartitions=2)
+-    assert ddf.known_divisions is True
+-
+-    with pytest.warns(UserWarning):
+-        cleared = ddf.index.map(lambda x: x * 10)
+-    assert cleared.known_divisions is False
+-
+-    with pytest.warns(UserWarning):
+-        applied = ddf.index.map(lambda x: x * 10, is_monotonic=True)
+-    assert applied.known_divisions is True
+-    assert applied.divisions == tuple(x * 10 for x in ddf.divisions)
+-
+-
+ def test_squeeze():
+     df = pd.DataFrame({"x": [1, 3, 6]})
+     df2 = pd.DataFrame({"x": [0]})
+@@ -475,20 +460,6 @@ def test_reset_index_projections(pdf):
+     assert_eq(df.y.reset_index()[["y"]], pdf.y.reset_index()[["y"]], check_index=False)
+ 
+ 
+-def test_series_map_meta():
+-    ser = pd.Series(
+-        ["".join(np.random.choice(["a", "b", "c"], size=3)) for x in range(100)]
+-    )
+-
+-    mapper = pd.Series(np.random.randint(50, size=len(ser)))
+-    expected = ser.map(mapper)
+-    dask_base = from_pandas(ser, npartitions=5)
+-    dask_map = from_pandas(mapper, npartitions=5)
+-    with pytest.warns(UserWarning):
+-        result = dask_base.map(dask_map)
+-    assert_eq(expected, result)
+-
+-
+ @pytest.mark.parametrize("periods", (1, 2))
+ @pytest.mark.parametrize("freq", (None, "1h", timedelta(hours=1)))
+ @pytest.mark.parametrize("axis", ("index", 0, "columns", 1))
+@@ -935,27 +906,6 @@ def test_blockwise_pandas_only_warning(func, pdf, df):
+         assert_eq(func(pdf), func(df))
+ 
+ 
+-def test_map_meta(pdf, df):
+-    expected = pdf.x.map(lambda x: x + 1)
+-    result = df.x.map(lambda x: x + 1, meta=expected.iloc[:0])
+-    assert_eq(result, expected)
+-
+-    result = df.x.map(df.x + 1, meta=expected.iloc[:0])
+-    assert_eq(result, expected)
+-
+-    result = df.x.map(df.x + 1, meta=("x", "int64"))
+-    assert_eq(result, expected)
+-
+-    result = df.x.map((df.x + 1).compute(), meta=("x", "int64"))
+-    assert_eq(result, expected)
+-
+-    pdf.index.name = "a"
+-    df = from_pandas(pdf, npartitions=10)
+-    expected = pdf.x.map(lambda x: x + 1)
+-    result = df.x.map(lambda x: x + 1, meta=("x", "int64"))
+-    assert_eq(result, expected)
+-
+-
+ def test_simplify_add_suffix_add_prefix(df, pdf):
+     result = df.add_prefix("2_")["2_x"].simplify()
+     expected = df[["x"]].simplify().add_prefix("2_")["2_x"]
+diff --git a/dask/dataframe/tests/test_dataframe.py b/dask/dataframe/tests/test_dataframe.py
+index 4bd9139..919e427 100644
+--- a/dask/dataframe/tests/test_dataframe.py
++++ b/dask/dataframe/tests/test_dataframe.py
+@@ -1671,24 +1671,6 @@ def test_assign_pandas_series():
+     assert_eq(ddf, df.assign(c=df["a"]))
+ 
+ 
+-def test_map():
+-    df = pd.DataFrame(
+-        {"a": range(9), "b": [4, 5, 6, 1, 2, 3, 0, 0, 0]},
+-        index=pd.Index([0, 1, 3, 5, 6, 8, 9, 9, 9], name="myindex"),
+-    )
+-    ddf = dd.from_pandas(df, npartitions=3)
+-    with pytest.warns(UserWarning, match="meta"):
+-        assert_eq(ddf.a.map(lambda x: x + 1), df.a.map(lambda x: x + 1))
+-        lk = {v: v + 1 for v in df.a.values}
+-        assert_eq(ddf.a.map(lk), df.a.map(lk))
+-        assert_eq(ddf.b.map(lk), df.b.map(lk))
+-        lk = pd.Series(lk)
+-        assert_eq(ddf.a.map(lk), df.a.map(lk))
+-        assert_eq(ddf.b.map(lk), df.b.map(lk))
+-    assert_eq(ddf.b.map(lk, meta=ddf.b), df.b.map(lk))
+-    assert_eq(ddf.b.map(lk, meta=("b", "i8")), df.b.map(lk))
+-
+-
+ def test_concat():
+     x = _concat([pd.DataFrame(columns=["a", "b"]), pd.DataFrame(columns=["a", "b"])])
+     assert list(x.columns) == ["a", "b"]
+@@ -2941,27 +2923,6 @@ def test_apply_warns():
+     assert "int64" in str(w[0].message)
+ 
+ 
+-@pytest.mark.skipif(not PANDAS_GE_210, reason="Not available before")
+-@pytest.mark.parametrize("na_action", [None, "ignore"])
+-def test_dataframe_map(na_action):
+-    df = pd.DataFrame({"x": [1, 2, 3, np.nan], "y": [10, 20, 30, 40]})
+-    ddf = dd.from_pandas(df, npartitions=2)
+-    with pytest.warns(UserWarning, match="meta"):
+-        assert_eq(
+-            ddf.map(lambda x: x + 1, na_action=na_action),
+-            df.map(lambda x: x + 1, na_action=na_action),
+-        )
+-        assert_eq(ddf.map(lambda x: (x, x)), df.map(lambda x: (x, x)))
+-
+-
+-@pytest.mark.skipif(PANDAS_GE_210, reason="Available at 2.1")
+-def test_dataframe_map_raises():
+-    df = pd.DataFrame({"x": [1, 2, 3, 4], "y": [10, 20, 30, 40]})
+-    ddf = dd.from_pandas(df, npartitions=2)
+-    with pytest.raises(NotImplementedError, match="DataFrame.map requires pandas"):
+-        ddf.map(lambda x: x + 1)
+-
+-
+ @pytest.mark.parametrize(
+     "index",
+     [
+@@ -4628,16 +4589,6 @@ def test_mixed_dask_array_multi_dimensional():
+     assert_eq(ddf[["y", "x"]] + dx + 1, df[["y", "x"]] + x + 1)
+ 
+ 
+-def test_meta_raises():
+-    # Raise when we use a user defined function
+-    s = pd.Series(["abcd", "abcd"])
+-    ds = dd.from_pandas(s, npartitions=2)
+-    try:
+-        ds.map(lambda x: x[3])
+-    except ValueError as e:
+-        assert "meta=" in str(e)
+-
+-
+ @pytest.mark.skip_with_pyarrow_strings  # DateOffset has to be an object
+ def test_meta_nonempty_uses_meta_value_if_provided():
+     # https://github.com/dask/dask/issues/6958
+@@ -4764,20 +4715,6 @@ def test_has_parallel_type():
+     assert not has_parallel_type(123)
+ 
+ 
+-def test_map_index():
+-    df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
+-    ddf = dd.from_pandas(df, npartitions=2)
+-    assert ddf.known_divisions is True
+-    with pytest.warns(UserWarning, match="meta"):
+-        cleared = ddf.index.map(lambda x: x * 10)
+-    assert cleared.known_divisions is False
+-
+-    with pytest.warns(UserWarning, match="meta"):
+-        applied = ddf.index.map(lambda x: x * 10, is_monotonic=True)
+-    assert applied.known_divisions is True
+-    assert applied.divisions == tuple(x * 10 for x in ddf.divisions)
+-
+-
+ def test_assign_index():
+     df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
+     ddf = dd.from_pandas(df, npartitions=2)
+@@ -4850,34 +4787,6 @@ def test_dtype_cast():
+     assert ddf.A.dtype == np.int32
+ 
+ 
+-@pytest.mark.parametrize("base_npart", [1, 4])
+-@pytest.mark.parametrize("map_npart", [1, 3])
+-@pytest.mark.parametrize("sorted_index", [False, True])
+-@pytest.mark.parametrize("sorted_map_index", [False, True])
+-def test_series_map(base_npart, map_npart, sorted_index, sorted_map_index):
+-    if map_npart != base_npart:
+-        pytest.xfail(reason="not yet implemented")
+-    base = pd.Series(
+-        ["".join(np.random.choice(["a", "b", "c"], size=3)) for x in range(100)]
+-    )
+-    if not sorted_index:
+-        index = np.arange(100)
+-        np.random.shuffle(index)
+-        base.index = index
+-    map_index = ["".join(x) for x in product("abc", repeat=3)]
+-    mapper = pd.Series(np.random.randint(50, size=len(map_index)), index=map_index)
+-    if not sorted_map_index:
+-        map_index = np.array(map_index)
+-        np.random.shuffle(map_index)
+-        mapper.index = map_index
+-    expected = base.map(mapper)
+-    dask_base = dd.from_pandas(base, npartitions=base_npart, sort=False)
+-    dask_map = dd.from_pandas(mapper, npartitions=map_npart, sort=False)
+-    with pytest.warns(UserWarning, match="meta"):
+-        result = dask_base.map(dask_map)
+-    assert_eq(expected, result)
+-
+-
+ @pytest.mark.skip_with_pyarrow_strings  # has to be array to explode
+ def test_dataframe_explode():
+     df = pd.DataFrame({"A": [[1, 2, 3], "foo", [3, 4]], "B": 1})
+diff --git a/dask/dataframe/tests/test_map.py b/dask/dataframe/tests/test_map.py
+new file mode 100644
+index 0000000..2b50e18
+--- /dev/null
++++ b/dask/dataframe/tests/test_map.py
+@@ -0,0 +1,244 @@
++from __future__ import annotations
++
++import numpy as np
++import pandas as pd
++import pytest
++
++import dask.dataframe as dd
++from dask.dataframe._compat import PANDAS_GE_210
++from dask.dataframe.utils import assert_eq
++
++
++@pytest.mark.parametrize("base_npart", [1, 4])
++@pytest.mark.parametrize("map_npart", [1, 3])
++@pytest.mark.parametrize("sorted_index", [False, True])
++@pytest.mark.parametrize("sorted_map_index", [False, True])
++def test_series_map(base_npart, map_npart, sorted_index, sorted_map_index):
++    if map_npart != base_npart:
++        pytest.xfail(reason="not yet implemented")
++    base = pd.Series(np.arange(100, dtype="i2"))
++    if not sorted_index:
++        index = np.arange(100)
++        np.random.shuffle(index)
++        base.index = index
++    map_index = np.arange(0, 1000, 10, dtype="i2")
++    mapper = pd.Series(np.random.randint(50, size=len(map_index)), index=map_index)
++    if not sorted_map_index:
++        map_index = np.array(map_index)
++        np.random.shuffle(map_index)
++        mapper.index = map_index
++    expected = base.map(mapper)
++    dask_base = dd.from_pandas(base, npartitions=base_npart, sort=False)
++    dask_map = dd.from_pandas(mapper, npartitions=map_npart, sort=False)
++    with pytest.warns(UserWarning, match="meta"):
++        result = dask_base.map(dask_map)
++    assert_eq(expected, result)
++
++
++def test_series_map2():
++    df = pd.DataFrame(
++        {"a": range(9), "b": [4, 5, 6, 1, 2, 3, 0, 0, 0]},
++        index=pd.Index([0, 1, 3, 5, 6, 8, 9, 9, 9], name="myindex"),
++    )
++    ddf = dd.from_pandas(df, npartitions=3)
++    with pytest.warns(UserWarning, match="meta"):
++        assert_eq(ddf.a.map(lambda x: x + 1), df.a.map(lambda x: x + 1))
++        lk = {v: v + 1 for v in df.a.values}
++        assert_eq(ddf.a.map(lk), df.a.map(lk))
++        assert_eq(ddf.b.map(lk), df.b.map(lk))
++        lk = pd.Series(lk)
++        assert_eq(ddf.a.map(lk), df.a.map(lk))
++        assert_eq(ddf.b.map(lk), df.b.map(lk))
++    assert_eq(ddf.b.map(lk, meta=ddf.b), df.b.map(lk))
++    assert_eq(ddf.b.map(lk, meta=("b", "i8")), df.b.map(lk))
++
++
++def test_series_map_meta():
++    ser = pd.Series(np.arange(100), dtype="i2")
++    mapper = pd.Series(np.random.randint(50, size=len(ser), dtype="u1"))
++    expected = ser.map(mapper)
++    dask_base = dd.from_pandas(ser, npartitions=5)
++    dask_map = dd.from_pandas(mapper, npartitions=5)
++    with pytest.warns(UserWarning):
++        result = dask_base.map(dask_map)
++    assert_eq(expected, result)
++
++
++def test_series_map_meta_2():
++    pdf = pd.DataFrame({"x": range(100)})
++    df = dd.from_pandas(pdf, npartitions=10)
++
++    expected = pdf.x.map(lambda x: x + 1)
++    result = df.x.map(lambda x: x + 1, meta=expected.iloc[:0])
++    assert_eq(result, expected)
++
++    result = df.x.map(df.x + 1, meta=expected.iloc[:0])
++    assert_eq(result, expected)
++
++    result = df.x.map(df.x + 1, meta=("x", "int64"))
++    assert_eq(result, expected)
++
++    result = df.x.map((df.x + 1).compute(), meta=("x", "int64"))
++    assert_eq(result, expected)
++
++    pdf.index.name = "a"
++    df = dd.from_pandas(pdf, npartitions=10)
++    expected = pdf.x.map(lambda x: x + 1)
++    result = df.x.map(lambda x: x + 1, meta=("x", "int64"))
++    assert_eq(result, expected)
++
++
++def test_index_map():
++    df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
++    ddf = dd.from_pandas(df, npartitions=2)
++    assert ddf.known_divisions is True
++
++    with pytest.warns(UserWarning):
++        cleared = ddf.index.map(lambda x: x * 10)
++    assert cleared.known_divisions is False
++
++    with pytest.warns(UserWarning):
++        applied = ddf.index.map(lambda x: x * 10, is_monotonic=True)
++    assert applied.known_divisions is True
++    assert applied.divisions == tuple(x * 10 for x in ddf.divisions)
++
++
++@pytest.mark.skipif(not PANDAS_GE_210, reason="Not available before")
++@pytest.mark.parametrize("na_action", [None, "ignore"])
++def test_dataframe_map(na_action):
++    df = pd.DataFrame({"x": [1, 2, 3, np.nan], "y": [10, 20, 30, 40]})
++    ddf = dd.from_pandas(df, npartitions=2)
++    with pytest.warns(UserWarning, match="meta"):
++        assert_eq(
++            ddf.map(lambda x: x + 1, na_action=na_action),
++            df.map(lambda x: x + 1, na_action=na_action),
++        )
++        assert_eq(ddf.map(lambda x: (x, x)), df.map(lambda x: (x, x)))
++
++
++def test_series_meta_raises():
++    # Raise when we use a user defined function
++    s = pd.Series(["abcd", "abcd"])
++    ds = dd.from_pandas(s, npartitions=2)
++    try:
++        ds.map(lambda x: x[3])
++    except ValueError as e:
++        assert "meta=" in str(e)
++
++
++@pytest.mark.skipif(PANDAS_GE_210, reason="Added in pandas 2.1.0")
++def test_dataframe_map_raises():
++    df = pd.DataFrame({"x": [1, 2, 3, 4], "y": [10, 20, 30, 40]})
++    ddf = dd.from_pandas(df, npartitions=2)
++    with pytest.raises(NotImplementedError, match="DataFrame.map requires pandas"):
++        ddf.map(lambda x: x + 1)
++
++
++def test_map_index():
++    df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
++    ddf = dd.from_pandas(df, npartitions=2)
++    assert ddf.known_divisions is True
++    with pytest.warns(UserWarning, match="meta"):
++        cleared = ddf.index.map(lambda x: x * 10)
++    assert cleared.known_divisions is False
++
++    with pytest.warns(UserWarning, match="meta"):
++        applied = ddf.index.map(lambda x: x * 10, is_monotonic=True)
++    assert applied.known_divisions is True
++    assert applied.divisions == tuple(x * 10 for x in ddf.divisions)
++
++
++def assert_series_map_dtype(base: pd.Series | pd.Index, func: pd.Series) -> None:
++    """Test that Series.map() behaves identically in Pandas and Dask
++    when `func` is a Series, and that Dask's behaviour is coherent in the edge cases
++    where the output dtype changes dynamically.
++    """
++    if isinstance(base, pd.Index):
++        dbase = dd.from_pandas(pd.Series(base, index=base), npartitions=2).index
++        assert_eq(dbase, base)
++    else:
++        dbase = dd.from_pandas(base, npartitions=2)
++    dfunc = dd.from_pandas(func, npartitions=2)
++
++    expect = base.map(func)
++
++    # Note: expect.dtype != func.dtype in edge cases
++    result = dbase.map(dfunc, meta=expect)
++
++    # Note that this will concatenate partitions which may have
++    # mismatched dtypes
++    assert_eq(result, expect)
++
++
++series_map_dtypes = pytest.mark.parametrize(
++    "values,dtype",
++    [
++        # NumPy dtypes
++        ([10, 20], np.int16),
++        ([True, False], np.bool_),
++        ([10.0, 20.0], np.float32),
++        # Pandas nullable dtypes
++        ([10, 20], pd.Int16Dtype()),
++        ([True, False], pd.BooleanDtype()),
++        ([10.0, 20.0], pd.Float32Dtype()),
++        # PyArrow nullable dtypes
++        ([10, 20], "int16[pyarrow]"),
++        ([True, False], "bool[pyarrow]"),
++        ([10.0, 20.0], "float32[pyarrow]"),
++        # Strings
++        (["a", "b"], object),
++        (["foo", "bar"], "str"),
++    ],
++)
++
++
++@series_map_dtypes
++@pytest.mark.parametrize(
++    "base_cls",
++    [
++        pytest.param(
++            pd.Series,
++            marks=pytest.mark.xfail(reason="https://github.com/dask/dask/issues/12426"),
++        ),
++        pd.Index,
++    ],
++)
++def test_series_map_dtype_all_mapped(base_cls, values, dtype):
++    """When all keys mapped, the result dtype is equal to the mapper.dtype
++    (basic use case).
++    """
++    base = base_cls([1, 2])
++    mapper = pd.Series(values, index=[2, 1], dtype=dtype)
++    assert_series_map_dtype(base, mapper)
++
++
++@pytest.mark.xfail(reason="https://github.com/dask/dask/issues/12426")
++@series_map_dtypes
++@pytest.mark.parametrize("base_cls", [pd.Series, pd.Index])
++def test_series_map_dtype_unmapped(base_cls, values, dtype):
++    """When some keys fail to map, the output dtype can change dynamically;
++    in Dask, this can't be reflected in the meta dtype.
++
++    Note: in this test, the mismatch happens in only one partition, which means that
++    finalize() will need to deal with mismatched dtypes in the final concatenation
++    step.
++    """
++    base = base_cls([1, 2])
++    mapper = pd.Series(values, index=[2, 3], dtype=dtype)
++    assert_series_map_dtype(base, mapper)
++
++
++@pytest.mark.xfail(reason="https://github.com/dask/dask/issues/12426")
++@series_map_dtypes
++@pytest.mark.parametrize("base_dtype", [np.float32, pd.Int16Dtype(), "int16[pyarrow]"])
++@pytest.mark.parametrize("base_cls", [pd.Series, pd.Index])
++def test_series_map_dtype_null_base(base_cls, base_dtype, values, dtype):
++    """A NULL in the base triggers dynamic dtype changes
++    when the mapper's dtype is not nullable.
++
++    Note: Pandas' behaviour changed in version 3.1
++    """
++    base = base_cls([1, None], dtype=base_dtype)
++    mapper_idx = pd.Index([2, 3], dtype=base_dtype)
++    mapper = pd.Series(values, index=mapper_idx, dtype=dtype)
++    assert_series_map_dtype(base, mapper)

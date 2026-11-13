@@ -1,0 +1,6 @@
+[
+  {
+    "path": "airflow-e2e-tests/tests/airflow_e2e_tests/java_sdk_tests/test_java_sdk_dag.py",
+    "status": "modified"
+  }
+]

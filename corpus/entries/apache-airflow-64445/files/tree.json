@@ -1,0 +1,3 @@
+[
+  "airflow-core/src/airflow/ui/tests/e2e/specs/xcoms.spec.ts"
+]

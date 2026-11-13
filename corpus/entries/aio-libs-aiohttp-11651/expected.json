@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_parse_cookie_gstate_header",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  }
+]

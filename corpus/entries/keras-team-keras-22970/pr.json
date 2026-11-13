@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/keras-team/keras/pull/22970",
+  "repo": "keras-team/keras",
+  "number": 22970,
+  "title": "Relax validation threshold for int8 quantization tests.",
+  "merged_at": "2026-05-22T21:16:04Z",
+  "stars": 64424,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "81a1fd973a6a35aa42011bd07389ca636961a03f",
+  "head_sha": "fb2b994bdd459f8541e7de1f06d6b3284c094378",
+  "files_changed": 3,
+  "additions": 3,
+  "deletions": 3
+}

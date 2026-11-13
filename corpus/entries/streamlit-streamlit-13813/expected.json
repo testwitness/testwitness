@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C003",
+    "severity": "high",
+    "subject": ".github/workflows/playwright-changed-files.yml",
+    "verdict": "tp",
+    "reason": "pytest exit code 5 mapped to success"
+  }
+]

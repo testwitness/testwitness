@@ -1,0 +1,38 @@
+[
+  {
+    "path": "packages/next/src/client/dev/hot-reloader/app/hot-reloader-app.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/src/client/dev/hot-reloader/pages/hot-reloader-pages.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/src/client/page-bootstrap.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/src/server/dev/hot-reloader-types.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/src/server/dev/next-dev-server.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/cache-components-errors/use-cache.util.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/use-cache-dev/app/api/cached/route.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/app-dir/use-cache-dev/app/cached-page/page.tsx",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/app-dir/use-cache-dev/use-cache-dev.test.ts",
+    "status": "modified"
+  }
+]

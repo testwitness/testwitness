@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/68161",
+  "repo": "apache/airflow",
+  "number": 68161,
+  "title": "Mark Java SDK E2E test XFail until #68160 resolved",
+  "merged_at": "2026-06-07T11:43:10Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R004",
+  "split": "tuning",
+  "base_sha": "c0b5a6f078d77ec3c650831a3d6c358719f057cb",
+  "head_sha": "ae46077b9a093700472eabd5e2781e7ea60c69a6",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 0
+}
