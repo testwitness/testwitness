@@ -44,6 +44,15 @@ export function templateRegex(key: string): { test(row: string): boolean } {
   };
 }
 
+/**
+ * A title the front end kept as template literal source (`case ${c.name}`) as a printf style template: the backticks
+ * go and each interpolation becomes one placeholder. Other titles are returned unchanged.
+ */
+export function templateTitle(qualifiedName: string): string {
+  if (!qualifiedName.includes('`')) return qualifiedName;
+  return qualifiedName.replace(/`([^`]*)`/g, (whole, inner: string) => (inner.includes('${') ? inner.replace(/\$\{[^}]*\}/g, '%s') : whole));
+}
+
 /** V003 Changed test did not run. */
 export const V003: Rule = {
   id: 'V003',
@@ -79,9 +88,11 @@ export const V003: Rule = {
       const ran = (t: TestCase) => {
         const keys = inventoryKeys(pair.file.path, t.qualifiedName, lang);
         if (keys.some((k) => ev.has(k))) return true;
-        // test.each / it.each titles are printf style templates; the producer writes the formatted rows.
-        if (/%[sdifjop#]|\$\w+/.test(t.qualifiedName)) {
-          const res = keys.map(templateRegex);
+        // test.each / it.each titles are printf style templates, and a title written as a template literal in a loop
+        // (`it(`case ${name}`)`) is one too; the producer writes the formatted rows.
+        const name = templateTitle(t.qualifiedName);
+        if (/%[sdifjop#]|\$\w+/.test(name)) {
+          const res = (name === t.qualifiedName ? keys : inventoryKeys(pair.file.path, name, lang)).map(templateRegex);
           for (const k of ev.keys()) if (res.some((re) => re.test(k))) return true;
         }
         return false;

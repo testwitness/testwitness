@@ -264,8 +264,12 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
 
   const changedProductionFiles = new Set(files.filter((f) => f.kind === 'production').map((f) => f.path));
 
+  // paths.ignore keeps a file away from every rule, the config and workflow rules included (they read config files by
+  // name wherever they sit). The gate's own config is never ignored, so W006 still sees a change to it.
+  const ruleFiles = files.filter((f) => f.path.split('/').pop() === '.testwitness.yml' || !(ignore(f.path) && (!f.oldPath || ignore(f.oldPath))));
+
   const ctx: RuleContext = {
-    files,
+    files: ruleFiles,
     pairs,
     headInventoryFor: async (path) => {
       const lang = classifyPath(path, undefined).language;
