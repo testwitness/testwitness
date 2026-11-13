@@ -1,6 +1,6 @@
 # Precision on the false positive corpus
 
-Measured 2026-11-04 on 134 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
+Measured 2026-11-13 on 134 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
 
 | Rule | Split | True positives | Low (informational) | False positives (medium or high) | Missed | Precision | High severity false positives |
 |---|---|---|---|---|---|---|---|
@@ -49,3 +49,32 @@ Measured 2026-11-04 on 134 public pull requests (corpus/). Precision counts medi
 | W003 | tuning | 0 | 0 | 0 | 1 | n/a | 0 |
 
 Regenerate with `pnpm corpus:report`.
+
+## Agent hook replay
+
+Measured 2026-11-13 on the same 134 pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (`testwitness hook --agent claude`) runs on it with the default settings: it blocks on open high findings only. A block is wrongful when the finding it rests on is not a true positive in the labels above.
+
+* 82 pull requests have at least one true positive finding. The hook blocks 22 of them (27%). 22 have a true positive at high severity; the others carry medium or low findings only, which the hook shows as advice.
+* 52 pull requests have no true positive finding. The hook blocks 0 of them. If every high finding blocked, it would block 2.
+* Rules with at least one wrongful block when every high finding blocks are advice only in the hook by default: R001. A maintainer can change the list with `hook.advice_only` in `.testwitness.yml`.
+* With `fail_on: medium` in the base config the hook blocks 63 of the 82 pull requests with a true positive (77%) and 0 of the 52 without one; the last two columns give that setting per rule. V004 reads the pull request text, which does not exist yet when the hook runs, so the hook never reports it.
+
+| Rule | True positives | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked | Wrongful blocks at the default | In the hook | Blocked with fail_on: medium | Wrongful blocks with fail_on: medium |
+|---|---|---|---|---|---|---|---|---|---|
+| A001 | 8 | 0 | 0 | 0% | 0 | 0 | blocks on high | 8 | 0 |
+| A002 | 27 | 2 | 2 | 7% | 0 | 0 | blocks on high | 27 | 0 |
+| A009 | 2 | 1 | 1 | 50% | 0 | 0 | blocks on high | 2 | 1 |
+| E001 | 1 | 1 | 1 | 100% | 0 | 0 | blocks on high | 1 | 0 |
+| O001 | 5 | 0 | 0 | 0% | 0 | 0 | blocks on high | 0 | 0 |
+| O002 | 9 | 0 | 0 | 0% | 0 | 0 | blocks on high | 3 | 5 |
+| R001 | 17 | 0 | 0 | 0% | 2 | 0 | advice only | 0 | 0 |
+| R002 | 9 | 9 | 9 | 100% | 0 | 0 | blocks on high | 9 | 0 |
+| R003 | 21 | 0 | 0 | 0% | 0 | 0 | blocks on high | 21 | 0 |
+| R004 | 11 | 5 | 5 | 45% | 0 | 0 | blocks on high | 6 | 0 |
+| R005 | 6 | 6 | 6 | 100% | 0 | 0 | blocks on high | 6 | 0 |
+| R010 | 5 | 0 | 0 | 0% | 0 | 0 | blocks on high | 0 | 0 |
+| V004 | 6 | 0 | 0 | 0% | 0 | 0 | blocks on high | 0 | 0 |
+| W002 | 7 | 7 | 7 | 100% | 0 | 0 | blocks on high | 7 | 0 |
+| W003 | 1 | 1 | 1 | 100% | 0 | 0 | blocks on high | 1 | 0 |
+
+The share is low for rules whose true positives are mostly medium: the hook does not block on medium unless the base config sets `fail_on: medium`. The numbers come from `corpus/runner/replay.test.ts`, which fails when this section and the measurement disagree. Regenerate with `pnpm corpus:report`.

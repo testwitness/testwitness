@@ -155,6 +155,61 @@ try {
   if (tools.join(',') === 'testwitness_check,testwitness_explain_rule,testwitness_rules') ok('mcp server lists its three tools');
   else fail(`mcp server tools/list returned ${JSON.stringify(tools)} (exit ${mcp.status}, stderr ${mcp.stderr.trim()})`);
 
+  // 4d2. the agent guard from the installed package: check --worktree, hook, init and a real refused git push
+  for (const required of ['plugin/.claude-plugin/plugin.json', 'plugin/hooks/hooks.json', 'plugin/.mcp.json']) {
+    if (paths.has(required)) ok(`tarball has ${required}`);
+    else fail(`tarball is missing ${required}`);
+  }
+  const guardRepo = join(work, 'guard-repo');
+  makeWeakenedRepo(guardRepo);
+  const guardGit = (dir, ...a) => run('git', ['-c', 'user.name=pack', '-c', 'user.email=pack@testwitness.local', '-c', 'commit.gpgsign=false', ...a], { cwd: dir });
+  guardGit(guardRepo, 'checkout', '-q', 'main');
+  rmSync(join(guardRepo, 'tests/test_math.py'));
+  const hookTmp = join(work, 'hook-tmp');
+  mkdirSync(hookTmp);
+  const hookEnv = { ...cleanEnv, TMPDIR: hookTmp, TMP: hookTmp, TEMP: hookTmp };
+  const before = guardGit(guardRepo, 'status', '--porcelain=v1', '-uall') + guardGit(guardRepo, 'count-objects', '-v');
+  const wt = JSON.parse(cli(['check', '--worktree', '--cwd', guardRepo, '--base', 'main', '--format', 'json', '--results', '', '--quiet'], { env: hookEnv }));
+  if (wt.headTree && wt.findings.some((f) => f.ruleId === 'R002')) ok('check --worktree reports the deleted test file and carries headTree');
+  else fail(`check --worktree: headTree ${wt.headTree}, findings ${wt.findings.map((f) => f.ruleId).join(',')}`);
+  const stopEvent = JSON.stringify({ session_id: 'pack-check', cwd: guardRepo, hook_event_name: 'Stop', stop_hook_active: false });
+  const stop = spawnSync(bin, [binJs, 'hook', '--agent', 'claude'], { input: stopEvent, encoding: 'utf8', env: hookEnv, timeout: 30_000 });
+  let stopOut = {};
+  try {
+    stopOut = JSON.parse(stop.stdout);
+  } catch {
+    /* reported below */
+  }
+  if (stop.status === 0 && stopOut.decision === 'block' && /R002 high tests\/test_math\.py/.test(stopOut.reason ?? '') && /def test_negatives\(\):/.test(stopOut.reason ?? '')) ok('hook --agent claude blocks the Stop event with the rule, the file and the base text');
+  else fail(`hook --agent claude on Stop: exit ${stop.status}, stdout ${stop.stdout.slice(0, 300)}, stderr ${stop.stderr.slice(0, 300)}`);
+  const noise = spawnSync(bin, [binJs, 'hook', '--agent', 'claude'], { input: JSON.stringify({ session_id: 'pack-check', cwd: guardRepo, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' } }), encoding: 'utf8', env: hookEnv, timeout: 30_000 });
+  if (noise.status === 0 && noise.stdout === '') ok('hook --agent claude says nothing on an unrelated Bash command');
+  else fail(`hook on npm test: exit ${noise.status}, stdout ${noise.stdout.slice(0, 200)}`);
+  const broken = spawnSync(bin, [binJs, 'hook', '--agent', 'cursor'], { input: 'not json', encoding: 'utf8', env: hookEnv, timeout: 30_000 });
+  if (broken.status === 0 && /"permission":"allow"/.test(broken.stdout) && /allowed without a check/.test(broken.stdout)) ok('hook allows and says so when the event is unreadable');
+  else fail(`hook on unreadable stdin: exit ${broken.status}, stdout ${broken.stdout.slice(0, 200)}`);
+  const after = guardGit(guardRepo, 'status', '--porcelain=v1', '-uall') + guardGit(guardRepo, 'count-objects', '-v');
+  if (before === after) ok('the working tree check and the hook left the repository untouched');
+  else fail('the repository changed during check --worktree or the hook');
+  const init1 = cli(['init', '--agent', 'claude', '--cwd', guardRepo, '--command', 'testwitness'], { env: hookEnv });
+  const init2 = cli(['init', '--agent', 'claude', '--cwd', guardRepo, '--command', 'testwitness'], { env: hookEnv });
+  const settings = JSON.parse(readFileSync(join(guardRepo, '.claude/settings.json'), 'utf8'));
+  if (/^created \.claude\/settings\.json/.test(init1) && /^unchanged \.claude\/settings\.json/.test(init2) && settings.hooks?.Stop?.[0]?.hooks?.[0]?.command === 'testwitness hook --agent claude') ok('init --agent claude writes .claude/settings.json and is idempotent');
+  else fail(`init --agent claude: ${init1.trim()} / ${init2.trim()}`);
+  // A real push through the installed pre-push hook: the pushed commit deletes a test file, so git must refuse it.
+  const remote = join(work, 'remote.git');
+  run('git', ['init', '-q', '--bare', remote]);
+  guardGit(guardRepo, 'remote', 'add', 'origin', remote);
+  guardGit(guardRepo, 'push', '-q', 'origin', 'main');
+  cli(['init', '--agent', 'git', '--cwd', guardRepo, '--command', `"${bin}" "${binJs}"`], { env: hookEnv });
+  guardGit(guardRepo, 'checkout', '-q', '-b', 'agent-work');
+  guardGit(guardRepo, 'add', '-A', 'tests');
+  guardGit(guardRepo, 'commit', '-q', '-m', 'make the suite green');
+  const push = spawnSync('git', ['push', 'origin', 'agent-work'], { cwd: guardRepo, encoding: 'utf8', env: hookEnv, timeout: 60_000 });
+  const pushed = spawnSync('git', ['rev-parse', '--verify', '--quiet', 'refs/heads/agent-work'], { cwd: remote, encoding: 'utf8' }).status === 0;
+  if (push.status !== 0 && !pushed && /testwitness blocked this push/.test(push.stderr) && /R002 high tests\/test_math\.py/.test(push.stderr)) ok('git push is refused by the pre-push hook init --agent git installed');
+  else fail(`git push through the pre-push hook: exit ${push.status}, reached the remote ${pushed}, stderr ${push.stderr.slice(0, 400)}`);
+
   // 4e. --coverage reads an lcov report and V008 reports a changed production line it never executed
   const gitIn = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: repo });
   writeFileSync(join(repo, 'src/math.ts'), 'export const add = (a: number, b: number) => a + b;\nexport const sub = (a: number, b: number) =>\n  a - b;\n');

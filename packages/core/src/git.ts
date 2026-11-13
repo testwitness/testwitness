@@ -47,14 +47,15 @@ export async function revParse(ref: string, opts: GitOptions): Promise<string> {
 /**
  * Diff options every diff the engine reads shares. --ignore-cr-at-eol: a line whose only change is CRLF to LF (or
  * back) is not a change, so a PR that converts line endings shows no hunks, and one that converts a file while
- * editing it shows only the real edits, as on LF.
+ * editing it shows only the real edits, as on LF. --no-ext-diff and --no-textconv: both are commands from the git
+ * config that a .gitattributes line of the repository can select, and the engine reads text as it is stored.
  */
-export const DIFF_FLAGS = ['--find-renames', '--ignore-cr-at-eol'] as const;
+export const DIFF_FLAGS = ['--find-renames', '--ignore-cr-at-eol', '--no-ext-diff', '--no-textconv'] as const;
 
 /** Raw unified diff with rename detection and zero context. */
 export async function rawDiff(base: string, head: string, opts: GitOptions): Promise<string> {
   return git(
-    ['diff', ...DIFF_FLAGS, '--unified=0', '--no-color', '--no-ext-diff', '--src-prefix=a/', '--dst-prefix=b/', base, head, '--'],
+    ['diff', ...DIFF_FLAGS, '--unified=0', '--no-color', '--src-prefix=a/', '--dst-prefix=b/', base, head, '--'],
     opts,
   );
 }
@@ -129,7 +130,9 @@ export interface WorktreeSnapshot {
  * into the temporary object directory, and `git write-tree` writes the tree there too. The repository's index, refs,
  * object store and working tree are not touched: no temporary commit, no stash, not even a loose object. The tree is
  * what `git add -A && git commit` would record (same ignore rules, same line ending and clean filters), so the engine
- * sees exactly what a commit of the current state would hold. The tree can only be read through the returned options
+ * sees exactly what a commit of the current state would hold. One consequence: a clean filter the user has configured
+ * in git (Git LFS, git-crypt) runs as it does for `git add`; it comes from the user's git config, never from the
+ * repository's files. Git hooks and fsmonitor programs are switched off for the snapshot. The tree can only be read through the returned options
  * and is gone after dispose().
  *
  * Why not read the files directly: the engine's rename detection, binary detection and hunks come from `git diff`, and
@@ -161,7 +164,23 @@ export async function snapshotWorktree(opts: GitOptions): Promise<WorktreeSnapsh
     mkdirSync(join(dir, 'objects'));
     const base = opts.env ?? process.env;
     const alternates = [objects, base['GIT_ALTERNATE_OBJECT_DIRECTORIES']].filter(Boolean).join(delimiter);
-    const env: NodeJS.ProcessEnv = { ...base, GIT_INDEX_FILE: tmpIndex, GIT_OBJECT_DIRECTORY: join(dir, 'objects'), GIT_ALTERNATE_OBJECT_DIRECTORIES: alternates, GIT_OPTIONAL_LOCKS: '0' };
+    // No git hook and no fsmonitor program may run while the snapshot is taken: `git add` writes an index, which would
+    // start a post-index-change hook, and refreshing it would start a configured fsmonitor. Both are switched off for
+    // every git call that uses this environment, through git's config-from-environment variables.
+    mkdirSync(join(dir, 'no-hooks'));
+    const n = Number(base['GIT_CONFIG_COUNT'] ?? 0) || 0;
+    const env: NodeJS.ProcessEnv = {
+      ...base,
+      GIT_INDEX_FILE: tmpIndex,
+      GIT_OBJECT_DIRECTORY: join(dir, 'objects'),
+      GIT_ALTERNATE_OBJECT_DIRECTORIES: alternates,
+      GIT_OPTIONAL_LOCKS: '0',
+      GIT_CONFIG_COUNT: String(n + 2),
+      [`GIT_CONFIG_KEY_${n}`]: 'core.hooksPath',
+      [`GIT_CONFIG_VALUE_${n}`]: join(dir, 'no-hooks'),
+      [`GIT_CONFIG_KEY_${n + 1}`]: 'core.fsmonitor',
+      [`GIT_CONFIG_VALUE_${n + 1}`]: 'false',
+    };
     const snap: GitOptions = { cwd: top, env };
     const stage = async (): Promise<void> => {
       await git(['add', '-A', '--', '.'], snap);
