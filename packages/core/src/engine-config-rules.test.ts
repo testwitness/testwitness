@@ -51,6 +51,12 @@ afterAll(() => {
 const LCOV = (root: string) => `SF:${root}/src/calc.ts\nDA:1,3\nDA:2,1\nDA:3,0\nend_of_record\n`;
 
 describe('configuration and coverage rules through the engine', () => {
+  it('keeps ignored paths away from the configuration rules too', async () => {
+    const config = parseConfig('paths:\n  ignore:\n    - "jest.config.js"\n    - "package.json"\n');
+    const { report } = await runEngine({ cwd: dir, base, head, frontEnds: [tsFrontEnd], config, resolved: true, helperIndex: false });
+    expect(report.findings.filter((f) => f.ruleId.startsWith('C'))).toEqual([]);
+  });
+
   it('reports C001, C002 and C003, and V008 only when coverage is attached', async () => {
     const without = await runEngine({ cwd: dir, base, head, frontEnds: [tsFrontEnd], config: parseConfig(undefined), resolved: true, helperIndex: false });
     const ids = without.report.findings.map((f) => `${f.ruleId} ${f.severity}`).sort();

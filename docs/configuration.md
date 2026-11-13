@@ -12,7 +12,7 @@ paths:
   tests:                # override test file detection
     - "src/test/**"
     - "**/*.test.ts"
-  ignore:
+  ignore:               # no rule reads these files, configuration and workflow rules included; .testwitness.yml itself is never ignored
     - "**/generated/**"
   followSymlinks: false # follow symbolic links in results, coverage, mutation and history paths (see below)
 results:                # test results of the head run; `junit` is the older name of this key and still works

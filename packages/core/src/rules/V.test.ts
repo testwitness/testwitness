@@ -99,6 +99,22 @@ describe('V005 and V006', () => {
 });
 
 describe('V003 template titles', () => {
+  it('reads a template literal title as a template', async () => {
+    const { templateTitle } = await import('./V.js');
+    expect(templateTitle('every fixture parses › `${agent}/${name}`')).toBe('every fixture parses › %s/%s');
+    expect(templateTitle('plain `code` title')).toBe('plain `code` title');
+    expect(templateTitle('adds %i')).toBe('adds %i');
+  });
+
+  it('matches rows of a test whose title is a template literal in a loop', async () => {
+    const head = t({ name: '`validates golden case ${c.project}/${c.name}`', container: ['report schema'], body: 'x' });
+    const pair = { file: changedFile('src/schema.test.ts', 'modified'), head: inventory('src/schema.test.ts', [head]) };
+    const ev = evidence(['report schema validates golden case ts-jest/r003::report schema validates golden case ts-jest/r003']);
+    expect(await V003.run(context({ pairs: [pair], evidence: ev }), {})).toEqual([]);
+    const other = evidence(['report schema something else::report schema something else']);
+    expect(await V003.run(context({ pairs: [pair], evidence: other }), {})).not.toEqual([]);
+  });
+
   it('matches test.each rows written by the producer', async () => {
     const { templateRegex } = await import('./V.js');
     expect(templateRegex('billing charge adds %i and %i to get %i::billing charge adds %i and %i to get %i').test('billing charge adds 1 and 2 to get 3::billing charge adds 1 and 2 to get 3')).toBe(true);
