@@ -332,33 +332,63 @@ export function testTokens(src: string, language: string | undefined, name: stri
   return out;
 }
 
-/** Length of the longest common subsequence of two token lists, with a token comparison. */
-function lcsLength(a: string[], b: string[], same: (x: string, y: string) => boolean): number {
-  let prev = new Array<number>(b.length + 1).fill(0);
-  for (let i = 1; i <= a.length; i++) {
-    const cur = new Array<number>(b.length + 1).fill(0);
-    for (let j = 1; j <= b.length; j++) cur[j] = same(a[i - 1]!, b[j - 1]!) ? prev[j - 1]! + 1 : Math.max(prev[j]!, cur[j - 1]!);
-    prev = cur;
+/**
+ * A longest common subsequence of two token lists, string literals compared without letter case. Returns the pairs of
+ * aligned positions in order.
+ */
+function align(a: string[], b: string[]): Array<[number, number]> {
+  const w = b.length + 1;
+  const dp = new Int32Array((a.length + 1) * w);
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
+      dp[i * w + j] = foldLiteral(a[i]!) === foldLiteral(b[j]!) ? dp[(i + 1) * w + j + 1]! + 1 : Math.max(dp[(i + 1) * w + j]!, dp[i * w + j + 1]!);
+    }
   }
-  return prev[b.length]!;
+  const out: Array<[number, number]> = [];
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (foldLiteral(a[i]!) === foldLiteral(b[j]!)) out.push([i++, j++]);
+    else if (dp[(i + 1) * w + j]! >= dp[i * w + j + 1]!) i++;
+    else j++;
+  }
+  return out;
 }
 
 const foldLiteral = (t: string): string => (t.startsWith('"') ? t.toLowerCase() : t);
+
+/** A token that starts a check: expect, assert, should, verify and their spellings, or a toBe style matcher. */
+const CHECK_TOKEN = /^(expect\w*|assert\w*|should\w*|verify\w*|to[A-Z]\w*)$/;
 
 /** Fewest tokens a deleted test needs before it can be called a near duplicate; shorter tests differ in too little. */
 export const NEAR_DUPLICATE_MIN_TOKENS = 25;
 
 /**
  * Is the deleted test a near duplicate of `kept`: every token of the deleted test appears, in order, in the kept test
- * (string literals compared without letter case, and at most one literal differing only in case), and the kept test is
- * at most half as long again. The kept test then runs the same setup and the same checks, plus perhaps a few more. A
- * deleted test that differs in any identifier, number or literal value is not a near duplicate.
+ * (string literals compared without letter case, and at most one literal differing only in case), the kept test is at
+ * most half as long again, and everything the kept test adds is an extra check: each run of added tokens contains a
+ * check token (expect, assert, should, verify, toBe) or is only commas. The kept test then runs the same setup and
+ * the same checks, plus perhaps a few more. A deleted test that differs in any identifier, number or literal value is
+ * not a near duplicate, and neither is one whose copy adds input (another event, argument or field) without a check.
  */
 export function isNearDuplicate(deleted: string[], kept: string[]): boolean {
   if (deleted.length < NEAR_DUPLICATE_MIN_TOKENS) return false;
   if (kept.length < deleted.length || kept.length > deleted.length * 1.5) return false;
-  if (lcsLength(deleted, kept, (x, y) => foldLiteral(x) === foldLiteral(y)) !== deleted.length) return false;
-  return deleted.length - lcsLength(deleted, kept, (x, y) => x === y) <= 1;
+  const pairs = align(deleted, kept);
+  if (pairs.length !== deleted.length) return false;
+  if (pairs.filter(([i, j]) => deleted[i] !== kept[j]).length > 1) return false;
+  const matched = new Set(pairs.map(([, j]) => j));
+  let run: string[] = [];
+  const runIsCheck = (): boolean => run.length === 0 || run.some((t) => CHECK_TOKEN.test(t)) || run.every((t) => t === ',');
+  for (let j = 0; j <= kept.length; j++) {
+    if (j < kept.length && !matched.has(j)) {
+      run.push(kept[j]!);
+      continue;
+    }
+    if (!runIsCheck()) return false;
+    run = [];
+  }
+  return true;
 }
 
 /** Source lines of a test, with the decorators or annotations directly above it. */
