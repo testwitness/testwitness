@@ -236,19 +236,18 @@ quarter with the same method.
 ## 5. Order of work
 
 Before the public launch:
-1. A002 semantic pairing (section 4.1), measured on the corpus before merge.
+1. A002 semantic pairing (section 4.1), measured on the corpus before merge. Done 4 Nov: 27 of 27 corpus positives, 0 false positives.
 2. First push to github.com/testwitness/testwitness, npm 0.1.0, dogfood on our own PRs.
 3. Quiet week on 3 to 5 friendly public repositories; every false positive report becomes a corpus entry before the fix merges.
 4. Study published (sampling is running now).
 5. Show HN and the community posts.
 
-After the launch, in order:
-6. JSON schema plus MCP server for agents (4.7). One day.
-7. Helper resolution across the repository (4.2). Two days.
-8. Coverage readers and the C rule family (4.3). Three days.
-9. Run history and dynamic severity (4.5). Three days.
-10. Mutation on request (4.4). Three days, behind an opt in. O001 moves back to medium once it exists.
-11. TAP and JSON reporters, then Kotlin and Go.
+Done on 4 Nov 2026, ahead of the launch because the push waited on Sajjad: 6 (schema v1 and `testwitness mcp`), 7 (helper index), 8 (C001 to C003, V008 with lcov, Cobertura and JaCoCo), 9 (run history: hides failure, flaky in history, ran before not now), 10 (Stryker and PIT readers, M001 and M002, `mutate-plan`, maintainer gated workflow template; O001 stays low by default and rises to medium only when measured), 11 (TAP 13 and 14, Jest and Vitest JSON, pytest json-report, Playwright JSON), plus an independent security review with 19 fixes.
+
+Still ahead:
+12. Kotlin and Go front ends.
+13. Corpus positives for C001 to C003, M001, M002, V008 (none can come from public PRs without CI artifacts except the C rules).
+14. Real PIT and JaCoCo fixture output from a Maven run on a machine with Central access.
 
 Everything above keeps the three promises: no model inside, no network, never
 runs the scanned repository's code unless the maintainer opts in to the
