@@ -73,7 +73,7 @@ Rules with measured true positives on the public PR corpus (see [docs/precision.
 | W003 | Failure suppressed in the run command | high | 1 | 0 | 1.00 |
 | V004 | Claim in PR text not supported by results | medium | 6 | 0 | 1.00 |
 
-7 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; O006 New test file with no tests collected; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
+11 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; O006 New test file with no tests collected; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; C001 Test selection narrowed in config; C002 Coverage threshold lowered or removed; C003 Passing with no tests enabled; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing; V008 Changed production lines not executed. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
 <!-- rules:end -->
 
 ## Precision
