@@ -2,6 +2,16 @@
 
 Each entry: the decision, my recommendation, and the reversible default I am proceeding with. Newest first.
 
+## 2026-11-13: no repository or person named in public prose
+
+The brief says public material names no repository or person. The repository still did in a few places: the launch plans in docs/launch (quiet week candidates, community notes, the first push runbook), example PRs in the precision notes, and a few project names in LOG.md, design.md and the assessment.
+
+Done in this batch: docs/launch is moved out of the public repository (the files now live in ~/Project AI Builder/testwitness/launch on your Mac), and the prose elsewhere describes cases by shape, not by name.
+
+Still named, and your call: the corpus itself (corpus/entries, one folder per public pull request with its URL and a copy of its description) and a source line in nine fixture READMEs pointing at the public PR a case was modelled on. These are data and attribution rather than claims, and the corpus cannot be reproduced without its URLs.
+Recommendation: keep both; a corpus of public PRs that does not say which PRs is not checkable.
+Default: kept.
+
 ## 2026-11-13: how to merge the port of 4 and 5 Nov work (PR "port day 4 afternoon")
 
 Twelve commits, each a coherent topic that was verified on its own on 4 Nov, plus one fix for the portable pack:check. Splitting them into twelve PRs would mean twelve CI runs and a rebase chain.

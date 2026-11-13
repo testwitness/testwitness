@@ -46,7 +46,7 @@ Diff text alone cannot tell a deleted test from a moved one, a loosened assertio
 
 ## Helpers in other files
 
-Tests often assert through project helpers: pip's `result.did_create(path)` in `tests/lib`, a base class method such as presto's `assertQuery`, next.js's `checkMeta` in a sibling module, a custom matcher. Name based reading catches the ones called `assert*` or `check*`. The rest used to need `assertions.extra`, and without it O001 reported tests whose only oracle is such a helper, and A001 could only lower a replacement to low with the label replaced by call. The helper index reads those helpers instead.
+Tests often assert through project helpers: a `result.did_create(path)` method in `tests/lib`, a base class method such as `assertQuery`, a `checkMeta` function in a sibling module, a custom matcher. Name based reading catches the ones called `assert*` or `check*`. The rest used to need `assertions.extra`, and without it O001 reported tests whose only oracle is such a helper, and A001 could only lower a replacement to low with the label replaced by call. The helper index reads those helpers instead.
 
 **When it runs.** Only when a changed test (added, modified or renamed, base and head) makes a call that could be a project helper: a whole statement call, not on the line of an assertion, not a print, log or sleep call, not a framework, mock, timer, lifecycle, collection or browser action call (`when`, `spyOn`, `useFakeTimers`, `push`, `click` and the like), and not an assertion helper of the file itself. A PR whose tests make no such call never builds the index.
 

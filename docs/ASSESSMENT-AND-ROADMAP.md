@@ -36,8 +36,8 @@ What is weak
   assertion free tests in public PRs are intentional smoke tests (race tests,
   verbose output tests, does not throw tests). Static rules alone cannot tell
   those apart.
-- R001 (test deleted) is at 0.65 because large rewrites across files (kafka,
-  scikit-learn, pandas fixture folds) look like deletions from inside one file.
+- R001 (test deleted) is at 0.65 because large rewrites across files and fixture
+  folds look like deletions from inside one file.
 - Nobody has used it yet. Great is decided by whether maintainers keep it
   installed after the first month, and there is no data on that.
 
