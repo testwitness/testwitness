@@ -45,6 +45,24 @@ A PR cannot relax its own check: `.testwitness.yml` is read from the merge base,
 * It fails open: a crash, the timeout and the loop guard all allow the action and say so. It is an early warning, not a sandbox; the [threat model](./threat-model#the-hook) lists what it does not stop.
 * `testwitness init` writes one config file and never runs anything from the repository. The hook command it writes never downloads a package (`npx --no-install` at most).
 
+## The PR trial
+
+`testwitness check --pr <url>` is the one path that uses the network, and the only code that does lives in the CLI package (`packages/cli/src/pr.ts`). It runs before the engine and only when `--pr` is given. Every other path keeps the promise above; a test runs the plain `check` under the network guard and the process trace and asserts that no socket, DNS lookup, fetch or remote git command happened.
+
+What it fetches:
+
+* With git, from `https://github.com/<owner>/<repo>.git`: the pull request head (`refs/pull/<n>/head`) and the base branch. Outside a clone of that repository it first makes a blobless clone of the default branch, so commits and trees come down but file contents do not. Before the engine runs, it fetches by object id only the files the engine reads: the changed files at both sides, the other files in their directories and files of the same name (for move and refactor detection), the files at the root and the agent hook configs.
+* At most one unauthenticated `GET https://api.github.com/repos/<owner>/<repo>/pulls/<n>`, for the title, body, base branch and head commit. Redirects are not followed. If it fails, nothing else is tried.
+
+Why it stays safe:
+
+* The URL is untrusted input. Only `https://github.com/<owner>/<repo>/pull/<number>` is accepted, with an optional trailing path such as `/files`. Owner and repository must match GitHub's own name rules, the input must be printable ASCII and at most 512 characters, and encoded characters, `..`, other hosts, user info, ports and ssh URLs are refused before any git or network call. The URLs testwitness fetches are rebuilt from the parsed parts, never copied from the input.
+* No token is read, asked for or stored, and `gh` is not used. Every git call runs with credential helpers off, configured extra HTTP headers (where a CI checkout keeps its token) cleared, `GIT_TERMINAL_PROMPT=0`, and only the `https` transport allowed.
+* Nothing from the fetched repository runs. Nothing is checked out; files are read as blobs (`git cat-file --batch`), and the diff runs with `--no-ext-diff --no-textconv`. Every git call sets `core.hooksPath=/dev/null` and `core.fsmonitor=false`, clears the LFS filter (`filter.lfs.smudge=`, `filter.lfs.process=`, `filter.lfs.required=false`), and does not fetch submodules. A test fetches a repository whose `.gitattributes` selects a filter and a diff driver and asserts that git started nothing but its own transport (`upload-pack`, `pack-objects`, `index-pack`).
+* The engine stays offline. It runs on a read only view: a new, empty bare repository in the temp directory that borrows the fetched objects through `objects/info/alternates`. The view has no remote, so git cannot fetch a missing file from inside the engine; a file that was not fetched up front reads as absent. The view is deleted after the run.
+* The cached clone lives in a per user directory under the temp directory (mode 0700, ownership checked, never a link). A clone is made in a temporary directory and renamed into place when complete, so an interrupted clone is never reused. A cached clone whose `origin` is not the expected URL is refused, not reused.
+* The title and body are data, as in the Action: they feed the claim rules and are escaped in the output.
+
 ## Supply chain
 
 Dependencies are pinned by the lockfile; `dist/index.js` is built in CI from the tag; consumers should pin a SHA or a major tag. Report vulnerabilities per SECURITY.md.
