@@ -1,0 +1,1 @@
+{"title": "perf: compute the discount once", "body": "The discount no longer recomputes the rate per line. Also added test cases for a quarter off and for a full discount."}

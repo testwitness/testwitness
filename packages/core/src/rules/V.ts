@@ -1,4 +1,4 @@
-import type { Finding, Rule, Severity, TestCase } from '../types.js';
+import type { ChangedFile, Finding, Rule, Severity, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
 import { inventoryKeys } from '../evidence/normalise.js';
 import { findClaims, type Claim } from '../evidence/claims.js';
@@ -117,12 +117,73 @@ export const V003: Rule = {
   },
 };
 
+/** New assertions in existing tests that, from this many on, count as added tests: a new check with its setup, not one tweak. */
+export const V004_MIN_ADDED_ASSERTIONS = 2;
+
+/**
+ * Does the diff add tests in any form a runner reports or a reviewer counts: a new test declaration, new cases in a
+ * parameter table (test.each rows, parametrize entries), new entries in a snapshot file (a fixture driven suite whose
+ * tests are generated from input files), or at least two new assertions inside existing tests.
+ */
+function diffAddsTests(ctx: Parameters<Rule['run']>[0]): boolean {
+  let assertionsAdded = 0;
+  for (const { change } of allChanges(ctx.pairs)) {
+    if (change.kind === 'added') return true;
+    if (change.kind === 'deleted') continue;
+    const { base, head } = change;
+    if (base.parameterCount !== undefined && head.parameterCount !== undefined && head.parameterCount > base.parameterCount) return true;
+    const before = new Map<string, number>();
+    for (const a of base.assertions) before.set(assertionKey(a.text), (before.get(assertionKey(a.text)) ?? 0) + 1);
+    for (const a of head.assertions) {
+      const k = assertionKey(a.text);
+      const n = before.get(k) ?? 0;
+      if (n > 0) before.set(k, n - 1);
+      else assertionsAdded++;
+    }
+    // Only count growth: a rewritten assertion replaces one, it adds none.
+  }
+  if (assertionsAdded >= V004_MIN_ADDED_ASSERTIONS && assertionsAdded > removedAssertions(ctx)) return true;
+  return ctx.files.some((f) => f.kind === 'snapshot' && snapshotEntriesAdded(f) > 0);
+}
+
+function assertionKey(text: string): string {
+  return text.replace(/\s+/g, '');
+}
+
+function removedAssertions(ctx: Parameters<Rule['run']>[0]): number {
+  let n = 0;
+  for (const { change } of allChanges(ctx.pairs)) {
+    if (change.kind === 'deleted' || change.kind === 'added') continue;
+    const after = new Map<string, number>();
+    for (const a of change.head.assertions) after.set(assertionKey(a.text), (after.get(assertionKey(a.text)) ?? 0) + 1);
+    for (const a of change.base.assertions) {
+      const k = assertionKey(a.text);
+      const c = after.get(k) ?? 0;
+      if (c > 0) after.set(k, c - 1);
+      else n++;
+    }
+  }
+  return n;
+}
+
+/** Snapshot entries the diff adds net: Jest and Vitest `exports[...]` keys, syrupy `# name:` headers; a new snapshot file counts as one. */
+function snapshotEntriesAdded(f: ChangedFile): number {
+  const entry = /^(exports\[|# name: )/;
+  let added = 0;
+  let removed = 0;
+  for (const h of f.hunks) {
+    added += h.added.filter((l) => entry.test(l)).length;
+    removed += h.removed.filter((l) => entry.test(l)).length;
+  }
+  if (f.status === 'added') return Math.max(1, added);
+  return added - removed;
+}
+
 function classify(claim: Claim, ctx: Parameters<Rule['run']>[0]): 'supported' | 'unsupported' | 'unreadable' {
   const ev = ctx.evidence;
-  const addedTests = allChanges(ctx.pairs).filter((c) => c.change.kind === 'added').length;
   switch (claim.kind) {
     case 'added-tests':
-      return addedTests > 0 ? 'supported' : 'unsupported';
+      return diffAddsTests(ctx) ? 'supported' : 'unsupported';
     case 'no-test-changes':
       return ctx.pairs.length === 0 ? 'supported' : 'unsupported';
     case 'tests-pass':
@@ -149,7 +210,8 @@ export const V004: Rule = {
   needs: ['diff', 'ast', 'prtext'],
   docs: {
     summary: 'The PR title or body claims that tests pass, that tests were added, or that nothing changed in tests, and the diff or the attached results do not support it. Claims that cannot be checked are reported as unreadable (low), never as false.',
-    falsePositives: 'Claims quoted from a template or inside code blocks (stripped), negated claims (skipped). Wording is always "not supported by the results attached to this run".',
+    falsePositives:
+      'Claims inside code blocks and HTML comments and every checklist line, checked or not, are template text and stripped ("- [x] Add test case(s)" ticks a reminder). Negated claims are skipped, including a negation later on the same line ("Added tests: not applicable", "no new test"). An "added tests" claim is supported by a new test, by new rows in a parameter table (test.each, parametrize), by new entries in a snapshot file (fixture driven suites such as runFormatTest generate their tests from input files) and by two or more new assertions inside existing tests. Wording is always "not supported by the results attached to this run".',
     example: 'PR body says "all tests pass"; results show 2 failures.',
   },
   run(ctx) {

@@ -1,0 +1,1 @@
+{"title": "Add regression test for blank lines after dangling comments", "body": "The printer kept a blank line after a dangling comment. This adds the input file and its snapshot."}

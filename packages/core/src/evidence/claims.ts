@@ -34,6 +34,23 @@ export function stripNonProse(text: string): string {
     .replace(/^\s*-\s*\[\s*\]\s.*$/gm, ' '); // unchecked checklist items are not claims
 }
 
+/**
+ * Checked checklist items too. A PR template's "- [x] Add test case(s)" ticks a reminder; it is template text, not a
+ * statement that this diff adds a test, so "added tests" claims never come from a checklist line.
+ */
+function stripChecklist(prose: string): string {
+  return prose.replace(/^\s*(?:[-*+]|\d+[.)])?\s*\[[ xX]?\]\s.*$/gm, ' ');
+}
+
+/** Words on the same line that cancel an "added tests" claim: "Added tests: not applicable", "no new test". */
+const LINE_NEGATION = /\b(no\s+new\s+tests?|no\s+tests?\s+(added|needed|required)|not\s+applicable|n\/a|not\s+needed|none\s+needed)\b/i;
+
+function lineAround(text: string, index: number): string {
+  const start = text.lastIndexOf('\n', index - 1) + 1;
+  const end = text.indexOf('\n', index);
+  return text.slice(start, end === -1 ? text.length : end);
+}
+
 export function findClaims(text: string, extraPhrases: string[] = []): Claim[] {
   const prose = stripNonProse(text);
   const out: Claim[] = [];
@@ -45,12 +62,15 @@ export function findClaims(text: string, extraPhrases: string[] = []): Claim[] {
     seen.add(key);
     out.push({ kind, text: t });
   };
+  const noChecklist = stripChecklist(prose);
   for (const { kind, re } of PATTERNS) {
     const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
-    for (const m of prose.matchAll(g)) {
+    const source = kind === 'added-tests' ? noChecklist : prose;
+    for (const m of source.matchAll(g)) {
       // "no tests pass" style negations
-      const before = prose.slice(Math.max(0, (m.index ?? 0) - 12), m.index ?? 0);
+      const before = source.slice(Math.max(0, (m.index ?? 0) - 12), m.index ?? 0);
       if (/\b(not?|never|without|don'?t|doesn'?t|didn'?t)\s*$/i.test(before)) continue;
+      if (kind === 'added-tests' && LINE_NEGATION.test(lineAround(source, m.index ?? 0))) continue;
       add(kind, m);
     }
   }
