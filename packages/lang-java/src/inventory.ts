@@ -689,6 +689,31 @@ function embeddedMatchers(chain: Chain, ctx: FileContext): Assertion[] {
   return out;
 }
 
+/** Calls whose lambda argument is the code an exception expectation guards: it stops at the first throw. */
+const THROW_EXPECTATIONS = new Set(['assertThrows', 'assertThrowsExactly', 'expectThrows', 'assertThatThrownBy', 'isThrownBy']);
+/** Expected types an assertion failure itself satisfies: there the assertion inside the lambda can be the oracle. */
+const CATCHES_ASSERTION_FAILURE = /\b(AssertionError|AssertionFailedError|ComparisonFailure|MultipleFailuresError|Throwable|Exception|Error)\.class\b/;
+
+/**
+ * The node sits inside a lambda passed to an exception expectation (`assertThrows(E.class, () -> { ... })`,
+ * `assertThatThrownBy(() -> ...)`, `assertThatExceptionOfType(E.class).isThrownBy(() -> ...)`), below `body`.
+ */
+function guardedByThrowExpectation(node: Node, body: Node): boolean {
+  for (let cur = node.parent; cur && cur.id !== body.id; cur = cur.parent) {
+    if (cur.type !== 'lambda_expression') continue;
+    const args = cur.parent;
+    const call = args?.type === 'argument_list' ? args.parent : undefined;
+    if (!call || call.type !== 'method_invocation') continue;
+    if (!THROW_EXPECTATIONS.has(call.childForFieldName('name')?.text ?? '')) continue;
+    const whole = outermostCall(call).text.replace(cur.text, '');
+    if (CATCHES_ASSERTION_FAILURE.test(whole)) return false;
+    // assertThatThrownBy(fn) alone passes on any throw, an assertion failure included; it needs a type or message.
+    if (call.childForFieldName('name')?.text === 'assertThatThrownBy' && !/\.(isInstanceOf|isExactlyInstanceOf|isInstanceOfAny|hasMessage\w*)\s*\(/.test(whole)) return false;
+    return true;
+  }
+  return false;
+}
+
 /** Collect assertions in a body, including every nested scope: lambdas, anonymous class bodies and local classes. */
 function collectAssertions(body: Node, query: Query, ctx: FileContext, embedded?: Assertion[]): Assertion[] {
   const seen = new Set<number>();
@@ -701,13 +726,14 @@ function collectAssertions(body: Node, query: Query, ctx: FileContext, embedded?
     seen.add(top.id);
     const chain = flattenChain(top);
     const found = classifyChain(chain, ctx);
+    if (found.length && guardedByThrowExpectation(top, body)) for (const a of found) a.guarded = true;
     out.push(...found);
     if (found.length === 0 && embedded) embedded.push(...embeddedMatchers(chain, ctx));
   }
   embedded?.sort((a, b) => a.line - b.line);
   for (const stmt of body.descendantsOfType('assert_statement')) {
     const expr = stmt.namedChildren[0];
-    out.push({ callee: 'assert', text: stmt.text.trim(), line: line(stmt), kind: 'value', ...(expr ? { subject: normaliseText(expr.text) } : {}) });
+    out.push({ callee: 'assert', text: stmt.text.trim(), line: line(stmt), kind: 'value', ...(expr ? { subject: normaliseText(expr.text) } : {}), ...(guardedByThrowExpectation(stmt, body) ? { guarded: true } : {}) });
   }
   out.sort((a, b) => a.line - b.line);
   return out;

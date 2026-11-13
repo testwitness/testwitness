@@ -656,6 +656,7 @@
         "flaky in history",
         "generated",
         "hides failure",
+        "inside exception expectation",
         "in helper",
         "maintainer only",
         "matches nothing",

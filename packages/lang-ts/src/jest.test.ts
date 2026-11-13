@@ -613,3 +613,23 @@ describe('calls (A001 replaced by call)', () => {
     expect(t.calls).toEqual([{ callee: 'client.flush', name: 'flush', line: 1, statement: true, text: 'client.flush()' }]);
   });
 });
+
+describe('assertions guarded by an exception expectation', () => {
+  it('marks assertions inside a callback given to a narrowed toThrow, not a bare toThrow()', async () => {
+    const t = await single(src(`
+      it('guards', () => {
+        expect(() => {
+          expect(parse('x')).toBe(1);
+        }).toThrow(TypeError);
+        expect(() => {
+          expect(parse('y')).toBe(2);
+        }).toThrow();
+        expect(() => {
+          expect(parse('z')).toBe(3);
+        }).toThrow(Error);
+        expect(parse('w')).toBe(4);
+      });
+    `));
+    expect(t.assertions.filter((a) => a.guarded).map((a) => a.subject)).toEqual(["parse('x')"]);
+  });
+});

@@ -1143,3 +1143,23 @@ class CartTest {
     expect(crlf.tests[0]!.assertions.some((a) => a.text.includes('\n'))).toBe(true);
   });
 });
+
+describe('assertions guarded by an exception expectation', () => {
+  it('marks assertions inside the lambda of assertThrows, not when the expected type is an assertion failure', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test
+  void guards() {
+    assertThrows(IllegalStateException.class, () -> {
+      assertEquals(1, service.read("x"));
+    });
+    assertThrows(AssertionError.class, () -> {
+      assertEquals(2, service.read("y"));
+    });
+    assertEquals(3, service.read("z"));
+  }
+}
+`);
+    expect(t.assertions.filter((a) => a.guarded).map((a) => a.text)).toEqual([expect.stringContaining('"x"')]);
+  });
+});
