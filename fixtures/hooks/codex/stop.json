@@ -1,0 +1,11 @@
+{
+  "session_id": "0199a1b2-codex",
+  "transcript_path": null,
+  "cwd": "__REPO__",
+  "hook_event_name": "Stop",
+  "model": "gpt-5.1-codex",
+  "permission_mode": "default",
+  "turn_id": "turn-7",
+  "stop_hook_active": false,
+  "last_assistant_message": "Done. The suite is green."
+}

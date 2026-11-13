@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyConfiguredSeverity, ConfigError, parseConfig } from './config.js';
+import { applyConfiguredSeverity, ConfigError, pathMatcher, parseConfig } from './config.js';
 import { ruleMap } from './rules/index.js';
 
 const known = ruleMap();
@@ -120,5 +120,29 @@ describe('coverage config', () => {
   it('accepts severities for the C rules and V008', () => {
     const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n  V008: medium\n', known);
     expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity, c.rules['V008']!.severity]).toEqual(['medium', 'off', 'low', 'medium']);
+  });
+});
+
+describe('agent hook config', () => {
+  it('defaults: nothing protected, 20 s, two blocks, R001 advice only', () => {
+    const c = parseConfig(undefined);
+    expect(c.protect).toEqual([]);
+    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, adviceOnly: ['R001'] });
+  });
+  it('reads protect, hook.timeout, hook.max_blocks and hook.advice_only', () => {
+    const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  advice_only: []\n', known);
+    expect(c.protect).toEqual(['tests/golden/**', '.github/workflows/test.yml']);
+    expect(c.hook).toEqual({ timeoutSeconds: 5, maxBlocks: 3, adviceOnly: [] });
+    expect(parseConfig('hook:\n  advice_only: [R001, O002]\n', known).hook.adviceOnly).toEqual(['R001', 'O002']);
+  });
+  it('rejects wrong types, unknown keys, unknown rules and values out of range', () => {
+    for (const bad of ['protect: "tests/**"\n', 'protect: [1]\n', 'hook: 5\n', 'hook:\n  timeout: 0\n', 'hook:\n  timeout: 601\n', 'hook:\n  timeout: "20"\n', 'hook:\n  max_blocks: 0\n', 'hook:\n  max_blocks: 1.5\n', 'hook:\n  max_blocks: 11\n', 'hook:\n  advice_only: [Z999]\n', 'hook:\n  advice_only: [r001]\n', 'hook:\n  retries: 2\n']) {
+      expect(() => parseConfig(bad, known), bad).toThrow(ConfigError);
+    }
+  });
+  it('pathMatcher matches globs, dot files included, and nothing when the list is empty', () => {
+    expect(pathMatcher([])('a.ts')).toBe(false);
+    const m = pathMatcher(['tests/golden/**', '.github/**']);
+    expect([m('tests/golden/a/b.snap'), m('.github/workflows/ci.yml'), m('tests/unit/a.ts')]).toEqual([true, true, false]);
   });
 });

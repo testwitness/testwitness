@@ -3,11 +3,29 @@ import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { check, loadConfig, render, resolveBase, ConfigError } from './check.js';
 import { serveStdio } from './mcp.js';
+import { AGENTS } from './hook/events.js';
+import { runHook } from './hook/run.js';
 import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION } from '@testwitness/core';
 
 export { check, render } from './check.js';
 export { allFrontEnds } from './frontends.js';
 export { createServer } from './mcp.js';
+
+export { runHook, evaluate } from './hook/run.js';
+
+/** All of stdin as text; empty when stdin is a terminal. */
+async function readStdin(timeoutMs: number): Promise<string> {
+  if (process.stdin.isTTY) return '';
+  const chunks: Buffer[] = [];
+  await new Promise<void>((done) => {
+    // An agent that never closes stdin must not hang the hook: answer with what arrived.
+    const timer = setTimeout(done, timeoutMs);
+    process.stdin.on('data', (c: Buffer | string) => chunks.push(typeof c === 'string' ? Buffer.from(c) : c));
+    process.stdin.on('end', () => (clearTimeout(timer), done()));
+    process.stdin.on('error', () => (clearTimeout(timer), done()));
+  });
+  return Buffer.concat(chunks).toString('utf8');
+}
 
 export async function main(argv: string[]): Promise<number> {
   const program = new Command();
@@ -112,6 +130,29 @@ export async function main(argv: string[]): Promise<number> {
     .description('List built in rules')
     .action(() => {
       for (const r of builtinRules()) process.stdout.write(`${r.id}  ${r.defaultSeverity.padEnd(6)}  ${r.name}\n`);
+    });
+
+  program
+    .command('hook')
+    .description("Guard for a coding agent's hooks: reads the hook event on stdin, checks the working tree on commit, push and stop, and answers in the agent's blocking format (docs/agent-guard.md)")
+    .requiredOption('--agent <name>', `${AGENTS.join(' | ')}`)
+    .option('--base <ref>', "base ref (merge base is computed); default the repository's default branch")
+    .option('--timeout <seconds>', 'give up and allow the action after this many seconds (default hook.timeout from the base config, then 20)')
+    .option('--results <globs>', 'comma separated globs of test results to read (default none)')
+    .option('--cwd <dir>', 'directory to use when the event names none', process.cwd())
+    .allowExcessArguments(true)
+    .action(async (o) => {
+      if (!(AGENTS as readonly string[]).includes(o.agent)) {
+        process.stderr.write(`testwitness: --agent must be one of ${AGENTS.join(', ')}\n`);
+        code = 2;
+        return;
+      }
+      const timeout = o.timeout === undefined ? undefined : Number(o.timeout);
+      const out = await runHook({ agent: o.agent, input: await readStdin(5000), cwd: resolve(o.cwd), base: o.base, results: o.results, ...(timeout !== undefined && timeout > 0 ? { timeoutSeconds: timeout } : {}) });
+      // Flush both streams, then leave: after a timeout the check may still be running, and the answer is already out.
+      await new Promise<void>((done) => process.stderr.write(out.stderr, () => done()));
+      await new Promise<void>((done) => process.stdout.write(out.stdout, () => done()));
+      process.exit(out.exitCode);
     });
 
   program

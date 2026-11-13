@@ -135,13 +135,27 @@ export interface WorktreeSnapshot {
  * Why not read the files directly: the engine's rename detection, binary detection and hunks come from `git diff`, and
  * findings must be identical to the commit check once the change is committed. One code path guarantees that.
  */
+/** Snapshot directories still on disk; removed when the process exits early (the agent hook exits on its timeout). */
+const liveSnapshots = new Set<string>();
+let exitHookInstalled = false;
+
 export async function snapshotWorktree(opts: GitOptions): Promise<WorktreeSnapshot> {
   const top = (await git(['rev-parse', '--show-toplevel'], opts)).trim();
   const paths = (await git(['rev-parse', '--git-path', 'objects', '--git-path', 'index'], { ...opts, cwd: top })).split('\n');
   const objects = resolve(top, paths[0] ?? '');
   const index = resolve(top, paths[1] ?? '');
   const dir = mkdtempSync(join(tmpdir(), 'testwitness-worktree-'));
-  const dispose = (): void => rmSync(dir, { recursive: true, force: true });
+  liveSnapshots.add(dir);
+  if (!exitHookInstalled) {
+    exitHookInstalled = true;
+    process.once('exit', () => {
+      for (const d of liveSnapshots) rmSync(d, { recursive: true, force: true });
+    });
+  }
+  const dispose = (): void => {
+    rmSync(dir, { recursive: true, force: true });
+    liveSnapshots.delete(dir);
+  };
   try {
     const tmpIndex = join(dir, 'index');
     mkdirSync(join(dir, 'objects'));

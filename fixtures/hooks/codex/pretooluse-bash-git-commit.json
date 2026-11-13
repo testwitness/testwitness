@@ -1,0 +1,14 @@
+{
+  "session_id": "0199a1b2-codex",
+  "transcript_path": null,
+  "cwd": "__REPO__",
+  "hook_event_name": "PreToolUse",
+  "model": "gpt-5.1-codex",
+  "permission_mode": "default",
+  "turn_id": "turn-7",
+  "tool_name": "Bash",
+  "tool_use_id": "call_001",
+  "tool_input": {
+    "command": "git commit -am 'make the suite green'"
+  }
+}
