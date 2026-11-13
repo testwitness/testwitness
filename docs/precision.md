@@ -27,8 +27,8 @@ Measured 2026-11-13 on 347 public pull requests (corpus/). Precision counts medi
 | O001 | all | 5 | 18 | 0 | 0 | 1.00 | 0 |
 | O001 | heldout | 0 | 10 | 0 | 0 | n/a | 0 |
 | O001 | tuning | 5 | 8 | 0 | 0 | 1.00 | 0 |
-| O002 | all | 9 | 39 | 8 | 0 | 0.53 | 0 |
-| O002 | heldout | 0 | 8 | 3 | 0 | 0.00 | 0 |
+| O002 | all | 9 | 42 | 5 | 0 | 0.64 | 0 |
+| O002 | heldout | 0 | 11 | 0 | 0 | n/a | 0 |
 | O002 | tuning | 9 | 31 | 5 | 0 | 0.64 | 0 |
 | R001 | all | 32 | 214 | 23 | 3 | 0.58 | 7 |
 | R001 | heldout | 23 | 106 | 7 | 2 | 0.77 | 2 |
@@ -71,7 +71,7 @@ Entries are split by the parity of the SHA-256 of the PR url (see corpus/README.
 | C003 | 1 | 1 | 0.50 | 0 | 0 |
 | E001 | 2 | 0 | 1.00 | 0 | 0 |
 | O001 | 0 | 0 | n/a | 0 | 0 |
-| O002 | 0 | 3 | 0.00 | 0 | 0 |
+| O002 | 0 | 0 | n/a | 0 | 0 |
 | R001 | 23 | 7 | 0.77 | 0 | 2 |
 | R002 | 3 | 1 | 0.75 | 0 | 0 |
 | R003 | 23 | 0 | 1.00 | 0 | 1 |

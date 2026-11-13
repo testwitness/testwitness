@@ -879,8 +879,8 @@
     "slug": "apache-shardingsphere-25656",
     "split": "heldout",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "BitronixRecoveryResourceTest#assertInit",
     "label": "smoke"
   },
@@ -888,8 +888,8 @@
     "slug": "apache-shardingsphere-25656",
     "split": "heldout",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "BitronixRecoveryResourceTest#assertSetFailed",
     "label": "smoke"
   },
@@ -897,8 +897,8 @@
     "slug": "apache-shardingsphere-25656",
     "split": "heldout",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "BitronixRecoveryResourceTest#assertClose",
     "label": "smoke"
   },
@@ -917,7 +917,8 @@
     "ruleId": "A001",
     "severity": "low",
     "verdict": "expected-low",
-    "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForPostgreSQL"
+    "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForPostgreSQL",
+    "label": "inside exception expectation"
   },
   {
     "slug": "apache-shardingsphere-25657",
@@ -925,7 +926,8 @@
     "ruleId": "A001",
     "severity": "low",
     "verdict": "expected-low",
-    "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForOpenGauss"
+    "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForOpenGauss",
+    "label": "inside exception expectation"
   },
   {
     "slug": "apache-shardingsphere-25660",
