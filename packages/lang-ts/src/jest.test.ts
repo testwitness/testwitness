@@ -39,6 +39,13 @@ describe('jest declarations', () => {
     expect(t.qualifiedName).toBe('`handles ${n} items`');
   });
 
+  it('reads escapes in a quoted title as the runner reports the name', async () => {
+    const t = await single(String.raw`test('edits each agent\'s file and a \u00e9 \x41', () => { expect(1).toBe(1); });`);
+    expect(t.name).toBe("edits each agent's file and a \u00e9 A");
+    const d = await single(String.raw`test("say \"hi\" \\ there", () => { expect(1).toBe(1); });`);
+    expect(d.name).toBe('say "hi" \\ there');
+  });
+
   it('hashes the body only, so a rename keeps the hash', async () => {
     const a = await single(`test('a', () => { expect(x).toBe(1); });`);
     const b = await single(`test('renamed', () => {\n  expect(x).toBe(1);\n});`);
