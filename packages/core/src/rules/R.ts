@@ -1,5 +1,6 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
+import { stripChecklist, stripNonProse } from '../evidence/claims.js';
 import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, removedSubjectOf, subjectRemoved, versionGated, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
@@ -496,14 +497,17 @@ export const R010: Rule = {
   needs: ['diff', 'ast'],
   docs: {
     summary: 'A test new in this PR already carries a skip, todo, fixme or xfail marker. It is honest about not running but it is not coverage.',
-    falsePositives: 'None by design: this is informational. It rises to medium when the PR text claims the test as coverage.',
+    falsePositives: 'Informational by design. It rises to medium when the PR text claims the test as coverage; a ticked checklist box from a PR template is not such a claim. Classes under src/main are never run as tests by Maven or Gradle and are not reported (skipping samples that other tests use as input).',
     example: "+  test.fixme('handles 3DS challenge', async ({ page }) => {",
   },
   run(ctx) {
     const out: Finding[] = [];
-    const claimsCoverage = ctx.prText ? /\b(add(ed|s)?|new|more)\s+(unit\s+|integration\s+)?tests?\b|\bcoverage\b/i.test(`${ctx.prText.title}\n${ctx.prText.body}`) : false;
+    // Checked template boxes ("- [x] Add test case(s)") tick a reminder; they do not claim the new test as coverage.
+    const claimsCoverage = ctx.prText ? /\b(add(ed|s)?|new|more)\s+(unit\s+|integration\s+)?tests?\b|\bcoverage\b/i.test(stripChecklist(stripNonProse(`${ctx.prText.title}\n${ctx.prText.body}`))) : false;
     for (const { pair, change } of allChanges(ctx.pairs)) {
       if (change.kind !== 'added') continue;
+      // Maven and Gradle never run classes under src/main as tests: a skipping sample there is input for another test.
+      if (/(^|\/)src\/main\//.test(pair.file.path)) continue;
       const t = change.head;
       if (!isSkipped(t) && !isXfail(t)) continue;
       if (allChanges([pair]).some((c) => c.change.kind === 'deleted' && c.change.base.name === t.name)) continue; // reported by R003

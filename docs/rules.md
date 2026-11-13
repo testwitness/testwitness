@@ -95,7 +95,7 @@ Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A test new in this PR already carries a skip, todo, fixme or xfail marker. It is honest about not running but it is not coverage.
 
-**False positive controls.** None by design: this is informational. It rises to medium when the PR text claims the test as coverage.
+**False positive controls.** Informational by design. It rises to medium when the PR text claims the test as coverage; a ticked checklist box from a PR template is not such a claim. Classes under src/main are never run as tests by Maven or Gradle and are not reported (skipping samples that other tests use as input).
 
 ```diff
 +  test.fixme('handles 3DS challenge', async ({ page }) => {

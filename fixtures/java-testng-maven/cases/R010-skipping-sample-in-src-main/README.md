@@ -1,0 +1,1 @@
+Negative. A test kit module adds a sample class under src/main/java whose test always skips. It is input for another test, and Maven and Gradle never run classes in src/main as tests. Seen in a replay of public PRs on TestNG. Nothing fires.

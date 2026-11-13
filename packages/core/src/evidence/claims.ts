@@ -38,7 +38,7 @@ export function stripNonProse(text: string): string {
  * Checked checklist items too. A PR template's "- [x] Add test case(s)" ticks a reminder; it is template text, not a
  * statement that this diff adds a test, so "added tests" claims never come from a checklist line.
  */
-function stripChecklist(prose: string): string {
+export function stripChecklist(prose: string): string {
   return prose.replace(/^\s*(?:[-*+]|\d+[.)])?\s*\[[ xX]?\]\s.*$/gm, ' ');
 }
 
