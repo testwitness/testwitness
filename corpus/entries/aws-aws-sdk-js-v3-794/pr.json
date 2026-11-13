@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-sdk-js-v3/pull/794",
+  "repo": "aws/aws-sdk-js-v3",
+  "number": 794,
+  "title": "chore: comment out flaky node-http2-handler test",
+  "merged_at": "2020-01-27T19:08:59Z",
+  "stars": 3679,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "4bf0168d62f064e6fb609497e98cdc0b07cef0c8",
+  "head_sha": "6430576f9c9a8ddbf1b2d72a656860d5775c9b2f",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

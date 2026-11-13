@@ -1,0 +1,6 @@
+[
+  {
+    "path": "integration-tests/kubernetes/quarkus-standard-way/src/test/java/io/quarkus/it/kubernetes/OpenshiftWithS2iTest.java",
+    "status": "modified"
+  }
+]

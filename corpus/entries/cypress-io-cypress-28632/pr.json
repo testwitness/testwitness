@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/cypress-io/cypress/pull/28632",
+  "repo": "cypress-io/cypress",
+  "number": 28632,
+  "title": "chore: comment out skipped tests where tests always hangs + add logs",
+  "merged_at": "2024-01-12T15:39:52Z",
+  "stars": 51029,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "f088ce6c4992a7201d10b6bc9e8758b071fd84a1",
+  "head_sha": "0699d55478451d8924431dc309eaadfc1e654c93",
+  "files_changed": 5,
+  "additions": 73,
+  "deletions": 40
+}

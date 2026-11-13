@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Gantt diagram \u203a should render a gantt diagram with very large intervals, skipping excludes if interval > 5 years",
+    "verdict": "tp",
+    "reason": "it.skip added to a failing test"
+  }
+]

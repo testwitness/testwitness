@@ -1,0 +1,22 @@
+[
+  {
+    "path": "packages/driver/cypress.config.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/driver/cypress/e2e/commands/task.cy.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/driver/cypress/e2e/e2e/origin/snapshots.cy.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/frontend-shared/cypress/support/e2e.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/launchpad/cypress/e2e/project-setup.cy.ts",
+    "status": "modified"
+  }
+]

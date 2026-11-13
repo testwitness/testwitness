@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "NodeHttp2Handler \u203a abortSignal \u203a will close request on session when aborted",
+    "verdict": "tp",
+    "reason": "test commented out for flakiness"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/quarkusio/quarkus/pull/15977",
+  "repo": "quarkusio/quarkus",
+  "number": 15977,
+  "title": "Comment out flaky assertion in s2i test",
+  "merged_at": "2021-03-24T09:55:46Z",
+  "stars": 15973,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "A001",
+  "split": "heldout",
+  "base_sha": "96c8f25c92308704f75bc8979c62c69a5d146faa",
+  "head_sha": "34c17b2bafda5cf98f4550e37b3698da7e6ef1ba",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}
