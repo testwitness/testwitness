@@ -2,10 +2,12 @@ import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { check, render, ConfigError } from './check.js';
+import { serveStdio } from './mcp.js';
 import { builtinRules, GitError, TOOL_VERSION } from '@testwitness/core';
 
 export { check, render } from './check.js';
 export { allFrontEnds } from './frontends.js';
+export { createServer } from './mcp.js';
 
 export async function main(argv: string[]): Promise<number> {
   const program = new Command();
@@ -64,6 +66,13 @@ export async function main(argv: string[]): Promise<number> {
     .description('List built in rules')
     .action(() => {
       for (const r of builtinRules()) process.stdout.write(`${r.id}  ${r.defaultSeverity.padEnd(6)}  ${r.name}\n`);
+    });
+
+  program
+    .command('mcp')
+    .description('Start a read only MCP server on stdio (tools: testwitness_check, testwitness_explain_rule, testwitness_rules)')
+    .action(async () => {
+      await serveStdio();
     });
 
   await program.parseAsync(argv, { from: 'user' });

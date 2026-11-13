@@ -39,6 +39,10 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 
 `testwitness rules` lists the built in rules.
 
+`testwitness mcp` starts a read only MCP server on stdio so coding agents can run the check before pushing; see [MCP server for agents](./mcp).
+
+The JSON report (`--format json`) follows the JSON Schema in [`docs/report.schema.json`](https://github.com/testwitness/testwitness/blob/main/docs/report.schema.json), published at `https://testwitness.github.io/testwitness/report.schema.json`, and carries `schemaVersion: "1"`.
+
 Exit codes: `0` pass, or any result in `report` mode; `1` review needed under `require-ack` or `strict`; `2` config or git error; `3` no test results under `strict` with `require_evidence`.
 
 The grammars and queries are read from `assets` next to the bundle. Set `TESTWITNESS_ASSET_DIR` to load them from another directory.
