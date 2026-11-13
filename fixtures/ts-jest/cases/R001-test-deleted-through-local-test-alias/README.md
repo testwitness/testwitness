@@ -1,0 +1,1 @@
+Positive. Tests are declared through a local binding of test. The PR deletes two of the three, loads a module and keeps a leading hash out of the fragment, and changes no production code. A deletion through the binding is a deletion of a test, so each is reported medium.

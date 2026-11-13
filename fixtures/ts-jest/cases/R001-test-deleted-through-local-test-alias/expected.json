@@ -1,0 +1,1 @@
+[{"ruleId":"R001","severity":"medium","subject":"graph › loads a module"},{"ruleId":"R001","severity":"medium","subject":"graph › keeps a leading hash out of the fragment"}]

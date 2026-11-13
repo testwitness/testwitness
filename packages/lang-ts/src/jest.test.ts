@@ -537,6 +537,22 @@ describe('jest catch alls', () => {
     expect(byName(inventory, 'background').catchAlls).toMatchObject([{ swallows: true, background: true }]);
   });
 
+  it('reads tests declared through a local binding of test, conditional when it picks test.skip', async () => {
+    const inventory = await inv(src(`
+      const testWithVmEsm = typeof globalThis.vm === 'object' ? test : test.skip;
+      const run = test;
+      const notATest = makeRunner();
+      describe('graph', () => {
+        testWithVmEsm('loads a module', () => { expect(load('a')).toBe(1); });
+        run('runs always', () => { expect(1).toBe(1); });
+        notATest('ignored', () => { expect(1).toBe(1); });
+      });
+    `));
+    expect(inventory.tests.map((t) => t.qualifiedName)).toEqual(['graph › loads a module', 'graph › runs always']);
+    expect(byName(inventory, 'loads a module').markers.map((m) => m.kind)).toEqual(['conditional-skip']);
+    expect(byName(inventory, 'runs always').markers).toEqual([]);
+  });
+
   it('records promise .catch handlers that swallow', async () => {
     const inventory = await inv(src(`
       test('promise catches', async () => {

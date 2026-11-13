@@ -20,6 +20,7 @@ import {
   MODIFIERS,
   NON_DECLARATION_PROPERTIES,
   ROOT_ALIASES,
+  TEST_ROOTS,
   detectFramework,
 } from './frameworks.js';
 import type { MarkerKind } from './frameworks.js';
@@ -270,11 +271,50 @@ function analyseQUnit(call: Node, chain: Chain): Declaration | undefined {
 }
 
 /** Decide whether a matched call is a test or container declaration. */
-function analyseDeclaration(call: Node): Declaration | undefined {
+/**
+ * Local bindings of a test function at the top of the file: `const testWithVmEsm = cond ? test : test.skip`,
+ * `const it2 = it`, `const run = test.concurrent`. A call through the binding declares a test. `conditional` is true
+ * when the binding picks a skipping variant under a condition, so the test runs only sometimes.
+ */
+export function localTestAliases(root: Node): Map<string, { conditional: boolean }> {
+  const out = new Map<string, { conditional: boolean }>();
+  const testRef = (n: Node | null | undefined): 'run' | 'skip' | undefined => {
+    if (!n) return undefined;
+    while (n.type === 'parenthesized_expression' && n.namedChildren[0]) n = n.namedChildren[0];
+    if (n.type === 'identifier') return TEST_ROOTS.includes(n.text) ? (ROOT_ALIASES[n.text]?.marker === 'skip' ? 'skip' : 'run') : undefined;
+    if (n.type !== 'member_expression') return undefined;
+    const obj = n.childForFieldName('object');
+    const prop = n.childForFieldName('property')?.text ?? '';
+    if (obj?.type !== 'identifier' || !TEST_ROOTS.includes(obj.text) || !MODIFIERS[prop] || MODIFIERS[prop]?.table) return undefined;
+    return MODIFIERS[prop]?.marker === 'skip' || MODIFIERS[prop]?.marker === 'todo' ? 'skip' : 'run';
+  };
+  for (const stmt of root.namedChildren) {
+    if (!stmt || (stmt.type !== 'lexical_declaration' && stmt.type !== 'variable_declaration')) continue;
+    for (const d of stmt.namedChildren) {
+      if (!d || d.type !== 'variable_declarator') continue;
+      const name = d.childForFieldName('name');
+      let value = d.childForFieldName('value');
+      if (!name || name.type !== 'identifier' || !value || ROOT_ALIASES[name.text]) continue;
+      while (value.type === 'parenthesized_expression' && value.namedChildren[0]) value = value.namedChildren[0];
+      if (value.type === 'ternary_expression') {
+        const a = testRef(value.childForFieldName('consequence'));
+        const b = testRef(value.childForFieldName('alternative'));
+        if (a && b) out.set(name.text, { conditional: a !== b || a === 'skip' });
+        continue;
+      }
+      const r = testRef(value);
+      if (r === 'run') out.set(name.text, { conditional: false });
+    }
+  }
+  return out;
+}
+
+function analyseDeclaration(call: Node, aliases?: Map<string, { conditional: boolean }>): Declaration | undefined {
   const chain = unwindChain(call);
   if (!chain || !chain.root || chain.root.type !== 'identifier') return undefined;
   if (chain.rootName === 'QUnit') return analyseQUnit(call, chain);
-  const alias = ROOT_ALIASES[chain.rootName];
+  const local = aliases?.get(chain.rootName);
+  const alias = local ? ROOT_ALIASES['test'] : ROOT_ALIASES[chain.rootName];
   if (!alias) return undefined;
 
   let base = alias.base;
@@ -284,6 +324,7 @@ function analyseDeclaration(call: Node): Declaration | undefined {
   const prefix: string[] = [chain.rootName];
 
   if (alias.marker) markers.push(markerFor(chain.rootName, alias.marker, call, { constant: true }));
+  if (local?.conditional) markers.push(markerFor(chain.rootName, 'conditional-skip', call, { constant: false }));
 
   for (const seg of chain.segments) {
     if (seg.name === '()') continue;
@@ -640,10 +681,12 @@ export async function buildInventory(path: string, source: string, profile: Fram
     return { kind: 'file' };
   };
 
-  for (const call of capturedNodes(queries.tests, root, 'call')) {
+  const aliases = localTestAliases(root);
+  const aliasCalls = aliases.size ? root.descendantsOfType('call_expression').filter((c): c is Node => !!c && unwindChain(c)?.rootName !== undefined && aliases.has(unwindChain(c)!.rootName)) : [];
+  for (const call of [...capturedNodes(queries.tests, root, 'call'), ...aliasCalls].sort((a, b) => a.startIndex - b.startIndex)) {
     if (isInnerCall(call)) continue;
     if (tests.has(call.id) || containers.has(call.id)) continue;
-    const decl = analyseDeclaration(call);
+    const decl = analyseDeclaration(call, aliases);
     if (!decl) continue;
     // A test declared inside another test body is not a declaration in any framework;
     // Playwright's inline test.skip('reason') lands here and is read as a marker instead.

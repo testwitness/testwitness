@@ -1,0 +1,1 @@
+Negative. The file declares its tests through a local binding of test, which picks test.skip when the VM modules API is missing. The PR adds two tests through that binding and says so. Calls through a local binding of test are test declarations, so the claim is supported. Seen in a replay of public PRs on Jest. Nothing fires.
