@@ -52,6 +52,44 @@ describe('coverage readers', () => {
     expect(normaliseCoveragePath('billing/refund.py', '/repo', ['/ci/other/src'])).toBe('billing/refund.py');
   });
 
+  it('normalises Windows report paths against a Windows root on any platform', () => {
+    // Drive letter case differs between tools (Istanbul writes c:\\, the runner's cwd is C:\\).
+    expect(normaliseCoveragePath('c:\\repo\\src\\a.ts', 'C:\\repo')).toBe('src/a.ts');
+    expect(normaliseCoveragePath('C:/Repo/src/a.ts', 'c:\\repo\\')).toBe('src/a.ts');
+    expect(normaliseCoveragePath('D:\\other\\src\\a.ts', 'C:\\repo')).toBe('D:/other/src/a.ts');
+    expect(normaliseCoveragePath('C:\\repository\\src\\a.ts', 'C:\\repo')).toBe('C:/repository/src/a.ts');
+    // UNC shares and file URLs.
+    expect(normaliseCoveragePath('\\\\build\\share\\app\\src\\a.ts', '\\\\BUILD\\share\\app')).toBe('src/a.ts');
+    expect(normaliseCoveragePath('file:///C:/repo/src/a.ts', 'C:\\repo')).toBe('src/a.ts');
+    expect(normaliseCoveragePath('file:///repo/src/a.ts', '/repo')).toBe('src/a.ts');
+    // Cobertura sources written on Windows.
+    expect(normaliseCoveragePath('billing\\refund.py', 'C:\\repo', ['c:\\repo\\src'])).toBe('src/billing/refund.py');
+    expect(normaliseCoveragePath('billing/refund.py', 'C:\\repo', ['C:\\repo'])).toBe('billing/refund.py');
+    expect(normaliseCoveragePath('billing/refund.py', 'C:\\repo', ['src\\'])).toBe('src/billing/refund.py');
+    // POSIX paths stay case sensitive.
+    expect(normaliseCoveragePath('/Repo/src/a.ts', '/repo')).toBe('/Repo/src/a.ts');
+  });
+
+  it('reads an lcov file written on Windows: CRLF lines and backslash SF paths', async () => {
+    const lcov = ['TN:', 'SF:c:\\work\\app\\src\\cart.ts', 'DA:1,1', 'DA:2,0', 'end_of_record', 'SF:src\\util.ts', 'DA:3,4', 'end_of_record', ''].join('\r\n');
+    const data = await readCoverageString(lcov, 'lcov.info', 'C:\\work\\app');
+    // Stored repository relative, not kept absolute for suffix matching (which two src/cart.ts in a monorepo defeat).
+    expect([...data.files.keys()]).toEqual(['src/cart.ts', 'src/util.ts']);
+    const ev = toCoverageEvidence(data);
+    expect(ev.files).toBe(2);
+    expect([...ev.lookup('src/cart.ts')!.executed]).toEqual([1]);
+    expect([...ev.lookup('src/cart.ts')!.instrumented].sort()).toEqual([1, 2]);
+    expect([...ev.lookup('src/util.ts')!.executed]).toEqual([3]);
+  });
+
+  it('reads a Cobertura report written on Windows: CRLF and a Windows source root', async () => {
+    const xml = ['<?xml version="1.0" ?>', '<coverage version="7.4">', '<sources><source>C:\\a\\app\\src</source></sources>', '<packages><package name="billing"><classes>', '<class name="refund.py" filename="billing\\refund.py"><lines><line number="4" hits="1"/><line number="5" hits="0"/></lines></class>', '</classes></package></packages></coverage>', ''].join('\r\n');
+    const data = await readCoverageString(xml, 'coverage.xml', 'c:\\a\\app');
+    expect([...data.files.keys()]).toEqual(['src/billing/refund.py']);
+    const ev = toCoverageEvidence(data);
+    expect([...ev.lookup('src/billing/refund.py')!.executed]).toEqual([4]);
+  });
+
   it('reads lcov line hits', async () => {
     const ev = toCoverageEvidence(await readCoverageString(LCOV, 'lcov.info', '/home/runner/work/app/app'));
     expect(ev.files).toBe(2);
