@@ -15,6 +15,15 @@ describe('findClaims', () => {
     expect(findClaims('- [x] all tests pass')).toHaveLength(1);
     expect(findClaims('tests do not pass yet')).toEqual([]);
   });
+  it('never reads an added tests claim from a checklist line, and honours a negation later on the line', () => {
+    expect(findClaims('- [x] Add test case(s)')).toEqual([]);
+    expect(findClaims('* [X] I have added tests to confirm my change works.')).toEqual([]);
+    expect(findClaims('1. [x] Added tests')).toEqual([]);
+    expect(findClaims('Added tests: not applicable, this deletes a test')).toEqual([]);
+    expect(findClaims('Added tests, no new test needed beyond the updated one')).toEqual([]);
+    expect(findClaims('Added tests for refunds.\nNot applicable to the docs.').map((c) => c.kind)).toEqual(['added-tests']);
+    expect(findClaims('- [x] all tests pass').map((c) => c.kind)).toEqual(['tests-pass']);
+  });
   it('dedupes and honours extra phrases', () => {
     const c = findClaims('tests pass. tests pass.', ['ran the whole thing']);
     expect(c.filter((x) => x.kind === 'tests-pass')).toHaveLength(1);

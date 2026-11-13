@@ -1,0 +1,1 @@
+Negative. The PR says it added test cases, and the diff adds two rows to an existing test.each table, which the runner reports as two new tests. Seen in a replay of public PRs on Vitest. Nothing fires.

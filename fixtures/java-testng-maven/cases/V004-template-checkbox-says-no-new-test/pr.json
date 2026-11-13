@@ -1,0 +1,1 @@
+{"title": "fix: wait for the failure record before a parallel retry", "body": "Fixes #3558.\n\n### Did you remember to?\n\n- [x] Add test case(s): no new test. A race this rare cannot be reproduced on demand, so the existing test is updated.\n- [ ] Update `CHANGES.txt`\n- [x] Auto applied styling via `./gradlew autostyleApply`\n"}

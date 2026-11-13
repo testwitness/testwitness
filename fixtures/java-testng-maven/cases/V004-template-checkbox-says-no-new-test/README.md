@@ -1,0 +1,1 @@
+Negative. The PR body comes from the repository's template, and the checked box "Add test case(s)" says on the same line that no new test was added and the existing test was updated. A checked template box is template text, not a claim, and the line itself negates it. Seen in a replay of public PRs on TestNG. Nothing fires.

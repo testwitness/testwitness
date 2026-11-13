@@ -1,0 +1,1 @@
+Negative. The title says the PR adds a regression test. The suite is driven by fixture files: the PR adds an input file and a new entry in the snapshot file, and the existing format.test.js generates one test per input when it runs. A new snapshot entry supports the claim. Seen in a replay of public PRs on Prettier. Nothing fires.

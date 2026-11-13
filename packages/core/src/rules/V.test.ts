@@ -63,6 +63,18 @@ describe('V004 claims', () => {
     expect((await V004.run(context({ pairs: [], prText: pr, evidence: failing }), {}))[0]).toMatchObject({ severity: 'medium', label: 'unsupported' });
     expect(await V004.run(context({ pairs: [], prText: pr, evidence: evidence(['a::b']) }), {})).toEqual([]);
   });
+  it('counts table rows, snapshot entries and two or more new assertions as added tests', async () => {
+    const pr = { title: 'Fix', body: 'Added tests for this.' };
+    const a = (text: string) => ({ callee: 'expect.toBe', text });
+    const rows = { file: changedFile('a.test.ts'), base: inventory('a.test.ts', [t({ name: 'a', body: 'x', parameterCount: 3 })]), head: inventory('a.test.ts', [t({ name: 'a', body: 'x', parameterCount: 5 })]) };
+    expect(await V004.run(context({ pairs: [rows], prText: pr }), {})).toEqual([]);
+    const two = { file: changedFile('a.test.ts'), base: inventory('a.test.ts', [t({ name: 'a', body: 'x', assertions: [a('expect(x).toBe(1)')] })]), head: inventory('a.test.ts', [t({ name: 'a', body: 'y', assertions: [a('expect(x).toBe(1)'), a('expect(y).toBe(2)'), a('expect(z).toBe(3)')] })]) };
+    expect(await V004.run(context({ pairs: [two], prText: pr }), {})).toEqual([]);
+    const one = { file: changedFile('a.test.ts'), base: inventory('a.test.ts', [t({ name: 'a', body: 'x', assertions: [a('expect(x).toBe(1)')] })]), head: inventory('a.test.ts', [t({ name: 'a', body: 'y', assertions: [a('expect(x).toBe(1)'), a('expect(y).toBe(2)')] })]) };
+    expect(await V004.run(context({ pairs: [one], prText: pr }), {})).toHaveLength(1);
+    const snap: ChangedFile = { ...changedFile('__snapshots__/f.test.js.snap'), kind: 'snapshot', hunks: [{ baseStart: 9, baseCount: 0, headStart: 10, headCount: 2, removed: [], added: ['exports[`b.js format 1`] = `', '`;'] }] };
+    expect(await V004.run(context({ pairs: [], files: [snap], prText: pr }), {})).toEqual([]);
+  });
   it('is silent without PR text or when claims are disabled', async () => {
     expect(await V004.run(context({ pairs: [] }), {})).toEqual([]);
     const ctx = context({ pairs: [], prText: { title: 'tests pass', body: '' } });

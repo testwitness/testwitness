@@ -1,0 +1,1 @@
+Negative. The PR says it added tests, and the diff adds two new assertions with their own setup inside an existing test function instead of declaring a new test. Seen in a replay of public PRs on Flask. Two or more new assertions in existing tests support the claim. Nothing fires.
