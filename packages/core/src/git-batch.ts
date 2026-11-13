@@ -1,6 +1,6 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { toLf } from "./eol.js";
-import { showFile, type GitOptions } from "./git.js";
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { toLf } from './eol.js';
+import { showFile, type GitOptions } from './git.js';
 
 /**
  * Reads many blobs through one long lived `git cat-file --batch` process instead of one `git show` per file.
@@ -23,11 +23,12 @@ export class BlobReader {
 
   private start(): ChildProcessWithoutNullStreams {
     if (this.proc) return this.proc;
-    const proc = spawn("git", ["cat-file", "--batch"], {
+    const proc = spawn('git', ['cat-file', '--batch'], {
       cwd: this.opts.cwd,
-      stdio: ["pipe", "pipe", "pipe"],
+      stdio: ['pipe', 'pipe', 'pipe'],
+      ...(this.opts.env ? { env: this.opts.env } : {}),
     });
-    proc.stdout.on("data", (chunk: Buffer) => {
+    proc.stdout.on('data', (chunk: Buffer) => {
       this.buf = this.buf.length ? Buffer.concat([this.buf, chunk]) : chunk;
       this.drain();
     });
@@ -35,15 +36,15 @@ export class BlobReader {
       this.failed = e;
       for (const q of this.queue.splice(0)) q.reject(e);
     };
-    proc.on("error", fail);
-    proc.on("close", (code) => {
+    proc.on('error', fail);
+    proc.on('close', (code) => {
       if (this.queue.length)
         fail(
-          new Error(`git cat-file --batch exited with ${code ?? "a signal"}`),
+          new Error(`git cat-file --batch exited with ${code ?? 'a signal'}`),
         );
       this.proc = undefined;
     });
-    proc.stdin.on("error", fail);
+    proc.stdin.on('error', fail);
     this.proc = proc;
     return proc;
   }
@@ -53,14 +54,14 @@ export class BlobReader {
     for (;;) {
       const nl = this.buf.indexOf(0x0a);
       if (nl < 0 || !this.queue.length) return;
-      const header = this.buf.subarray(0, nl).toString("utf8");
-      if (header.endsWith(" missing") || header.endsWith(" ambiguous")) {
+      const header = this.buf.subarray(0, nl).toString('utf8');
+      if (header.endsWith(' missing') || header.endsWith(' ambiguous')) {
         this.buf = this.buf.subarray(nl + 1);
         this.queue.shift()!.resolve(undefined);
         continue;
       }
       // <sha> <type> <size>
-      const parts = header.split(" ");
+      const parts = header.split(' ');
       const size = Number(parts[2]);
       if (parts.length !== 3 || !Number.isFinite(size)) {
         const e = new Error(
@@ -76,7 +77,7 @@ export class BlobReader {
       this.buf = this.buf.subarray(nl + 1 + size + 1);
       const q = this.queue.shift()!;
       // A path that names a tree (a directory) is not a file.
-      q.resolve(parts[1] === "blob" ? toLf(body.toString("utf8")) : undefined);
+      q.resolve(parts[1] === 'blob' ? toLf(body.toString('utf8')) : undefined);
     }
   }
 

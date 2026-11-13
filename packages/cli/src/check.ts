@@ -22,6 +22,7 @@ import {
   toCoverageEvidence,
   toMutationEvidence,
   type HistoryDocument,
+  type InventoryPair,
   type MutationEvidence,
   type CoverageEvidence,
   type ChangedFile,
@@ -40,6 +41,16 @@ export interface CheckOptions {
   /** Base ref; the merge base with head is compared. Default: the default branch (origin/HEAD's target). */
   base?: string;
   head: string;
+  /**
+   * Compare the merge base with the working tree (staged, unstaged and untracked files that are not ignored) instead
+   * of with the head commit. Nothing is written into the repository.
+   */
+  worktree?: boolean | undefined;
+  /**
+   * Read .testwitness.yml from the base ref only and never from the working tree; without a config at the base the
+   * defaults apply. The agent hook sets it, so a change in the working tree cannot relax the check that judges it.
+   */
+  configFromBaseOnly?: boolean | undefined;
   /**
    * Comma separated globs of test results: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or
    * Playwright, told apart by content. Default from config `results.head` (or its older name `junit.head`).
@@ -98,6 +109,8 @@ export interface CheckResult {
   /** The changed files and the evidence the engine graded with, so a caller that changes findings afterwards (the Action's acknowledgements) recomputes the state from the same inputs. */
   files: ChangedFile[];
   evidence?: Evidence;
+  /** Base and head inventories of the changed test files, for callers that quote the base text of a test (the agent hook). */
+  pairs: InventoryPair[];
 }
 
 export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
@@ -113,7 +126,7 @@ export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
     } catch {
       source = undefined;
     }
-    if (source === undefined) {
+    if (source === undefined && !opts.configFromBaseOnly) {
       const local = resolve(opts.cwd, '.testwitness.yml');
       if (existsSync(local)) source = await readFile(local, 'utf8');
     }
@@ -375,10 +388,11 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   }
   const runAttempt = process.env['GITHUB_RUN_ATTEMPT'];
   const runId = opts.runId ?? (process.env['GITHUB_RUN_ID'] ? `${process.env['GITHUB_RUN_ID']}${runAttempt && runAttempt !== '1' ? `.${runAttempt}` : ''}` : undefined);
-  const { report, files, history: updated } = await runEngine({
+  const { report, files, pairs, history: updated } = await runEngine({
     cwd: opts.cwd,
     base,
     head: opts.head,
+    ...(opts.worktree ? { worktree: true } : {}),
     frontEnds: allFrontEnds(),
     config,
     evidence,
@@ -415,7 +429,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   } else if (opts.historyOut) {
     log('history: no results were read and no history was given, so no history was written');
   }
-  return { report, exitCode: exitCodeFor(report, config), config, files, ...(evidence ? { evidence } : {}), ...(updated ? { history: updated } : {}) };
+  return { report, exitCode: exitCodeFor(report, config), config, files, pairs, ...(evidence ? { evidence } : {}), ...(updated ? { history: updated } : {}) };
 }
 
 export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean): string {

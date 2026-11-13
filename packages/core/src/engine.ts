@@ -19,7 +19,7 @@ import type {
   Severity,
   TestInventory,
 } from './types.js';
-import { commitMessages, listTree, mergeBase, numstat, rawDiff, revParse } from './git.js';
+import { commitMessages, listTree, mergeBase, numstat, rawDiff, revParse, snapshotWorktree, type GitOptions, type WorktreeSnapshot } from './git.js';
 import { BlobReader } from './git-batch.js';
 import { parseUnifiedDiff } from './diff/parse.js';
 import { classifyFiles, classifyPath } from './diff/classify.js';
@@ -43,6 +43,12 @@ export interface EngineOptions {
   cwd: string;
   base: string;
   head: string;
+  /**
+   * Compare the merge base with the working tree (staged, unstaged and untracked files that are not ignored) instead
+   * of with the `head` commit. `head` still names the commit the merge base and the commit messages come from. Nothing
+   * is written into the repository (see snapshotWorktree in git.ts).
+   */
+  worktree?: boolean;
   frontEnds: LanguageFrontEnd[];
   config: ResolvedConfig;
   rules?: Rule[];
@@ -103,22 +109,27 @@ export function historyResults(evidence: Evidence): HistoryResult[] {
 }
 
 export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
-  const blobs = new BlobReader({ cwd: opts.cwd });
+  const snapshot = opts.worktree ? await snapshotWorktree({ cwd: opts.cwd }) : undefined;
+  // Blob reads go through one git cat-file --batch process; in working tree mode it reads the snapshot's objects.
+  const blobs = new BlobReader(snapshot ? snapshot.git : { cwd: opts.cwd });
   try {
-    return await runEngineWith(opts, blobs);
+    return await runEngineOn(opts, snapshot, blobs);
   } finally {
     blobs.close();
+    snapshot?.dispose();
   }
 }
 
-async function runEngineWith(opts: EngineOptions, blobs: BlobReader): Promise<EngineResult> {
+async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | undefined, blobs: BlobReader): Promise<EngineResult> {
   const t0 = performance.now();
-  const git = { cwd: opts.cwd };
+  const git: GitOptions = snapshot ? snapshot.git : { cwd: opts.cwd };
   const log = opts.log ?? (() => {});
 
-  const headSha = await revParse(opts.head, git);
-  const baseSha = opts.resolved ? await revParse(opts.base, git) : await mergeBase(opts.base, headSha, git);
-  log(`base ${baseSha.slice(0, 10)} head ${headSha.slice(0, 10)}`);
+  // In working tree mode the head side is the snapshot tree; the head commit still anchors the merge base and the log.
+  const headCommit = await revParse(opts.head, git);
+  const baseSha = opts.resolved ? await revParse(opts.base, git) : await mergeBase(opts.base, headCommit, git);
+  const headSha = snapshot ? snapshot.tree : headCommit;
+  log(`base ${baseSha.slice(0, 10)} head ${snapshot ? `working tree ${headSha.slice(0, 10)} on ` : ''}${headCommit.slice(0, 10)}`);
 
   // Diff
   const diffText = await rawDiff(baseSha, headSha, git);
@@ -311,7 +322,7 @@ async function runEngineWith(opts: EngineOptions, blobs: BlobReader): Promise<En
   // Provenance
   let provenance: ProvenanceInfo = { agents: [] };
   try {
-    const msgs = await commitMessages(baseSha, headSha, git);
+    const msgs = await commitMessages(baseSha, headCommit, git);
     provenance = detectProvenance(msgs, opts.prText, opts.author);
   } catch {
     /* shallow clones may not have history; provenance is optional */
@@ -331,7 +342,7 @@ async function runEngineWith(opts: EngineOptions, blobs: BlobReader): Promise<En
   }
   let updatedHistory: HistoryDocument | undefined = opts.recordHistory ? opts.history : undefined;
   if (opts.recordHistory && opts.evidence && opts.evidence.total > 0) {
-    const run = { id: opts.historyRun?.id || `local-${headSha.slice(0, 10)}`, date: opts.historyRun?.date || new Date().toISOString().slice(0, 10) };
+    const run = { id: opts.historyRun?.id || `local-${headCommit.slice(0, 10)}`, date: opts.historyRun?.date || new Date().toISOString().slice(0, 10) };
     updatedHistory = mergeHistory(opts.history, run, historyResults(opts.evidence));
   }
   const counts = { high: 0, medium: 0, low: 0 };
@@ -393,7 +404,8 @@ async function runEngineWith(opts: EngineOptions, blobs: BlobReader): Promise<En
       : {}),
     ...(history ? { history } : {}),
     base: baseSha,
-    head: headSha,
+    head: headCommit,
+    ...(snapshot ? { headTree: snapshot.tree } : {}),
   };
   return { report, files, pairs, ...(updatedHistory ? { history: updatedHistory } : {}) };
 }
