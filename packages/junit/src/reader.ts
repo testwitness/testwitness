@@ -217,5 +217,6 @@ export function toEvidence(data: ResultIndexData): Evidence {
     statusOf: (key) => data.records.get(key)?.status,
     keysForClass: (ck) => data.byClass.get(ck) ?? [],
     keys: () => data.records.keys(),
+    rerunsOf: (key) => data.records.get(key)?.reruns ?? 0,
   };
 }

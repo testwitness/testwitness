@@ -1,0 +1,3 @@
+Positive for run history. The head turns `it('fails on purpose')` into `it.skip`. The real jest-junit XML in `fixtures/ts-jest/junit/junit.xml` records that test as failed; the history holds it merged as 5 runs, so the test failed in 5 of its last 5 recorded runs and the skip is high with the label hides failure (medium without history).
+
+history/history.json was written by the engine, not by hand: `fixtures/runner/make-history.ts` runs the bundled CLI (`testwitness check --junit ... --run-id ... --history ... --history-out ...`) once per entry of history/runs.json, in an empty temporary git repository, and copies the final document here. Regenerate with `pnpm bundle:cli && pnpm exec tsx fixtures/runner/make-history.ts <this case dir>`.

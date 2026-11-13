@@ -11,7 +11,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { check } from 'testwitness';
-import { renderJson, renderMarkdown, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, computeState, exitCodeFor, type Finding, type Report, type PullRequestComment } from '@testwitness/core';
+import { downloadBaseHistory, HISTORY_FILE, isDefaultBranchPush, uploadHistory } from './history.js';
+import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, computeState, exitCodeFor, type Finding, type Report, type PullRequestComment } from '@testwitness/core';
 
 function annotationLevel(f: Finding, strict: boolean): 'error' | 'warning' | 'notice' {
   if (f.severity === 'high') return strict ? 'error' : 'warning';
@@ -25,8 +26,10 @@ export async function run(): Promise<void> {
   const pr = ctx.payload.pull_request;
   const baseInput = core.getInput('base');
   const headInput = core.getInput('head');
-  const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : 'origin/main');
+  const defaultPush = isDefaultBranchPush();
   const head = headInput || (pr ? (pr['head'] as { sha: string }).sha : 'HEAD');
+  // A push to the default branch has no pull request to compare; it runs to record history, so the diff is empty.
+  const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : defaultPush ? head : 'origin/main');
   const junit = core.getInput('junit') || undefined;
   const coverage = core.getInput('coverage') || undefined;
   const mode = (core.getInput('mode') || undefined) as 'report' | 'require-ack' | 'strict' | undefined;
@@ -34,6 +37,10 @@ export async function run(): Promise<void> {
   const configPath = core.getInput('config') || undefined;
   const commentEnabled = (core.getInput('comment') || 'true') !== 'false';
   const outDir = core.getInput('output_dir') || '.';
+  const historyInput = core.getInput('history') || undefined;
+  const historyArtifact = core.getInput('history_artifact');
+  const historyWrite = core.getInput('history_write') === 'true' || defaultPush;
+  const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
 
   // PR text comes from the event payload file, read as data.
   let prTitle: string | undefined;
@@ -49,10 +56,19 @@ export async function run(): Promise<void> {
   const author = typeof user?.login === 'string' && user.login ? user.login : undefined;
   const authorType = typeof user?.type === 'string' ? user.type : undefined;
 
-  const { report, config } = await check({ cwd, base, head, junit, coverage, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false });
+  // History: a local file when given, else the artifact of the base branch on pull requests.
+  let history: { path: string; source?: string } | undefined = historyInput ? { path: historyInput } : undefined;
+  if (!history && pr && historyArtifact) {
+    const baseRef = String((pr['base'] as { ref?: unknown } | undefined)?.ref ?? '');
+    if (baseRef) history = await downloadBaseHistory(token, historyArtifact, baseRef);
+  }
+
+  const { report, config, history: updatedHistory } = await check({
+    cwd, base, head, junit, coverage, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
+    history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
+  });
 
   // Acknowledgements from PR comments and the label. Comments are readable on fork PRs with the read only token.
-  const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
   if (pr && token) {
     try {
       const prAuthor = (pr['user'] as { login?: string } | undefined)?.login;
@@ -78,6 +94,13 @@ export async function run(): Promise<void> {
   core.setOutput('report', jsonPath);
   core.setOutput('findings_high', String(report.summary.findings.high));
   core.setOutput('findings_medium', String(report.summary.findings.medium));
+  if (updatedHistory) {
+    const historyPath = resolve(cwd, outDir, HISTORY_FILE);
+    await writeFile(historyPath, serializeHistory(updatedHistory));
+    core.setOutput('history', historyPath);
+    if (historyWrite && historyArtifact) await uploadHistory(historyArtifact, historyPath);
+    else if (historyWrite) core.info('History: history_artifact is empty, so the history was written but not uploaded.');
+  }
 
   // Annotations render on the Files tab without any token.
   const strict = config.mode === 'strict';

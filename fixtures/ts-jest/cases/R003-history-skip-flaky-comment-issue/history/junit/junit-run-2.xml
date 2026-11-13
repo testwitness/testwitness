@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.235">
+  <testsuite name="Retry" errors="0" failures="0" skipped="0" timestamp="2026-11-04T15:48:35" time="0.093" tests="1">
+    <testcase classname="Retry settles the ledger" name="Retry settles the ledger" time="0.003">
+    </testcase>
+  </testsuite>
+</testsuites>

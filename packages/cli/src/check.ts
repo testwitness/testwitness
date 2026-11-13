@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import fg from 'fast-glob';
 import {
   exitCodeFor,
@@ -14,7 +14,10 @@ import {
   revParse,
   ConfigError,
   readCoverageFiles,
+  readHistoryFile,
+  serializeHistory,
   toCoverageEvidence,
+  type HistoryDocument,
   type CoverageEvidence,
   type Evidence,
   type PullRequestText,
@@ -46,6 +49,18 @@ export interface CheckOptions {
   mode?: ResolvedConfig['mode'] | undefined;
   failOn?: ResolvedConfig['failOn'] | undefined;
   quiet?: boolean;
+  /** Run history JSON to read (docs/history.md). No default: without it severities do not depend on earlier runs. */
+  history?: string | undefined;
+  /** How to name the history source in the report; default the history path. */
+  historySource?: string | undefined;
+  /** Notes about the history to carry into the report (the Action explains why none was downloaded). */
+  historyNotes?: string[] | undefined;
+  /** Write the history with this run merged in. No default. */
+  historyOut?: string | undefined;
+  /** Return the history with this run merged in as CheckResult.history, without writing it (the Action writes it). */
+  recordHistory?: boolean;
+  /** Id of this run in the history; default GITHUB_RUN_ID, then local-<head sha>. */
+  runId?: string | undefined;
   /** Index assertion helpers in test support files of the working tree (default true). The environment variable TESTWITNESS_HELPER_INDEX=off also turns it off. */
   helperIndex?: boolean;
   log?: (s: string) => void;
@@ -55,6 +70,8 @@ export interface CheckResult {
   report: Report;
   exitCode: number;
   config: ResolvedConfig;
+  /** The history with this run merged in, when a history was read or results were read. */
+  history?: HistoryDocument;
 }
 
 export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
@@ -126,7 +143,19 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     const body = opts.prBody ?? (opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '');
     prText = { title: opts.prTitle ?? '', body };
   }
-  const { report } = await runEngine({
+  let history: HistoryDocument | undefined;
+  const historyNotes = [...(opts.historyNotes ?? [])];
+  if (opts.history) {
+    const read = await readHistoryFile(resolve(opts.cwd, opts.history));
+    if (read.doc) history = read.doc;
+    else {
+      historyNotes.push(`${read.error}; severities do not use history in this run.`);
+      log(read.error!);
+    }
+  }
+  const runAttempt = process.env['GITHUB_RUN_ATTEMPT'];
+  const runId = opts.runId ?? (process.env['GITHUB_RUN_ID'] ? `${process.env['GITHUB_RUN_ID']}${runAttempt && runAttempt !== '1' ? `.${runAttempt}` : ''}` : undefined);
+  const { report, history: updated } = await runEngine({
     cwd: opts.cwd,
     base: opts.base,
     head: opts.head,
@@ -138,9 +167,22 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     prText,
     ...(opts.author ? { author: { login: opts.author, type: opts.authorType } } : {}),
     ...(opts.helperIndex === false || process.env['TESTWITNESS_HELPER_INDEX'] === 'off' ? { helperIndex: false as const } : {}),
+    history,
+    historySource: opts.history || opts.historySource !== undefined || historyNotes.length ? (opts.historySource ?? opts.history ?? 'none') : undefined,
+    historyNotes,
+    historyRun: { id: runId },
+    recordHistory: opts.recordHistory === true || opts.historyOut !== undefined,
     log,
   });
-  return { report, exitCode: exitCodeFor(report, config), config };
+  if (opts.historyOut && updated) {
+    const out = resolve(opts.cwd, opts.historyOut);
+    await mkdir(dirname(out), { recursive: true });
+    await writeFile(out, serializeHistory(updated));
+    log(`history: ${updated.runs.length} runs, ${Object.keys(updated.tests).length} tests written to ${opts.historyOut}`);
+  } else if (opts.historyOut) {
+    log('history: no results were read and no history was given, so no history was written');
+  }
+  return { report, exitCode: exitCodeFor(report, config), config, ...(updated ? { history: updated } : {}) };
 }
 
 export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean): string {

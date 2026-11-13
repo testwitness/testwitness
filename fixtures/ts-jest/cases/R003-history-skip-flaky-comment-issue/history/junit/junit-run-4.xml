@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="1" failures="1" errors="0" time="0.283">
+  <testsuite name="Retry" errors="0" failures="1" skipped="0" timestamp="2026-11-04T15:48:37" time="0.123" tests="1">
+    <testcase classname="Retry settles the ledger" name="Retry settles the ledger" time="0.004">
+      <failure>Error: expect(received).not.toBe(expected) // Object.is equality
+
+Expected: not 3
+    at Object.toBe (/tmp/twjest/src/retry.test.js:11:26)
+    at Promise.finally.completed (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1834:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1774:10)
+    at _callCircusTest (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1167:40)
+    at _runTestInContext (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1103:3)
+    at runTestWithContext (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:996:5)
+    at _runTestsForDescribeBlockOnce (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1008:11)
+    at _runTestsForDescribeBlock (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+    at _runTestsForDescribeBlockOnce (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:1003:11)
+    at _runTestsForDescribeBlock (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:824:5)
+    at run (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:789:3)
+    at runAndTransformResultsToJestFormat (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/jestAdapterInit.js:2300:21)
+    at jestAdapter (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-circus/build/runner.js:111:19)
+    at runTestInternal (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-runner/build/index.js:247:16)
+    at runTest (/home/claude/testwitness/fixtures/ts-jest/project/node_modules/jest-runner/build/index.js:315:7)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

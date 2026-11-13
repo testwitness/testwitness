@@ -1,0 +1,3 @@
+Negative control for run history. The head skips test_add_increases_count, which passed in every run of the history (the real `fixtures/py-pytest/junit/junit.xml` merged as 5 runs). The skip stays medium with no history label.
+
+history/history.json was written by the engine, not by hand: `fixtures/runner/make-history.ts` runs the bundled CLI (`testwitness check --junit ... --run-id ... --history ... --history-out ...`) once per entry of history/runs.json, in an empty temporary git repository, and copies the final document here. Regenerate with `pnpm bundle:cli && pnpm exec tsx fixtures/runner/make-history.ts <this case dir>`.

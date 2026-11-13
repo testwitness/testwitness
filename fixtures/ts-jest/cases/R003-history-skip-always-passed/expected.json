@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Billing \u203a charge \u203a charges a valid card"
+  }
+]

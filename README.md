@@ -101,7 +101,7 @@ acknowledge:
 
 ## Security and privacy
 
-Runs on `pull_request` with `contents: read`. No secrets, no network calls, no execution of your code: grammars are bundled, configs are parsed as text. Nothing leaves the runner; the JSON report stays in your workspace. See [docs/design.md](docs/design.md).
+Runs on `pull_request` with `contents: read`. No secrets, no network calls from the engine, no execution of your code: grammars are bundled, configs are parsed as text. The Action talks only to the GitHub API, for the optional comment and the optional [run history](docs/history.md) artifact. Nothing leaves the runner; the JSON report stays in your workspace. See [docs/design.md](docs/design.md).
 
 ## Development
 
