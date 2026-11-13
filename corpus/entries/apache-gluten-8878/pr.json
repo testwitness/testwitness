@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/gluten/pull/8878",
+  "repo": "apache/gluten",
+  "number": 8878,
+  "title": "[CORE] Make scalatest.testFailureIgnore configurable for convenience",
+  "merged_at": "2025-03-04T06:16:27Z",
+  "stars": 1623,
+  "license": "Apache-2.0",
+  "language": "scala",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "4cba527ced6c5e7ea7fc58c7e4ec125068bd2b38",
+  "head_sha": "fcbe4f51f6755de12717cb9242174aea62bb1f15",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

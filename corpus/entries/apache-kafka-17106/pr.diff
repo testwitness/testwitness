@@ -1,0 +1,88 @@
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+index a27d3df8..d6da2a94 100644
+--- a/.github/workflows/build.yml
++++ b/.github/workflows/build.yml
+@@ -108,6 +108,7 @@ jobs:
+         # --continue:     Keep running even if a test fails
+         # -PcommitId      Prevent the Git SHA being written into the jar files (which breaks caching)
+         timeout-minutes: 180  # 3 hours
++        continue-on-error: true
+         run: |
+           ./gradlew --build-cache --scan --continue \
+           -PtestLoggingEvents=started,passed,skipped,failed \
+diff --git a/build.gradle b/build.gradle
+index 8305711e..36df0b27 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -80,7 +80,7 @@ ext {
+   maxTestForks = project.hasProperty('maxParallelForks') ? maxParallelForks.toInteger() : Runtime.runtime.availableProcessors()
+   maxScalacThreads = project.hasProperty('maxScalacThreads') ? maxScalacThreads.toInteger() :
+       Math.min(Runtime.runtime.availableProcessors(), 8)
+-  userIgnoreFailures = project.hasProperty('ignoreFailures') ? ignoreFailures : false
++  userIgnoreFailures = project.hasProperty('ignoreFailures') ? ignoreFailures.toBoolean() : false
+ 
+   userMaxTestRetries = project.hasProperty('maxTestRetries') ? maxTestRetries.toInteger() : 0
+   userMaxTestRetryFailures = project.hasProperty('maxTestRetryFailures') ? maxTestRetryFailures.toInteger() : 0
+@@ -470,8 +470,13 @@ subprojects {
+   def testsToExclude = ['**/*Suite.class']
+ 
+   test {
++    ext {
++      isGithubActions = System.getenv('GITHUB_ACTIONS') != null
++      hadFailure = false  // Used to track if any tests failed, see afterSuite below
++    }
++
+     maxParallelForks = maxTestForks
+-    ignoreFailures = userIgnoreFailures
++    ignoreFailures = userIgnoreFailures || ext.isGithubActions
+ 
+     maxHeapSize = defaultMaxHeapSize
+     jvmArgs = defaultJvmArgs
+@@ -499,6 +504,32 @@ subprojects {
+         maxFailures = userMaxTestRetryFailures
+       }
+     }
++    
++    // As we process results, check if there were any test failures.
++    afterSuite { desc, result ->
++      if (result.resultType == TestResult.ResultType.FAILURE) {
++        ext.hadFailure = true
++      }
++    }
++
++    // This closure will copy JUnit XML files out of the sub-project's build directory and into
++    // a top-level build/junit-xml directory. This is necessary to avoid reporting on tests which
++    // were not run, but instead were restored via FROM-CACHE. See KAFKA-17479 for more details.
++    doLast {
++      if (ext.isGithubActions) {
++        def dest = rootProject.layout.buildDirectory.dir("junit-xml/${project.name}").get().asFile
++        println "Copy JUnit XML for ${project.name} to $dest"
++        ant.copy(todir: "$dest") {
++          ant.fileset(dir: "${test.reports.junitXml.entryPoint}")
++        }
++
++        // If there were any test failures, we want to fail the task to prevent the failures
++        // from being cached.
++        if (ext.hadFailure) {
++          throw new GradleException("Failing this task since '${project.name}:${name}' had test failures.")
++        }
++      }
++    }
+   }
+ 
+   task integrationTest(type: Test, dependsOn: compileJava) {
+@@ -569,14 +600,6 @@ subprojects {
+       delete t.reports.junitXml.outputLocation
+       delete t.reports.html.outputLocation
+     }
+-
+-    doLast {
+-      def dest = rootProject.layout.buildDirectory.dir("junit-xml/${project.name}").get().asFile
+-      println "Copy JUnit XML for ${project.name} to $dest"
+-      ant.copy(todir: "$dest") {
+-        ant.fileset(dir: "${test.reports.junitXml.entryPoint}")
+-      }
+-    }
+   }
+ 
+   jar {

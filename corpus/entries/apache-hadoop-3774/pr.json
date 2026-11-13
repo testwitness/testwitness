@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/hadoop/pull/3774",
+  "repo": "apache/hadoop",
+  "number": 3774,
+  "title": "HADOOP-18040. Use maven.test.failure.ignore instead of ignoreTestFailure",
+  "merged_at": "2021-12-09T16:36:31Z",
+  "stars": 15709,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "5a950b8900aa143f6db281eb22928965f3b2754f",
+  "head_sha": "3f67b644b228a0505f41144f0bdcb6f77823c5d7",
+  "files_changed": 8,
+  "additions": 1,
+  "deletions": 10
+}

@@ -1,0 +1,52 @@
+diff --git a/kroxylicious-filter-archetype/src/main/resources/archetype-resources/pom.xml b/kroxylicious-filter-archetype/src/main/resources/archetype-resources/pom.xml
+index c0610da..490a796 100644
+--- a/kroxylicious-filter-archetype/src/main/resources/archetype-resources/pom.xml
++++ b/kroxylicious-filter-archetype/src/main/resources/archetype-resources/pom.xml
+@@ -176,7 +176,7 @@
+                 <artifactId>maven-failsafe-plugin</artifactId>
+                 <version>${maven.failsafe.version}</version>
+                 <configuration>
+-                    <skipTests>${skipITs}</skipTests>
++                    <skipITs>${skipITs}</skipITs>
+                     <environmentVariables>
+                         <!-- https://github.com/containers/podman/issues/7927#issuecomment-731525556 - required for testcontainers/podman support -->
+                         <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+diff --git a/kroxylicious-filters/kroxylicious-entity-isolation/pom.xml b/kroxylicious-filters/kroxylicious-entity-isolation/pom.xml
+index 454314c..50688c2 100644
+--- a/kroxylicious-filters/kroxylicious-entity-isolation/pom.xml
++++ b/kroxylicious-filters/kroxylicious-entity-isolation/pom.xml
+@@ -225,7 +225,7 @@
+                 <artifactId>maven-failsafe-plugin</artifactId>
+                 <version>3.6.0</version>
+                 <configuration>
+-                    <skipTests>${skipITs}</skipTests>
++                    <skipITs>${skipITs}</skipITs>
+                     <environmentVariables>
+                         <!-- https://github.com/containers/podman/issues/7927#issuecomment-731525556 - required for testcontainers/podman support -->
+                         <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+diff --git a/kroxylicious-kubernetes/kroxylicious-operator/pom.xml b/kroxylicious-kubernetes/kroxylicious-operator/pom.xml
+index 541bd0f..59107fe 100644
+--- a/kroxylicious-kubernetes/kroxylicious-operator/pom.xml
++++ b/kroxylicious-kubernetes/kroxylicious-operator/pom.xml
+@@ -317,7 +317,7 @@
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-failsafe-plugin</artifactId>
+                 <configuration>
+-                    <skipTests>${skipITs}</skipTests>
++                    <skipITs>${skipITs}</skipITs>
+                     <runOrder>random</runOrder>
+                     <argLine>
+                         <!-- https://junit-pioneer.org/docs/environment-variables/#warnings-for-reflective-access -->
+diff --git a/pom.xml b/pom.xml
+index b9d5099..cc0e83d 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -861,7 +861,7 @@
+                     <artifactId>maven-failsafe-plugin</artifactId>
+                     <version>${maven.failsafe.version}</version>
+                     <configuration>
+-                        <skipTests>${skipITs}</skipTests>
++                        <skipITs>${skipITs}</skipITs>
+                         <failIfNoTests>false</failIfNoTests>
+                         <environmentVariables>
+                             <!-- https://github.com/containers/podman/issues/7927#issuecomment-731525556 - required for testcontainers/podman support -->

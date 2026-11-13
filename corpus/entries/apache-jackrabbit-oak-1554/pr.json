@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/jackrabbit-oak/pull/1554",
+  "repo": "apache/jackrabbit-oak",
+  "number": 1554,
+  "title": "OAK-10843 : exclude a flaky test combination",
+  "merged_at": "2024-06-24T16:00:42Z",
+  "stars": 415,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "922d17ea5d15911837a58da877bb2de5b30b7eb5",
+  "head_sha": "b1c9659fe6e8832987b20b805cfe3384573a8546",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

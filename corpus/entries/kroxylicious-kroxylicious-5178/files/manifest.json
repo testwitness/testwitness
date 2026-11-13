@@ -1,0 +1,18 @@
+[
+  {
+    "path": "kroxylicious-filter-archetype/src/main/resources/archetype-resources/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "kroxylicious-filters/kroxylicious-entity-isolation/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "kroxylicious-kubernetes/kroxylicious-operator/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "pom.xml",
+    "status": "modified"
+  }
+]

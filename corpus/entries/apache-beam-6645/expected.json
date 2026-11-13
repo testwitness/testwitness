@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "subject": "FnApiRunnerTest::test_pardo_side_outputs",
+    "verdict": "fp"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "subject": "FnApiRunnerTest::test_read",
+    "verdict": "fp"
+  }
+]

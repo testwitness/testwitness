@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/kroxylicious/kroxylicious/pull/5178",
+  "repo": "kroxylicious/kroxylicious",
+  "number": 5178,
+  "title": "build: Fix warnings about <skipTests> for failsafe plugin",
+  "merged_at": "2026-10-23T16:31:15Z",
+  "stars": 332,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "cf569b1e3b69c0567275e79c3041824eb23799c3",
+  "head_sha": "35ea285ac6330e1a0f0d236af2285fbc72de27c6",
+  "files_changed": 4,
+  "additions": 4,
+  "deletions": 4
+}

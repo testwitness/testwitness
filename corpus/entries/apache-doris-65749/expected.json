@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "subject": "cloud/script/run_all_tests.sh",
+    "verdict": "tp",
+    "reason": "failing test binary treated as pass when the log matches an ASAN pattern"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/celeborn/pull/1090",
+  "repo": "apache/celeborn",
+  "number": 1090,
+  "title": "[CELEBORN-144]Lower code coverage requirements.",
+  "merged_at": "2022-12-15T05:48:47Z",
+  "stars": 1081,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "e3576e4e7af10485c92f55ea8e585e986f23260b",
+  "head_sha": "410353ef88b71936804d6c6b6a9b58c2fe6b60f3",
+  "files_changed": 1,
+  "additions": 26,
+  "deletions": 0
+}
