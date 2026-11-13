@@ -257,9 +257,9 @@ A test command in a workflow, package.json script, Makefile, tox.ini, Jenkinsfil
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff.
 
-The PR changes .testwitness.yml or the workflow step that runs testwitness (its version, inputs, mode or fail_on). Configuration is read from the base ref, so the change takes effect only after merge; this finding makes sure a maintainer sees it. It cannot be acknowledged by the PR author or by the label.
+The change touches the gate itself: .testwitness.yml, the workflow step that runs testwitness (its version, inputs, mode or fail_on), or the agent hook config that runs testwitness hook (.claude/settings.json, .claude/settings.local.json, .cursor/hooks.json, .codex/hooks.json, .codex/config.toml). Configuration is read from the base ref, so a config change takes effect only after merge; this finding makes sure a maintainer sees it. It cannot be acknowledged by the PR author or by the label.
 
-**False positive controls.** Legitimate configuration changes. A maintainer acknowledges them with the comment command, and the change applies after merge.
+**False positive controls.** Legitimate configuration changes. A maintainer acknowledges them with the comment command, and the change applies after merge. A hook config file is reported only when it mentions testwitness at the base or at the head, or when one of the hook config files at the base does (so a setting that turns every hook off is seen); a repository that does not use the agent hook gets no finding for its agent settings.
 
 ```diff
  rules:

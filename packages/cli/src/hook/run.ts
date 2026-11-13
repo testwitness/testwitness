@@ -9,7 +9,7 @@
 //   * Never leaves the agent stuck: the same finding blocks at most `hook.max_blocks` times per session, and a crash or
 //     a timeout allows the action and says so.
 import { isAbsolute, relative, resolve } from 'node:path';
-import { git, GitError, pathMatcher, SEVERITY_RANK, showFile, HOOK_DEFAULT_TIMEOUT_SECONDS, type ChangedFile, type Finding, type InventoryPair, type ResolvedConfig, type Severity } from '@testwitness/core';
+import { git, GitError, isHookConfigPath, pathMatcher, SEVERITY_RANK, showFile, HOOK_DEFAULT_TIMEOUT_SECONDS, type ChangedFile, type Finding, type InventoryPair, type ResolvedConfig, type Severity } from '@testwitness/core';
 import { check, ConfigError, defaultBase, loadConfig, type CheckResult } from '../check.js';
 import { fallbackEvent, parseEvent, renderDecision, type Agent, type Decision, type HookEvent, type HookOutput } from './events.js';
 import { defaultStateDir, readCounts, writeCounts } from './state.js';
@@ -64,9 +64,11 @@ const where = (f: GuardFinding): string => `${f.path}${f.line ? `:${f.line}` : '
  *
  * Blocking: open findings at or above `fail_on` (high unless the base config lowers it), plus changed paths on the
  * `protect` list. Never blocking: acknowledged findings, rules in `hook.advice_only`, and W006 on a file the change
- * adds (a gate that did not exist at the base cannot have been weakened; the pull request check still reports it).
+ * adds or on a hook config that had no testwitness hook at the base (`gateInstalls`): a gate that did not exist at
+ * the base cannot have been weakened, and running `testwitness init` on a branch must not block that branch. The pull
+ * request check still reports both.
  */
-export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: ResolvedConfig, adviceOnly: readonly string[] = config.hook.adviceOnly): Evaluation {
+export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: ResolvedConfig, adviceOnly: readonly string[] = config.hook.adviceOnly, gateInstalls: ReadonlySet<string> = new Set()): Evaluation {
   const blocking: GuardFinding[] = [];
   const advice: GuardFinding[] = [];
   const byPath = new Map(result.files.map((f) => [f.path, f]));
@@ -74,7 +76,7 @@ export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: 
     if (f.acknowledged) continue;
     const g: GuardFinding = { ruleId: f.ruleId, severity: f.severity, path: f.location.path, ...(f.location.line ? { line: f.location.line } : {}), message: f.message, fingerprint: f.fingerprint, finding: f };
     const atThreshold = SEVERITY_RANK[f.severity] >= SEVERITY_RANK[config.failOn];
-    const adviceRule = adviceOnly.includes(f.ruleId) || (f.ruleId === 'W006' && byPath.get(f.location.path)?.status === 'added');
+    const adviceRule = adviceOnly.includes(f.ruleId) || (f.ruleId === 'W006' && (byPath.get(f.location.path)?.status === 'added' || gateInstalls.has(f.location.path)));
     if (atThreshold && !adviceRule) blocking.push(g);
     else if (SEVERITY_RANK[f.severity] >= SEVERITY_RANK.medium) advice.push(g);
   }
@@ -263,7 +265,15 @@ async function decide(event: HookEvent, opts: HookOptions, deadline: Deadline): 
   const files: ChangedFile[] = [];
   const pairs: InventoryPair[] = [];
   for (const r of runs) {
-    const e = evaluate(r, config);
+    // A hook config file that had no testwitness hook at the base: the change installs the guard, it cannot weaken it.
+    const gateInstalls = new Set<string>();
+    for (const f of r.report.findings) {
+      if (f.ruleId !== 'W006' || !isHookConfigPath(f.location.path)) continue;
+      const file = r.files.find((x) => x.path === f.location.path);
+      const atBase = await showFile(r.report.base, file?.oldPath ?? f.location.path, { cwd: top }).catch(() => undefined);
+      if (atBase === undefined || !/testwitness/i.test(atBase)) gateInstalls.add(f.location.path);
+    }
+    const e = evaluate(r, config, config.hook.adviceOnly, gateInstalls);
     for (const [from, to] of [[e.blocking, evaluation.blocking], [e.advice, evaluation.advice]] as const) {
       for (const f of from) {
         if (seenFp.has(f.fingerprint)) continue;
