@@ -1,0 +1,1 @@
+Negative. The PR adds a fixture module under __fixtures__, a manual mock under __mocks__, an ES module in a subdirectory of __tests__ that a test imports, an underscore helper, a script under e2e and a harness under tests. None of them has a test or spec name, so no runner collects them as test files. Seen in a replay of public PRs on Jest and Playwright. Nothing fires.

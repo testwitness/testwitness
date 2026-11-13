@@ -174,9 +174,9 @@ A new test whose only assertions are existence or type checks (toBeDefined, asse
 
 Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
 
-A new file matching test patterns defines no collectable test (wrong name prefix, missing @Test, describe without it). It reads as coverage and runs nothing.
+A new file that the test runner would collect (named the way the runner finds test files) defines no collectable test (wrong name prefix, missing @Test, describe without it). It reads as coverage and runs nothing.
 
-**False positive controls.** Shared test helpers and fixtures placed in a tests directory. Add them to paths.ignore or name them so they do not match test patterns.
+**False positive controls.** Only files a runner collects by name are checked: *Test, Test*, *Tests, *TestCase and *IT classes in Java; test_*.py, *_test.py and tests.py in Python; *.test.* and *.spec.* scripts, scripts directly inside __tests__, and with Mocha scripts directly inside test/ in JavaScript and TypeScript; plus anything matching paths.tests. Helpers, listeners, samples, stubs and harnesses with other names, package-info.java, names starting with an underscore, *.fixture.* files and anything under __fixtures__, fixtures, __mocks__, __snapshots__ or samples directories are support code and never reported. A collected script that declares no test but makes a top level call to a project function (such as runFormatTest(import.meta, [...])) generates its tests at run time and is reported low with the label generated.
 
 ```diff
 +// tests/helpers.test.ts

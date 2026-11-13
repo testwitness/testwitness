@@ -1,0 +1,1 @@
+const fn = (a) => (b) => (c) => a + b + c;

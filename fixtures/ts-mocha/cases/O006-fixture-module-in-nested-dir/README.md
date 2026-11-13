@@ -1,0 +1,1 @@
+Negative. The PR adds two fixture modules under test/integration/fixtures, one of them named like a fixture with .fixture.cjs and holding plain data. Mocha only loads test/*.js by default, and the integration tests run fixture files through a child process on purpose. Seen in a replay of public PRs on Mocha. Nothing fires.

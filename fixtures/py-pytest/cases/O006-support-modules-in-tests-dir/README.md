@@ -1,0 +1,1 @@
+Negative. The PR adds two support modules under tests/, an underscore helper and a module that another test imports. pytest only collects test_*.py and *_test.py, and Twisted trial only collects modules named test_*, so neither is a test file. Seen in a replay of public PRs on pydantic and Twisted. Nothing fires.
