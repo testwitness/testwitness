@@ -10,6 +10,8 @@ A test present in the base is absent in the head and no test with the same body 
 
 **False positive controls.** Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, or same name added elsewhere in the PR), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Precision over recall: a deletion is medium or high only when none of those signals is present.
 
+**With run history.** A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored or production removed are left alone, because the test still runs somewhere or only partly stopped running. See [run history](history.md).
+
 ```diff
 -  @Test
 -  void rejectsNegativeAmount() {
@@ -37,6 +39,8 @@ A skip, todo or fixme marker was added to a test that ran in the base.
 
 **False positive controls.** Conditional skips whose condition is not a constant (platform or optional dependency checks) are reported low. A reason that references an issue number or tracker URL lowers the severity one step.
 
+**With run history.** A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with the label conditional are left alone, because the test still runs somewhere or only partly stopped running. A skip whose reason references an issue (label tracked) on a test the history records as flaky (it passed and failed within the last 20 runs, or reran in at least 2 of them) keeps its severity and gets the label flaky in history, and the message states the counts. A skip of a flaky test without an issue reference is unchanged. See [run history](history.md).
+
 ```diff
 +  @pytest.mark.skip(reason="flaky in CI")
    def test_batches(n):
@@ -49,6 +53,8 @@ Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast.
 An xfail, expectedFailure, test.fails or test.fail marker was added to a test that was expected to pass in the base.
 
 **False positive controls.** A strict xfail with a reason that references an issue is lowered to medium: the failure is documented and will fail the suite once fixed.
+
+**With run history.** A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with the label conditional or one case are left alone, because the test still runs somewhere or only partly stopped running. See [run history](history.md).
 
 ```diff
 +  @pytest.mark.xfail(reason="see later")
@@ -298,6 +304,8 @@ Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast, junit.
 A test added or modified by the PR has no record in the JUnit XML of this run. Names are normalised across Surefire, Gradle, pytest, jest-junit, Vitest, Playwright and Mocha producers.
 
 **False positive controls.** Tests in a matrix leg whose XML was not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.
+
+**With run history.** A finding on a test recorded in every one of the last 5 runs of the history becomes high with the label ran before, not now. A test the history has never seen, or that is missing from any of those 5 runs, keeps the severity above, and a finding labelled partial results stays low. A history with fewer than 5 runs changes nothing. See [run history](history.md).
 
 ```diff
 Modified test CartTest#handlesEmpty has no testcase record in 3 result files (42 tests).

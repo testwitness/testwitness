@@ -2,7 +2,7 @@
 
 ## What the Action needs
 
-`permissions: contents: read` on `pull_request`. No secrets. It makes no network calls (grammars and parsers are bundled) and never executes the repository's code: no install, no test run, no `require` of config files.
+`permissions: contents: read` on `pull_request`. No secrets. The engine makes no network calls (grammars and parsers are bundled) and never executes the repository's code: no install, no test run, no `require` of config files. The Action calls the GitHub REST API with the job token for the optional comment, the acknowledgements and the [run history](./history) artifact (`actions: read`); fork pull requests may run without the history because their read only token may not reach the base repository's artifacts. The history artifact is uploaded only on pushes to the default branch (or with `history_write: true`), never by default from a pull request.
 
 ## Fork PRs
 

@@ -18,6 +18,10 @@ Environment constraint: the workspace proxy denies Maven Central (`repo.maven.ap
 | py-pytest | pytest junitxml plugin | pytest 9.1.1, pytest-rerunfailures 16.7, Python 3.13.18 | `junit.xml` (2779), `junit-legacy.xml` (3311), `junit-reruns.xml` (414) | OK |
 | py-unittest | pytest junitxml plugin, and unittest-xml-reporting | pytest 9.1.1, unittest-xml-reporting 4.0.0 | `junit.xml` (1428), `xmlrunner/TEST-tests.test_shapes.ShapesTest-20261101133526.xml` (1822), `xmlrunner/TEST-tests.test_shapes.EdgeCasesTest-20261101133526.xml` (401) | OK |
 
+## Run history cases
+
+The golden cases named `R003-history-*` in java-junit4-gradle, ts-jest and py-pytest carry `history/history.json`, written by the engine through `fixtures/runner/make-history.ts` (the bundled CLI with `--history-out`), never by hand. Most merge the project XML above as several runs. The three flaky cases need a test that passed in some runs and failed in others, which no project XML above has, so their `history/junit/` holds XML from five real runs of a counter based test, with a `PRODUCER.md` each (Gradle 8.14.3 with JUnit 4.13.2, jest 30.5.2 with jest-junit 17.0.0, pytest 9.1.1), produced on 4 Nov 2026. pytest-rerunfailures could not be used for this: it writes the failed first attempt as a plain second testcase element, so `junit-reruns.xml` holds no trace of the rerun.
+
 ## Quirks per producer
 
 ### Gradle JUnit XML writer (java-junit4-gradle, and the Gradle TestNG file in java-testng-maven)

@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "high",
+    "subject": "test_fails_on_purpose",
+    "label": "hides failure"
+  }
+]

@@ -6,6 +6,8 @@
  *   pr.json (optional) { title, body }
  *   junit/ (optional)    JUnit XML of the head run
  *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
+ *   history/history.json (optional) run history of earlier runs, written by the engine through
+ *                         fixtures/runner/make-history.ts from history/runs.json, never by hand
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
  */
@@ -32,6 +34,7 @@ export interface GoldenCase {
   pr?: { title: string; body: string };
   junit?: string;
   coverage?: string;
+  history?: string;
 }
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'fixture', GIT_AUTHOR_EMAIL: 'fixture@testwitness.local', GIT_COMMITTER_NAME: 'fixture', GIT_COMMITTER_EMAIL: 'fixture@testwitness.local' };
@@ -54,6 +57,7 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       if (existsSync(prPath)) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
       if (existsSync(join(dir, 'junit'))) c.junit = join(dir, 'junit');
       if (existsSync(join(dir, 'coverage'))) c.coverage = join(dir, 'coverage');
+      if (existsSync(join(dir, 'history', 'history.json'))) c.history = join(dir, 'history', 'history.json');
       if (!filter || filter(c)) out.push(c);
     }
   }
@@ -122,6 +126,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,
+      history: c.history,
       quiet: true,
       log: () => {},
     });

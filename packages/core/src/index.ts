@@ -18,3 +18,5 @@ export * from './evidence/claims.js';
 export * from './acknowledge.js';
 export * from './config-text.js';
 export * from './coverage/reader.js';
+export * from './history/history.js';
+export * from './rules/history.js';

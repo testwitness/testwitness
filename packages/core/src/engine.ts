@@ -27,7 +27,9 @@ import { builtinRules } from './rules/index.js';
 import { detectProvenance } from './provenance.js';
 import { HelperIndex, namesToIndex, resolveHelperCalls, secondLevelNames } from './helper-index.js';
 import { diffInventories } from './inventory.js';
-import type { HelperIndexSummary, TestCase } from './types.js';
+import type { HelperIndexSummary, HistorySummary, TestCase } from './types.js';
+import { mergeHistory, type HistoryDocument, type HistoryResult } from './history/history.js';
+import { applyHistory } from './rules/history.js';
 
 /** $id of docs/report.schema.json, the JSON Schema of the report. */
 export const REPORT_SCHEMA = 'https://testwitness.github.io/testwitness/report.schema.json';
@@ -57,6 +59,18 @@ export interface EngineOptions {
    * keeps it but writes no cache. Default: on, cache under os.tmpdir().
    */
   helperIndex?: false | { cacheDir?: string | false };
+  /**
+   * Run history of earlier runs (docs/history.md). When `history` is set, R001, R003, R004 and V003 findings can
+   * change severity and label by counting what the tests did before. `historySource` names where it came from for the
+   * report; `historyNotes` carries why it could not be read. Either one alone still adds the history section.
+   */
+  history?: HistoryDocument | undefined;
+  historySource?: string | undefined;
+  historyNotes?: string[] | undefined;
+  /** Merge this run's results into the history and return it as `EngineResult.history`. Default false. */
+  recordHistory?: boolean;
+  /** Id and date of this run in the updated history. Default: `local-<head sha 10>` and today (UTC). */
+  historyRun?: { id?: string | undefined; date?: string | undefined } | undefined;
   log?: (msg: string) => void;
 }
 
@@ -64,6 +78,21 @@ export interface EngineResult {
   report: Report;
   files: ChangedFile[];
   pairs: InventoryPair[];
+  /**
+   * The history with this run's JUnit results merged into the window, when `recordHistory` is set and a history was
+   * given or results were read; equal to the input history when no results were read (an empty run is never recorded).
+   */
+  history?: HistoryDocument;
+}
+
+/** The current run's results as history records. */
+export function historyResults(evidence: Evidence): HistoryResult[] {
+  const out: HistoryResult[] = [];
+  for (const key of evidence.keys()) {
+    const status = evidence.statusOf(key);
+    if (status) out.push({ key, status, reruns: evidence.rerunsOf?.(key) ?? 0 });
+  }
+  return out;
 }
 
 export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
@@ -231,6 +260,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
   const tRules0 = performance.now();
   const rules = opts.rules ?? builtinRules();
   const findings: Finding[] = [];
+  let adjusted = 0;
   for (const rule of rules) {
     const configured = effectiveSeverity(rule, opts.config);
     if (configured === 'off') continue;
@@ -244,6 +274,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
       log(`rule ${rule.id} failed: ${(err as Error).stack ?? (err as Error).message}`);
       continue;
     }
+    if (opts.history) adjusted += applyHistory(result, opts.history, files);
     for (const f of result) {
       f.severity = applyConfiguredSeverity(f.severity, configured, rule.defaultSeverity);
       findings.push(f);
@@ -269,6 +300,22 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
   }
 
   const state = computeState(findings, opts.config, opts.evidence, files);
+
+  let history: HistorySummary | undefined;
+  if (opts.history || opts.historySource !== undefined || opts.historyNotes?.length) {
+    history = {
+      source: opts.historySource ?? 'inline',
+      runs: opts.history?.runs.length ?? 0,
+      tests: opts.history ? Object.keys(opts.history.tests).length : 0,
+      adjusted,
+      notes: [...(opts.historyNotes ?? []), ...(opts.history?.truncated ? ['The history was truncated by the size cap; some tests have no record.'] : [])].slice(0, 10),
+    };
+  }
+  let updatedHistory: HistoryDocument | undefined = opts.recordHistory ? opts.history : undefined;
+  if (opts.recordHistory && opts.evidence && opts.evidence.total > 0) {
+    const run = { id: opts.historyRun?.id || `local-${headSha.slice(0, 10)}`, date: opts.historyRun?.date || new Date().toISOString().slice(0, 10) };
+    updatedHistory = mergeHistory(opts.history, run, historyResults(opts.evidence));
+  }
   const counts = { high: 0, medium: 0, low: 0 };
   for (const f of findings) if (!f.acknowledged) counts[f.severity]++;
 
@@ -312,10 +359,11 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     ...(opts.coverage
       ? { coverage: { sources: opts.coverage.sources, files: opts.coverage.files, linesInstrumented: opts.coverage.linesInstrumented, linesExecuted: opts.coverage.linesExecuted, notes: opts.coverage.warnings.slice(0, 10) } }
       : {}),
+    ...(history ? { history } : {}),
     base: baseSha,
     head: headSha,
   };
-  return { report, files, pairs };
+  return { report, files, pairs, ...(updatedHistory ? { history: updatedHistory } : {}) };
 }
 
 /** pass, review or unreadable. */

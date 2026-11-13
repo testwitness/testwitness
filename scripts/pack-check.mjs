@@ -163,6 +163,17 @@ try {
   const v008 = covReport?.findings.find((f) => f.ruleId === 'V008');
   if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
   else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
+
+  // 4f. --history-out writes a run history and --history reads it back
+  writeFileSync(join(work, 'junit.xml'), '<testsuite name="s"><testcase classname="tests.test_math" name="test_adds"/><testcase classname="tests.test_math" name="test_negatives"><failure/></testcase></testsuite>');
+  const historyPath = join(work, 'history.json');
+  const hist = (id, extra) => spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  hist('1', []);
+  const h2 = hist('2', ['--history', historyPath]);
+  const h2Report = h2.status === 0 ? JSON.parse(h2.stdout) : undefined;
+  const histDoc = JSON.parse(readFileSync(historyPath, 'utf8'));
+  if (histDoc.runs?.length === 2 && histDoc.tests?.['test_math::test_negatives'] === 'FF' && h2Report?.history?.runs === 1) ok('--history-out wrote 2 runs and --history read them back');
+  else fail(`run history round trip failed (exit ${h2.status}, stderr ${h2.stderr.trim()}, runs ${histDoc.runs?.length})`);
 } catch (err) {
   fail(err instanceof Error ? err.message : String(err));
 } finally {

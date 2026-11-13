@@ -30,6 +30,8 @@ export const V003: Rule = {
     falsePositives:
       'Tests in a matrix leg whose XML was not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.',
     example: 'Modified test CartTest#handlesEmpty has no testcase record in 3 result files (42 tests).',
+    history:
+      'A finding on a test recorded in every one of the last 5 runs of the history becomes high with the label ran before, not now. A test the history has never seen, or that is missing from any of those 5 runs, keeps the severity above, and a finding labelled partial results stays low. A history with fewer than 5 runs changes nothing.',
   },
   run(ctx) {
     const ev = ctx.evidence;

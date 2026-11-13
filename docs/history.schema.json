@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://testwitness.github.io/testwitness/history.schema.json",
+  "title": "testwitness run history",
+  "description": "What each test did in the last runs of one workflow, written by testwitness check --history-out and uploaded by the GitHub Action as the testwitness-history artifact. It holds normalised test keys and outcomes only: no source code, no file paths, no pull request text, no names of people. schemaVersion changes only when a field is removed or changes type.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "window", "runs", "tests"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL of this schema."
+    },
+    "schemaVersion": {
+      "const": "1",
+      "description": "Version of the history shape."
+    },
+    "window": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Most runs the document keeps. testwitness writes 20. When a run is added beyond it, the oldest run rolls off."
+    },
+    "truncated": {
+      "const": true,
+      "description": "Present when the 5 MB size cap could not be met by rolling off runs and some test keys of the newest run were dropped."
+    },
+    "runs": {
+      "type": "array",
+      "description": "The runs in the window, oldest first. Each test entry has one outcome character per run, in this order.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "date", "total", "passed", "failed", "errored", "skipped", "flaky"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Workflow run id in the Action (with .<attempt> after a re-run), the --run-id value, or local-<head sha> in the CLI. A run with an id already present replaces that run."
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "UTC date of the run."
+          },
+          "total": { "type": "integer", "minimum": 0, "description": "Test keys with a record in the run." },
+          "passed": { "type": "integer", "minimum": 0, "description": "Keys that passed, including flaky ones." },
+          "failed": { "type": "integer", "minimum": 0, "description": "Keys that failed." },
+          "errored": { "type": "integer", "minimum": 0, "description": "Keys that errored." },
+          "skipped": { "type": "integer", "minimum": 0, "description": "Keys that were skipped." },
+          "flaky": { "type": "integer", "minimum": 0, "description": "Keys that failed and then passed on a rerun." }
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "description": "Per normalised test key (classKey::nameKey, as the JUnit reader builds it), one character per run aligned with runs: P passed, K flaky (passed on a rerun), S skipped, F failed, f failed after reruns, E error, e error after reruns, - no record in that run. A key with no record in any run of the window is removed.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[PKSFfEe-]*$"
+      }
+    }
+  }
+}
