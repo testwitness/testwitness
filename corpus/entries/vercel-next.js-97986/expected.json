@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "sync IO that blocks the root \u203a does not hang the build and reports sync IO errors - $description \u203a %s",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  }
+]

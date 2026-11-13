@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vitejs/vite/pull/23872",
+  "repo": "vitejs/vite",
+  "number": 23872,
+  "title": "test: workaround flaky test failure caused by Rolldown bug",
+  "merged_at": "2026-10-23T01:36:42Z",
+  "stars": 83652,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "4ca25e1d3a24cb3343352f781a276cbfd2d206d6",
+  "head_sha": "75d820d0a446e8844a329096727cd44321cd729f",
+  "files_changed": 4,
+  "additions": 112,
+  "deletions": 10
+}

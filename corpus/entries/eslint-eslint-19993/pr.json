@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/eslint/eslint/pull/19993",
+  "repo": "eslint/eslint",
+  "number": 19993,
+  "title": "test: resolve flakiness in --mcp flag test",
+  "merged_at": "2025-08-08T19:03:14Z",
+  "stars": 27603,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "e22af8c42d622d8d912ee7bedf49bf4283247fdc",
+  "head_sha": "c48dd463ebee186dbee9938066e9428207a40dc9",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 2
+}

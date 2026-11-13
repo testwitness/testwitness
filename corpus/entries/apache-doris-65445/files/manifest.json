@@ -1,0 +1,10 @@
+[
+  {
+    "path": "fe/fe-core/src/test/java/org/apache/doris/nereids/stats/StatsCalculatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "regression-test/suites/statistics/test_scale_num_nulls.groovy",
+    "status": "deleted"
+  }
+]

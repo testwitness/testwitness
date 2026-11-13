@@ -1,0 +1,28 @@
+diff --git a/hudi-spark-datasource/hudi-spark/src/test/scala/org/apache/hudi/TestSparkFilterHelper.scala b/hudi-spark-datasource/hudi-spark/src/test/scala/org/apache/hudi/TestSparkFilterHelper.scala
+index 2c41800..c542a76 100644
+--- a/hudi-spark-datasource/hudi-spark/src/test/scala/org/apache/hudi/TestSparkFilterHelper.scala
++++ b/hudi-spark-datasource/hudi-spark/src/test/scala/org/apache/hudi/TestSparkFilterHelper.scala
+@@ -28,12 +28,22 @@ import org.apache.spark.sql.catalyst.expressions._
+ import org.apache.spark.sql.functions._
+ import org.apache.spark.sql.types._
+ import org.apache.spark.unsafe.types.UTF8String
+-import org.junit.jupiter.api.{Assertions, Test}
++import org.junit.jupiter.api.{AfterEach, Assertions, BeforeEach, Test}
+ 
+ import scala.collection.JavaConverters._
+ 
+ class TestSparkFilterHelper extends HoodieSparkClientTestHarness with SparkAdapterSupport  {
+ 
++  @BeforeEach
++  def setUp(): Unit = {
++    initSparkContexts()
++  }
++
++  @AfterEach
++  def tearDown(): Unit = {
++    cleanupSparkContexts()
++  }
++
+   @Test
+   def testConvertInExpression(): Unit = {
+     val filterExpr = sparkAdapter.translateFilter(

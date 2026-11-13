@@ -1,0 +1,14 @@
+diff --git a/test/development/app-dir/instant-navs-devtools/instant-navs-devtools.test.ts b/test/development/app-dir/instant-navs-devtools/instant-navs-devtools.test.ts
+index 08cf52822..e3454b1c1 100644
+--- a/test/development/app-dir/instant-navs-devtools/instant-navs-devtools.test.ts
++++ b/test/development/app-dir/instant-navs-devtools/instant-navs-devtools.test.ts
+@@ -1,7 +1,8 @@
+ import { nextTestSetup, type Playwright } from 'e2e-utils'
+ import { retry, toggleDevToolsIndicatorPopover } from 'next-test-utils'
+ 
+-describe('instant-nav-panel', () => {
++// FIXME: Skipped due to flakiness. Reenable when fixed
++describe.skip('instant-nav-panel', () => {
+   const { isNextDev, isTurbopack, next } = nextTestSetup({
+     files: __dirname,
+   })

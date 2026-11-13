@@ -1,0 +1,40 @@
+diff --git a/client/trino-client/src/test/java/io/trino/client/auth/external/TestHttpTokenPoller.java b/client/trino-client/src/test/java/io/trino/client/auth/external/TestHttpTokenPoller.java
+index dd00c710d..3b4945a93 100644
+--- a/client/trino-client/src/test/java/io/trino/client/auth/external/TestHttpTokenPoller.java
++++ b/client/trino-client/src/test/java/io/trino/client/auth/external/TestHttpTokenPoller.java
+@@ -44,6 +44,7 @@ public class TestHttpTokenPoller
+ {
+     private static final String TOKEN_PATH = "/v1/authentications/sso/test/token";
+     private static final Duration ONE_SECOND = Duration.ofSeconds(1);
++    private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
+ 
+     private static final TokenPoller tokenPoller = new HttpTokenPoller(new OkHttpClient.Builder()
+             .callTimeout(Duration.ofMillis(500))
+@@ -121,6 +122,18 @@ public class TestHttpTokenPoller
+                 .matches("Request to http://.* failed: JsonResponse\\{statusCode=200, .*, hasValue=false} .*");
+     }
+ 
++    @Test
++    public void testHttpStatus503Retried()
++    {
++        server.enqueue(statusAndBody(HTTP_UNAVAILABLE, "Server failure"));
++        server.enqueue(statusAndBody(HTTP_OK, jsonPair("token", "token")));
++
++        TokenPollResult result = tokenPoller.pollForToken(tokenUri(), ONE_MINUTE);
++
++        assertThat(result.getToken().token()).isEqualTo("token");
++        assertThat(server.getRequestCount()).isEqualTo(2);
++    }
++
+     @Test
+     public void testHttpStatus503()
+     {
+@@ -134,7 +147,7 @@ public class TestHttpTokenPoller
+                 .hasMessageFindingMatch("Request to http://.* failed: JsonResponse\\{statusCode=503,")
+                 .hasMessageContaining("[Error: Server failure #");
+ 
+-        assertThat(server.getRequestCount()).isGreaterThan(1);
++        assertThat(server.getRequestCount()).isLessThan(100);
+     }
+ 
+     @Test

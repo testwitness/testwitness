@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/5140",
+  "repo": "TanStack/query",
+  "number": 5140,
+  "title": "Adding in retries to cover flakiness in tests",
+  "merged_at": "2023-03-17T15:59:10Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "0e98eddff2923a0ff66b903322efe38e8f23aa8c",
+  "head_sha": "be8c2227e1fe71bb12f97ccc2895d72e5baf0f74",
+  "files_changed": 2,
+  "additions": 17,
+  "deletions": 3
+}

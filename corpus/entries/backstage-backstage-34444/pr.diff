@@ -1,0 +1,49 @@
+diff --git a/packages/backend-defaults/src/entrypoints/auth/plugin/keys/DatabaseKeyStore.test.ts b/packages/backend-defaults/src/entrypoints/auth/plugin/keys/DatabaseKeyStore.test.ts
+index feb253e7e..40c28c7ff 100644
+--- a/packages/backend-defaults/src/entrypoints/auth/plugin/keys/DatabaseKeyStore.test.ts
++++ b/packages/backend-defaults/src/entrypoints/auth/plugin/keys/DatabaseKeyStore.test.ts
+@@ -19,6 +19,7 @@ import {
+   TestDatabases,
+   mockServices,
+ } from '@backstage/backend-test-utils';
++import waitForExpect from 'wait-for-expect';
+ import { DatabaseKeyStore, TABLE } from './DatabaseKeyStore';
+ 
+ const testKey = {
+@@ -104,12 +105,13 @@ describe('DatabaseKeyStore', () => {
+         "Removing expired plugin service keys, 'test-key-2'",
+       );
+ 
+-      // Key deletion happens async, so give it a bit of time to complete
+-      await new Promise(resolve => setTimeout(resolve, 500));
+-
+-      await expect(knex(TABLE).select('id')).resolves.toEqual([
+-        { id: testKey.kid },
+-      ]);
++      // Key deletion happens async — poll until it completes rather than
++      // relying on a fixed sleep that can flake in slow CI environments.
++      await waitForExpect(async () => {
++        await expect(knex(TABLE).select('id')).resolves.toEqual([
++          { id: testKey.kid },
++        ]);
++      });
+     });
+ 
+     it('should fail to insert with invalid date', async () => {
+diff --git a/plugins/events-backend/src/service/hub/DatabaseEventBusStore.test.ts b/plugins/events-backend/src/service/hub/DatabaseEventBusStore.test.ts
+index 1a7d297a8..e92f72c6f 100644
+--- a/plugins/events-backend/src/service/hub/DatabaseEventBusStore.test.ts
++++ b/plugins/events-backend/src/service/hub/DatabaseEventBusStore.test.ts
+@@ -178,9 +178,9 @@ describe.each(databases.eachSupportedId())(
+ 
+       await store.clean();
+ 
+-      // Local testing shows this takes about 80ms, but if this is flaky we can
+-      // reduce the count down to 10_000.
+-      expect(Date.now() - start).toBeLessThan(500);
++      // Local testing shows this takes about 80ms, but CI containers can
++      // be significantly slower under load.
++      expect(Date.now() - start).toBeLessThan(2000);
+ 
+       await expect(db('event_bus_events').count()).resolves.toEqual([
+         { count: '5' },

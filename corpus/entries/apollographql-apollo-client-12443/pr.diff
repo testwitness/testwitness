@@ -1,0 +1,42 @@
+diff --git a/src/core/__tests__/ApolloClient/general.test.ts b/src/core/__tests__/ApolloClient/general.test.ts
+index 640915d..0fdb15c 100644
+--- a/src/core/__tests__/ApolloClient/general.test.ts
++++ b/src/core/__tests__/ApolloClient/general.test.ts
+@@ -5278,20 +5278,23 @@ describe("ApolloClient", () => {
+       };
+       const client = new ApolloClient({
+         cache: new InMemoryCache(),
+-        link: new MockLink([
+-          {
+-            request: { query },
+-            result: { data },
+-          },
+-          {
+-            request: { query },
+-            result: { data: secondReqData },
+-          },
+-          {
+-            request: { query: mutation },
+-            result: { data: mutationData },
+-          },
+-        ]),
++        link: new MockLink(
++          [
++            {
++              request: { query },
++              result: { data },
++            },
++            {
++              request: { query },
++              result: { data: secondReqData },
++            },
++            {
++              request: { query: mutation },
++              result: { data: mutationData },
++            },
++          ],
++          { showWarnings: false }
++        ),
+       });
+       const observable = client.watchQuery({
+         query,

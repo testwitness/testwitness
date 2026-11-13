@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/payloadcms/payload/pull/11487",
+  "repo": "payloadcms/payload",
+  "number": 11487,
+  "title": "chore: temporarily disables flaky \"should execute a custom script\" test",
+  "merged_at": "2025-03-03T04:05:25Z",
+  "stars": 45799,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "398d48ab169b950b58f17db38d6f7a63eb41bfca",
+  "head_sha": "9ef22607ce9fcf8fb723354f82f7fd16d1904dbe",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

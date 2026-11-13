@@ -1,0 +1,114 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a idle state \u203a should open panel in the idle state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a idle state \u203a should not set cookie when closing panel from idle state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a awaiting navigation state \u203a should reset the panel and app when pressing the close button from awaiting navigation",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should show page load state after clicking Start and refreshing",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should auto-open panel on page load when cookie is already set",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should reset the panel and app when pressing the close button from captured MPA state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should keep params and searchParams RSC content suspended for a captured MPA page load",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should show MPA state after clicking a link that crosses root layouts",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a MPA captures \u203a should re-arm capture and return to awaiting navigation after Continue Rendering from MPA state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a SPA captures \u203a should show client nav state after clicking Start and navigating",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a SPA captures \u203a should show loading skeleton during SPA navigation after clicking Start",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a SPA captures \u203a should reset the panel and app when pressing the close button from captured SPA state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a SPA captures \u203a should show params and searchParams RSC content for a captured SPA navigation",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a SPA captures \u203a should re-arm capture and return to awaiting navigation after Continue Rendering from SPA state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a transitions between capture types \u203a should keep the panel in MPA state after capture -> reload and then update to SPA state after client navigation",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "instant-nav-panel \u203a transitions between capture types \u203a should avoid showing stale SPA state when reloading from a captured SPA state into captured MPA state",
+    "verdict": "tp",
+    "reason": "describe.skip added for flakiness"
+  }
+]

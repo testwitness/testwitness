@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/42941",
+  "repo": "microsoft/playwright",
+  "number": 42941,
+  "title": "test: remove flaky unresponsive page tracing test",
+  "merged_at": "2026-09-25T23:39:21Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "6b37d04cf3dcbc4d91592b65c66e49d8f7c8ecfc",
+  "head_sha": "1351879195e86d0d5681f8424dadb4fefc0e5821",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 17
+}

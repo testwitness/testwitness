@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/42131",
+  "repo": "microsoft/playwright",
+  "number": 42131,
+  "title": "test(firefox): fixme flaky codegen pierceFrames disambiguation on Intel macOS",
+  "merged_at": "2026-08-10T09:45:38Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "bcbdff0b2e6d070e20a9cd633ff3812ed42e9d1c",
+  "head_sha": "7fdb4208899f619eceba4c204b23b2d546a5bc9f",
+  "files_changed": 1,
+  "additions": 8,
+  "deletions": 7
+}

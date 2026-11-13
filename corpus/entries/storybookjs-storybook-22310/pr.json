@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/storybookjs/storybook/pull/22310",
+  "repo": "storybookjs/storybook",
+  "number": 22310,
+  "title": "Comment out flaky test",
+  "merged_at": "2023-04-28T15:20:54Z",
+  "stars": 91421,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "7e197e1c1f11ee93260d4edda3970c22a77a9b00",
+  "head_sha": "f6a07d48dbf74d81e5d075ce759251a146cb45c6",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 5
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/6946",
+  "repo": "TanStack/query",
+  "number": 6946,
+  "title": "test(queryClient): Remove flaky perfomance tests",
+  "merged_at": "2024-02-24T12:54:00Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "8104a407cc9347fbf74b64bcb5adc77c2f8daaea",
+  "head_sha": "518cb2c347a8c33340476cd4a8f00d2a16d4574c",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 42
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/doris/pull/66726",
+  "repo": "apache/doris",
+  "number": 66726,
+  "title": "[fix](cloud) Remove flaky idempotent injection debug test",
+  "merged_at": "2026-08-14T03:31:04Z",
+  "stars": 16178,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "dfb298aada0b46b85cf6ddf776df823dff8272a8",
+  "head_sha": "0b2ec2a2184b7dbda47267ecc5ed473ab2f592ce",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 32
+}

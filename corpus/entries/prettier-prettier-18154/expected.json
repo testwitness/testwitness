@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "`printDocToString` should not manipulate docs",
+    "verdict": "tp",
+    "reason": "timing assertion removed"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "`printDocToString` has linear time complexity at most to print fill() \u203a numWords=%d",
+    "verdict": "tp",
+    "reason": "performance test deleted"
+  }
+]

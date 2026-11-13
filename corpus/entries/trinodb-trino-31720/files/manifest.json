@@ -1,0 +1,6 @@
+[
+  {
+    "path": "client/trino-client/src/test/java/io/trino/client/auth/external/TestHttpTokenPoller.java",
+    "status": "modified"
+  }
+]

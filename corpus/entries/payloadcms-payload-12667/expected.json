@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "low",
+    "label": "conditional",
+    "verdict": "fp",
+    "reason": "conditional early return for one database adapter"
+  }
+]

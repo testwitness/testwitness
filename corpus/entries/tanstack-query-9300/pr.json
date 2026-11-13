@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/9300",
+  "repo": "TanStack/query",
+  "number": 9300,
+  "title": "test(vue-query): use fakeTimers for flaky useMutation.test.tsx",
+  "merged_at": "2025-06-22T11:43:24Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "cd87a42a310cb34eb6d6efaff11f8bf27ae0b51e",
+  "head_sha": "38fd41883f1aae67370e33fe8f64009a4b8a6c65",
+  "files_changed": 1,
+  "additions": 49,
+  "deletions": 40
+}

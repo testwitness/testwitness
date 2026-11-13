@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright/pull/42874",
+  "repo": "microsoft/playwright",
+  "number": 42874,
+  "title": "test(trace-viewer): remove flaky trace-viewer-scrub spec",
+  "merged_at": "2026-09-23T00:02:46Z",
+  "stars": 99148,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R002",
+  "split": "tuning",
+  "base_sha": "724115f51426a168510a1506911e3a3459124f90",
+  "head_sha": "4b00f26e40cf73240a58f1da344af18634a95798",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 280
+}
