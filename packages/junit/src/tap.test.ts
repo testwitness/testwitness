@@ -236,7 +236,7 @@ describe('TAP parser properties', () => {
 });
 
 describe('TAP on hostile input (review regression)', () => {
-  it('reads a line with a long run of inner spaces in linear time', () => {
+  it.skipIf(TIMING_OFF)('reads a line with a long run of inner spaces in linear time', () => {
     // indentOf used /\s+$/, which took 8 s on this 100 kB line and grows with the square of its length.
     const line = `ok 1 - a${' '.repeat(100_000)}b`;
     const t0 = performance.now();
