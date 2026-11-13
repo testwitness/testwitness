@@ -77,3 +77,12 @@ describe('findClaims details', () => {
     expect(findClaims('')).toEqual([]);
   });
 });
+
+describe('PR bodies with CRLF line endings', () => {
+  // The GitHub API returns PR bodies written in the web editor with CRLF.
+  it('finds the same claims in a CRLF body as in an LF one', () => {
+    const body = '## Summary\n\nAll tests pass.\n\n- [ ] Added tests for refunds\n- [x] Verified locally\n\n```\nall tests pass\n```\n<!-- CI is green -->\n';
+    expect(findClaims(body.replace(/\n/g, '\r\n'))).toEqual(findClaims(body));
+    expect(findClaims(body.replace(/\n/g, '\r\n')).map((c) => c.kind).sort()).toEqual(['tests-pass', 'verified']);
+  });
+});
