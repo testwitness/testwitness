@@ -1,0 +1,1 @@
+Negative control. Issue565Test.java moves to a feature package, its one test gets a readable name and AssertJ assertions. Git sees a deletion and an addition, and neither the body nor the test name survives. The PR adds a file with the same name holding as many tests, so R002 reports the deletion low as rewritten. Seen in a replay of public PRs on TestNG.
