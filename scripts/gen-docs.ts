@@ -53,7 +53,8 @@ for (const r of promoted) {
 }
 const notPromotedList = notPromoted.map((r) => {
   const s = stats.get(r.id)!;
-  return `- ${r.id} ${r.name}: ${s.tp} true positives, ${s.fp} false positives, held out precision ${fmt(heldoutPrecision(s))}`;
+  const n = (k: number, w: string): string => `${k} ${w}${k === 1 ? '' : 's'}`;
+  return `- ${r.id} ${r.name}: ${n(s.tp, 'true positive')}, ${n(s.fp, 'false positive')}, held out precision ${fmt(heldoutPrecision(s))}`;
 });
 const block = [
   '<!-- rules:start -->',
