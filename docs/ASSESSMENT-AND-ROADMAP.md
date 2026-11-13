@@ -86,7 +86,11 @@ Engine recall gaps found by the corpus (all documented in corpus NOTES):
   inside a custom matcher, PyHamcrest has_items to has_item(contains_string),
   Chai lengthOf to length greaterThan.
 - QUnit is not parsed. Python files named *_test_it.py are not matched.
-- W002 matches only a literal true, not `continue-on-error: ${{ matrix.x == 'y' }}`.
+- W002 matches only a literal true, not an expression such as
+
+  ```yaml
+  continue-on-error: ${{ matrix.x == 'y' }}
+  ```
 - W003 does not read shell scripts or appveyor.yml, where suppressions actually
   live in older repositories.
 - R003 misses an in body `self.skipTest(...)`. R001 misses tests declared

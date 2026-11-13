@@ -4,6 +4,8 @@ export default defineConfig({
   title: 'testwitness',
   description: 'Did this PR weaken its tests, and did they actually run?',
   base: '/testwitness/',
+  // Launch runbooks and drafts live in the repository for transparency but are not site pages.
+  srcExclude: ['launch/**'],
   themeConfig: {
     nav: [
       { text: 'Quick start', link: '/' },
