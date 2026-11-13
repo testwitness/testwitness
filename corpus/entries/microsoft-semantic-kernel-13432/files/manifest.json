@@ -1,0 +1,10 @@
+[
+  {
+    "path": "python/samples/getting_started_with_agents/copilot_studio/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/tests/unit/connectors/ai/mistral_ai/services/test_mistralai_chat_completion.py",
+    "status": "modified"
+  }
+]

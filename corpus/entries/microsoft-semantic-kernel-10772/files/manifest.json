@@ -1,0 +1,50 @@
+[
+  {
+    "path": "python/.cspell.json",
+    "status": "modified"
+  },
+  {
+    "path": "python/samples/concepts/agents/bedrock_agent/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/samples/concepts/setup/ALL_SETTINGS.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/bedrock/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/bedrock/services/bedrock_base.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/bedrock/services/bedrock_chat_completion.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/bedrock/services/bedrock_text_completion.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/semantic_kernel/connectors/ai/bedrock/services/bedrock_text_embedding.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/tests/integration/completions/chat_completion_test_base.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/tests/integration/completions/test_chat_completions.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/tests/integration/completions/test_text_completion.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/semantic-kernel/pull/10772",
+  "repo": "microsoft/semantic-kernel",
+  "number": 10772,
+  "title": "Python: Improve Bedrock service setup docs",
+  "merged_at": "2025-03-04T00:28:57Z",
+  "stars": 28726,
+  "license": "MIT",
+  "language": "python",
+  "category": "V004",
+  "split": "heldout",
+  "base_sha": "75453a1219abe6e35eef93288d7ea76f43112f49",
+  "head_sha": "f3a5e66726f0c38f47526d04d5ea228c467701d5",
+  "files_changed": 12,
+  "additions": 122,
+  "deletions": 33
+}

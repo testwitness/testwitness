@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/semantic-kernel/pull/6092",
+  "repo": "microsoft/semantic-kernel",
+  "number": 6092,
+  "title": "Java: Python: Docs: Fix broken link",
+  "merged_at": "2024-05-02T02:55:48Z",
+  "stars": 28726,
+  "license": "MIT",
+  "language": "c#",
+  "category": "V004",
+  "split": "tuning",
+  "base_sha": "75dccb3f83388723b433ac47cd8f81cc9caea8c6",
+  "head_sha": "190a7b785b146d362816e4c1589fe9ea0b1d4346",
+  "files_changed": 8,
+  "additions": 8,
+  "deletions": 10
+}

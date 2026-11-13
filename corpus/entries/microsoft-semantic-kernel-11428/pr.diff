@@ -1,0 +1,13 @@
+diff --git a/README.md b/README.md
+index d247096f..f309b680 100644
+--- a/README.md
++++ b/README.md
+@@ -14,7 +14,7 @@ Semantic Kernel is a model-agnostic SDK that empowers developers to build, orche
+ 
+ ## System Requirements
+ 
+-- **Python**: 3.9+
++- **Python**: 3.10+
+ - **.NET**: .NET 8.0+ 
+ - **Java**: JDK 17+
+ - **OS Support**: Windows, macOS, Linux
