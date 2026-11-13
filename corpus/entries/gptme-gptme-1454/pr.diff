@@ -1,0 +1,24 @@
+diff --git a/.github/workflows/test.yml b/.github/workflows/test.yml
+index f756522..9dc3180 100644
+--- a/.github/workflows/test.yml
++++ b/.github/workflows/test.yml
+@@ -152,13 +152,15 @@ jobs:
+     runs-on: ubuntu-latest
+     env:
+       RELEASE: false
++    continue-on-error: ${{ matrix.experimental || false }}
+     strategy:
+       fail-fast: false
+       matrix:
+-        model:
+-          - 'openai/gpt-4o-mini'
+-          - 'anthropic/claude-haiku-4-5'
+-          - 'openrouter/z-ai/glm-5@z-ai'
++        include:
++          - model: 'openai/gpt-4o-mini'
++          - model: 'anthropic/claude-haiku-4-5'
++          - model: 'openrouter/z-ai/glm-5@z-ai'
++            experimental: true
+ 
+     steps:
+     - uses: actions/checkout@v6

@@ -1,0 +1,363 @@
+diff --git a/.github/workflows/ci-jest.yml b/.github/workflows/ci-jest.yml
+new file mode 100644
+index 0000000..1720432
+--- /dev/null
++++ b/.github/workflows/ci-jest.yml
+@@ -0,0 +1,41 @@
++name: CI-jest
++
++on:
++  push:
++    branches:
++      - master
++    paths-ignore:
++      - 'docs/**'
++      - '*.md'
++  pull_request:
++    branches:
++      - master
++    paths-ignore:
++      - 'docs/**'
++      - '*.md'
++
++jobs:
++  test:
++    runs-on: ${{ matrix.os }}
++
++    strategy:
++      matrix:
++        node-version: [10, 12, 14, 15, 16]
++        os: [ubuntu-latest]
++    continue-on-error: true
++
++    steps:
++      - uses: actions/checkout@v2.3.4
++
++      - name: Use Node.js
++        uses: actions/setup-node@v2.1.5
++        with:
++          node-version: ${{ matrix.node-version }}
++
++      - name: Install Dependencies
++        run: |
++          npm install --ignore-scripts
++
++      - name: Run Tests
++        run: |
++          npm run test:jest
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 022fa05..1011646 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -2,10 +2,14 @@ name: CI
+ 
+ on:
+   push:
++    branches:
++      - master
+     paths-ignore:
+       - 'docs/**'
+       - '*.md'
+   pull_request:
++    branches:
++      - master
+     paths-ignore:
+       - 'docs/**'
+       - '*.md'
+@@ -31,9 +35,9 @@ jobs:
+         run: |
+           npm install --ignore-scripts
+ 
+-      - name: Run Tests
++      - name: Run Tests With Tap
+         run: |
+-          npm test
++          npm run test:tap
+ 
+   automerge:
+     needs: test
+diff --git a/.github/workflows/linting.yml b/.github/workflows/linting.yml
+index 413dbec..c26a1bf 100644
+--- a/.github/workflows/linting.yml
++++ b/.github/workflows/linting.yml
+@@ -17,7 +17,7 @@ jobs:
+ 
+     strategy:
+       matrix:
+-        node-version: [15]
++        node-version: [16]
+ 
+     steps:
+       - name: Checkout Repository
+diff --git a/.husky/pre-commit b/.husky/pre-commit
+index 4763591..9cd4de3 100644
+--- a/.husky/pre-commit
++++ b/.husky/pre-commit
+@@ -1,5 +1,5 @@
+ #!/bin/sh
+ . "$(dirname $0)/_/husky.sh"
+ 
+-npm run test
++npm run test:tap
+ npm run lint:everything
+diff --git a/lib/requestContextPlugin.js b/lib/requestContextPlugin.js
+index 34fc5c8..c6088fd 100644
+--- a/lib/requestContextPlugin.js
++++ b/lib/requestContextPlugin.js
+@@ -1,3 +1,5 @@
++'use strict'
++
+ const fp = require('fastify-plugin')
+ const { als } = require('asynchronous-local-storage')
+ const { AsyncResource } = require('async_hooks')
+diff --git a/package.json b/package.json
+index a987d39..b0487d8 100644
+--- a/package.json
++++ b/package.json
+@@ -12,12 +12,13 @@
+   "main": "index.js",
+   "types": "index.d.ts",
+   "scripts": {
+-    "test": "jest --config=jest.config.json",
+-    "test:coverage": "jest --config=jest.config.json --coverage",
++    "test:coverage": "tap -J test-tap/*.test.js --cov --coverage-report=lcovonly",
++    "test:jest": "jest --config=jest.config.json",
++    "test:tap": "tap -J test-tap/*.test.js",
+     "test:typescript": "tsd",
+-    "lint": "eslint --format codeframe \"lib/**/*.js\" \"test/**/*.js\" index.js",
++    "lint": "eslint --format codeframe \"lib/**/*.js\" \"test/**/*.js\" \"test-tap/**/*.js\" index.js",
+     "lint:everything": "npm run lint && npm run test:typescript",
+-    "prettier": "prettier --write \"{lib,test}/**/*.js\" index.js index.d.ts",
++    "prettier": "prettier --write \"{lib,test,test-tap}/**/*.js\" index.js index.d.ts",
+     "postinstall": "husky install",
+     "prepublishOnly": "pinst --disable",
+     "postpublish": "pinst --enable"
+@@ -40,6 +41,7 @@
+     "pinst": "^2.1.1",
+     "prettier": "^2.2.1",
+     "superagent": "^6.1.0",
++    "tap": "^15.0.9",
+     "tsd": "^0.15.0",
+     "typescript": "4.2.4"
+   },
+diff --git a/test-tap/requestContextPlugin.e2e.test.js b/test-tap/requestContextPlugin.e2e.test.js
+new file mode 100644
+index 0000000..bae2779
+--- /dev/null
++++ b/test-tap/requestContextPlugin.e2e.test.js
+@@ -0,0 +1,195 @@
++'use strict'
++
++const request = require('superagent')
++const {
++  initAppPostWithPrevalidation,
++  initAppPostWithAllPlugins,
++} = require('../test/internal/appInitializer')
++const { TestService } = require('../test/internal/testService')
++const t = require('tap')
++const test = t.test
++
++let app
++t.afterEach(() => {
++  return app.close()
++})
++
++test('correctly preserves values set in prevalidation phase within single POST request', (t) => {
++  t.plan(2)
++
++  let testService
++  let responseCounter = 0
++  return new Promise((resolveResponsePromise) => {
++    const promiseRequest2 = new Promise((resolveRequest2Promise) => {
++      const promiseRequest1 = new Promise((resolveRequest1Promise) => {
++        const route = (req) => {
++          const requestId = req.requestContext.get('testKey')
++
++          function prepareReply() {
++            return testService.processRequest(requestId.replace('testValue', '')).then(() => {
++              const storedValue = req.requestContext.get('testKey')
++              return Promise.resolve({ storedValue })
++            })
++          }
++
++          // We don't want to read values until both requests wrote their values to see if there is a racing condition
++          if (requestId === 'testValue1') {
++            resolveRequest1Promise()
++            return promiseRequest2.then(prepareReply)
++          }
++
++          if (requestId === 'testValue2') {
++            resolveRequest2Promise()
++            return promiseRequest1.then(prepareReply)
++          }
++
++          throw new Error(`Unexpected requestId: ${requestId}`)
++        }
++
++        app = initAppPostWithPrevalidation(route)
++        app.listen(0).then(() => {
++          testService = new TestService(app)
++          const { address, port } = app.server.address()
++          const url = `${address}:${port}`
++          const response1Promise = request('POST', url)
++            .send({ requestId: 1 })
++            .then((response) => {
++              t.equal(response.body.storedValue, 'testValue1')
++              responseCounter++
++              if (responseCounter === 2) {
++                resolveResponsePromise()
++              }
++            })
++
++          const response2Promise = request('POST', url)
++            .send({ requestId: 2 })
++            .then((response) => {
++              t.equal(response.body.storedValue, 'testValue2')
++              responseCounter++
++              if (responseCounter === 2) {
++                resolveResponsePromise()
++              }
++            })
++
++          return Promise.all([response1Promise, response2Promise])
++        })
++      })
++
++      return promiseRequest1
++    })
++
++    return promiseRequest2
++  })
++})
++
++test('correctly preserves values set in multiple phases within single POST request', (t) => {
++  t.plan(10)
++
++  let testService
++  let responseCounter = 0
++  return new Promise((resolveResponsePromise) => {
++    const promiseRequest2 = new Promise((resolveRequest2Promise) => {
++      const promiseRequest1 = new Promise((resolveRequest1Promise) => {
++        const route = (req) => {
++          const onRequestValue = req.requestContext.get('onRequest')
++          const preParsingValue = req.requestContext.get('preParsing')
++          const preValidationValue = req.requestContext.get('preValidation')
++          const preHandlerValue = req.requestContext.get('preHandler')
++
++          t.equal(onRequestValue, undefined)
++          t.equal(preParsingValue, undefined)
++          t.type(preValidationValue, 'number')
++          t.type(preHandlerValue, 'number')
++
++          const requestId = `testValue${preHandlerValue}`
++
++          function prepareReply() {
++            return testService.processRequest(requestId.replace('testValue', '')).then(() => {
++              const storedValue = req.requestContext.get('preValidation')
++              return Promise.resolve({ storedValue: `testValue${storedValue}` })
++            })
++          }
++
++          // We don't want to read values until both requests wrote their values to see if there is a racing condition
++          if (requestId === 'testValue1') {
++            resolveRequest1Promise()
++            return promiseRequest2.then(prepareReply)
++          }
++
++          if (requestId === 'testValue2') {
++            resolveRequest2Promise()
++            return promiseRequest1.then(prepareReply)
++          }
++
++          throw new Error(`Unexpected requestId: ${requestId}`)
++        }
++
++        app = initAppPostWithAllPlugins(route, 'preValidation')
++
++        app.listen(0).then(() => {
++          testService = new TestService(app)
++          const { address, port } = app.server.address()
++          const url = `${address}:${port}`
++          const response1Promise = request('POST', url)
++            .send({ requestId: 1 })
++            .then((response) => {
++              t.equal(response.body.storedValue, 'testValue1')
++              responseCounter++
++              if (responseCounter === 2) {
++                resolveResponsePromise()
++              }
++            })
++
++          const response2Promise = request('POST', url)
++            .send({ requestId: 2 })
++            .then((response) => {
++              t.equal(response.body.storedValue, 'testValue2')
++              responseCounter++
++              if (responseCounter === 2) {
++                resolveResponsePromise()
++              }
++            })
++
++          return Promise.all([response1Promise, response2Promise])
++        })
++      })
++
++      return promiseRequest1
++    })
++
++    return promiseRequest2
++  })
++})
++
++test('correctly preserves values set in multiple phases within single POST request', (t) => {
++  t.plan(7)
++
++  const route = (req) => {
++    const onRequestValue = req.requestContext.get('onRequest')
++    const preParsingValue = req.requestContext.get('preParsing')
++    const preValidationValue = req.requestContext.get('preValidation')
++    const preHandlerValue = req.requestContext.get('preHandler')
++
++    t.equal(onRequestValue, 'dummy')
++    t.equal(preParsingValue, 'dummy')
++    t.type(preValidationValue, 'number')
++    t.type(preHandlerValue, 'number')
++
++    const requestId = `testValue${preHandlerValue}`
++    return Promise.resolve({ storedValue: requestId })
++  }
++
++  app = initAppPostWithAllPlugins(route)
++
++  return app.listen(0).then(() => {
++    const { address, port } = app.server.address()
++    const url = `${address}:${port}`
++    return request('POST', url)
++      .send({ requestId: 1 })
++      .then((response) => {
++        t.equal(response.body.storedValue, 'testValue1')
++        t.equal(response.body.preSerialization1, 'dummy')
++        t.equal(response.body.preSerialization2, 1)
++      })
++  })
++})
+diff --git a/test/requestContextPlugin.e2e.spec.js b/test/requestContextPlugin.e2e.spec.js
+index 199fcc0..4beb394 100644
+--- a/test/requestContextPlugin.e2e.spec.js
++++ b/test/requestContextPlugin.e2e.spec.js
+@@ -1,3 +1,5 @@
++'use strict'
++
+ const request = require('superagent')
+ const {
+   initAppPostWithPrevalidation,
+diff --git a/test/requestContextPlugin.spec.js b/test/requestContextPlugin.spec.js
+index 5b8cd61..dc9f3d1 100644
+--- a/test/requestContextPlugin.spec.js
++++ b/test/requestContextPlugin.spec.js
+@@ -1,3 +1,5 @@
++'use strict'
++
+ const {
+   initAppPost,
+   initAppPostWithPrevalidation,

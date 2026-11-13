@@ -1,0 +1,6 @@
+[
+  {
+    "path": "generators/cypress/templates/src/test/javascript/cypress/e2e/lighthouse.audits.ts.ejs",
+    "status": "modified"
+  }
+]

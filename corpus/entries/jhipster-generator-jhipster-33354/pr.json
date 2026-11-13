@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jhipster/generator-jhipster/pull/33354",
+  "repo": "jhipster/generator-jhipster",
+  "number": 33354,
+  "title": "Sonar: Add at least one assertion to this test case",
+  "merged_at": "2026-06-25T20:20:45Z",
+  "stars": 22460,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "9327b17378808508c38e211508947575c8822d40",
+  "head_sha": "80f96ce6808d1fcce8462a799cd0a00b38252c83",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 1
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "path": ".github/workflows/ci-jest.yml",
+    "status": "added"
+  },
+  {
+    "path": ".github/workflows/ci.yml",
+    "status": "modified"
+  },
+  {
+    "path": ".github/workflows/linting.yml",
+    "status": "modified"
+  },
+  {
+    "path": ".husky/pre-commit",
+    "status": "modified"
+  },
+  {
+    "path": "lib/requestContextPlugin.js",
+    "status": "modified"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "test-tap/requestContextPlugin.e2e.test.js",
+    "status": "added"
+  },
+  {
+    "path": "test/requestContextPlugin.e2e.spec.js",
+    "status": "modified"
+  },
+  {
+    "path": "test/requestContextPlugin.spec.js",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jhipster/generator-jhipster/pull/31753",
+  "repo": "jhipster/generator-jhipster",
+  "number": 31753,
+  "title": "[Angular] Sonar: Add at least one assertion to this test case",
+  "merged_at": "2025-12-19T20:55:46Z",
+  "stars": 22460,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "e3cc21694c28a408466b985797c4a1be07b1cedf",
+  "head_sha": "47d6f92879019d5557212851a679f497fb472dca",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 2
+}

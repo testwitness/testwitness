@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/gptme/gptme/pull/1454",
+  "repo": "gptme/gptme",
+  "number": 1454,
+  "title": "ci(test): mark GLM-5 tests as experimental (continue-on-error)",
+  "merged_at": "2026-02-24T04:18:28Z",
+  "stars": 4472,
+  "license": "MIT",
+  "language": "python",
+  "category": "W002",
+  "split": "heldout",
+  "base_sha": "87237f3ab9138dad24240d5f9e53eb8064c50ec2",
+  "head_sha": "2ded5376645916ee7b9e0720643fd5c535f162dd",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 4
+}

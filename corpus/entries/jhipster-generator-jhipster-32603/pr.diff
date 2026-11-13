@@ -1,0 +1,38 @@
+diff --git a/generators/angular/__snapshots__/generator.spec.ts.snap b/generators/angular/__snapshots__/generator.spec.ts.snap
+index e10fa72e5..eb35effbb 100644
+--- a/generators/angular/__snapshots__/generator.spec.ts.snap
++++ b/generators/angular/__snapshots__/generator.spec.ts.snap
+@@ -1240,12 +1240,10 @@ describe("UserManagement Service", () => {
+     });
+ 
+     it("should delete a UserManagement", () => {
+-      const expected = true;
+-
+       service.delete("ABC").subscribe();
+ 
+-      const req = httpMock.expectOne({ method: "DELETE" });
+-      req.flush({ status: 200 });
++      const requests = httpMock.match({ method: "DELETE" });
++      expect(requests.length).toBe(1);
+     });
+ 
+     describe("addUserManagementToCollectionIfMissing", () => {
+diff --git a/generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/service/_entityFile_.service.spec.ts.ejs b/generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/service/_entityFile_.service.spec.ts.ejs
+index 6a19097d5..c013afef4 100644
+--- a/generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/service/_entityFile_.service.spec.ts.ejs
++++ b/generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/service/_entityFile_.service.spec.ts.ejs
+@@ -132,12 +132,10 @@ describe('<%= entityAngularName %> Service', () => {
+ 
+ <%_ if (!readOnly) { _%>
+         it('should delete a <%= entityAngularName %>', () => {
+-            const expected = true;
+-
+             service.delete(<%- tsKeyId %>).subscribe();
+ 
+-            const req = httpMock.expectOne({ method: 'DELETE' });
+-            req.flush({ status: 200 });
++            const requests = httpMock.match({ method: 'DELETE' });
++            expect(requests.length).toBe(1);
+         });
+ <%_ } _%>
+ 

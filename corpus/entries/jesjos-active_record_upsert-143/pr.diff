@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index fa91dbe..63f3c27 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -78,6 +78,7 @@ jobs:
+           bundler-cache: true
+ 
+       - name: Run Tests
++        continue-on-error: ${{ matrix.experimental == true }}
+         run: |
+           export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
+           bundle exec rake spec
