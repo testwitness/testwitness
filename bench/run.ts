@@ -31,7 +31,9 @@ import { fileURLToPath } from 'node:url';
 import { generate, generatorHash, SIZES, type GenerateResult, type SizeName } from './generate.js';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const BUDGET_MS: Record<string, number> = { '100': 5_000, '1000': 30_000, '5000': 120_000 };
+// BENCH_BUDGET_SCALE is only for trying the gate (0.01 makes every case fail); CI never sets it.
+const BUDGET_SCALE = Number(process.env.BENCH_BUDGET_SCALE || 1);
+const BUDGET_MS: Record<string, number> = { '100': 5_000 * BUDGET_SCALE, '1000': 30_000 * BUDGET_SCALE, '5000': 120_000 * BUDGET_SCALE };
 const BUDGET_RSS_MB = 1536;
 
 interface Args {
@@ -82,6 +84,8 @@ interface RunSample {
   findings: number;
   byRule: Record<string, number>;
   engine: { totalMs: number; parseMs: number; rulesMs: number } | null;
+  /** The reader stopped at its byte cap on results, so part of the XML was never read and the case is not measuring what it claims. */
+  resultsCapped: boolean;
   stderrTail: string;
 }
 
@@ -141,11 +145,13 @@ async function runOnce(gen: GenerateResult, args: Args, profile: boolean, tag: s
   let findings = 0;
   const byRule: Record<string, number> = {};
   let engine: RunSample['engine'] = null;
+  let resultsCapped = false;
   if (existsSync(outFile)) {
-    const report = JSON.parse(readFileSync(outFile, 'utf8')) as { state: string; findings: { ruleId: string }[]; timing: { totalMs: number; parseMs: number; rulesMs: number } };
+    const report = JSON.parse(readFileSync(outFile, 'utf8')) as { state: string; findings: { ruleId: string }[]; timing: { totalMs: number; parseMs: number; rulesMs: number }; evidence: { notes: string[] } };
     state = report.state;
     findings = report.findings.length;
     for (const f of report.findings) byRule[f.ruleId] = (byRule[f.ruleId] ?? 0) + 1;
+    resultsCapped = report.evidence.notes.some((n) => n.includes('cap on results'));
     engine = { totalMs: report.timing.totalMs, parseMs: report.timing.parseMs, rulesMs: report.timing.rulesMs };
   }
   return {
@@ -159,6 +165,7 @@ async function runOnce(gen: GenerateResult, args: Args, profile: boolean, tag: s
     findings,
     byRule,
     engine,
+    resultsCapped,
     stderrTail: stderr.slice(-400),
   };
 }
@@ -240,7 +247,7 @@ async function main(): Promise<void> {
       generateCached,
       budgetRssMb: BUDGET_RSS_MB,
       // A run that crashed or produced no report is a failure, not a fast pass.
-      overBudget: medianWallMs > budgetMs || failedRuns > 0,
+      overBudget: medianWallMs > budgetMs || failedRuns > 0 || runs.some((x) => x.resultsCapped),
       overRss: rss.length ? Math.max(...rss) > BUDGET_RSS_MB : false,
       generateSlowerThanCheck: c.name === '5000' && generateMs > medianWallMs,
     });
@@ -251,6 +258,7 @@ async function main(): Promise<void> {
     const problems: string[] = [];
     if (r.medianWallMs > r.budgetMs) problems.push(`median ${(r.medianWallMs / 1000).toFixed(2)} s over ${r.budgetMs / 1000} s`);
     if (r.runs.some((x) => x.exitCode !== 0 || x.state === 'unknown')) problems.push('a run failed or wrote no report');
+    if (r.runs.some((x) => x.resultsCapped)) problems.push('results hit the reader byte cap, XML was not fully read');
     if (r.overRss) problems.push(`peak RSS ${r.maxRssMb} MB over ${r.budgetRssMb} MB`);
     if (r.generateSlowerThanCheck) problems.push(`generation ${(r.generateMs / 1000).toFixed(1)} s took longer than the check ${(r.medianWallMs / 1000).toFixed(1)} s`);
     return { name: r.name, problems };

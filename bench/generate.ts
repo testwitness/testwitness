@@ -9,7 +9,7 @@
  * Sizes: SIZES holds the three benchmark cases (100, 1,000 and 5,000 changed
  * files). Every proportion is fixed, so a case is fully described by its file
  * count and seed: 30 percent test files, a 45/30/25 mix of TypeScript, Java and
- * Python, 200 KB of JUnit XML per changed file, and 1 percent each of deleted,
+ * Python, 80 KB of JUnit XML per changed file (5,000 files stay near 400 MB, under the 500 MB cap the reader puts on results), and 1 percent each of deleted,
  * skipped and loosened tests plus 2 percent new tests without an assertion.
  *
  * Shapes:
@@ -605,7 +605,7 @@ export function sizeOptions(files: number, seed: number): Omit<GenerateOptions, 
     seed,
     files,
     testFiles,
-    xmlBytes: files * 200 * 1024,
+    xmlBytes: files * 80 * 1024,
     mutations: { deleted: pct(1), skipped: pct(1), loosened: pct(1), newWithoutAssertion: pct(2) },
   };
 }

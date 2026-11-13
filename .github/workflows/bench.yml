@@ -2,7 +2,9 @@ name: bench
 
 # Three PR sizes (100, 1,000 and 5,000 changed files) on three operating systems, with the budget enforced:
 #   100 files under 5 s, 1,000 under 30 s, 5,000 under 120 s (median wall of 3 runs), peak RSS under 1.5 GB,
-#   and generating the 5,000 file repository must not take longer than checking it.
+#   and generating the 5,000 file repository must not take longer than checking it (bench/run.ts fails the
+#   job otherwise). Generation is about 4 s against a check of a minute or more, so the repositories are not
+#   cached; bench/run.ts has --reuse and a generator hash if that ever changes.
 # Runner minutes: ubuntu on every matching pull request; windows and macos on push to main, on manual
 # dispatch, and on pull requests that carry the label "bench".
 on:
@@ -70,18 +72,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm tsc -b
-      - name: Choose the generated repository directory
-        run: echo "BENCH_WORK=$RUNNER_TEMP/testwitness-bench" >> "$GITHUB_ENV"
-
-      # The generated repositories depend only on bench/generate.ts, so the key is its hash. A hit skips
-      # generation (the 5,000 file case writes about 1 GB of XML); bench/run.ts re-checks the hash itself.
-      - name: Restore generated repositories
-        id: gen-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ runner.temp }}/testwitness-bench
-          key: bench-gen-${{ runner.os }}-${{ hashFiles('bench/generate.ts') }}
-
       - name: Pick a network sandbox for the check step
         id: sandbox
         if: runner.os == 'Linux'
@@ -99,24 +89,16 @@ jobs:
 
       - name: Benchmark (100 under 5 s, 1,000 under 30 s, 5,000 under 120 s, RSS under 1.5 GB)
         env:
+          # Through the environment: an empty command line argument does not survive pnpm on Windows.
           BENCH_PREFIX: ${{ steps.sandbox.outputs.prefix }}
           BENCH_RUNS: ${{ inputs.runs || 3 }}
         run: |
           set -o pipefail
           mkdir -p bench-out
-          pnpm bench --no-build --reuse --enforce \
+          pnpm bench --no-build --enforce \
             --runs "$BENCH_RUNS" \
             --out "bench-out/results-$RUNNER_OS.json" \
             --summary "bench-out/summary-$RUNNER_OS.md" | tee "bench-out/output-$RUNNER_OS.txt"
-
-      # Saved even when a budget failed, so the next run does not generate again. BENCH_PREFIX and BENCH_WORK
-      # reach bench/run.ts through the environment: an empty command line argument does not survive pnpm on Windows.
-      - name: Save generated repositories
-        if: always() && steps.gen-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ runner.temp }}/testwitness-bench
-          key: bench-gen-${{ runner.os }}-${{ hashFiles('bench/generate.ts') }}
 
       - name: Job summary
         if: always()

@@ -1,30 +1,135 @@
 {
-  "generatedAt": "2026-11-04T18:24:05.457Z",
+  "generatedAt": "2026-11-13T09:14:48.385Z",
   "machine": {
     "cores": 2,
     "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
     "platform": "linux",
-    "release": "6.18.44-fc-v233",
+    "release": "6.18.44-fc-v445",
+    "memoryMb": 8022,
     "node": "v22.23.4"
   },
   "prefix": [],
   "runs": 3,
   "cases": [
     {
-      "name": "large",
-      "budgetMs": 30000,
-      "generateMs": 1700,
+      "name": "100",
+      "budgetMs": 5000,
+      "generateMs": 149,
       "gen": {
-        "repo": "/tmp/testwitness-bench/large/repo",
-        "junitDir": "/tmp/testwitness-bench/large/junit",
-        "junitGlob": "/tmp/testwitness-bench/large/junit/**/*.xml",
-        "baseSha": "7c85daccc68522c2e7d3c1b153abfea6f48fb2e9",
-        "headSha": "4ebae712a7f37b61f395d8db7d05e5a7ec31b442",
+        "repo": "/tmp/testwitness-bench/100/repo",
+        "junitDir": "/tmp/testwitness-bench/100/junit",
+        "junitGlob": "/tmp/testwitness-bench/100/junit/**/*.xml",
+        "baseSha": "83b955517e12780c19cf7c612ba023d5790ea3a0",
+        "headSha": "a244c4156bcd6ace1118761847f797f70d835edf",
+        "files": 100,
+        "testFiles": 30,
+        "tests": 486,
+        "xmlFiles": 11,
+        "xmlBytes": 8286958,
+        "mutations": {
+          "deleted": 1,
+          "skipped": 1,
+          "loosened": 1,
+          "newWithoutAssertion": 2,
+          "neutralTests": 25,
+          "production": 70
+        }
+      },
+      "runs": [
+        {
+          "wallMs": 2600.045674,
+          "maxRssMb": 166,
+          "userCpuMs": 1700,
+          "systemCpuMs": 290,
+          "exitCode": 0,
+          "loadAvg1": 4.37,
+          "state": "review",
+          "findings": 5,
+          "byRule": {
+            "A002": 1,
+            "R003": 1,
+            "O001": 2,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 2195,
+            "parseMs": 1570,
+            "rulesMs": 101
+          },
+          "resultsCapped": false,
+          "stderrTail": ""
+        },
+        {
+          "wallMs": 2568.7447669999997,
+          "maxRssMb": 162,
+          "userCpuMs": 1662,
+          "systemCpuMs": 266,
+          "exitCode": 0,
+          "loadAvg1": 4.37,
+          "state": "review",
+          "findings": 5,
+          "byRule": {
+            "A002": 1,
+            "R003": 1,
+            "O001": 2,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 2224,
+            "parseMs": 1584,
+            "rulesMs": 81
+          },
+          "resultsCapped": false,
+          "stderrTail": ""
+        },
+        {
+          "wallMs": 3226.020187,
+          "maxRssMb": 166,
+          "userCpuMs": 1835,
+          "systemCpuMs": 289,
+          "exitCode": 0,
+          "loadAvg1": 4.1,
+          "state": "review",
+          "findings": 5,
+          "byRule": {
+            "A002": 1,
+            "R003": 1,
+            "O001": 2,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 2806,
+            "parseMs": 2153,
+            "rulesMs": 107
+          },
+          "resultsCapped": false,
+          "stderrTail": ""
+        }
+      ],
+      "medianWallMs": 2600.045674,
+      "bestWallMs": 2568.7447669999997,
+      "maxRssMb": 166,
+      "generateCached": false,
+      "budgetRssMb": 1536,
+      "overBudget": false,
+      "overRss": false,
+      "generateSlowerThanCheck": false
+    },
+    {
+      "name": "1000",
+      "budgetMs": 30000,
+      "generateMs": 1015,
+      "gen": {
+        "repo": "/tmp/testwitness-bench/1000/repo",
+        "junitDir": "/tmp/testwitness-bench/1000/junit",
+        "junitGlob": "/tmp/testwitness-bench/1000/junit/**/*.xml",
+        "baseSha": "ce3c2d8eef9743ab50855428191a6f4f71744af9",
+        "headSha": "a56049ab11319283c53e4d863661eef085981405",
         "files": 1000,
         "testFiles": 300,
-        "tests": 5413,
-        "xmlFiles": 102,
-        "xmlBytes": 210818244,
+        "tests": 5633,
+        "xmlFiles": 92,
+        "xmlBytes": 82964156,
         "mutations": {
           "deleted": 10,
           "skipped": 10,
@@ -36,11 +141,12 @@
       },
       "runs": [
         {
-          "wallMs": 13289.248818,
-          "maxRssMb": 374,
-          "userCpuMs": 8813,
-          "systemCpuMs": 2428,
+          "wallMs": 15706.396266,
+          "maxRssMb": 284,
+          "userCpuMs": 8646,
+          "systemCpuMs": 1929,
           "exitCode": 0,
+          "loadAvg1": 4.25,
           "state": "review",
           "findings": 50,
           "byRule": {
@@ -50,18 +156,20 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 11177,
-            "parseMs": 6858,
-            "rulesMs": 362
+            "totalMs": 14782,
+            "parseMs": 9894,
+            "rulesMs": 566
           },
+          "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 13791.440125,
-          "maxRssMb": 377,
-          "userCpuMs": 8667,
-          "systemCpuMs": 2399,
+          "wallMs": 16911.013013,
+          "maxRssMb": 284,
+          "userCpuMs": 8379,
+          "systemCpuMs": 1861,
           "exitCode": 0,
+          "loadAvg1": 4.13,
           "state": "review",
           "findings": 50,
           "byRule": {
@@ -71,18 +179,20 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 11827,
-            "parseMs": 7367,
-            "rulesMs": 436
+            "totalMs": 15780,
+            "parseMs": 11233,
+            "rulesMs": 525
           },
+          "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 14748.245471999995,
-          "maxRssMb": 377,
-          "userCpuMs": 9262,
-          "systemCpuMs": 2438,
+          "wallMs": 18241.027819999996,
+          "maxRssMb": 283,
+          "userCpuMs": 9133,
+          "systemCpuMs": 2079,
           "exitCode": 0,
+          "loadAvg1": 4.42,
           "state": "review",
           "findings": 50,
           "byRule": {
@@ -92,111 +202,126 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 12674,
-            "parseMs": 7815,
-            "rulesMs": 442
+            "totalMs": 16456,
+            "parseMs": 9757,
+            "rulesMs": 581
           },
+          "resultsCapped": false,
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 13791.440125,
-      "bestWallMs": 13289.248818,
-      "maxRssMb": 377,
-      "overBudget": false
+      "medianWallMs": 16911.013013,
+      "bestWallMs": 15706.396266,
+      "maxRssMb": 284,
+      "generateCached": false,
+      "budgetRssMb": 1536,
+      "overBudget": false,
+      "overRss": false,
+      "generateSlowerThanCheck": false
     },
     {
-      "name": "small",
-      "budgetMs": 5000,
-      "generateMs": 234,
+      "name": "5000",
+      "budgetMs": 120000,
+      "generateMs": 4425,
       "gen": {
-        "repo": "/tmp/testwitness-bench/small/repo",
-        "junitDir": "/tmp/testwitness-bench/small/junit",
-        "junitGlob": "/tmp/testwitness-bench/small/junit/**/*.xml",
-        "baseSha": "01e83050140dd5bfa3e4ed946d501654ee13e94d",
-        "headSha": "b71a3a152a666ac321444be7ae750c72bd4b32c5",
-        "files": 20,
-        "testFiles": 6,
-        "tests": 128,
-        "xmlFiles": 4,
-        "xmlBytes": 2123643,
+        "repo": "/tmp/testwitness-bench/5000/repo",
+        "junitDir": "/tmp/testwitness-bench/5000/junit",
+        "junitGlob": "/tmp/testwitness-bench/5000/junit/**/*.xml",
+        "baseSha": "f31c2f55352d89f0c0568a40a4255c1fd9927b66",
+        "headSha": "513dab184541ceed6a6d543eaf5c57bb7b56461d",
+        "files": 5000,
+        "testFiles": 1500,
+        "tests": 26109,
+        "xmlFiles": 452,
+        "xmlBytes": 414572908,
         "mutations": {
-          "deleted": 1,
-          "skipped": 1,
-          "loosened": 1,
-          "newWithoutAssertion": 1,
-          "neutralTests": 2,
-          "production": 14
+          "deleted": 50,
+          "skipped": 50,
+          "loosened": 50,
+          "newWithoutAssertion": 100,
+          "neutralTests": 1250,
+          "production": 3500
         }
       },
       "runs": [
         {
-          "wallMs": 1102.9041590000052,
-          "maxRssMb": 140,
-          "userCpuMs": 1155,
-          "systemCpuMs": 126,
+          "wallMs": 97747.442847,
+          "maxRssMb": 784,
+          "userCpuMs": 36186,
+          "systemCpuMs": 14951,
           "exitCode": 0,
+          "loadAvg1": 4.53,
           "state": "review",
-          "findings": 4,
+          "findings": 250,
           "byRule": {
-            "A002": 1,
-            "R003": 1,
-            "O001": 1,
-            "R001": 1
+            "A002": 50,
+            "R003": 50,
+            "O001": 100,
+            "R001": 50
           },
           "engine": {
-            "totalMs": 829,
-            "parseMs": 626,
-            "rulesMs": 44
+            "totalMs": 93127,
+            "parseMs": 52623,
+            "rulesMs": 8669
           },
+          "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 959.8994569999995,
-          "maxRssMb": 139,
-          "userCpuMs": 990,
-          "systemCpuMs": 138,
+          "wallMs": 122259.51275299999,
+          "maxRssMb": 726,
+          "userCpuMs": 34078,
+          "systemCpuMs": 15205,
           "exitCode": 0,
+          "loadAvg1": 4.56,
           "state": "review",
-          "findings": 4,
+          "findings": 250,
           "byRule": {
-            "A002": 1,
-            "R003": 1,
-            "O001": 1,
-            "R001": 1
+            "A002": 50,
+            "R003": 50,
+            "O001": 100,
+            "R001": 50
           },
           "engine": {
-            "totalMs": 677,
-            "parseMs": 506,
-            "rulesMs": 32
+            "totalMs": 117841,
+            "parseMs": 70032,
+            "rulesMs": 6383
           },
+          "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 1016.0690079999986,
-          "maxRssMb": 143,
-          "userCpuMs": 1024,
-          "systemCpuMs": 146,
+          "wallMs": 124601.24325899995,
+          "maxRssMb": 723,
+          "userCpuMs": 33773,
+          "systemCpuMs": 13871,
           "exitCode": 0,
+          "loadAvg1": 5.26,
           "state": "review",
-          "findings": 4,
+          "findings": 250,
           "byRule": {
-            "A002": 1,
-            "R003": 1,
-            "O001": 1,
-            "R001": 1
+            "A002": 50,
+            "R003": 50,
+            "O001": 100,
+            "R001": 50
           },
           "engine": {
-            "totalMs": 726,
-            "parseMs": 560,
-            "rulesMs": 29
+            "totalMs": 120580,
+            "parseMs": 70116,
+            "rulesMs": 10181
           },
+          "resultsCapped": false,
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 1016.0690079999986,
-      "bestWallMs": 959.8994569999995,
-      "maxRssMb": 143,
-      "overBudget": false
+      "medianWallMs": 122259.51275299999,
+      "bestWallMs": 97747.442847,
+      "maxRssMb": 784,
+      "generateCached": false,
+      "budgetRssMb": 1536,
+      "overBudget": true,
+      "overRss": false,
+      "generateSlowerThanCheck": false
     }
   ]
 }
