@@ -33,6 +33,17 @@ The title and body are read from the event payload file, never interpolated into
 
 A PR cannot relax its own check: `.testwitness.yml` is read from the base ref, and any change to it or to the testwitness workflow step is reported as W006, which only a maintainer can acknowledge.
 
+## The agent hook
+
+`testwitness hook` runs on a developer machine, possibly in a repository the user has just cloned and does not trust. It keeps the same promises as the check:
+
+* It reads `.testwitness.yml` from the merge base only, never from the working tree, so the change being judged cannot relax its own judge. Changes to that file and to the hook config files are W006 findings.
+* It makes no network call. The hook tests run with socket connect, DNS, UDP and fetch replaced by functions that throw, and pass in a network namespace without interfaces (`unshare -rn`).
+* The only program it starts is `git`, with local subcommands (`rev-parse`, `merge-base`, `symbolic-ref`, `diff`, `show`, `ls-tree`, `log`, `add`, `read-tree`, `write-tree`). A test traces every child process on a repository full of traps (package scripts, test runner configs, git hooks, an fsmonitor program, an external diff, a textconv) and asserts that none ran.
+* The working tree is read through a snapshot in a temporary index and a temporary object directory under the OS temp dir. The repository's index, refs and object store are not written. For the snapshot, git hooks and fsmonitor are switched off; `git diff` runs with `--no-ext-diff --no-textconv`. One thing does run: a clean filter you configured in git (Git LFS, git-crypt), as it does for `git add`. A repository's files can select a filter but cannot define one.
+* The loop guard's counts are in a per user directory under the OS temp dir (mode 0700, ownership checked), never in the repository.
+* `testwitness init` writes one config file and never runs anything from the repository. The hook command it writes never downloads a package (`npx --no-install` at most).
+
 ## Supply chain
 
 Dependencies are pinned by the lockfile; `dist/index.js` is built in CI from the tag; consumers should pin a SHA or a major tag. Report vulnerabilities per SECURITY.md.

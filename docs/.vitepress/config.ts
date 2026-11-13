@@ -27,6 +27,7 @@ export default defineConfig({
       { text: 'Run history', link: '/history' },
       { text: 'Configuration', link: '/configuration' },
       { text: 'CLI', link: '/cli' },
+      { text: 'Agent guard (hooks)', link: '/agent-guard' },
       { text: 'MCP server for agents', link: '/mcp' },
       { text: 'Fork PRs and security', link: '/security' },
       { text: 'Rules reference', link: '/rules' },

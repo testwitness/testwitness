@@ -40,6 +40,17 @@ testwitness check --base origin/main --results "**/junit*.xml"
 
 See [docs/cli.md](docs/cli.md) for every option.
 
+## Inside the agent's loop
+
+The same engine can run before the pull request exists, as a hook in Claude Code, Cursor or Codex, or as a git pre-push hook. When the agent tries to commit, push or end its turn with weakened tests in the working tree, the hook blocks and hands back the rule, the file, the line and the base text to restore. It blocks the same finding at most twice per session, and a crash or a timeout lets the action through.
+
+```bash
+npm i -g testwitness
+testwitness init --agent claude    # or cursor, codex, git
+```
+
+By default it blocks only on rules that never blocked wrongly on our corpus and on 300 real merged pull requests; deleted tests are advice only for now. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
+
 ## What it reports
 
 Three states, never a verdict about honesty:

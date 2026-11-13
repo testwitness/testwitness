@@ -1,6 +1,8 @@
 # MCP server for coding agents
 
-`testwitness mcp` starts a Model Context Protocol server on stdio. A coding agent such as Claude Code, Cursor or Codex can then run the same check the GitHub Action runs, on its own branch, before it pushes. Every finding comes with a file, a line, a rule and the code before and after, so the agent can fix its own weakened tests and the reviewer sees a pull request that already passed.
+`testwitness mcp` starts a Model Context Protocol server on stdio. A coding agent such as Claude Code, Cursor or Codex can then run the same check the GitHub Action runs, on its own branch. Every finding comes with a file, a line, a rule and the code before and after, so the agent can look up what a finding means and fix its own weakened tests.
+
+The server is a tool the agent may call. It does not make the agent call it. To have the check run whether or not the agent thinks of it, install the [agent guard](./agent-guard) (`testwitness init --agent claude`, `cursor`, `codex` or `git`): a hook that runs on commit, push and stop and blocks on its own. The two work together: the hook blocks and names the rule, and the agent can call `testwitness_explain_rule` to understand it.
 
 The server is read only. It reads the git history and files as text, never executes repository code (no install, no test run, no import of config files) and makes no network calls. It is part of the `testwitness` npm package; there is nothing extra to install.
 
@@ -76,7 +78,7 @@ Inputs:
 | `prTitle`, `prBody` | Pull request text, for claim checks such as "all tests pass" | none |
 | `mode` | `report`, `require-ack` or `strict` | from `.testwitness.yml` |
 
-The check compares commits, so commit before you call it: uncommitted changes are not seen. Configuration is read from the base ref, the same as in CI, so a branch cannot relax its own check.
+The MCP check compares commits, so uncommitted changes are not seen; `testwitness check --worktree` and the [agent guard](./agent-guard) compare the working tree. Configuration is read from the base ref, the same as in CI, so a branch cannot relax its own check.
 
 The structured result is the full JSON report, `schemaVersion` 1, described by the JSON Schema at `https://testwitness.github.io/testwitness/report.schema.json` (source: `docs/report.schema.json` in the repository). The text content is a summary for the agent to read first:
 
@@ -97,20 +99,22 @@ Takes a rule id from a finding, such as `A002`, and returns the entry from the [
 
 Lists every built in rule with its id, name and default severity.
 
-## Suggested agent instruction
+## Do not rely on an instruction
 
-Add this to `CLAUDE.md`, `AGENTS.md`, `.cursor/rules` or wherever your agent reads its project instructions:
+An earlier version of this page suggested pasting a "run testwitness_check before pushing" rule into `CLAUDE.md`, `AGENTS.md` or `.cursor/rules`. The evidence says that is not enough. In 89 public reports of agents weakening tests that we read in November 2026, 8 say a written rule was in the agent's context and the agent ignored it ([one](https://github.com/anthropics/claude-code/issues/45550) had "Never skip failing tests" in a project skill; [another](https://github.com/anthropics/claude-code/issues/60177) had "test before claiming done" in `CLAUDE.md`). An instruction is a request. A hook is not.
+
+So the way to get the check run is the [agent guard](./agent-guard), which does not depend on what the agent was told. The MCP tool also compares commits, not the working tree, so it sees a change only after the agent has committed it; the hook checks the working tree before the commit exists.
+
+If you still want a note in your instruction file, keep it to what helps the agent after a block:
 
 ```markdown
 ## Test integrity
 
-Before pushing, run testwitness_check on this repository and fix every medium or high finding or acknowledge it with a reason.
+testwitness checks this repository on commit, push and at the end of a turn.
 
-* Commit first; the check compares commits, not the working tree.
-* Fixing means restoring the deleted test, the removed assertion or the original matcher, or replacing it with a check that is at least as strict.
-* Do not skip, delete or loosen a test to make a change pass. If a test is wrong, say so in the pull request description and leave it for a human.
-* If a finding is intended (a test moved, a feature removed), say which finding it is and why in the pull request description. A maintainer acknowledges it in .testwitness.yml.
+* If it blocks, restore the base text it shows, or keep the change and say why in the pull request description.
+* Do not skip, delete or loosen a test to make a change pass. If a test is wrong, say so and leave it for a human.
 * Use testwitness_explain_rule when a finding is unclear.
 ```
 
-Editing `.testwitness.yml` on the branch acknowledges nothing: configuration is read from the base ref, and rule W006 flags the edit for a maintainer. The agent's part is to fix the finding or explain it; a maintainer acknowledges it.
+Editing `.testwitness.yml` or the hook config on the branch acknowledges nothing: both are read from the base ref, and rule W006 flags the edit for a maintainer. The agent's part is to fix the finding or explain it; a maintainer acknowledges it.
