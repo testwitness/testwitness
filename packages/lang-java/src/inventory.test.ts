@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { FrameworkProfile, TestInventory, TestCase } from '@testwitness/core';
 import { javaFrontEnd, buildJavaInventory } from './index.js';
 import type { JavaTestTiming } from './index.js';
+const TIMING_OFF = process.env['TESTWITNESS_TIMING'] === 'off'; // Stryker instruments the code under test, so wall clock budgets do not apply there
 
 const profile: FrameworkProfile = { frameworks: new Set(), extraAssertions: [] };
 
@@ -847,7 +848,7 @@ final class Checks {
     expect(i.tests).toHaveLength(300);
     expect(i.tests[299]!.qualifiedName).toBe('BigTest#test299');
     expect(i.tests[299]!.assertions).toHaveLength(2);
-    expect(ms).toBeLessThan(1000);
+    expect(ms).toBeLessThan(TIMING_OFF ? Number.POSITIVE_INFINITY : 1000);
   });
 
   it('duplicate method names in different classes get distinct qualified names', async () => {
