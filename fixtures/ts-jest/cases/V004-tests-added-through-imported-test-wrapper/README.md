@@ -1,0 +1,1 @@
+Negative. The tests are declared through testWithVmEsm, a wrapper of test imported from a shared test utility module. The PR adds one test through it and says so. A call to an imported function named test or it plus a capitalised suffix, with a title and a function, declares a test. Seen in a replay of public PRs on Jest. Nothing fires.
