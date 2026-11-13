@@ -90,6 +90,63 @@ describe('W006 gate weakened', () => {
   });
 });
 
+describe('W006 agent hook config', () => {
+  const hookLine = '            "command": "testwitness hook --agent claude",';
+  const run = async (files: ChangedFile[], base: Record<string, string> = {}, head: Record<string, string> = {}) => {
+    const { W006 } = await import('./W.js');
+    const ctx = ctxWith(...files);
+    ctx.readBase = async (p) => base[p];
+    ctx.readHead = async (p) => head[p];
+    return (await W006.run(ctx, {})).map((f) => [f.severity, f.label, f.location.path, f.message]);
+  };
+
+  it('reports a change that removes or edits the testwitness hook, in each agent\'s file', async () => {
+    for (const path of ['.claude/settings.json', '.claude/settings.local.json', '.cursor/hooks.json', '.codex/hooks.json', '.codex/config.toml']) {
+      const out = await run([file(path, 'other', [], [hookLine])], { [path]: `{\n${hookLine}\n}` }, { [path]: '{}' });
+      expect(out, path).toEqual([['high', 'maintainer only', path, `${path} was modified; it holds the testwitness agent hook config, and a change to it needs a maintainer acknowledgement`]]);
+    }
+  });
+
+  it('reports a deleted hook config, a renamed one, and one the change adds', async () => {
+    const deleted = { ...file('.cursor/hooks.json', 'other', [], [hookLine]), status: 'deleted' as const };
+    expect(await run([deleted], { '.cursor/hooks.json': hookLine })).toHaveLength(1);
+    const renamed = { ...file('config/old-hooks.json', 'other', []), status: 'renamed' as const, oldPath: '.codex/hooks.json' };
+    renamed.hunks = [];
+    expect(await run([renamed], { '.codex/hooks.json': hookLine }, { 'config/old-hooks.json': hookLine })).toHaveLength(1);
+    const added = { ...file('.claude/settings.json', 'other', [hookLine]), status: 'added' as const };
+    expect((await run([added], {}, { '.claude/settings.json': hookLine }))[0]![3]).toContain('.claude/settings.json was added');
+  });
+
+  it('reports an edit elsewhere in a file that holds the hook, with no testwitness line in the diff', async () => {
+    const f = file('.claude/settings.json', 'other', ['  "disableAllHooks": true,']);
+    expect(await run([f], { '.claude/settings.json': hookLine }, { '.claude/settings.json': `"disableAllHooks": true,\n${hookLine}` })).toHaveLength(1);
+  });
+
+  it('reports a new agent settings file next to an installed hook (it can turn every hook off)', async () => {
+    const local = { ...file('.claude/settings.local.json', 'other', ['  "disableAllHooks": true']), status: 'added' as const };
+    const out = await run([local], { '.claude/settings.json': hookLine }, { '.claude/settings.local.json': '{ "disableAllHooks": true }' });
+    expect(out).toEqual([['high', 'maintainer only', '.claude/settings.local.json', '.claude/settings.local.json was added; it holds agent hook settings next to the testwitness agent hook, and a change to it needs a maintainer acknowledgement']]);
+  });
+
+  it('says nothing about agent settings in a repository that does not use the hook, or about other files', async () => {
+    const f = file('.claude/settings.json', 'other', ['  "model": "opus"'], ['  "model": "sonnet"']);
+    expect(await run([f], { '.claude/settings.json': '{ "model": "sonnet" }' }, { '.claude/settings.json': '{ "model": "opus" }' })).toEqual([]);
+    expect(await run([file('docs/claude/settings.json', 'other', [hookLine]), file('.cursor/mcp.json', 'other', ['testwitness mcp'])])).toEqual([]);
+  });
+
+  it('gives the hook config and .testwitness.yml different fingerprints per status', async () => {
+    const { W006 } = await import('./W.js');
+    const mk = async (status: ChangedFile['status']) => {
+      const ctx = ctxWith({ ...file('.codex/hooks.json', 'other', [hookLine]), status });
+      ctx.readHead = async () => hookLine;
+      ctx.readBase = async () => hookLine;
+      return (await W006.run(ctx, {}))[0]!.fingerprint;
+    };
+    expect(await mk('added')).not.toBe(await mk('modified'));
+    expect(await mk('modified')).toBe(await mk('modified'));
+  });
+});
+
 describe('W002 continue-on-error', () => {
   const wf = `jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v5\n      - name: Unit tests\n        continue-on-error: true\n        run: ./gradlew test\n      - name: Upload\n        continue-on-error: true\n        run: ./upload.sh\n  e2e:\n    continue-on-error: true\n    runs-on: ubuntu-latest\n    steps:\n      - run: npx playwright test\n`;
   it('reports the test step and the test job, not the upload step', async () => {
