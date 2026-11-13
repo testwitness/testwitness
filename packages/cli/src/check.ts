@@ -13,6 +13,9 @@ import {
   mergeBase,
   revParse,
   ConfigError,
+  readCoverageFiles,
+  toCoverageEvidence,
+  type CoverageEvidence,
   type Evidence,
   type PullRequestText,
   type Report,
@@ -26,6 +29,8 @@ export interface CheckOptions {
   base: string;
   head: string;
   junit?: string | undefined;
+  /** Comma separated globs of lcov, Cobertura or JaCoCo reports; default from config coverage.paths. */
+  coverage?: string | undefined;
   /** Path to .testwitness.yml; default reads it from the base ref, then the working tree. */
   config?: string | undefined;
   format: 'json' | 'markdown' | 'both';
@@ -97,10 +102,25 @@ export async function loadEvidence(cwd: string, globs: string, log: (s: string) 
   return { evidence: toEvidence(data), notes };
 }
 
+export async function loadCoverage(cwd: string, globs: string, log: (s: string) => void): Promise<CoverageEvidence | undefined> {
+  const patterns = globs.split(',').map((s) => s.trim()).filter(Boolean);
+  if (!patterns.length) return undefined;
+  const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
+  if (!files.length) {
+    log(`no coverage report matched ${globs}`);
+    return undefined;
+  }
+  const data = await readCoverageFiles(files.sort(), cwd);
+  for (const w of data.warnings.slice(0, 10)) log(w);
+  if (!data.sources.length) return undefined;
+  return toCoverageEvidence(data);
+}
+
 export async function check(opts: CheckOptions): Promise<CheckResult> {
   const log = opts.log ?? ((s: string) => { if (!opts.quiet) process.stderr.write(`testwitness: ${s}\n`); });
   const config = await loadConfig(opts);
   const { evidence, notes } = await loadEvidence(opts.cwd, opts.junit ?? config.junit.head, log);
+  const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log);
   let prText: PullRequestText | undefined;
   if (opts.prTitle !== undefined || opts.prBodyFile || opts.prBody !== undefined) {
     const body = opts.prBody ?? (opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '');
@@ -114,6 +134,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     config,
     evidence,
     evidenceNotes: notes,
+    coverage,
     prText,
     ...(opts.author ? { author: { login: opts.author, type: opts.authorType } } : {}),
     ...(opts.helperIndex === false || process.env['TESTWITNESS_HELPER_INDEX'] === 'off' ? { helperIndex: false as const } : {}),

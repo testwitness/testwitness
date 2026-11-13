@@ -1,0 +1,5 @@
+[project]
+name = "app"
+
+[tool.pytest.ini_options]
+addopts = "-q --cov=app --cov-fail-under=90"

@@ -9,6 +9,9 @@ inputs:
     description: Comma separated globs of JUnit XML files written by the test job
     required: false
     default: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml"
+  coverage:
+    description: Comma separated globs of lcov, Cobertura or JaCoCo coverage reports from the head run (optional; enables V008)
+    required: false
   base:
     description: Base ref or sha (default is the pull request base)
     required: false

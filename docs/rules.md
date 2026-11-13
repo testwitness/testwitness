@@ -248,6 +248,49 @@ The test command or runner config now rewrites snapshots on every run (jest -u, 
 +    "test": "jest -u",
 ```
 
+## C001 Test selection narrowed in config
+
+Default severity: high. Since 0.1.0. Languages: all. Needs: diff, config.
+
+Runner configuration now selects fewer tests. pytest addopts gaining --ignore, --ignore-glob, --deselect or -k, testpaths narrowed, norecursedirs grown; Jest testPathIgnorePatterns or modulePathIgnorePatterns grown, testMatch or testRegex narrowed; Vitest test.include narrowed or test.exclude grown; Mocha spec narrowed or ignore grown in .mocharc; Playwright testIgnore grown or testMatch narrowed; Surefire or Failsafe <excludes> or <excludedGroups> grown, <includes> narrowed; Gradle test exclude(...), filter excludeTestsMatching, useJUnitPlatform excludeTags (and excludeCategories, excludeGroups) grown; TestNG suite <exclude> grown; junit.jupiter.conditions.deactivate set in junit-platform.properties (medium). Path patterns are matched against the test files of the head tree and the finding names how many it drops. Test tasks disabled outright (<skipTests>, <skip>, test { enabled = false }) are reported by W003.
+
+**False positive controls.** An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high.
+
+```diff
+   testPathIgnorePatterns: [
+     "/node_modules/",
++    "<rootDir>/src/payments/",
+   ],
+```
+
+## C002 Coverage threshold lowered or removed
+
+Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, config.
+
+A coverage gate got weaker: a threshold was lowered (medium) or removed (high). Read as config text and compared as numbers between base and head: Jest coverageThreshold (jest.config.*, package.json jest), Vitest coverage.thresholds, nyc check-coverage values (.nycrc, package.json nyc), pytest --cov-fail-under in addopts (pytest.ini, setup.cfg, tox.ini, pyproject.toml), coverage.py fail_under (.coveragerc, [coverage:report], [tool.coverage.report]), JaCoCo limits in pom.xml and Gradle violationRules, Kover minBound and minValue, codecov.yml target and threshold, and .coveralls.yml thresholds. For an allowed drop (codecov threshold, a JaCoCo maximum, a coveralls decrease threshold) a higher value is the weaker one.
+
+**False positive controls.** A threshold moved to another file in the same PR (or to another setting in the same file, such as --cov-fail-under to fail_under) with the same or a stricter value is silent. A new project with its own threshold is not a lowering, because only settings present in the base are compared. Removing an allowed drop (codecov threshold) is stricter and is not reported. Values that are not literal numbers (codecov auto, a variable) are not read.
+
+```diff
+   coverageThreshold: {
+-    global: { lines: 90, branches: 80 },
++    global: { lines: 70, branches: 80 },
+   },
+```
+
+## C003 Passing with no tests enabled
+
+Default severity: high. Since 0.1.0. Languages: all. Needs: diff, config, workflow.
+
+A test command, script, workflow or runner config now passes when no test is found: --passWithNoTests or passWithNoTests: true (Jest, Vitest), Playwright --pass-with-no-tests, Surefire or Failsafe <failIfNoTests>false</failIfNoTests> or -DfailIfNoTests=false, Gradle failOnNoDiscoveredTests = false or filter.failOnNoMatchingTests = false, pytest --suppress-no-test-exit-code. A typo in a path or a filter then turns the whole test run into a green no op.
+
+**False positive controls.** The same setting already present anywhere in the base version of the file is silent, and so is a line that only moved within the file. Commented out lines are ignored.
+
+```diff
+-    "test": "jest",
++    "test": "jest --passWithNoTests",
+```
+
 ## V003 Changed test did not run
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast, junit.
@@ -294,4 +337,16 @@ The attached results contain failures or errors and the PR text claims the tests
 
 ```diff
 PR body: "all tests pass". junit.xml: 3 failures.
+```
+
+## V008 Changed production lines not executed
+
+Default severity: low. Since 0.1.0. Languages: all. Needs: diff, coverage.
+
+Coverage reports of the head run (lcov, Cobertura such as coverage.py coverage.xml, JaCoCo XML; the coverage input, --coverage or coverage.paths) say that lines this PR added or changed in a production file were instrumented but never executed by any test. One finding per file with the count and the first three line numbers, label uncovered change. Nothing is reported when no coverage report is attached.
+
+**False positive controls.** Only lines the coverage tool instrumented count, so comments, blank lines, declarations and files missing from the report are never reported. Reports from a partial run (one matrix leg, a sharded suite) under count execution; attach every shard. At most 200 changed production files are checked and at most 200 report files or 50 MB of coverage data are read.
+
+```diff
+src/billing/refund.py: 4 changed lines never executed by the tests (lines 42, 43, 57 and 1 more).
 ```

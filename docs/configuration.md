@@ -16,6 +16,10 @@ paths:
     - "**/generated/**"
 junit:
   head: "**/junit*.xml"
+coverage:
+  paths:                # lcov, Cobertura or JaCoCo XML of the head run; empty: V008 is off
+    - "coverage/lcov.info"
+    - "**/jacoco.xml"
 assertions:
   extra:                # helpers outside the scanned support files, or without an assertion inside
     - "assert_ledger_balanced"

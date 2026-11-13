@@ -93,6 +93,11 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
     lines.push(`- Read ${e.sources.length} result file${e.sources.length === 1 ? '' : 's'}: ${e.total} tests, ${e.passed} passed, ${e.failed} failed, ${e.errored} errored, ${e.skipped} skipped${e.flaky ? `, ${e.flaky} flaky` : ''}`);
   }
   for (const n of e.notes) lines.push(`- ${esc(n)}`);
+  const c = report.coverage;
+  if (c) {
+    lines.push(`- Coverage: ${c.sources.length} report${c.sources.length === 1 ? '' : 's'}, ${c.files} source file${c.files === 1 ? '' : 's'}, ${c.linesExecuted} of ${c.linesInstrumented} instrumented lines executed`);
+    for (const n of c.notes) lines.push(`- ${esc(n)}`);
+  }
   lines.push('');
 
   const hi = report.helperIndex;

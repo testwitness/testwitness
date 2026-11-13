@@ -4,6 +4,8 @@
  *   head/   files after the PR; a file present in base and absent in head is a deletion
  *   expected.json  [{ ruleId, severity?, subject?, label? }]
  *   pr.json (optional) { title, body }
+ *   junit/ (optional)    JUnit XML of the head run
+ *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
  */
@@ -29,6 +31,7 @@ export interface GoldenCase {
   expected: ExpectedFinding[];
   pr?: { title: string; body: string };
   junit?: string;
+  coverage?: string;
 }
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'fixture', GIT_AUTHOR_EMAIL: 'fixture@testwitness.local', GIT_COMMITTER_NAME: 'fixture', GIT_COMMITTER_EMAIL: 'fixture@testwitness.local' };
@@ -50,6 +53,7 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       const prPath = join(dir, 'pr.json');
       if (existsSync(prPath)) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
       if (existsSync(join(dir, 'junit'))) c.junit = join(dir, 'junit');
+      if (existsSync(join(dir, 'coverage'))) c.coverage = join(dir, 'coverage');
       if (!filter || filter(c)) out.push(c);
     }
   }
@@ -112,8 +116,9 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       cwd: repo,
       base: baseSha,
       head: headSha,
-      // A glob, not a path: always forward slashes, also on Windows.
+      // Globs, not paths: always forward slashes, also on Windows.
       junit: c.junit ? `${c.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
+      coverage: c.coverage ? `${c.coverage.split(sep).join('/')}/**/*` : '',
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,

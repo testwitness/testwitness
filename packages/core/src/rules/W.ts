@@ -4,7 +4,7 @@ import { makeFinding } from './util.js';
 const RULE_SINCE = '0.1.0';
 
 /** Files whose added lines may carry a test command. */
-function isCommandFile(f: ChangedFile): boolean {
+export function isCommandFile(f: ChangedFile): boolean {
   if (f.kind === 'ci-workflow') return true;
   const base = f.path.split('/').pop() ?? f.path;
   return (
