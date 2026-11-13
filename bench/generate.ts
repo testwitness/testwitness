@@ -620,3 +620,6 @@ export const SIZES: Record<SizeName, Omit<GenerateOptions, 'dir'>> = {
 export function generatorHash(opts: Omit<GenerateOptions, 'dir'>, source: string): string {
   return createHash('sha256').update(JSON.stringify(opts)).update(source.replace(/\r\n/g, '\n')).digest('hex').slice(0, 16);
 }
+
+/** A 20 file repository for tests that need a realistic generated PR without the benchmark's cost. Not a benchmark size. */
+export const SMALL: Omit<GenerateOptions, 'dir'> = sizeOptions(20, 2);
