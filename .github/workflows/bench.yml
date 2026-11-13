@@ -1,15 +1,66 @@
 name: bench
+
+# Three PR sizes (100, 1,000 and 5,000 changed files) on three operating systems, with the budget enforced:
+#   100 files under 5 s, 1,000 under 30 s, 5,000 under 120 s (median wall of 3 runs), peak RSS under 1.5 GB,
+#   and generating the 5,000 file repository must not take longer than checking it.
+# Runner minutes: ubuntu on every matching pull request; windows and macos on push to main, on manual
+# dispatch, and on pull requests that carry the label "bench".
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'packages/**'
+      - 'bench/**'
+      - '.github/workflows/bench.yml'
+  push:
+    branches: [main]
   workflow_dispatch:
-  schedule:
-    # Mondays 04:17 UTC
-    - cron: '17 4 * * 1'
+    inputs:
+      runs:
+        description: Runs per size (the median is checked against the budget)
+        type: number
+        default: 3
+
+concurrency:
+  group: bench-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  bench:
+  plan:
+    name: plan
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Pick the operating systems
+        id: matrix
+        env:
+          EVENT: ${{ github.event_name }}
+          HAS_BENCH_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'bench') }}
+        run: |
+          if [ "$EVENT" = "pull_request" ] && [ "$HAS_BENCH_LABEL" != "true" ]; then
+            echo 'matrix={"os":["ubuntu-latest"]}' >> "$GITHUB_OUTPUT"
+            echo "Pull request without the bench label: ubuntu only." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'matrix={"os":["ubuntu-latest","windows-latest","macos-latest"]}' >> "$GITHUB_OUTPUT"
+          fi
+
+  bench:
+    name: bench (${{ matrix.os }})
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -19,8 +70,21 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm tsc -b
+      - name: Choose the generated repository directory
+        run: echo "BENCH_WORK=$RUNNER_TEMP/testwitness-bench" >> "$GITHUB_ENV"
+
+      # The generated repositories depend only on bench/generate.ts, so the key is its hash. A hit skips
+      # generation (the 5,000 file case writes about 1 GB of XML); bench/run.ts re-checks the hash itself.
+      - name: Restore generated repositories
+        id: gen-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/testwitness-bench
+          key: bench-gen-${{ runner.os }}-${{ hashFiles('bench/generate.ts') }}
+
       - name: Pick a network sandbox for the check step
         id: sandbox
+        if: runner.os == 'Linux'
         run: |
           if unshare -rn true 2>/dev/null; then
             echo "prefix=unshare -rn" >> "$GITHUB_OUTPUT"
@@ -32,19 +96,40 @@ jobs:
             echo "prefix=" >> "$GITHUB_OUTPUT"
             echo "sandbox: none available, the check step ran with network access" >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: Benchmark (large under 30 s, small under 5 s, median of 3)
+
+      - name: Benchmark (100 under 5 s, 1,000 under 30 s, 5,000 under 120 s, RSS under 1.5 GB)
+        env:
+          BENCH_PREFIX: ${{ steps.sandbox.outputs.prefix }}
+          BENCH_RUNS: ${{ inputs.runs || 3 }}
         run: |
-          pnpm bench --no-build --enforce --prefix "${{ steps.sandbox.outputs.prefix }}" | tee bench-output.txt
-          {
-            echo '```'
-            grep -A4 '^| case' bench-output.txt
-            grep '^machine:' bench-output.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -o pipefail
+          mkdir -p bench-out
+          pnpm bench --no-build --reuse --enforce \
+            --runs "$BENCH_RUNS" \
+            --out "bench-out/results-$RUNNER_OS.json" \
+            --summary "bench-out/summary-$RUNNER_OS.md" | tee "bench-out/output-$RUNNER_OS.txt"
+
+      # Saved even when a budget failed, so the next run does not generate again. BENCH_PREFIX and BENCH_WORK
+      # reach bench/run.ts through the environment: an empty command line argument does not survive pnpm on Windows.
+      - name: Save generated repositories
+        if: always() && steps.gen-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/testwitness-bench
+          key: bench-gen-${{ runner.os }}-${{ hashFiles('bench/generate.ts') }}
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f "bench-out/summary-$RUNNER_OS.md" ]; then
+            cat "bench-out/summary-$RUNNER_OS.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No benchmark summary was written, see the step log." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bench-results
-          path: |
-            bench/results.json
-            bench-output.txt
+          name: bench-results-${{ runner.os }}
+          path: bench-out/
+          if-no-files-found: warn
