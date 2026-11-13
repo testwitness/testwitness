@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -42,7 +42,7 @@ jobs:
           MAJOR="${GITHUB_REF_NAME%%.*}"
           git tag -f "$MAJOR"
           git push -f origin "${GITHUB_REF_NAME}" "$MAJOR"
-      - uses: actions/attest-build-provenance@v2
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/index.js
       # Bundles packages/cli, packs it, installs the tarball with plain npm and runs a check.
@@ -57,6 +57,6 @@ jobs:
             npm publish --provenance --access public
           fi
       - name: GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
