@@ -148,7 +148,7 @@ try {
     { jsonrpc: '2.0', method: 'notifications/initialized' },
     { jsonrpc: '2.0', id: 2, method: 'tools/list' },
   ];
-  const mcp = spawnSync(bin, ['mcp'], { input: rpc.map((m) => JSON.stringify(m)).join('\n') + '\n', encoding: 'utf8', env: cleanEnv, timeout: 30_000 });
+  const mcp = spawnSync(bin, [binJs, 'mcp'], { input: rpc.map((m) => JSON.stringify(m)).join('\n') + '\n', encoding: 'utf8', env: cleanEnv, timeout: 30_000 });
   const replies = mcp.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const tools = (replies.find((r) => r.id === 2)?.result?.tools ?? []).map((t) => t.name).sort();
   process.stdout.write(`testwitness mcp tools: ${tools.join(', ')}\n`);
@@ -160,7 +160,7 @@ try {
   writeFileSync(join(repo, 'src/math.ts'), 'export const add = (a: number, b: number) => a + b;\nexport const sub = (a: number, b: number) =>\n  a - b;\n');
   gitIn('commit', '-q', '-am', 'add sub');
   writeFileSync(join(work, 'lcov.info'), 'SF:src/math.ts\nDA:1,3\nDA:2,0\nDA:3,0\nend_of_record\n');
-  const cov = spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--coverage', join(work, 'lcov.info'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  const cov = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--coverage', join(work, 'lcov.info'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
   const covReport = cov.status === 0 ? JSON.parse(cov.stdout) : undefined;
   const v008 = covReport?.findings.find((f) => f.ruleId === 'V008');
   if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
@@ -171,12 +171,12 @@ try {
   writeFileSync(join(repo, 'src/shipping.ts'), readFileSync(join(mutCase, 'head/src/shipping.ts'), 'utf8'));
   gitIn('add', '-A');
   gitIn('commit', '-q', '-m', 'shipping fee');
-  const mut = spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--mutation', join(mutCase, 'mutation/mutation.json'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  const mut = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--mutation', join(mutCase, 'mutation/mutation.json'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
   const mutReport = mut.status === 0 ? JSON.parse(mut.stdout) : undefined;
   const m001 = mutReport?.findings.find((f) => f.ruleId === 'M001');
   if (m001?.label === 'measured weak' && m001.location?.path === 'src/shipping.ts' && mutReport.mutation?.mutants === 18) ok(`--mutation read the Stryker report and M001 reported: ${m001.message}`);
   else fail(`--mutation did not produce M001 and a mutation section (exit ${mut.status}, stderr ${mut.stderr.trim()})`);
-  const plan = spawnSync(bin, ['mutate-plan', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json'], { encoding: 'utf8', env: cleanEnv });
+  const plan = spawnSync(bin, [binJs, 'mutate-plan', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json'], { encoding: 'utf8', env: cleanEnv });
   const planJson = plan.status === 0 ? JSON.parse(plan.stdout) : undefined;
   if (planJson?.stryker?.mutate?.includes('src/shipping.ts:1-10')) ok(`mutate-plan planned ${planJson.stryker.mutate.join(', ')}`);
   else fail(`mutate-plan did not plan src/shipping.ts (exit ${plan.status}, stderr ${plan.stderr.trim()})`);
@@ -184,7 +184,7 @@ try {
   // 4g. --history-out writes a run history and --history reads it back
   writeFileSync(join(work, 'junit.xml'), '<testsuite name="s"><testcase classname="tests.test_math" name="test_adds"/><testcase classname="tests.test_math" name="test_negatives"><failure/></testcase></testsuite>');
   const historyPath = join(work, 'history.json');
-  const hist = (id, extra) => spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  const hist = (id, extra) => spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });
   hist('1', []);
   const h2 = hist('2', ['--history', historyPath]);
   const h2Report = h2.status === 0 ? JSON.parse(h2.stdout) : undefined;
@@ -209,7 +209,7 @@ try {
     if (side === 'base') gitTap('checkout', '-q', '-b', 'change');
   }
   const tapCheck = (flag, file) => {
-    const r = spawnSync(bin, ['check', '--cwd', tapRepo, '--base', 'main', '--format', 'json', flag, file, '--quiet'], { encoding: 'utf8', env: cleanEnv });
+    const r = spawnSync(bin, [binJs, 'check', '--cwd', tapRepo, '--base', 'main', '--format', 'json', flag, file, '--quiet'], { encoding: 'utf8', env: cleanEnv });
     return r.status === 0 ? JSON.parse(r.stdout) : { error: `exit ${r.status}, stderr ${r.stderr.trim()}` };
   };
   const tapMissing = tapCheck('--results', join(tapCase('V003-tap-modified-test-missing'), 'results/results.tap'));
