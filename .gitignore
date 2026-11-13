@@ -24,3 +24,4 @@ bench/.prof/
 packages/cli/LICENSE
 packages/cli/README.md
 bench/.prof/
+bench-out/
