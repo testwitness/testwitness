@@ -1,0 +1,1 @@
+Medium. Counter case for R001-near-duplicate-removed: the deleted test has the same shape as the test that stays but passes another content type and expects another header value. It checks a different input, so it is not a near duplicate and the deletion stays medium.

@@ -17,7 +17,7 @@ import { inventoryKeys } from '../evidence/normalise.js';
 import { HISTORY_RECENT, lookupHistory, type HistoryDocument, type HistoryStats } from '../history/history.js';
 
 /** Labels that mean the rule found the test still runs somewhere, or only some of it stopped running. */
-const EXCUSED = new Set(['moved', 'parameterised', 'rewritten', 'replaced', 'refactored', 'production removed', 'version dropped', 'conditional', 'one case', 'partial results']);
+const EXCUSED = new Set(['moved', 'parameterised', 'rewritten', 'replaced', 'refactored', 'production removed', 'version dropped', 'near duplicate removed', 'conditional', 'one case', 'partial results']);
 
 export const HIDES_FAILURE_RULES = new Set(['R001', 'R003', 'R004']);
 

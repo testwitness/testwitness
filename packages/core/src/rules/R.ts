@@ -1,7 +1,7 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
 import { stripChecklist, stripNonProse } from '../evidence/claims.js';
-import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, removedSubjectOf, subjectRemoved, versionGated, type HeadIndex } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, nearDuplicateOf, removedSubjectOf, subjectRemoved, versionGated, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -43,10 +43,10 @@ export const R001: Rule = {
   docs: {
     summary: 'A test present in the base is absent in the head and no test with the same body exists elsewhere in the head tree.',
     falsePositives:
-      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Reported low with the label production removed when its production file was deleted, or when a class or function the test names was removed from a production file that stays (and is defined in no other changed file). Reported low with the label version dropped when the test was gated on a language version (skipif on sys.version_info, process.versions, @EnabledOnJre) and the PR raises the minimum version (requires-python, python_requires, engines.node, the Java release). Precision over recall: a deletion is medium or high only when none of those signals is present.',
+      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Reported low with the label production removed when its production file was deleted, or when a class or function the test names was removed from a production file that stays (and is defined in no other changed file). Reported low with the label near duplicate removed when a test that stays in the same file or in another changed test file contains the deleted test token for token (whitespace, comments and the test names ignored, string literals compared without letter case, at most one literal differing only in case) and is at most half as long again: the same setup and checks still run. A deleted test that differs in any identifier, number or literal value, or is shorter than 25 tokens, is not a near duplicate. Reported low with the label version dropped when the test was gated on a language version (skipif on sys.version_info, process.versions, @EnabledOnJre) and the PR raises the minimum version (requires-python, python_requires, engines.node, the Java release). Precision over recall: a deletion is medium or high only when none of those signals is present.',
     example: '-  @Test\n-  void rejectsNegativeAmount() {\n-    assertThrows(IllegalArgumentException.class, () -> svc.charge(-1));\n-  }',
     history:
-      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored, production removed or version dropped are left alone, because the test still runs somewhere or only partly stopped running.',
+      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored, production removed, version dropped or near duplicate removed are left alone, because the test still runs somewhere or only partly stopped running.',
   },
   async run(ctx) {
     const out: Finding[] = [];
@@ -176,6 +176,18 @@ export const R001: Rule = {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} only ran on a language version this PR stops supporting`, {
             label: 'version dropped',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // A redundant copy: a test that stays runs the same code and the same checks (perhaps a few more).
+      const twin = await nearDuplicateOf(ctx, pair.file.path, t, pair.file.language);
+      if (twin) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted; ${twin.test.qualifiedName}${twin.path === pair.file.path ? '' : ` in ${twin.path}`} still runs the same code and checks`, {
+            label: 'near duplicate removed',
             line: t.startLine,
             snippet: snippet(t),
           }),
