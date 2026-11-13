@@ -1,7 +1,7 @@
 import type { Assertion, CallSite, ChangedFile, Finding, Rule, Severity, TestCase } from '../types.js';
 import { meaningOf, RANK, relatedSubjects } from '../assertion-meaning.js';
 import type { Meaning } from '../assertion-meaning.js';
-import { allChanges, lower } from '../inventory.js';
+import { allChanges, isNonOracleCall, lower } from '../inventory.js';
 import { changedProductionStems, makeFinding, exercisesChangedProduction } from './util.js';
 
 const RULE_SINCE = '0.1.0';
@@ -20,15 +20,6 @@ function mentionsChangedProduction(text: string, stems: Set<string>): boolean {
   const lower = text.toLowerCase();
   for (const s of stems) if (s.length >= 3 && lower.includes(s)) return true;
   return false;
-}
-
-/** Receivers and names of calls that print, log or wait. They never stand in for an assertion. */
-const NON_ORACLE_ROOTS = new Set(['console', 'logging', 'logger', 'log', 'LOG', 'LOGGER', 'Logger', 'System', 'warnings', 'time', 'Thread']);
-const NON_ORACLE_NAMES = new Set(['print', 'pprint', 'println', 'printf', 'printStackTrace', 'breakpoint', 'sleep', 'debugger']);
-
-function isNonOracleCall(c: CallSite): boolean {
-  const root = c.callee.split(/[.(]/, 1)[0] ?? '';
-  return NON_ORACLE_ROOTS.has(root) || NON_ORACLE_NAMES.has(c.name);
 }
 
 /**
@@ -55,7 +46,7 @@ export const A001: Rule = {
   docs: {
     summary: 'A modified test lost one or more assertions and gained no replacement on the same subject.',
     falsePositives:
-      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll) is reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper in the same file are still counted. When the test gained at least as many new call statements as it lost assertions (a callee name not called anywhere in the base body, not a print, log or sleep call), the assertions were probably replaced by a helper defined elsewhere, such as result.did_create(path): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.',
+      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll) is reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.',
     example: '   expect(res.status).toBe(200);\n-  expect(res.body.total).toBe(1250);\n-  expect(ledger.entries).toHaveLength(2);',
   },
   run(ctx) {

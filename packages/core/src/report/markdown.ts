@@ -95,6 +95,23 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
   for (const n of e.notes) lines.push(`- ${esc(n)}`);
   lines.push('');
 
+  const hi = report.helperIndex;
+  if (hi && (hi.resolved.length || hi.warnings.length)) {
+    lines.push('**Helpers in other files**');
+    lines.push('');
+    for (const w of hi.warnings) lines.push(`- ${esc(w)}`);
+    if (hi.resolved.length) {
+      lines.push('<details>');
+      lines.push(`<summary>${hi.resolved.length} call${hi.resolved.length === 1 ? '' : 's'} counted as assertions through helpers defined in other files</summary>`);
+      lines.push('');
+      for (const r of hi.resolved.slice(0, 50)) lines.push(`- ${esc(r.test)} (${esc(r.path)}:${r.line}): counted via helper ${esc(r.helper)} in ${esc(r.definedIn)}:${r.definedLine}`);
+      if (hi.resolved.length > 50) lines.push(`- ${hi.resolved.length - 50} more in the JSON report`);
+      lines.push('');
+      lines.push('</details>');
+    }
+    lines.push('');
+  }
+
   if (report.provenance.agents.length || report.provenance.botAuthor) {
     lines.push('**Provenance**');
     lines.push('');

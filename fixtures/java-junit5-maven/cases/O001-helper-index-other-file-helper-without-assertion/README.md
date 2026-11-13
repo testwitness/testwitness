@@ -1,0 +1,1 @@
+Positive. The new test printsTwoLines ends with CartPrinter.dump(cart), defined in src/test/java/com/example/support/CartPrinter.java, which this PR does not touch. The helper index finds dump, but its body contains no assertion and calls no helper that asserts. The call is not counted and O001 still reports the test low.

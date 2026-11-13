@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "O001",
+    "severity": "low",
+    "subject": "test_receipt_of_two_lines"
+  }
+]

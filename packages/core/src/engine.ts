@@ -24,6 +24,9 @@ import { applyConfiguredSeverity, effectiveSeverity, SEVERITY_RANK } from './con
 import { fingerprint as makeFingerprint } from './hash.js';
 import { builtinRules } from './rules/index.js';
 import { detectProvenance } from './provenance.js';
+import { HelperIndex, namesToIndex, resolveHelperCalls, secondLevelNames } from './helper-index.js';
+import { diffInventories } from './inventory.js';
+import type { HelperIndexSummary, TestCase } from './types.js';
 
 /** $id of docs/report.schema.json, the JSON Schema of the report. */
 export const REPORT_SCHEMA = 'https://testwitness.github.io/testwitness/report.schema.json';
@@ -46,6 +49,11 @@ export interface EngineOptions {
   author?: { login: string; type?: string | undefined } | undefined;
   /** Already resolved: skip merge base computation (used by fixtures). */
   resolved?: boolean;
+  /**
+   * Helper index over the test support files of the working tree at `cwd`. `false` turns it off; `cacheDir: false`
+   * keeps it but writes no cache. Default: on, cache under os.tmpdir().
+   */
+  helperIndex?: false | { cacheDir?: string | false };
   log?: (msg: string) => void;
 }
 
@@ -142,6 +150,47 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     pairs.push(pair);
   }
   const parseMs = performance.now() - tParse0;
+
+  // Helper index: only when a changed test calls something its own file could not resolve.
+  const tIndex0 = performance.now();
+  let helperIndex: HelperIndexSummary | undefined;
+  if (opts.helperIndex !== false) {
+    const changed: Array<{ test: TestCase; inv: TestInventory }> = [];
+    for (const pair of pairs) {
+      for (const ch of diffInventories(pair.base, pair.head)) {
+        if (ch.kind === 'added' || ch.kind === 'modified' || ch.kind === 'renamed') changed.push({ test: ch.head, inv: pair.head! });
+        if (ch.kind === 'modified' || ch.kind === 'renamed') changed.push({ test: ch.base, inv: pair.base! });
+      }
+    }
+    const names = namesToIndex(changed);
+    const headPairs = new Map(pairs.filter((p) => p.head).map((p) => [p.file.path, p]));
+    if (names.size > 0) {
+      const extensions = [...new Set(opts.frontEnds.filter((fe) => frontEndFor(fe.id)).flatMap((fe) => fe.extensions))];
+      const index = new HelperIndex({
+        cwd: opts.cwd,
+        frontEndFor: (p) => frontEndFor(classifyPath(p, undefined).language),
+        extensions,
+        ignore: opts.config.paths.ignore,
+        profile,
+        version: TOOL_VERSION,
+        ...(opts.helperIndex?.cacheDir !== undefined ? { cacheDir: opts.helperIndex.cacheDir } : {}),
+        known: async (p, src) => {
+          const pair = headPairs.get(p);
+          if (!pair?.head) return undefined;
+          return (await read(headSha, p)) === src ? pair.head : undefined;
+        },
+        log,
+      });
+      await index.ensure(names);
+      await index.ensure(secondLevelNames(index, names));
+      const resolved = resolveHelperCalls(changed, index);
+      index.save();
+      const helpers = new Set(resolved.map((r) => `${r.definedIn}:${r.helper}`));
+      helperIndex = { files: index.fileCount, parsed: index.parsedCount, cached: index.cachedCount + index.reusedCount, helpers: helpers.size, capped: index.capped, warnings: index.warnings, resolved };
+      log(`helper index: ${index.fileCount} support files, ${index.parsedCount} parsed, ${index.cachedCount} cached, ${resolved.length} calls resolved`);
+    }
+  }
+  const helperIndexMs = performance.now() - tIndex0;
 
   // Head test files, lazily listed, for move detection.
   let headTestFilesP: Promise<string[]> | undefined;
@@ -253,7 +302,8 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
       workflows: files.filter((f) => f.kind === 'ci-workflow').length,
       snapshots: files.filter((f) => f.kind === 'snapshot').length,
     },
-    timing: { totalMs: Math.round(performance.now() - t0), parseMs: Math.round(parseMs), rulesMs: Math.round(rulesMs), evidenceMs: 0 },
+    timing: { totalMs: Math.round(performance.now() - t0), parseMs: Math.round(parseMs), rulesMs: Math.round(rulesMs), evidenceMs: 0, ...(helperIndex ? { helperIndexMs: Math.round(helperIndexMs) } : {}) },
+    ...(helperIndex ? { helperIndex } : {}),
     base: baseSha,
     head: headSha,
   };

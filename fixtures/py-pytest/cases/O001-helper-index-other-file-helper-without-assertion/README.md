@@ -1,0 +1,1 @@
+Positive. The new test's only call after setup is show_receipt from tests/support.py, which this PR does not touch. The helper index finds the definition, but its body only prints and returns: no assertion, and no call to another helper that asserts. The call is not counted, so O001 still reports the test low.

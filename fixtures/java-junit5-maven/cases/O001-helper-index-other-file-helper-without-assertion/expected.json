@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "O001",
+    "severity": "low",
+    "subject": "CartTest#printsTwoLines"
+  }
+]

@@ -9,7 +9,7 @@
  */
 
 import { countParseErrors, normaliseText, parseSource, shortHash } from '@testwitness/core';
-import type { Assertion, AssertionKind, CallSite, CatchAll, FrameworkProfile, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
+import type { Assertion, AssertionKind, CallSite, CatchAll, FrameworkProfile, HelperDefinition, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
 import type { Query } from '@testwitness/core';
 import { grammarFor, grammarForPath } from './grammar.js';
 import type { GrammarId } from './grammar.js';
@@ -398,6 +398,12 @@ export function collectCalls(body: Node | undefined): CallSite[] {
   if (!body || !isFunctionNode(body)) return [];
   const inner = body.childForFieldName('body');
   if (!inner) return [];
+  return callsIn(inner, body);
+}
+
+/** Calls under `inner`, the body of the function node `fn` (an expression bodied arrow counts its body as a statement). */
+function callsIn(inner: Node, fn: Node): CallSite[] {
+  const body = fn;
   const out: CallSite[] = [];
   const record = (call: Node): void => {
     const fn = call.childForFieldName('function');
@@ -409,7 +415,7 @@ export function collectCalls(body: Node | undefined): CallSite[] {
     while (up && (up.type === 'await_expression' || up.type === 'parenthesized_expression' || up.type === 'non_null_expression')) up = up.parent;
     // An expression bodied arrow (`() => client.flush()`) is a single statement.
     const statement = up !== null && (up.type === 'expression_statement' || up.id === body.id);
-    out.push({ callee, name, line: line(call), statement });
+    out.push({ callee, name, line: line(call), statement, text: call.text.trim() });
   };
   const visit = (node: Node): void => {
     if (node.type === 'call_expression') record(node);
@@ -648,16 +654,38 @@ export async function buildInventory(path: string, source: string, profile: Fram
   const helperAssertions: Record<string, Assertion[]> = {};
   const extra = new Set(profile.extraAssertions);
   const candidates = assertionCandidates(queries.assertions, root);
+  const defAssertions = new Map<NodeId, Assertion[]>();
   for (const { stmt, expr } of candidates) {
     const scope = scopeOf(stmt);
     if (scope.kind === 'test') continue;
     const analysis = analyseAssertion(expr, extra);
     if (!analysis) continue;
-    const name = enclosingFunctionName(stmt, containers);
-    if (name && !looksLikeTestName(name)) {
+    const fn = enclosingNamedFunction(stmt, containers);
+    const name = fn ? functionName(fn) : undefined;
+    if (fn && name && !looksLikeTestName(name)) {
       assertionHelpers.add(name);
-      (helperAssertions[name] ??= []).push(toAssertion(stmt, expr, analysis));
+      const a = toAssertion(stmt, expr, analysis);
+      (helperAssertions[name] ??= []).push(a);
+      push(defAssertions, fn.id, a);
     }
+  }
+  // Every named function outside a test, for the helper index.
+  const definitions: HelperDefinition[] = [];
+  for (const fn of root.descendantsOfType([...FUNCTION_TYPES, 'function_declaration', 'generator_function_declaration'])) {
+    if (!fn || fn.parent?.type === 'arguments') continue;
+    const name = functionName(fn);
+    if (!name || looksLikeTestName(name) || !/^[A-Za-z_$][\w$]*$/.test(name)) continue;
+    if (scopeOf(fn).kind === 'test') continue;
+    const inner = fn.childForFieldName('body');
+    const def: HelperDefinition = {
+      name,
+      line: line(fn),
+      assertions: defAssertions.get(fn.id) ?? [],
+      calls: inner ? callsIn(inner, fn).filter((c) => c.statement).map((c) => c.name) : [],
+    };
+    const cls = owningClassName(fn);
+    if (cls) def.className = cls;
+    definitions.push(def);
   }
   const helperNames = new Set([...assertionHelpers, ...extra]);
 
@@ -756,6 +784,8 @@ export async function buildInventory(path: string, source: string, profile: Fram
     imports,
     fileMarkers,
     parseErrors: countParseErrors(root),
+    definitions,
+    classBases: collectClassBases(root),
   };
   tree.delete();
   return inventory;
@@ -926,23 +956,50 @@ function isCallbackOfAssertion(arrow: Node): boolean {
 }
 
 /** Resolve the name of the nearest enclosing named function that is not a test or container callback. */
-function enclosingFunctionName(node: Node, containers: Map<NodeId, Declaration>): string | undefined {
+function isAnyFunction(node: Node): boolean {
+  return isFunctionNode(node) || node.type === 'function_declaration' || node.type === 'generator_function_declaration';
+}
+
+/** The innermost named function around a node, climbing out of anonymous callbacks; undefined inside a describe or test callback. */
+function enclosingNamedFunction(node: Node, containers: Map<NodeId, Declaration>): Node | undefined {
   let cur: Node | null = node;
   while (cur) {
-    if (isFunctionNode(cur) || cur.type === 'function_declaration' || cur.type === 'generator_function_declaration') {
+    if (isAnyFunction(cur)) {
       const parent = cur.parent;
       if (parent && parent.type === 'arguments') {
         const call = parent.parent;
         if (call && containers.has(call.id)) return undefined;
         // Anonymous callback passed to something else (forEach, beforeEach): keep climbing.
-      } else {
-        const name = functionName(cur);
-        if (name) return name;
+      } else if (functionName(cur)) {
+        return cur;
       }
     }
     cur = cur.parent;
   }
   return undefined;
+}
+
+/** Class name of a method definition, or undefined. */
+function owningClassName(fn: Node): string | undefined {
+  if (fn.type !== 'method_definition') return undefined;
+  const cls = fn.parent?.parent;
+  return cls && (cls.type === 'class_declaration' || cls.type === 'class' || cls.type === 'abstract_class_declaration') ? cls.childForFieldName('name')?.text : undefined;
+}
+
+/** Superclass of each named class in the file. */
+function collectClassBases(root: Node): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  for (const cls of root.descendantsOfType(['class_declaration', 'abstract_class_declaration', 'class'])) {
+    const name = cls.childForFieldName('name')?.text;
+    if (!name) continue;
+    const heritage = cls.namedChildren.find((c) => c?.type === 'class_heritage');
+    const ext = heritage?.type === 'class_heritage' ? (heritage.namedChildren.find((c) => c?.type === 'extends_clause') ?? heritage) : undefined;
+    const value = ext?.namedChildren[0];
+    if (!value) continue;
+    const simple = value.text.replace(/<.*$/s, '').split('.').pop()?.trim();
+    if (simple && /^[A-Za-z_$][\w$]*$/.test(simple)) (out[name] ??= []).push(simple);
+  }
+  return out;
 }
 
 function functionName(fn: Node): string | undefined {

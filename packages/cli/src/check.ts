@@ -41,6 +41,8 @@ export interface CheckOptions {
   mode?: ResolvedConfig['mode'] | undefined;
   failOn?: ResolvedConfig['failOn'] | undefined;
   quiet?: boolean;
+  /** Index assertion helpers in test support files of the working tree (default true). The environment variable TESTWITNESS_HELPER_INDEX=off also turns it off. */
+  helperIndex?: boolean;
   log?: (s: string) => void;
 }
 
@@ -114,6 +116,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     evidenceNotes: notes,
     prText,
     ...(opts.author ? { author: { login: opts.author, type: opts.authorType } } : {}),
+    ...(opts.helperIndex === false || process.env['TESTWITNESS_HELPER_INDEX'] === 'off' ? { helperIndex: false as const } : {}),
     log,
   });
   return { report, exitCode: exitCodeFor(report, config), config };
