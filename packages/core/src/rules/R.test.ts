@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { R001, R002, R003, R004, R005, R006, R010 } from './R.js';
 import { changedFile, context, inventory, test as t } from './testkit.js';
-import { definedSymbols, minimumVersionRaised } from './util.js';
+import { definedSymbols, isNearDuplicate, minimumVersionRaised, testTokens } from './util.js';
 import type { ChangedFile } from '../types.js';
 
 const P = 'src/billing.test.ts';
@@ -226,3 +226,58 @@ describe('production symbols removed and version gates', () => {
   });
 });
 
+
+describe('R001 near duplicate removed', () => {
+  const kept = [
+    "  it('keeps the header with a charset', function () {",
+    '    const res = send({ type: "text/csv" });',
+    "    expect(res.headers['Content-Type']).toBe('text/csv; charset=utf-8');",
+    "    expect(res.status).toBe(200);",
+    "    expect(res.body).toBe('a,b');",
+    '  });',
+  ];
+  const copy = [
+    "  it('keeps the header', function () {",
+    "    // same request as above",
+    "    const res = send({ type: 'text/csv' })",
+    "    expect(res.headers['content-type']).toBe('text/csv; charset=utf-8')",
+    "    expect(res.status).toBe(200)",
+    '  });',
+  ];
+  const other = copy.map((l) => l.replace('200', '201'));
+  const run = async (deleted: string[]) => {
+    const keptTest = t({ name: 'keeps the header with a charset', body: 'k', line: 1 });
+    keptTest.endLine = 6;
+    const gone = t({ name: 'keeps the header', body: 'd', line: 7 });
+    gone.endLine = 12;
+    const pair = { file: changedFile(P), base: inventory(P, [keptTest, gone]), head: inventory(P, [keptTest]) };
+    const ctx = { ...context({ pairs: [pair] }), readBase: async () => [...kept, ...deleted].join('\n'), readHead: async () => kept.join('\n') };
+    return R001.run(ctx, {});
+  };
+
+  it('reports low when a test that stays contains the deleted one token for token', async () => {
+    expect(await run(copy)).toMatchObject([{ severity: 'low', label: 'near duplicate removed', subject: 'keeps the header' }]);
+  });
+
+  it('still reports medium when the deleted test differs in a value', async () => {
+    const out = await run(other);
+    expect(out).toMatchObject([{ severity: 'medium', subject: 'keeps the header' }]);
+    expect(out[0]!.label).toBeUndefined();
+  });
+
+  it('tokenises without whitespace, comments, semicolons, quote style or the test name', () => {
+    expect(testTokens("it('n', () => { f(\"a\"); // c\n})", 'typescript', 'n')).toEqual(['it', '(', ',', '(', ')', '=', '>', '{', 'f', '(', '"a', ')', '}', ')']);
+    expect(testTokens("def test_n():\n    assert f('a')  # c", 'python', 'test_n')).toEqual(['def', '(', ')', ':', 'assert', 'f', '(', '"a', ')']);
+  });
+
+  it('needs every token in order, one case only literal at most, and a kept test at most half as long again', () => {
+    const base = Array.from({ length: 30 }, (_, i) => `t${i}`);
+    expect(isNearDuplicate(base, [...base])).toBe(true);
+    expect(isNearDuplicate(base.slice(0, 20), base.slice(0, 20))).toBe(false); // too short to tell
+    expect(isNearDuplicate(base, [...base.slice(0, 29), 't99'])).toBe(false); // one identifier differs
+    expect(isNearDuplicate(base, [...base, ...Array.from({ length: 16 }, (_, i) => `x${i}`)])).toBe(false); // kept test far longer
+    const lit = [...base.slice(0, 28), '"Content-Type', '"Accept'];
+    expect(isNearDuplicate(lit, [...base.slice(0, 28), '"content-type', '"Accept'])).toBe(true);
+    expect(isNearDuplicate(lit, [...base.slice(0, 28), '"content-type', '"accept'])).toBe(false);
+  });
+});

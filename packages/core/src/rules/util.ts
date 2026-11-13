@@ -303,3 +303,87 @@ export async function versionGated(ctx: RuleContext, path: string, t: TestCase):
   if (!minimumVersionRaised(ctx)) return false;
   return VERSION_GATE.test(await baseTestText(ctx, path, t));
 }
+
+/**
+ * Tokens of a test's source for the near duplicate check: whitespace, comments and statement semicolons dropped,
+ * identifiers, numbers and punctuation kept as written, string literals reduced to their content (quote style ignored).
+ * Tokens that name the test itself (its title string or function name) are dropped, so a copy under another name still
+ * compares equal.
+ */
+export function testTokens(src: string, language: string | undefined, name: string): string[] {
+  const hash = language === 'python';
+  const re = hash
+    ? /("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|(#[^\n]*)|([A-Za-z_$][\w$]*|\d[\w.]*)|(\S)/g
+    : /("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|([A-Za-z_$][\w$]*|\d[\w.]*)|(\S)/g;
+  const out: string[] = [];
+  for (const m of src.matchAll(re)) {
+    if (m[2] !== undefined) continue;
+    if (m[1] !== undefined) {
+      const q = m[1].startsWith('"""') || m[1].startsWith("'''") ? 3 : 1;
+      const content = m[1].slice(q, -q);
+      if (content === name) continue;
+      out.push(`"${content}`);
+      continue;
+    }
+    const tok = m[3] ?? m[4]!;
+    if (tok === ';' || tok === name) continue;
+    out.push(tok);
+  }
+  return out;
+}
+
+/** Length of the longest common subsequence of two token lists, with a token comparison. */
+function lcsLength(a: string[], b: string[], same: (x: string, y: string) => boolean): number {
+  let prev = new Array<number>(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = new Array<number>(b.length + 1).fill(0);
+    for (let j = 1; j <= b.length; j++) cur[j] = same(a[i - 1]!, b[j - 1]!) ? prev[j - 1]! + 1 : Math.max(prev[j]!, cur[j - 1]!);
+    prev = cur;
+  }
+  return prev[b.length]!;
+}
+
+const foldLiteral = (t: string): string => (t.startsWith('"') ? t.toLowerCase() : t);
+
+/** Fewest tokens a deleted test needs before it can be called a near duplicate; shorter tests differ in too little. */
+export const NEAR_DUPLICATE_MIN_TOKENS = 25;
+
+/**
+ * Is the deleted test a near duplicate of `kept`: every token of the deleted test appears, in order, in the kept test
+ * (string literals compared without letter case, and at most one literal differing only in case), and the kept test is
+ * at most half as long again. The kept test then runs the same setup and the same checks, plus perhaps a few more. A
+ * deleted test that differs in any identifier, number or literal value is not a near duplicate.
+ */
+export function isNearDuplicate(deleted: string[], kept: string[]): boolean {
+  if (deleted.length < NEAR_DUPLICATE_MIN_TOKENS) return false;
+  if (kept.length < deleted.length || kept.length > deleted.length * 1.5) return false;
+  if (lcsLength(deleted, kept, (x, y) => foldLiteral(x) === foldLiteral(y)) !== deleted.length) return false;
+  return deleted.length - lcsLength(deleted, kept, (x, y) => x === y) <= 1;
+}
+
+/** Source lines of a test, with the decorators or annotations directly above it. */
+function testText(lines: string[], t: TestCase): string {
+  let start = t.startLine - 1;
+  while (start > 0 && /^\s*@/.test(lines[start - 1] ?? '')) start--;
+  return lines.slice(start, t.endLine).join('\n');
+}
+
+/**
+ * A test that stays in the head of the same file or of another changed test file and makes the deleted test redundant
+ * (see isNearDuplicate). Returns its path and the test.
+ */
+export async function nearDuplicateOf(ctx: RuleContext, path: string, t: TestCase, language: string | undefined): Promise<{ path: string; test: TestCase } | undefined> {
+  const deleted = testTokens(await baseTestText(ctx, path, t), language, t.name);
+  if (deleted.length < NEAR_DUPLICATE_MIN_TOKENS) return undefined;
+  const pairs = [...ctx.pairs].sort((a, b) => Number(b.file.path === path) - Number(a.file.path === path));
+  for (const pair of pairs) {
+    if (!pair.head || pair.file.kind !== 'test') continue;
+    const lines = ((await ctx.readHead(pair.file.path)) ?? '').split(/\r?\n/);
+    for (const h of pair.head.tests) {
+      if (pair.file.path === path && h.qualifiedName === t.qualifiedName) continue;
+      const kept = testTokens(testText(lines, h), pair.file.language, h.name);
+      if (isNearDuplicate(deleted, kept)) return { path: pair.file.path, test: h };
+    }
+  }
+  return undefined;
+}

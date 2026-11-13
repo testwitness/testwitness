@@ -663,6 +663,7 @@
         "measured weak",
         "moved",
         "narrowed",
+        "near duplicate removed",
         "nested",
         "one case",
         "override",
