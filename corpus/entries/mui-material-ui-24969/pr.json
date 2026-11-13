@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mui/material-ui/pull/24969",
+  "repo": "mui/material-ui",
+  "number": 24969,
+  "title": "[test] Remove internal icons smoke test",
+  "merged_at": "2021-02-16T17:24:57Z",
+  "stars": 99292,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "R002",
+  "split": "heldout",
+  "base_sha": "2fe9dbb6d73f72d5d0467a41081c53d1df606c78",
+  "head_sha": "3c0328317640ce3ea552d04303ecdd25c14c9920",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 44
+}

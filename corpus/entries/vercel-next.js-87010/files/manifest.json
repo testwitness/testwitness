@@ -1,0 +1,18 @@
+[
+  {
+    "path": "packages/next/src/build/turbopack-analyze/index.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/next-analyze/app/page.tsx",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-analyze/next-analyze.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-analyze/next.config.js",
+    "status": "added"
+  }
+]

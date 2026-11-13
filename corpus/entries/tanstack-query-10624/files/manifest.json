@@ -1,0 +1,26 @@
+[
+  {
+    "path": "packages/svelte-query-devtools/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/svelte-query-devtools/tests/Devtools.svelte.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "packages/svelte-query-devtools/tests/test-setup.ts",
+    "status": "added"
+  },
+  {
+    "path": "packages/svelte-query-devtools/tsconfig.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/svelte-query-devtools/vite.config.ts",
+    "status": "modified"
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "status": "modified"
+  }
+]

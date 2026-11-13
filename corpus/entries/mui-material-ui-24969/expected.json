@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/material-ui/src/internal/svg-icons/index.test.js",
+    "verdict": "tp",
+    "reason": "smoke test file deleted, icons kept"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/20155",
+  "repo": "PrefectHQ/prefect",
+  "number": 20155,
+  "title": "Add E2E auth test infrastructure and smoke test",
+  "merged_at": "2026-01-09T15:56:34Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "fixture",
+  "split": "heldout",
+  "base_sha": "e56e6be16f24ca7621229513f294b48dc3e82113",
+  "head_sha": "5da03bf63f90ebb1d337d9295843ed069b1bc23f",
+  "files_changed": 4,
+  "additions": 168,
+  "deletions": 0
+}
