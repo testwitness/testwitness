@@ -11,6 +11,16 @@
  *   mutation/ (optional) Stryker JSON or PIT mutations.xml reports of the head, as the opt in mutation job writes them
  *   history/history.json (optional) run history of earlier runs, written by the engine through
  *                         fixtures/runner/make-history.ts from history/runs.json, never by hand
+ *   CRLF (optional) write the case with Windows line endings. One directive per line, `#` starts a comment:
+ *     twin <case>       take base/, head/, expected.json, pr.json and the result, coverage, mutation and history
+ *                       inputs from that LF case of the same project (the case's own copies win when present);
+ *                       the suite then also requires the very same findings as the twin, line numbers,
+ *                       messages and fingerprints included
+ *     from <case>       take only base/ and head/ from that case (no expectations, no comparison)
+ *     sides base|head|both  which commit gets CRLF (default both); the head side also converts the PR body
+ *                       and the result, coverage, mutation and history inputs
+ *     head base         the head commit is the base files again (a PR that only converts line endings)
+ *   The temporary repository sets core.autocrlf false so git stores the CRLF bytes as written.
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
  */
@@ -40,6 +50,41 @@ export interface GoldenCase {
   coverage?: string;
   mutation?: string;
   history?: string;
+  /** Present when the case directory has a CRLF file. */
+  crlf?: CrlfMode;
+}
+
+export interface CrlfMode {
+  sides: Array<'base' | 'head'>;
+  /** Name of the LF case this case mirrors. */
+  twin?: string;
+  /** Name of a case whose base and head files this case uses, without its expectations. */
+  from?: string;
+  /** The head commit is the base files again. */
+  headIsBase: boolean;
+}
+
+/** Parse a case's CRLF file (see the header comment). */
+export function parseCrlfFile(text: string): CrlfMode {
+  const mode: CrlfMode = { sides: ['base', 'head'], headIsBase: false };
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.replace(/#.*/, '').trim();
+    if (!line) continue;
+    const [key, value] = line.split(/\s+/, 2) as [string, string | undefined];
+    if (key === 'twin' && value) mode.twin = value;
+    else if (key === 'from' && value) mode.from = value;
+    else if (key === 'sides' && (value === 'base' || value === 'head')) mode.sides = [value];
+    else if (key === 'sides' && value === 'both') mode.sides = ['base', 'head'];
+    else if (key === 'head' && value === 'base') mode.headIsBase = true;
+    else throw new Error(`CRLF: unknown directive ${JSON.stringify(line)}`);
+  }
+  return mode;
+}
+
+/** LF to CRLF for text; a buffer with a NUL byte is binary and kept as it is. */
+export function toCrlf(buf: Buffer): Buffer {
+  if (buf.includes(0)) return buf;
+  return Buffer.from(buf.toString('utf8').replace(/\r?\n/g, '\r\n'), 'utf8');
 }
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'fixture', GIT_AUTHOR_EMAIL: 'fixture@testwitness.local', GIT_COMMITTER_NAME: 'fixture', GIT_COMMITTER_EMAIL: 'fixture@testwitness.local' };
@@ -55,16 +100,29 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
     if (!existsSync(casesDir) || !statSync(casesDir).isDirectory()) continue;
     for (const name of readdirSync(casesDir).sort()) {
       const dir = join(casesDir, name);
-      const expectedPath = join(dir, 'expected.json');
-      if (!existsSync(expectedPath)) continue;
+      const crlfPath = join(dir, 'CRLF');
+      const crlf = existsSync(crlfPath) ? parseCrlfFile(readFileSync(crlfPath, 'utf8')) : undefined;
+      for (const other of [crlf?.twin, crlf?.from]) if (other && !existsSync(join(casesDir, other, 'expected.json'))) throw new Error(`${project}/${name}: CRLF names ${other}, which is not a case`);
+      // Inputs come from the case directory, then from the twin's.
+      const dirs = crlf?.twin ? [dir, join(casesDir, crlf.twin)] : [dir];
+      const find = (...rel: string[]): string | undefined => dirs.map((d) => join(d, ...rel)).find((p) => existsSync(p));
+      const expectedPath = find('expected.json');
+      if (!expectedPath && crlf) throw new Error(`${project}/${name}: a CRLF case needs expected.json or a twin`);
+      if (!expectedPath) continue;
       const c: GoldenCase = { project, name, dir, expected: JSON.parse(readFileSync(expectedPath, 'utf8')) as ExpectedFinding[] };
-      const prPath = join(dir, 'pr.json');
-      if (existsSync(prPath)) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
-      if (existsSync(join(dir, 'junit'))) c.junit = join(dir, 'junit');
-      if (existsSync(join(dir, 'results'))) c.results = join(dir, 'results');
-      if (existsSync(join(dir, 'coverage'))) c.coverage = join(dir, 'coverage');
-      if (existsSync(join(dir, 'mutation'))) c.mutation = join(dir, 'mutation');
-      if (existsSync(join(dir, 'history', 'history.json'))) c.history = join(dir, 'history', 'history.json');
+      if (crlf) c.crlf = crlf;
+      const prPath = find('pr.json');
+      if (prPath) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
+      const junit = find('junit');
+      if (junit) c.junit = junit;
+      const results = find('results');
+      if (results) c.results = results;
+      const coverage = find('coverage');
+      if (coverage) c.coverage = coverage;
+      const mutation = find('mutation');
+      if (mutation) c.mutation = mutation;
+      const history = find('history', 'history.json');
+      if (history) c.history = history;
       if (!filter || filter(c)) out.push(c);
     }
   }
@@ -78,13 +136,38 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
  * unchanged and the head commit silently drops the change (seen as flaky V003, A001 and
  * A002 failures on windows-latest). Writing gives every file a fresh mtime.
  */
-function writeTree(from: string, to: string): void {
+function writeTree(from: string, to: string, crlf = false): void {
   if (!existsSync(from)) return;
   for (const rel of listFiles(from)) {
     const target = join(to, rel);
     mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, readFileSync(join(from, rel)));
+    const bytes = readFileSync(join(from, rel));
+    writeFileSync(target, crlf ? toCrlf(bytes) : bytes);
   }
+}
+
+/** Base and head directories of a case, the twin's when the case has none of its own. */
+export function caseDirs(c: GoldenCase): { baseDir: string; headDir: string } {
+  const src = (side: string): string => {
+    const own = join(c.dir, side);
+    const other = c.crlf?.twin ?? c.crlf?.from;
+    if (existsSync(own) || !other) return own;
+    return join(dirname(c.dir), other, side);
+  };
+  const baseDir = src('base');
+  return { baseDir, headDir: c.crlf?.headIsBase ? baseDir : src('head') };
+}
+
+/** A CRLF copy of an evidence directory or file, so readers see Windows line endings too. */
+function crlfCopy(path: string | undefined, into: string, name: string): string | undefined {
+  if (!path) return undefined;
+  const target = join(into, name);
+  if (statSync(path).isDirectory()) writeTree(path, target, true);
+  else {
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, toCrlf(readFileSync(path)));
+  }
+  return target;
 }
 
 function listFiles(dir: string, base = dir): string[] {
@@ -101,11 +184,17 @@ function listFiles(dir: string, base = dir): string[] {
 /** Materialise a case into a temp repo and run the engine. Returns the report and the temp dir (caller removes). */
 export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Promise<{ report: Report; repo: string }> {
   const repo = mkdtempSync(join(tmpdir(), `tw-${c.project}-${c.name}-`));
+  const crlfBase = c.crlf?.sides.includes('base') ?? false;
+  const crlfHead = c.crlf?.sides.includes('head') ?? false;
+  // Evidence of a CRLF head is converted too, outside the repository so it is not committed.
+  const evidenceDir = crlfHead ? mkdtempSync(join(tmpdir(), `tw-ev-${c.project}-${c.name}-`)) : undefined;
   try {
     git(repo, ['init', '-q', '-b', 'main']);
-    const baseDir = join(c.dir, 'base');
-    const headDir = join(c.dir, 'head');
-    writeTree(baseDir, repo);
+    // Store the bytes as written whatever the runner's global config says (Windows images set autocrlf true).
+    git(repo, ['config', 'core.autocrlf', 'false']);
+    git(repo, ['config', 'commit.gpgsign', 'false']);
+    const { baseDir, headDir } = caseDirs(c);
+    writeTree(baseDir, repo, crlfBase);
     writeFileSync(join(repo, '.gitkeep'), '');
     git(repo, ['add', '-A']);
     git(repo, ['commit', '-q', '-m', 'base', '--allow-empty']);
@@ -113,7 +202,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
     const baseFiles = new Set(listFiles(baseDir));
     const headFiles = new Set(listFiles(headDir));
     for (const f of baseFiles) if (!headFiles.has(f)) rmSync(join(repo, f), { force: true });
-    writeTree(headDir, repo);
+    writeTree(headDir, repo, crlfHead);
     git(repo, ['add', '-A']);
     git(repo, ['commit', '-q', '-m', 'head', '--allow-empty']);
     const headSha = git(repo, ['rev-parse', 'HEAD']).trim();
@@ -121,28 +210,37 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
     let prBodyFile: string | undefined;
     if (c.pr) {
       prBodyFile = join(repo, '.pr-body.txt');
-      writeFileSync(prBodyFile, c.pr.body);
+      writeFileSync(prBodyFile, crlfHead ? toCrlf(Buffer.from(c.pr.body, 'utf8')) : c.pr.body);
     }
+    const ev = evidenceDir
+      ? { results: crlfCopy(c.results, evidenceDir, 'results'), junit: crlfCopy(c.junit, evidenceDir, 'junit'), coverage: crlfCopy(c.coverage, evidenceDir, 'coverage'), mutation: crlfCopy(c.mutation, evidenceDir, 'mutation'), history: crlfCopy(c.history, evidenceDir, 'history.json') }
+      : c;
     const { report } = await check({
       cwd: repo,
       base: baseSha,
       head: headSha,
       // Globs, not paths: always forward slashes, also on Windows.
-      results: c.results ? `${c.results.split(sep).join('/')}/**/*` : undefined,
-      junit: c.junit ? `${c.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
-      coverage: c.coverage ? `${c.coverage.split(sep).join('/')}/**/*` : '',
-      mutation: c.mutation ? `${c.mutation.split(sep).join('/')}/**/*.json,${c.mutation.split(sep).join('/')}/**/*.xml` : '',
+      results: ev.results ? `${ev.results.split(sep).join('/')}/**/*` : undefined,
+      junit: ev.junit ? `${ev.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
+      coverage: ev.coverage ? `${ev.coverage.split(sep).join('/')}/**/*` : '',
+      mutation: ev.mutation ? `${ev.mutation.split(sep).join('/')}/**/*.json,${ev.mutation.split(sep).join('/')}/**/*.xml` : '',
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,
-      history: c.history,
+      history: ev.history,
       quiet: true,
       log: () => {},
     });
     return { report, repo };
   } finally {
     if (!opts.keep) rmSync(repo, { recursive: true, force: true });
+    if (evidenceDir) rmSync(evidenceDir, { recursive: true, force: true });
   }
+}
+
+/** Everything a finding says, for comparing a CRLF case with its LF twin. */
+export function fullFinding(f: Finding): Record<string, unknown> {
+  return { ruleId: f.ruleId, severity: f.severity, subject: f.subject, label: f.label, message: f.message, location: f.location, fingerprint: f.fingerprint, before: f.before, after: f.after };
 }
 
 export function summarise(f: Finding): ExpectedFinding {

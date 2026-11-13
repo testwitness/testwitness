@@ -134,7 +134,32 @@ fixtures/<lang>-<framework>-<build>/     e.g. java-junit5-maven, ts-jest, py-pyt
     expected.json          # golden findings: [{ruleId, severity, subject, label?}]
     README.md              # one paragraph: what the case is and why it is positive or negative
     junit/ or results/     # results of the head run; results/ takes any format the reader knows
+    CRLF                   # optional: write the case with Windows line endings (below)
 ```
+
+### CRLF cases
+
+Windows repositories commit CRLF, and a PR may convert files between CRLF and
+LF while it edits them. A case directory with a `CRLF` file is written with
+CRLF line endings by the runner (`fixtures/runner/golden.ts`), and the
+temporary repository sets `core.autocrlf false` so git stores the CRLF bytes.
+One directive per line:
+
+- `twin <case>`: take `base/`, `head/`, `expected.json`, `pr.json` and the
+  result, coverage, mutation and history inputs from that LF case of the same
+  project. The suite then requires exactly the findings of the twin, line
+  numbers, messages and fingerprints included.
+- `sides base|head|both` (default `both`): which commit gets CRLF. The head
+  side also converts the PR body and the result, coverage, mutation and
+  history inputs. `twin X` with `sides head` is a PR that converts to CRLF
+  while it edits; `sides base` one that converts to LF.
+- `from <case>`: take only `base/` and `head/` from that case, without its
+  expectations.
+- `head base`: the head commit is the base files again, so the PR only
+  converts line endings and `expected.json` is `[]`.
+
+Names: `<twin>-crlf` (both sides), `<twin>-mixed` (head only),
+`<twin>-crlf-to-lf` (base only), `CRLF-only-*` (line endings only).
 
 A case is positive when `expected.json` lists findings and negative when it is
 `[]`. Negative cases must cover the false positive controls named in the spec:
