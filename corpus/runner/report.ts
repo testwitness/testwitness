@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { loadCorpus, precisionTable, renderPrecisionMarkdown, type Verdict } from './corpus.js';
@@ -23,7 +23,11 @@ for (const e of entries) {
 }
 const rows = precisionTable(verdicts);
 const date = new Date().toISOString().slice(0, 10);
-const md = renderPrecisionMarkdown(rows, entries.length, date) + '\n' + renderHookReplayMarkdown(hookStats(replays), date);
+const notesPath = join(root, 'precision-notes.md');
+const notes = existsSync(notesPath) ? readFileSync(notesPath, 'utf8') : undefined;
+const heldout = { entries: entries.filter((e) => e.meta.split === 'heldout').length, verdicts };
+const md = renderPrecisionMarkdown(rows, entries.length, date, heldout, notes) + '
+' + renderHookReplayMarkdown(hookStats(replays), date);
 writeFileSync(join(root, '..', 'docs', 'precision.md'), md);
 writeFileSync(join(root, 'verdicts.json'), JSON.stringify(verdicts, null, 2));
 process.stdout.write('\n' + md);

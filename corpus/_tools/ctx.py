@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """For each hunk of an entry's diff, print the file and the nearest enclosing test declaration (from the head file, or base when deleted)."""
 import re, sys, os
-ROOT="/home/claude/testwitness/corpus/entries"
+ROOT=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entries")
 DECL=[r'^\s*(?:async\s+)?def (test\w*)\(', r'^\s*class (\w+)', r'^\s*(?:public\s+|protected\s+|private\s+)?(?:static\s+)?void (\w+)\(', r'^\s*(?:it|test|testWidgets)(?:\.\w+)*\(\s*[\'"`](.+?)[\'"`]', r'^\s*(?:describe|suite|context)(?:\.\w+)*\(\s*[\'"`](.+?)[\'"`]', r'@Test', r'@pytest\.mark\.(skip|xfail)', r'@Disabled|@Ignore']
 for slug in sys.argv[1:]:
     d=f"{ROOT}/{slug}"; cur=None; lines={}

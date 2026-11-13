@@ -154,7 +154,7 @@ export function precisionTable(verdicts: Verdict[]): PrecisionRow[] {
   return [...rows.values()].sort((a, b) => a.ruleId.localeCompare(b.ruleId) || a.split.localeCompare(b.split));
 }
 
-export function renderPrecisionMarkdown(rows: PrecisionRow[], entries: number, date: string): string {
+export function renderPrecisionMarkdown(rows: PrecisionRow[], entries: number, date: string, heldout?: { entries: number; verdicts: Verdict[] }, notes?: string): string {
   const lines = [
     `# Precision on the false positive corpus`,
     '',
@@ -166,6 +166,41 @@ export function renderPrecisionMarkdown(rows: PrecisionRow[], entries: number, d
   for (const r of rows) {
     lines.push(`| ${r.ruleId} | ${r.split} | ${r.tp} | ${r.expectedLow} | ${r.fp} | ${r.missed} | ${r.precision === null ? 'n/a' : r.precision.toFixed(2)} | ${r.highFp} |`);
   }
+  if (heldout) {
+    lines.push(
+      '',
+      '## Held out half',
+      '',
+      `Entries are split by the parity of the SHA-256 of the PR url (see corpus/README.md), so the labeller does not choose the split. No rule was tuned on these ${heldout.entries} entries. Precision here counts only medium and high findings: medium or high true positives over medium or high true positives plus false positives.`,
+      '',
+      '| Rule | True positives (medium or high) | False positives (medium or high) | Precision (medium or high) | Low true positives | Missed |',
+      '|---|---|---|---|---|---|',
+    );
+    for (const r of heldoutTable(heldout.verdicts)) {
+      lines.push(`| ${r.ruleId} | ${r.tp} | ${r.fp} | ${r.precision === null ? 'n/a' : r.precision.toFixed(2)} | ${r.lowTp} | ${r.missed} |`);
+    }
+  }
+  if (notes) lines.push('', notes.trim());
   lines.push('', 'Regenerate with `pnpm corpus:report`.');
   return lines.join('\n') + '\n';
+}
+
+export interface HeldoutRow { ruleId: string; tp: number; fp: number; lowTp: number; missed: number; precision: number | null }
+
+/** Per rule precision on the held out half, medium and high findings only. */
+export function heldoutTable(verdicts: Verdict[]): HeldoutRow[] {
+  const rows = new Map<string, HeldoutRow>();
+  for (const v of verdicts) {
+    if (v.split !== 'heldout') continue;
+    const r = rows.get(v.ruleId) ?? { ruleId: v.ruleId, tp: 0, fp: 0, lowTp: 0, missed: 0, precision: null };
+    const medHigh = v.severity === 'medium' || v.severity === 'high';
+    if (v.verdict === 'tp') {
+      if (medHigh) r.tp++;
+      else r.lowTp++;
+    } else if (v.verdict === 'fp') r.fp++;
+    else if (v.verdict === 'missed') r.missed++;
+    rows.set(v.ruleId, r);
+  }
+  for (const r of rows.values()) r.precision = r.tp + r.fp > 0 ? r.tp / (r.tp + r.fp) : null;
+  return [...rows.values()].sort((a, b) => a.ruleId.localeCompare(b.ruleId));
 }

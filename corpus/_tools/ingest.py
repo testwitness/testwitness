@@ -4,7 +4,7 @@ usage: ingest.py owner/repo number category [slug]
 Refuses PRs over 2000 changed lines, repos under 100 stars, non permissive licences."""
 import json, subprocess, sys, hashlib, os, re
 ALLOWED = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC"}
-ROOT = "/home/claude/testwitness/corpus"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MIRRORS = "/tmp/corpus-repos"
 EMAP = {".py":"python",".java":"java",".ts":"typescript",".tsx":"typescript",".js":"javascript",".jsx":"javascript",".mjs":"javascript",".cjs":"javascript",".kt":"kotlin",".go":"go",".rs":"rust",".cs":"csharp",".scala":"scala",".groovy":"groovy"}
 def run(cmd, cwd=None, check=True):
@@ -19,15 +19,18 @@ def main():
     slug = args[0] if args else f"{repo.replace('/','-').lower()}-{num}"
     cache = f"{MIRRORS}/meta-{repo.replace('/','-')}.json"
     os.makedirs(MIRRORS, exist_ok=True)
-    if os.path.exists(cache): r = json.load(open(cache))
-    else:
-        r = json.loads(run(["gh","api","-X","GET","search/repositories","-f",f"q=repo:{repo}"]))["items"][0]
-        json.dump(r, open(cache,"w"))
+    GHS = [sys.executable, "-I", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ghsearch.py")]
+    if not os.path.exists(cache): run(GHS + ["repos", repo])
+    if not os.path.exists(cache): print(f"SKIP {repo}#{num}: repository not found by search"); return
+    r = json.load(open(cache))
     stars = r["stargazers_count"]; lic = (r.get("license") or {}).get("spdx_id")
     if stars < 100: print(f"SKIP {repo}#{num}: {stars} stars"); return
     if lic not in ALLOWED: print(f"SKIP {repo}#{num}: licence {lic}"); return
-    items = json.loads(run(["gh","api","-X","GET","search/issues","-f",f"q=repo:{repo} is:pr {num}"]))["items"]
-    items = [i for i in items if i["number"] == num]
+    pc = f"{MIRRORS}/pr-{repo.replace('/','-')}-{num}.json"
+    if os.path.exists(pc): items = [json.load(open(pc))]
+    else:
+        items = json.loads(run(GHS + ["raw", "search/issues", "-f", f"q=repo:{repo} is:pr {num}"]))["items"]
+        items = [i for i in items if i["number"] == num]
     if not items: print(f"SKIP {repo}#{num}: not found by search"); return
     p = items[0]
     merged = p["pull_request"].get("merged_at")
