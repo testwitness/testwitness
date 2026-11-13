@@ -21,6 +21,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--head <ref>', 'head ref', 'HEAD')
     .option('--results <globs>', 'comma separated globs of test results: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (default from config)')
     .option('--junit <globs>', 'older name of --results; used when --results is not given')
+    .option('--diff-only', 'check the diff and the PR text only: read no test results and skip V005 (for local runs and existing PRs)', false)
     .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
     .option('--mutation <globs>', 'comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (default from config mutation.paths)')
     .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
@@ -46,6 +47,7 @@ export async function main(argv: string[]): Promise<number> {
           head: o.head,
           results: o.results,
           junit: o.junit,
+          ...(o.diffOnly ? { diffOnly: true } : {}),
           coverage: o.coverage,
           mutation: o.mutation,
           config: o.config,

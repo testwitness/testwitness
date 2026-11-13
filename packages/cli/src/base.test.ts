@@ -54,4 +54,20 @@ describe('base ref and empty comparisons', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('with diffOnly reads no results, drops V005 and grades the diff rules alone', async () => {
+    const dir = mergedRepo();
+    try {
+      writeFileSync(join(dir, 'junit.xml'), '<testsuites><testsuite name="x"><testcase classname="a" name="a"/></testsuite></testsuites>');
+      const logs: string[] = [];
+      const { report } = await check({ cwd: dir, base: 'master^1', head: 'feature', format: 'json', diffOnly: true, failOn: 'medium', results: 'junit.xml', log: (s) => logs.push(s) });
+      expect(report.findings.some((f) => f.ruleId === 'V005')).toBe(false);
+      expect(report.evidence.sources).toEqual([]);
+      expect(report.evidence.notes[0]).toMatch(/diff only/i);
+      expect(report.state).toBe('review');
+      expect(logs.some((l) => /no test results matched/.test(l))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

@@ -35,6 +35,8 @@ import { allFrontEnds } from './frontends.js';
 
 export interface CheckOptions {
   cwd: string;
+  /** Check the diff only: read no test results, drop V005, and grade the state on the diff and claim rules alone. */
+  diffOnly?: boolean;
   /** Base ref; the merge base with head is compared. Default: the default branch (origin/HEAD's target). */
   base?: string;
   head: string;
@@ -349,7 +351,10 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   opts = { ...opts, base };
   const config = await loadConfig(opts);
   const follow = opts.followSymlinks ?? config.paths.followSymlinks;
-  const { evidence, notes } = await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log, follow);
+  if (opts.diffOnly) config.rules['V005'] = { severity: 'off', options: config.rules['V005']?.options ?? {} };
+  const { evidence, notes } = opts.diffOnly
+    ? { evidence: undefined, notes: ['Diff only: test results were not read (--diff-only), so the state reflects the diff and claim rules alone.'] }
+    : await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log, follow);
   const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log, follow);
   const mutation = await loadMutation(opts.cwd, opts.mutation ?? config.mutation.paths.join(','), log, follow);
   let prText: PullRequestText | undefined;
@@ -390,6 +395,11 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     recordHistory: opts.recordHistory === true || opts.historyOut !== undefined,
     log,
   });
+  if (opts.diffOnly) {
+    const threshold = { low: 1, medium: 2, high: 3 }[config.failOn];
+    const open = report.findings.some((f) => !f.acknowledged && { low: 1, medium: 2, high: 3 }[f.severity] >= threshold);
+    report.state = open ? 'review' : 'pass';
+  }
   if (report.base === report.head && report.files.changed === 0) {
     // The head is inside the base (a PR merged with a merge commit, or the default branch itself): say so, never pass.
     const note = nothingToCompare(base, opts.head);

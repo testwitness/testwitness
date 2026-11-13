@@ -28,6 +28,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--head <ref>` | head ref | `HEAD` |
 | `--results <globs>` | comma separated globs of test results: JUnit XML (recommended), TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content ([evidence](./evidence)) | from config `results.head` |
 | `--junit <globs>` | older name of `--results`, used when `--results` is not given | |
+| `--diff-only` | check the diff and the PR text only: read no test results, skip V005, and grade the state on the diff and claim rules alone (`pass` or `review`) | off |
 | `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
 | `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
 | `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
@@ -45,6 +46,22 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `-q, --quiet` | no progress on stderr | |
 
 `testwitness rules` lists the built in rules.
+
+## Running it locally
+
+**From source, before the package is published.** Clone this repository, then run `pnpm install --frozen-lockfile` and `pnpm bundle:cli`. The CLI is then `node packages/cli/bin/testwitness.js`, with the same options as `testwitness`.
+
+**Checking an existing pull request.** Fetch its head and check it out, because the helper index reads helper files from the working tree, not from `--head`:
+
+```bash
+git fetch origin pull/123/head:pr-123
+git checkout --detach pr-123
+testwitness check --base origin/main --head pr-123 --diff-only
+```
+
+Use the branch the pull request targets as `--base` (a backport or release branch is not `main`), or the CLI compares far more than the pull request changed. Once the pull request is merged with a merge commit, its head is already inside that branch and there is nothing to compare; use the first parent of the merge commit instead (`--base <merge commit>^1`). The CLI says "Nothing to compare" with the state `unreadable` when that happens, never `pass`.
+
+**What `unreadable` means without results.** Without test results the diff rules still run, but nothing confirms which tests ran, so the state reads `unreadable` and V005 asks for a reporter. That is expected on a laptop. Pass `--diff-only` to say you only want the diff and claim rules: no results are searched for, V005 is skipped and the state is `pass` or `review`.
 
 `testwitness mutate-plan --base <ref> --head <ref> [--format json|shell] [--out <file>] [--cwd <dir>]` prints the production files the PR changed and the settings that mutate only them: StrykerJS `--mutate` line ranges with `--incremental`, and PIT `targetClasses` and `targetTests`. It reads git and runs nothing. The shell format is single quoted variable assignments for a workflow to source. See [mutation on request](./mutation-on-request).
 
