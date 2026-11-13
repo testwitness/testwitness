@@ -211,12 +211,15 @@ export const V004: Rule = {
   docs: {
     summary: 'The PR title or body claims that tests pass, that tests were added, or that nothing changed in tests, and the diff or the attached results do not support it. Claims that cannot be checked are reported as unreadable (low), never as false.',
     falsePositives:
-      'Claims inside code blocks and HTML comments and every checklist line, checked or not, are template text and stripped ("- [x] Add test case(s)" ticks a reminder). Negated claims are skipped, including a negation later on the same line ("Added tests: not applicable", "no new test"). An "added tests" claim is supported by a new test, by new rows in a parameter table (test.each, parametrize), by new entries in a snapshot file (fixture driven suites such as runFormatTest generate their tests from input files) and by two or more new assertions inside existing tests. Wording is always "not supported by the results attached to this run".',
+      'Claims inside code blocks and HTML comments are stripped, and so is every unchecked checklist line. A checked checklist line is template text too ("- [x] Add test case(s)" ticks a reminder) and is read as an added tests claim only when the PR changes no test file at all. Negated claims are skipped, including a negation later on the same line ("Added tests: not applicable", "no new test"). An "added tests" claim is supported by a new test, by new rows in a parameter table (test.each, parametrize), by new entries in a snapshot file (fixture driven suites such as runFormatTest generate their tests from input files) and by two or more new assertions inside existing tests. Wording is always "not supported by the results attached to this run".',
     example: 'PR body says "all tests pass"; results show 2 failures.',
   },
   run(ctx) {
     if (!ctx.prText || !ctx.config.claims.enabled) return [];
-    const claims = findClaims(`${ctx.prText.title}\n${ctx.prText.body}`, ctx.config.claims.phrasesExtra);
+    // A ticked template box is template text, unless the PR touches no test file at all: then "I have added tests"
+    // ticked on a PR without a test change is a claim worth checking.
+    const touchesTests = ctx.files.some((f) => f.kind === 'test');
+    const claims = findClaims(`${ctx.prText.title}\n${ctx.prText.body}`, ctx.config.claims.phrasesExtra, { checklistClaims: !touchesTests });
     const out: Finding[] = [];
     for (const c of claims) {
       const verdict = classify(c, ctx);

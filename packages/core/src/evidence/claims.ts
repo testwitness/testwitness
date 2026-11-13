@@ -36,7 +36,8 @@ export function stripNonProse(text: string): string {
 
 /**
  * Checked checklist items too. A PR template's "- [x] Add test case(s)" ticks a reminder; it is template text, not a
- * statement that this diff adds a test, so "added tests" claims never come from a checklist line.
+ * statement about what this diff does to its tests, so "added tests" claims come from a checklist line only when the
+ * caller asks (V004 does when the PR changes no test file).
  */
 export function stripChecklist(prose: string): string {
   return prose.replace(/^\s*(?:[-*+]|\d+[.)])?\s*\[[ xX]?\]\s.*$/gm, ' ');
@@ -51,7 +52,11 @@ function lineAround(text: string, index: number): string {
   return text.slice(start, end === -1 ? text.length : end);
 }
 
-export function findClaims(text: string, extraPhrases: string[] = []): Claim[] {
+/**
+ * `checklistClaims`: read "added tests" claims from ticked checklist lines too. V004 sets it only when the PR changes
+ * no test file at all, so a ticked "I have added tests" box on a PR that touches no test is still checked.
+ */
+export function findClaims(text: string, extraPhrases: string[] = [], options: { checklistClaims?: boolean } = {}): Claim[] {
   const prose = stripNonProse(text);
   const out: Claim[] = [];
   const seen = new Set<string>();
@@ -62,7 +67,7 @@ export function findClaims(text: string, extraPhrases: string[] = []): Claim[] {
     seen.add(key);
     out.push({ kind, text: t });
   };
-  const noChecklist = stripChecklist(prose);
+  const noChecklist = options.checklistClaims ? prose : stripChecklist(prose);
   for (const { kind, re } of PATTERNS) {
     const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
     const source = kind === 'added-tests' ? noChecklist : prose;

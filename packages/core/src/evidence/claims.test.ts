@@ -23,6 +23,7 @@ describe('findClaims', () => {
     expect(findClaims('Added tests, no new test needed beyond the updated one')).toEqual([]);
     expect(findClaims('Added tests for refunds.\nNot applicable to the docs.').map((c) => c.kind)).toEqual(['added-tests']);
     expect(findClaims('- [x] all tests pass').map((c) => c.kind)).toEqual(['tests-pass']);
+    expect(findClaims('- [x] I have added new tests where possible', [], { checklistClaims: true }).map((c) => c.kind)).toEqual(['added-tests']);
   });
   it('dedupes and honours extra phrases', () => {
     const c = findClaims('tests pass. tests pass.', ['ran the whole thing']);
