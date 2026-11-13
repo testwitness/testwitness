@@ -28,6 +28,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--head <ref>` | head ref | `HEAD` |
 | `--junit <globs>` | comma separated globs of JUnit XML | from config |
 | `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
+| `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
 | `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
 | `--format <fmt>` | `markdown`, `json` or `both` | `markdown` |
 | `--out <path>` | write to a file instead of stdout | |
@@ -42,6 +43,8 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `-q, --quiet` | no progress on stderr | |
 
 `testwitness rules` lists the built in rules.
+
+`testwitness mutate-plan --base <ref> --head <ref> [--format json|shell] [--out <file>] [--cwd <dir>]` prints the production files the PR changed and the settings that mutate only them: StrykerJS `--mutate` line ranges with `--incremental`, and PIT `targetClasses` and `targetTests`. It reads git and runs nothing. The shell format is single quoted variable assignments for a workflow to source. See [mutation on request](./mutation-on-request).
 
 `testwitness mcp` starts a read only MCP server on stdio so coding agents can run the check before pushing; see [MCP server for agents](./mcp).
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T16:06:21.118Z",
+  "generatedAt": "2026-11-04T16:46:33.481Z",
   "machine": {
     "cores": 2,
     "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
@@ -13,7 +13,7 @@
     {
       "name": "large",
       "budgetMs": 30000,
-      "generateMs": 1580,
+      "generateMs": 1806,
       "gen": {
         "repo": "/tmp/testwitness-bench/large/repo",
         "junitDir": "/tmp/testwitness-bench/large/junit",
@@ -36,10 +36,10 @@
       },
       "runs": [
         {
-          "wallMs": 13446.050164,
-          "maxRssMb": 373,
-          "userCpuMs": 8998,
-          "systemCpuMs": 2371,
+          "wallMs": 13261.583944,
+          "maxRssMb": 372,
+          "userCpuMs": 8682,
+          "systemCpuMs": 2279,
           "exitCode": 0,
           "state": "review",
           "findings": 50,
@@ -50,17 +50,17 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 11485,
-            "parseMs": 7306,
-            "rulesMs": 382
+            "totalMs": 11287,
+            "parseMs": 7089,
+            "rulesMs": 363
           },
           "stderrTail": ""
         },
         {
-          "wallMs": 14725.851742,
-          "maxRssMb": 362,
-          "userCpuMs": 9648,
-          "systemCpuMs": 2653,
+          "wallMs": 12926.861769999998,
+          "maxRssMb": 374,
+          "userCpuMs": 8715,
+          "systemCpuMs": 2248,
           "exitCode": 0,
           "state": "review",
           "findings": 50,
@@ -71,17 +71,17 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 12590,
-            "parseMs": 7920,
-            "rulesMs": 391
+            "totalMs": 11106,
+            "parseMs": 6691,
+            "rulesMs": 543
           },
           "stderrTail": ""
         },
         {
-          "wallMs": 13876.321794999996,
-          "maxRssMb": 363,
-          "userCpuMs": 9027,
-          "systemCpuMs": 2490,
+          "wallMs": 13427.167978000005,
+          "maxRssMb": 374,
+          "userCpuMs": 8643,
+          "systemCpuMs": 2349,
           "exitCode": 0,
           "state": "review",
           "findings": 50,
@@ -92,16 +92,16 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 11902,
-            "parseMs": 7472,
-            "rulesMs": 394
+            "totalMs": 11271,
+            "parseMs": 6806,
+            "rulesMs": 371
           },
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 13876.321794999996,
-      "bestWallMs": 13446.050164,
-      "maxRssMb": 373,
+      "medianWallMs": 13261.583944,
+      "bestWallMs": 12926.861769999998,
+      "maxRssMb": 374,
       "overBudget": false
     },
     {
@@ -130,10 +130,10 @@
       },
       "runs": [
         {
-          "wallMs": 956.6148899999971,
+          "wallMs": 983.759828000002,
           "maxRssMb": 142,
-          "userCpuMs": 1034,
-          "systemCpuMs": 94,
+          "userCpuMs": 1040,
+          "systemCpuMs": 107,
           "exitCode": 0,
           "state": "review",
           "findings": 4,
@@ -144,57 +144,57 @@
             "R001": 1
           },
           "engine": {
-            "totalMs": 674,
-            "parseMs": 521,
+            "totalMs": 721,
+            "parseMs": 571,
+            "rulesMs": 35
+          },
+          "stderrTail": ""
+        },
+        {
+          "wallMs": 951.070676000003,
+          "maxRssMb": 138,
+          "userCpuMs": 947,
+          "systemCpuMs": 107,
+          "exitCode": 0,
+          "state": "review",
+          "findings": 4,
+          "byRule": {
+            "A002": 1,
+            "R003": 1,
+            "O001": 1,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 687,
+            "parseMs": 518,
+            "rulesMs": 41
+          },
+          "stderrTail": ""
+        },
+        {
+          "wallMs": 1015.6188790000015,
+          "maxRssMb": 142,
+          "userCpuMs": 1029,
+          "systemCpuMs": 136,
+          "exitCode": 0,
+          "state": "review",
+          "findings": 4,
+          "byRule": {
+            "A002": 1,
+            "R003": 1,
+            "O001": 1,
+            "R001": 1
+          },
+          "engine": {
+            "totalMs": 685,
+            "parseMs": 520,
             "rulesMs": 29
-          },
-          "stderrTail": ""
-        },
-        {
-          "wallMs": 986.3954760000051,
-          "maxRssMb": 140,
-          "userCpuMs": 1027,
-          "systemCpuMs": 123,
-          "exitCode": 0,
-          "state": "review",
-          "findings": 4,
-          "byRule": {
-            "A002": 1,
-            "R003": 1,
-            "O001": 1,
-            "R001": 1
-          },
-          "engine": {
-            "totalMs": 720,
-            "parseMs": 535,
-            "rulesMs": 31
-          },
-          "stderrTail": ""
-        },
-        {
-          "wallMs": 1009.0931310000014,
-          "maxRssMb": 142,
-          "userCpuMs": 1025,
-          "systemCpuMs": 141,
-          "exitCode": 0,
-          "state": "review",
-          "findings": 4,
-          "byRule": {
-            "A002": 1,
-            "R003": 1,
-            "O001": 1,
-            "R001": 1
-          },
-          "engine": {
-            "totalMs": 748,
-            "parseMs": 565,
-            "rulesMs": 40
           },
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 986.3954760000051,
-      "bestWallMs": 956.6148899999971,
+      "medianWallMs": 983.759828000002,
+      "bestWallMs": 951.070676000003,
       "maxRssMb": 142,
       "overBudget": false
     }

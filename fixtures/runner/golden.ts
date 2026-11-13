@@ -6,6 +6,7 @@
  *   pr.json (optional) { title, body }
  *   junit/ (optional)    JUnit XML of the head run
  *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
+ *   mutation/ (optional) Stryker JSON or PIT mutations.xml reports of the head, as the opt in mutation job writes them
  *   history/history.json (optional) run history of earlier runs, written by the engine through
  *                         fixtures/runner/make-history.ts from history/runs.json, never by hand
  * The runner builds a temporary git repository with two commits and runs the
@@ -34,6 +35,7 @@ export interface GoldenCase {
   pr?: { title: string; body: string };
   junit?: string;
   coverage?: string;
+  mutation?: string;
   history?: string;
 }
 
@@ -57,6 +59,7 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       if (existsSync(prPath)) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
       if (existsSync(join(dir, 'junit'))) c.junit = join(dir, 'junit');
       if (existsSync(join(dir, 'coverage'))) c.coverage = join(dir, 'coverage');
+      if (existsSync(join(dir, 'mutation'))) c.mutation = join(dir, 'mutation');
       if (existsSync(join(dir, 'history', 'history.json'))) c.history = join(dir, 'history', 'history.json');
       if (!filter || filter(c)) out.push(c);
     }
@@ -123,6 +126,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       // Globs, not paths: always forward slashes, also on Windows.
       junit: c.junit ? `${c.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
       coverage: c.coverage ? `${c.coverage.split(sep).join('/')}/**/*` : '',
+      mutation: c.mutation ? `${c.mutation.split(sep).join('/')}/**/*.json,${c.mutation.split(sep).join('/')}/**/*.xml` : '',
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,

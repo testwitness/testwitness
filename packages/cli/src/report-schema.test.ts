@@ -112,7 +112,33 @@ describe('report schema', () => {
     const withoutAdjusted: Record<string, unknown> = { ...history };
     delete withoutAdjusted['adjusted'];
     expect(validate({ ...base, history: withoutAdjusted })).toBe(false);
+    const mutation = { sources: ['reports/mutation/mutation.json'], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] };
+    expect(validate({ ...base, mutation })).toBe(true);
+    expect(validate(withFinding({ ruleId: 'M001', label: 'measured weak' }))).toBe(true);
+    expect(validate(withFinding({ ruleId: 'M002', label: 'measured weak', severity: 'high' }))).toBe(true);
+    expect(validate(withFinding({ ruleId: 'M003' }))).toBe(false);
+    expect(validate(withFinding({ label: 'measured strong' }))).toBe(false);
+    expect(validate({ ...base, mutation: { ...mutation, extra: 1 } })).toBe(false);
+    expect(validate({ ...base, mutation: { ...mutation, survived: -1 } })).toBe(false);
+    expect(validate({ ...base, mutation: { ...mutation, killed: 1.5 } })).toBe(false);
+    const withoutNoCoverage: Record<string, unknown> = { ...mutation };
+    delete withoutNoCoverage['noCoverage'];
+    expect(validate({ ...base, mutation: withoutNoCoverage })).toBe(false);
   });
+
+  const mutationCases = discoverCases(join(root, 'fixtures'), (c) => c.mutation !== undefined);
+  it('has golden cases with mutation reports from Stryker and PIT', () => {
+    expect(new Set(mutationCases.map((c) => c.project))).toEqual(new Set(['ts-vitest', 'java-junit5-maven']));
+  });
+  for (const c of mutationCases.filter((x) => x.name.startsWith('O001-') && x.name.includes('upgrade'))) {
+    it(`validates the JSON output of mutation case ${c.project}/${c.name}`, async () => {
+      const { report } = await runCase(c);
+      const json = JSON.parse(render(report, 'json', false));
+      expect(json.mutation.mutants).toBeGreaterThan(0);
+      expect(json.findings.map((f: { ruleId: string }) => f.ruleId)).toEqual(expect.arrayContaining(['M001', 'M002', 'O001']));
+      expectValid(json);
+    }, 60_000);
+  }
 
   const historyCases = discoverCases(join(root, 'fixtures'), (c) => c.history !== undefined);
   it('has golden cases with a run history in three fixture projects', () => {

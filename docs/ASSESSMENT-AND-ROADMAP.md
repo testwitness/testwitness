@@ -163,6 +163,12 @@ PR's new or changed tests. A new test that kills nothing on the lines it claims
 to cover is measured weak, not guessed weak. This resolves the O001 and O002
 precision ceiling.
 
+Status, 4 Nov 2026: implemented (docs/mutation-on-request.md). Stryker JSON and PIT
+mutations.xml are read; mutmut is not, because its results carry no line numbers
+or killing tests. M001 and M002 ship, and O001 and O002 are raised to medium with
+the label measured weak, or dropped, when mutation data covers the test. O001's
+default stays low: without mutation data it is still a guess.
+
 ### 4.5 Memory across runs: the repository's own baseline
 
 Keep the last N JUnit results and reports in a workflow artifact or an orphan

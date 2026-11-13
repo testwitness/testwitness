@@ -20,6 +20,10 @@ coverage:
   paths:                # lcov, Cobertura or JaCoCo XML of the head run; empty: V008 is off
     - "coverage/lcov.info"
     - "**/jacoco.xml"
+mutation:
+  paths:                # Stryker mutation.json or PIT mutations.xml from the opt in mutation job; empty: M001 and M002 are off
+    - "reports/mutation/mutation.json"
+    - "**/pit-reports/mutations.xml"
 assertions:
   extra:                # helpers outside the scanned support files, or without an assertion inside
     - "assert_ledger_balanced"

@@ -1,0 +1,3 @@
+O001 upgrade. The PR adds exemptTax() and a test that calls it without an assertion. Without mutation data O001 is low. The report says the test covers src/tax.ts and that none of the mutants on the changed lines 5 and 6 was killed, so O001 is raised to medium with the label measured weak. M001 reports the two weak lines (medium, all mutated changed lines are weak) and M002 reports the test, which killed nothing (high).
+
+mutation/mutation.json was written by StrykerJS 10.1.1 with @stryker-mutator/vitest-runner 10.1.1 and Vitest 5.0.5 (coverageAnalysis perTest, json reporter), running the head tree with --mutate set to the changed production file, as testwitness mutate-plan plans it. It is real output, kept as written (projectRoot names the temporary run directory).

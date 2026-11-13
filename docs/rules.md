@@ -119,7 +119,7 @@ A modified test lost one or more assertions and gained no replacement on the sam
 
 Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
 
-An assertion on a subject was replaced by a weaker one. Every assertion is read onto one lattice shared by all languages: exact equality and snapshots at the top, then ordered or near equality (startsWith, an anchored regex, containsExactlyInAnyOrder, closeTo), then containment (toContain, contains, in, toMatchObject, hasItem, an unanchored regex), then a bound (greaterThan, >=, toBeLessThan), then a non empty check (greater than zero, not equal to zero, isNotEmpty), and at the bottom existence or truthiness (assertNotNull, toBeDefined, is not None, assertTrue on a plain value). Mock, exception and other library specific checks keep the strength their front end gives them. Base and head assertions are paired by subject: the same text first, then the same subject once identity accessors (length, size(), len(), trim(), get()), copies with a few fields overridden and boolean wrappers are removed, so assertTrue(body.contains(x)) is a containment check on body and all(d.get(k) == v for k, v in e.items()) is a subset check on d. A local name bound once to a projection of another reference is followed to that reference.
+An assertion on a subject was replaced by a weaker one. Every assertion is read onto one lattice shared by all languages: exact equality and snapshots at the top, then ordered or near equality (startsWith, an anchored regex, containsExactlyInAnyOrder, closeTo), then containment (toContain, contains, in, toMatchObject, hasItem, an unanchored regex), then a bound (greaterThan, &gt;=, toBeLessThan), then a non empty check (greater than zero, not equal to zero, isNotEmpty), and at the bottom existence or truthiness (assertNotNull, toBeDefined, is not None, assertTrue on a plain value). Mock, exception and other library specific checks keep the strength their front end gives them. Base and head assertions are paired by subject: the same text first, then the same subject once identity accessors (length, size(), len(), trim(), get()), copies with a few fields overridden and boolean wrappers are removed, so assertTrue(body.contains(x)) is a containment check on body and all(d.get(k) == v for k, v in e.items()) is a subset check on d. A local name bound once to a projection of another reference is followed to that reference.
 
 **False positive controls.** Textually unchanged assertions pair first and are never compared. A negative check (not equal, not in) is never paired with a positive one, except that not equal to zero reads as a lower bound and not equal to null as an existence check. An assertion that got stronger, or moved between spellings of the same rank (is(equalTo(x)) to equalTo(x), assertEquals(true, c) to assertTrue(c)), is silent. Pairing by position happens only when the leftover assertions match one for one and each pair shares an identifier word in its subject, so a subject replaced by an unrelated one is not paired, and such a pairing is never more than medium. A move accompanied by a stronger assertion on a sub expression of the same subject is low and labelled narrowed. A loosening in a test that gained parameterised cases is low. A test yields at most one finding, the worst pair, naming the matcher before and after. Within one library family the v0.1 grading holds: two steps down, or landing on a smoke check, is high; otherwise a drop is medium, and it is high when the head checks nothing about the value (existence or truthiness) on the same subject, or when the test exercises a production file the PR changed (by name convention or import, as for A001). Checks inside a helper defined in the test file, or inside a project matcher (a Hamcrest matcher passed to a project method, an expectation object passed to a project toMatch), are compared the same way and capped at medium, labelled in helper or nested.
 
@@ -147,7 +147,7 @@ Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A test added in this PR has no assertion: no framework assertion, no exception expectation, no snapshot, and no call to an assertion helper defined in the file, in a test support file of the checkout, or configured in assertions.extra.
 
-**False positive controls.** Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions, whether they are defined in the test file or in a test support file of the checkout (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test), and a helper that calls another helper that asserts counts too. Only helpers outside those locations, or without an assertion the front end can read inside, need assertions.extra. Assertions inside nested scopes of the test body (callbacks, lambdas, anonymous and local classes, inner functions) are counted. The default is low (informational) until mutation on request exists: on public PRs half of the new tests without an assertion were intentional smoke tests (race tests, verbose output tests, does not throw tests), so a static rule cannot carry medium or high here. Raise it per repository with rules: { O001: medium } in .testwitness.yml.
+**False positive controls.** Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions, whether they are defined in the test file or in a test support file of the checkout (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test), and a helper that calls another helper that asserts counts too. Only helpers outside those locations, or without an assertion the front end can read inside, need assertions.extra. Assertions inside nested scopes of the test body (callbacks, lambdas, anonymous and local classes, inner functions) are counted. The default is low (informational): on public PRs half of the new tests without an assertion were intentional smoke tests (race tests, verbose output tests, does not throw tests), so a static rule cannot carry medium or high here. Raise it per repository with rules: { O001: medium } in .testwitness.yml. With mutation reports from the opt in mutation job (docs/mutation-on-request.md) the oracle is measured instead of guessed: when the changed production lines the test exercises carry mutants and none of them was killed, the finding is medium with the label measured weak; when the test itself killed a mutant on those lines (it notices a wrong result, for example through an exception), the finding is dropped. Which production files a test exercises comes from the coverage the mutation report records, or from the name and imports of the test file when it records none.
 
 ```diff
 +  @Test
@@ -162,7 +162,7 @@ Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.
 
-**False positive controls.** A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test.
+**False positive controls.** A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change.
 
 ```diff
 +  it('computes the discount', () => {
@@ -183,11 +183,37 @@ A new file matching test patterns defines no collectable test (wrong name prefix
 +export function makeUser() { ... }
 ```
 
+## M001 Changed lines with surviving mutants
+
+Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, mutation.
+
+Mutation reports of the head (Stryker JSON or PIT mutations.xml, from the opt in mutation job; the mutation input, --mutation or mutation.paths) say that lines this PR added or changed in a production file carry mutants that no test killed: every mutant starting on the line survived or was not covered. One finding per file with the count and the first three line numbers, label measured weak. Medium when at least 3 such lines, or more than half of the mutated changed lines, are weak; low otherwise. Nothing is reported without mutation reports.
+
+**False positive controls.** Only lines with at least one mutant that ran to an outcome count; compile errors, runtime errors, ignored and pending mutants are not counted, and a timed out mutant counts as killed. A mutant is attributed to the line it starts on, so a removed block is counted on the line of its opening brace. Equivalent mutants (a change no test could observe, such as &gt;= against &gt; on a value the code never reaches) survive by nature; one weak line in a well tested file stays low. Reports from a run that mutated other files than the PR changed say nothing about the changed lines and give no finding. At most 200 changed production files are checked and at most 200 report files or 50 MB are read.
+
+```diff
+src/shipping.ts: 4 changed lines have mutants that no test killed (lines 3, 4, 6 and 1 more): 6 survived, 6 not covered.
+```
+
+## M002 New test kills nothing
+
+Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast, mutation.
+
+A test added in this PR appears in no killing test list of the mutation reports, although the reports name the tests that killed mutants (Stryker killedBy with testFiles, PIT killingTest or killingTests). The test ran under mutation and noticed none of the changes. High when the test exercises a changed production file with mutants (by the coverage the report records, or by name and imports when it records none); medium otherwise. Label measured weak.
+
+**False positive controls.** Silent when the reports name no killing tests, with a note in the mutation section of the report. When a Stryker report lists the tests of the run (testFiles), a new test it does not list did not run under mutation and gets no finding. A test that only checks that nothing throws can still kill a mutant that throws; that counts as a kill. PIT stops at the first killing test of a mutant unless fullMutationMatrix is on, so a test whose every kill was also made by an earlier test can look like it kills nothing; turn fullMutationMatrix on in the mutation job to rule that out. Skipped and expected failure tests are not reported.
+
+```diff
++it('returns text for euros', () => {
++  expect(typeof money(5, '€')).toBe('string');
++});
+```
+
 ## E001 Catch all added in a test
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast.
 
-A try block now wraps part of the test and its catch (Exception, Throwable, bare except, any JavaScript catch, or .catch(() => {})) neither rethrows, fails nor asserts. A failing subject call no longer fails the test.
+A try block now wraps part of the test and its catch (Exception, Throwable, bare except, any JavaScript catch, or .catch(() =&gt; {})) neither rethrows, fails nor asserts. A failing subject call no longer fails the test.
 
 **False positive controls.** Cleanup wrappers with finally only are not catches. Catch blocks that assert on the exception, call fail(), or rethrow are not reported. A catch that existed in the base is not reported.
 
@@ -258,7 +284,7 @@ The test command or runner config now rewrites snapshots on every run (jest -u, 
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, config.
 
-Runner configuration now selects fewer tests. pytest addopts gaining --ignore, --ignore-glob, --deselect or -k, testpaths narrowed, norecursedirs grown; Jest testPathIgnorePatterns or modulePathIgnorePatterns grown, testMatch or testRegex narrowed; Vitest test.include narrowed or test.exclude grown; Mocha spec narrowed or ignore grown in .mocharc; Playwright testIgnore grown or testMatch narrowed; Surefire or Failsafe <excludes> or <excludedGroups> grown, <includes> narrowed; Gradle test exclude(...), filter excludeTestsMatching, useJUnitPlatform excludeTags (and excludeCategories, excludeGroups) grown; TestNG suite <exclude> grown; junit.jupiter.conditions.deactivate set in junit-platform.properties (medium). Path patterns are matched against the test files of the head tree and the finding names how many it drops. Test tasks disabled outright (<skipTests>, <skip>, test { enabled = false }) are reported by W003.
+Runner configuration now selects fewer tests. pytest addopts gaining --ignore, --ignore-glob, --deselect or -k, testpaths narrowed, norecursedirs grown; Jest testPathIgnorePatterns or modulePathIgnorePatterns grown, testMatch or testRegex narrowed; Vitest test.include narrowed or test.exclude grown; Mocha spec narrowed or ignore grown in .mocharc; Playwright testIgnore grown or testMatch narrowed; Surefire or Failsafe &lt;excludes&gt; or &lt;excludedGroups&gt; grown, &lt;includes&gt; narrowed; Gradle test exclude(...), filter excludeTestsMatching, useJUnitPlatform excludeTags (and excludeCategories, excludeGroups) grown; TestNG suite &lt;exclude&gt; grown; junit.jupiter.conditions.deactivate set in junit-platform.properties (medium). Path patterns are matched against the test files of the head tree and the finding names how many it drops. Test tasks disabled outright (&lt;skipTests&gt;, &lt;skip&gt;, test { enabled = false }) are reported by W003.
 
 **False positive controls.** An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high.
 
@@ -288,7 +314,7 @@ A coverage gate got weaker: a threshold was lowered (medium) or removed (high). 
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, config, workflow.
 
-A test command, script, workflow or runner config now passes when no test is found: --passWithNoTests or passWithNoTests: true (Jest, Vitest), Playwright --pass-with-no-tests, Surefire or Failsafe <failIfNoTests>false</failIfNoTests> or -DfailIfNoTests=false, Gradle failOnNoDiscoveredTests = false or filter.failOnNoMatchingTests = false, pytest --suppress-no-test-exit-code. A typo in a path or a filter then turns the whole test run into a green no op.
+A test command, script, workflow or runner config now passes when no test is found: --passWithNoTests or passWithNoTests: true (Jest, Vitest), Playwright --pass-with-no-tests, Surefire or Failsafe &lt;failIfNoTests&gt;false&lt;/failIfNoTests&gt; or -DfailIfNoTests=false, Gradle failOnNoDiscoveredTests = false or filter.failOnNoMatchingTests = false, pytest --suppress-no-test-exit-code. A typo in a path or a filter then turns the whole test run into a green no op.
 
 **False positive controls.** The same setting already present anywhere in the base version of the file is silent, and so is a line that only moved within the file. Commented out lines are ignored.
 

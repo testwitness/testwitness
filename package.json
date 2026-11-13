@@ -24,7 +24,7 @@
     "gen:docs": "tsx --conditions=development scripts/gen-docs.ts",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
-    "bench": "tsx bench/run.ts",
+    "bench": "pnpm bundle:cli && tsx bench/run.ts",
     "mutate": "stryker run",
     "study:sample": "tsx --conditions=development study/sample.ts",
     "study:fetch": "tsx --conditions=development study/fetch.ts",
