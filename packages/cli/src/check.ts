@@ -216,9 +216,11 @@ export async function matchReportFiles(cwd: string, patterns: string[], followSy
     if (ok) kept.push(f);
     else skipped.push(f);
   }
-  skipped.sort();
-  const notes = skipped.length
-    ? [`${skipped.length} matched path${skipped.length === 1 ? ' was' : 's were'} skipped because ${skipped.length === 1 ? 'it is' : 'they are'} a symbolic link or outside the repository (${skipped.slice(0, 3).map((f) => relative(cwd, f)).join(', ')}${skipped.length > 3 ? ', ...' : ''}); set paths.followSymlinks or --follow-symlinks to read linked outputs`]
+  // Named relative to the checkout with forward slashes on every platform, sorted by that name: fast-glob returns
+  // forward slashes and path.resolve backslashes on Windows, so sorting the raw paths gave a platform dependent order.
+  const shown = skipped.map((f) => relative(cwd, f).split(sep).join('/')).sort();
+  const notes = shown.length
+    ? [`${shown.length} matched path${shown.length === 1 ? ' was' : 's were'} skipped because ${shown.length === 1 ? 'it is' : 'they are'} a symbolic link or outside the repository (${shown.slice(0, 3).join(', ')}${shown.length > 3 ? ', ...' : ''}); set paths.followSymlinks or --follow-symlinks to read linked outputs`]
     : [];
   return { files: kept, notes };
 }
