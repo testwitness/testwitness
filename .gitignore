@@ -25,3 +25,4 @@ packages/cli/LICENSE
 packages/cli/README.md
 bench/.prof/
 bench-out/
+/stryker.shard.json

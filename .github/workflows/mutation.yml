@@ -1,21 +1,55 @@
 name: mutation
 on:
   schedule:
-    - cron: '17 6 * * 1'
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  stryker:
+  shards:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    outputs:
+      list: ${{ steps.list.outputs.list }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: list
+        run: echo "list=$(node scripts/mutation-shard.mjs --list)" >> "$GITHUB_OUTPUT"
+  stryker:
+    needs: shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.shards.outputs.list) }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm stryker run --concurrency 2
+      - uses: actions/cache@v5
+        with:
+          path: reports/stryker-incremental-${{ matrix.shard }}.json
+          key: stryker-${{ matrix.shard }}-${{ github.sha }}
+          restore-keys: stryker-${{ matrix.shard }}-
+      - run: node scripts/mutation-shard.mjs "$SHARD"
+        env:
+          SHARD: ${{ matrix.shard }}
+      - run: pnpm stryker run stryker.shard.json --concurrency 3
       - uses: actions/upload-artifact@v7
         if: always()
-        with: { name: mutation-report, path: reports/mutation }
+        with:
+          name: mutation-${{ matrix.shard }}
+          path: reports/mutation
+  summary:
+    needs: stryker
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: mutation-*
+          path: reports/mutation
+      - run: node scripts/mutation-summary.mjs reports/mutation >> "$GITHUB_STEP_SUMMARY"
