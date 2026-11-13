@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-11-13T16:38:00.981Z",
+  "machine": {
+    "cores": 2,
+    "model": "Intel(R) Xeon(R) Processor @ 2.30GHz",
+    "platform": "linux",
+    "release": "6.18.44-fc-v445",
+    "node": "v22.23.4"
+  },
+  "prefix": [],
+  "hookCases": [
+    {
+      "name": "worktree30",
+      "description": "agent hook, Stop event, 30 file repository with every file changed and uncommitted",
+      "budgetMs": 3000,
+      "repoFiles": 31,
+      "changedFiles": 30,
+      "samples": 5,
+      "wallMs": [
+        874,
+        779,
+        782,
+        749,
+        806
+      ],
+      "p50Ms": 782,
+      "p95Ms": 874,
+      "maxMs": 874,
+      "maxRssMb": 141,
+      "blocked": 5,
+      "findingsInReason": 2,
+      "overBudget": false
+    },
+    {
+      "name": "worktree30-in-1000",
+      "description": "agent hook, Stop event, 1,000 file repository with 30 files changed and uncommitted",
+      "budgetMs": 3000,
+      "repoFiles": 1001,
+      "changedFiles": 30,
+      "samples": 5,
+      "wallMs": [
+        920,
+        1020,
+        1089,
+        1153,
+        866
+      ],
+      "p50Ms": 1020,
+      "p95Ms": 1153,
+      "maxMs": 1153,
+      "maxRssMb": 136,
+      "blocked": 5,
+      "findingsInReason": 1,
+      "overBudget": false
+    }
+  ]
+}
