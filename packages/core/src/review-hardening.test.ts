@@ -18,9 +18,10 @@ import { pitTestKey } from './mutation/reader.js';
 import { safeRegExp, selectorMatches, selectorsOf, thresholdsOf, wildcardMatch } from './rules/C.js';
 import { stripQuoted, S004, W003 } from './rules/W.js';
 import type { ChangedFile, RuleContext } from './types.js';
+const TIMING_OFF = process.env['TESTWITNESS_TIMING'] === 'off'; // Stryker instruments the code under test, so wall clock budgets do not apply there
 
 const N = 100_000;
-const BUDGET_MS = 2000;
+const BUDGET_MS = TIMING_OFF ? Number.POSITIVE_INFINITY : 2000;
 
 function timed<T>(f: () => T): { value: T; ms: number } {
   const t0 = performance.now();

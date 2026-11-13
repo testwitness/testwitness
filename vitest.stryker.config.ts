@@ -10,5 +10,6 @@ export default defineConfig({
     name: 'unit',
     include: ['packages/**/src/**/*.test.ts'],
     environment: 'node',
+    env: { TESTWITNESS_TIMING: 'off' },
   },
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { FrameworkProfile, TestCase, TestInventory } from '@testwitness/core';
 import { pythonFrontEnd } from './index.js';
+const TIMING_OFF = process.env['TESTWITNESS_TIMING'] === 'off'; // Stryker instruments the code under test, so wall clock budgets do not apply there
 
 const profile: FrameworkProfile = { frameworks: new Set(), extraAssertions: [] };
 
@@ -1022,7 +1023,7 @@ def test_smoke():
     const elapsed = performance.now() - start;
     expect(i.tests).toHaveLength(300);
     expect(i.tests.every((t) => t.assertions.length === 3 && t.parameterCount === 3)).toBe(true);
-    expect(elapsed).toBeLessThan(1000);
+    expect(elapsed).toBeLessThan(TIMING_OFF ? Number.POSITIVE_INFINITY : 1000);
   });
 });
 

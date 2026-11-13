@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { shortHash } from '@testwitness/core';
 import { byName, inv, src } from './helpers.test-util.js';
+const TIMING_OFF = process.env['TESTWITNESS_TIMING'] === 'off'; // Stryker instruments the code under test, so wall clock budgets do not apply there
 
 describe('edge cases', () => {
   it('returns an empty inventory for an empty file', async () => {
@@ -136,6 +137,6 @@ describe('edge cases', () => {
     expect(inventory.tests.every((t) => t.assertions.length === 4)).toBe(true);
     expect(inventory.tests.every((t) => t.mocks.length === 1)).toBe(true);
     expect(inventory.tests[499]!.qualifiedName).toBe('group 24 › case 19 does the thing');
-    expect(elapsed).toBeLessThan(1000);
+    expect(elapsed).toBeLessThan(TIMING_OFF ? Number.POSITIVE_INFINITY : 1000);
   });
 });
