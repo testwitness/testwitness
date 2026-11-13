@@ -6,6 +6,7 @@ testwitness reads a pull request's diff and test results and tells the reviewer 
 
 ```bash
 npx testwitness check --base origin/main
+npx testwitness check --pr https://github.com/<owner>/<repo>/pull/<n>   # trial on a public PR, no clone needed
 ```
 
 Needs Node 20 or newer and a git checkout with the base branch fetched. Supported on Linux and macOS; Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support). For pull requests, use the [GitHub Action](#github-action).
@@ -18,7 +19,7 @@ Measured on 347 public pull requests ([how we measure](docs/how-we-measure-preci
 
 ## What it checks
 
-testwitness is a GitHub Action and a CLI that reads a pull request's diff, the test code (tree-sitter) and the test results from the run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright), and tells the reviewer whether the tests still mean anything: deleted, skipped, loosened, tautological, assertion free, swallowed in a catch all, excluded in config, suppressed in CI, or claimed but never run. Java (JUnit 4 and 5, TestNG, AssertJ, Mockito), TypeScript and JavaScript (Jest, Vitest, Mocha, Playwright Test), Python (pytest, unittest). Works on PRs from Claude Code, Codex, Copilot, Cursor, Devin and people. No model, no secrets, no network.
+testwitness is a GitHub Action and a CLI that reads a pull request's diff, the test code (tree-sitter) and the test results from the run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright), and tells the reviewer whether the tests still mean anything: deleted, skipped, loosened, tautological, assertion free, swallowed in a catch all, excluded in config, suppressed in CI, or claimed but never run. Java (JUnit 4 and 5, TestNG, AssertJ, Mockito), TypeScript and JavaScript (Jest, Vitest, Mocha, Playwright Test), Python (pytest, unittest). Works on PRs from Claude Code, Codex, Copilot, Cursor, Devin and people. No model, no secrets, no network (the `--pr` trial alone fetches the pull request with git).
 
 Why it exists: a June 2026 study of 86,156 agent authored test patches found 80.2% had weak or no explicit oracle ([arXiv 2606.18168](https://arxiv.org/abs/2606.18168)), and inaccurate self reporting is the failure mode that grows over time in real sessions ([arXiv 2605.29442](https://arxiv.org/abs/2605.29442)). CI is green either way. testwitness puts the answer on the PR.
 

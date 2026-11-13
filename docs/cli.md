@@ -43,6 +43,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--history-out <file>` | write the run history with this run's results merged in | none |
 | `--run-id <id>` | id of this run in the history | `GITHUB_RUN_ID`, then `local-<head sha>` |
 | `--follow-symlinks` | follow symbolic links in the results, coverage, mutation and history paths, for Bazel style layouts ([configuration](./configuration#symbolic-links-in-report-paths)) | config `paths.followSymlinks`, off |
+| `--pr <url>` | trial run on a public pull request, `https://github.com/<owner>/<repo>/pull/<n>` (a trailing `/files` and the like is fine): fetches it with git, then checks it with `--diff-only`. Not with `--base`, `--head`, `--worktree`, `--results`, `--junit`, `--coverage`, `--mutation`, `--history` or `--history-out` ([trying it on a pull request](#trying-it-on-a-pull-request)) | |
 | `--cwd <dir>` | repository directory | current |
 | `-q, --quiet` | no progress on stderr | |
 
@@ -53,6 +54,23 @@ The `text` format is for a person at a terminal: findings sorted high first, eac
 ## Running it locally
 
 **From source, before the package is published.** Clone this repository, then run `pnpm install --frozen-lockfile` and `pnpm bundle:cli`. The CLI is then `node packages/cli/bin/testwitness.js`, with the same options as `testwitness`.
+
+### Trying it on a pull request
+
+```bash
+npx testwitness check --pr https://github.com/<owner>/<repo>/pull/<n>
+```
+
+Nothing to set up and no token. It works on public repositories only.
+
+* When the current directory is a clone of that repository (its `origin` is the same GitHub repository), the pull request head and its base branch are fetched into `refs/testwitness/pr/<n>/head` and `refs/testwitness/pr/<n>/base`. Your branches, working tree and `FETCH_HEAD` are not touched. The command prints how to delete the two refs.
+* Anywhere else, it makes a blobless partial clone (`--filter=blob:none --no-checkout`) in the temp directory, `testwitness-pr-clones-<uid>/<owner>/<repo>`, next to the helper index cache. The next run on the same repository reuses it and only fetches the new commits. The command prints where the clone is and the `rm -rf` line that deletes it.
+* Base is the merge base of the pull request head and its base branch; head is the pull request head commit.
+* It is a trial, so no test results are read: `--diff-only` applies on its own and the evidence section says so. Coverage, mutation reports and the helper index are not used either. `.testwitness.yml` is read from the merge base only, unless you pass `--config`.
+* One unauthenticated request to `api.github.com` reads the title, the body and the base branch. When it fails (offline, blocked, or the 60 requests an hour limit), the check goes on without the title and body, one line in the report says so and names the claim rules that were skipped (V004 and V006), and the base is the repository's default branch.
+* Output is what `check` prints anywhere else: text at a terminal, markdown in a pipe, `--format` and `--out` as usual.
+
+What it fetches and why that is safe: [security](./security#the-pr-trial).
 
 **Checking an existing pull request.** Fetch its head and check it out, because the helper index reads helper files from the working tree, not from `--head`:
 
