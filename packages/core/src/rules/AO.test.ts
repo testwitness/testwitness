@@ -218,3 +218,49 @@ describe('O006 new test file with no tests', () => {
     expect(await O006.run(context({ pairs: [{ file: changedFile('tests/x.test.ts', 'added'), head: broken }] }), {})).toEqual([]);
   });
 });
+
+describe('O006 only files a runner collects', () => {
+  const added = (path: string) => ({ file: changedFile(path, 'added'), head: inventory(path, []) });
+  it('skips support files that no runner collects by name', async () => {
+    const paths = [
+      'src/test/java/demo/RecordingListener.java',
+      'src/test/java/demo/package-info.java',
+      'src/test/java/demo/samples/BaseTest.java',
+      'src/__tests__/__fixtures__/a.js',
+      'src/__tests__/__mocks__/dep.mjs',
+      'src/__tests__/graph/dep.mjs',
+      'src/__tests__/_utils.ts',
+      'tests/harness.ts',
+      'test/integration/fixtures/x.fixture.cjs',
+      'tests/_cache.py',
+      'tests/with_deprecated.py',
+    ];
+    for (const path of paths) {
+      const file = changedFile(path, 'added');
+      file.language = path.endsWith('.java') ? 'java' : path.endsWith('.py') ? 'python' : 'typescript';
+      expect(await O006.run(context({ pairs: [{ file, head: inventory(path, []) }] }), {}), path).toEqual([]);
+    }
+  });
+  it('still reports runner named files', async () => {
+    for (const [path, language] of [
+      ['src/test/java/demo/CartTest.java', 'java'],
+      ['src/test/java/demo/TestCart.java', 'java'],
+      ['tests/test_cart.py', 'python'],
+      ['src/__tests__/cart.ts', 'typescript'],
+      ['src/cart.spec.ts', 'typescript'],
+    ] as const) {
+      const file = changedFile(path, 'added');
+      file.language = language;
+      const out = await O006.run(context({ pairs: [{ file, head: inventory(path, []) }] }), {});
+      expect(out.map((f) => f.severity), path).toEqual(['medium']);
+    }
+  });
+  it('reports a runner named script with a top level generator call as low, generated', async () => {
+    const pair = added('tests/format/js/format.test.js');
+    pair.file.language = 'javascript';
+    const ctx = { ...context({ pairs: [pair] }), readHead: async () => 'runFormatTest(import.meta, ["babel"]);\n' };
+    expect(await O006.run(ctx, {})).toMatchObject([{ severity: 'low', label: 'generated' }]);
+    const suite = { ...context({ pairs: [pair] }), readHead: async () => "describe('x', () => {});\n" };
+    expect(await O006.run(suite, {})).toMatchObject([{ severity: 'medium' }]);
+  });
+});

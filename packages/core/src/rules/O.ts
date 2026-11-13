@@ -1,4 +1,5 @@
-import type { Finding, Rule, TestCase } from '../types.js';
+import picomatch from 'picomatch';
+import type { Finding, Rule, RuleContext, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
 import { makeFinding } from './util.js';
 import { mutationOracle } from './M.js';
@@ -93,6 +94,62 @@ export const O002: Rule = {
   },
 };
 
+/** Directories and names that hold test support code by convention, never test files a runner collects. */
+const SUPPORT_DIR = /(^|\/)(__fixtures__|fixtures?|__mocks__|__snapshots__|samples?)\//;
+const SUPPORT_NAME = /^_|\.fixtures?\.[^.]+$|^package-info\.java$/;
+/** Names each runner collects by default: Surefire and Gradle (Test*, *Test, *Tests, *TestCase, *IT), pytest and unittest (test_*.py, *_test.py, tests.py), Jest, Vitest, Playwright and node:test (*.test.*, *.spec.*). */
+const JAVA_COLLECTED = /^(Test\w*|\w*(Test|Tests|TestCase|IT))\.java$/;
+const PY_COLLECTED = /^(test_\w*|\w+_test|tests?)\.py$/;
+const JS_COLLECTED = /\.(test|spec)\.[cm]?[jt]sx?$/;
+const JS_EXT = /\.[cm]?[jt]sx?$/;
+/** Top level calls that declare suites or hooks, or load modules, rather than generate tests. */
+const NOT_GENERATOR = new Set(['describe', 'context', 'suite', 'it', 'test', 'specify', 'before', 'after', 'beforeEach', 'afterEach', 'beforeAll', 'afterAll', 'setup', 'teardown', 'suiteSetup', 'suiteTeardown', 'require', 'jest', 'vi', 'expect', 'console', 'process', 'Object', 'module', 'exports', 'import', 'QUnit', 'if', 'for', 'while', 'switch', 'with', 'return', 'function', 'async', 'void', 'typeof']);
+
+async function usesMocha(ctx: RuleContext): Promise<boolean> {
+  if (ctx.pairs.some((p) => p.head?.framework === 'mocha' || p.base?.framework === 'mocha')) return true;
+  for (const f of ['.mocharc.yml', '.mocharc.yaml', '.mocharc.json', '.mocharc.jsonc', '.mocharc.js', '.mocharc.cjs']) if ((await ctx.readHead(f)) !== undefined) return true;
+  if (/"mocha"\s*:/.test((await ctx.readHead('package.json')) ?? '')) return true;
+  return false;
+}
+
+/** Mocha in the repository, or Mocha tests next to the file (the first few test files of its directory). */
+async function mochaAt(ctx: RuleContext, dir: string, repoWide: () => Promise<boolean>): Promise<boolean> {
+  if (await repoWide()) return true;
+  const siblings = (await ctx.headTestFiles()).filter((f) => f.slice(0, f.lastIndexOf('/')) === dir && JS_COLLECTED.test(f)).slice(0, 3);
+  for (const f of siblings) if ((await ctx.headInventoryFor(f))?.framework === 'mocha') return true;
+  return false;
+}
+
+/**
+ * Would a test runner collect this file at all? Only such files can "define no tests": a helper, listener, sample,
+ * fixture or mock in a test directory is support code by design. Paths configured in paths.tests count as collected.
+ */
+async function collectedByRunner(ctx: RuleContext, path: string, language: string | undefined, mocha: () => Promise<boolean>): Promise<boolean> {
+  const name = path.split('/').pop() ?? path;
+  if (SUPPORT_DIR.test(path) || SUPPORT_NAME.test(name)) return false;
+  if (ctx.config.paths.tests.length > 0 && picomatch(ctx.config.paths.tests, { dot: true })(path)) return true;
+  if (language === 'java') return JAVA_COLLECTED.test(name);
+  if (language === 'python') return PY_COLLECTED.test(name);
+  if (language === 'typescript' || language === 'javascript') {
+    if (JS_COLLECTED.test(name)) return true;
+    const parent = path.split('/').slice(-2, -1)[0];
+    // Jest collects every script directly inside __tests__; Mocha loads every script directly inside test/ by default.
+    if (parent === '__tests__' && JS_EXT.test(name)) return true;
+    if (parent === 'test' && /\.[cm]?js$/.test(name)) return mochaAt(ctx, path.slice(0, path.lastIndexOf('/')), mocha);
+    return false;
+  }
+  return false;
+}
+
+/** The first top level call that is not a suite, hook or module load, such as `runFormatTest(import.meta, [...])`. */
+function topLevelGenerator(src: string): string | undefined {
+  for (const line of src.split(/\r?\n/)) {
+    const m = /^(?:await\s+)?([A-Za-z_$][\w$]*)(?:\.[\w$]+)*\s*\(/.exec(line);
+    if (m && !NOT_GENERATOR.has(m[1]!)) return m[1];
+  }
+  return undefined;
+}
+
 /** O006 New test file with no tests collected. */
 export const O006: Rule = {
   id: 'O006',
@@ -103,20 +160,31 @@ export const O006: Rule = {
   languages: 'any',
   needs: ['diff', 'ast'],
   docs: {
-    summary: 'A new file matching test patterns defines no collectable test (wrong name prefix, missing @Test, describe without it). It reads as coverage and runs nothing.',
-    falsePositives: 'Shared test helpers and fixtures placed in a tests directory. Add them to paths.ignore or name them so they do not match test patterns.',
+    summary: 'A new file that the test runner would collect (named the way the runner finds test files) defines no collectable test (wrong name prefix, missing @Test, describe without it). It reads as coverage and runs nothing.',
+    falsePositives:
+      'Only files a runner collects by name are checked: *Test, Test*, *Tests, *TestCase and *IT classes in Java; test_*.py, *_test.py and tests.py in Python; *.test.* and *.spec.* scripts, scripts directly inside __tests__, and with Mocha scripts directly inside test/ in JavaScript and TypeScript; plus anything matching paths.tests. Helpers, listeners, samples, stubs and harnesses with other names, package-info.java, names starting with an underscore, *.fixture.* files and anything under __fixtures__, fixtures, __mocks__, __snapshots__ or samples directories are support code and never reported. A collected script that declares no test but makes a top level call to a project function (such as runFormatTest(import.meta, [...])) generates its tests at run time and is reported low with the label generated.',
     example: '+// tests/helpers.test.ts\n+export function makeUser() { ... }',
   },
   async run(ctx) {
     const out: Finding[] = [];
+    let mochaP: Promise<boolean> | undefined;
+    const mocha = (): Promise<boolean> => (mochaP ??= usesMocha(ctx));
     for (const pair of ctx.pairs) {
       if (pair.file.status !== 'added' || !pair.head) continue;
       if (pair.head.tests.length > 0) continue;
       if (pair.head.parseErrors > 0) continue;
+      if (!(await collectedByRunner(ctx, pair.file.path, pair.file.language, mocha))) continue;
+      const src = (await ctx.readHead(pair.file.path)) ?? '';
       // A concrete subclass of an abstract test base inherits its tests; the per file inventory cannot see them.
       if (pair.file.language === 'java') {
-        const src = (await ctx.readHead(pair.file.path)) ?? '';
         if (/\bclass\s+\w+\s+extends\s+\w+/.test(src) && !/\babstract\s+class\b/.test(src)) continue;
+      }
+      const generator = pair.file.language === 'typescript' || pair.file.language === 'javascript' ? topLevelGenerator(src) : undefined;
+      if (generator) {
+        out.push(
+          makeFinding(ctx, 'O006', 'low', pair.file, pair.file.path, `New test file ${pair.file.path} declares no test itself; its top level call to ${generator} may generate tests at run time`, { snippet: 'no-tests', label: 'generated' }),
+        );
+        continue;
       }
       // Helper only files: exports with assertion helpers and nothing else are still "no tests"; report.
       out.push(

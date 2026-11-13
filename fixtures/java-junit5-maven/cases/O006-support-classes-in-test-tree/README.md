@@ -1,0 +1,1 @@
+Negative. The PR adds a listener, a sample class and a package-info.java under src/test/java. None of them is named the way Surefire or Gradle collects test classes (Test*, *Test, *Tests, *TestCase), so no runner would look for tests in them. Seen in a replay of public PRs on TestNG and Mockito. Nothing fires.
