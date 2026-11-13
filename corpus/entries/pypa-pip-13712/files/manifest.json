@@ -1,0 +1,14 @@
+[
+  {
+    "path": "tests/lib/__init__.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/lib/filesystem.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/unit/test_req_uninstall.py",
+    "status": "modified"
+  }
+]

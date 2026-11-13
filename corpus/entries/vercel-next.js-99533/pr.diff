@@ -1,0 +1,124 @@
+diff --git a/test/lib/e2e-utils/deployment-test-env.ts b/test/lib/e2e-utils/deployment-test-env.ts
+new file mode 100644
+index 0000000000..dc472c41fd
+--- /dev/null
++++ b/test/lib/e2e-utils/deployment-test-env.ts
+@@ -0,0 +1,16 @@
++const deploymentTestFlags = ['__NEXT_CACHE_COMPONENTS']
++
++/**
++ * Capture test flags in the deployed config because Vercel environment variable
++ * names cannot start with an underscore. This runs in the local test harness.
++ */
++export function getDeploymentTestEnvAssignments(): string {
++  let assignments = ''
++  for (const flag of deploymentTestFlags) {
++    const value = process.env[flag]
++    if (value) {
++      assignments += `process.env.${flag} = ${JSON.stringify(value)}\n`
++    }
++  }
++  return assignments
++}
+diff --git a/test/lib/next-modes/base.ts b/test/lib/next-modes/base.ts
+index 59e024ee97..c797bdf153 100644
+--- a/test/lib/next-modes/base.ts
++++ b/test/lib/next-modes/base.ts
+@@ -4,6 +4,7 @@ import { existsSync, promises as fs, rmSync, readFileSync } from 'fs'
+ import treeKill from 'tree-kill'
+ import type { NextConfig } from 'next'
+ import { FileRef, isNextDeploy, PatchedFileRef } from '../e2e-utils'
++import { getDeploymentTestEnvAssignments } from '../e2e-utils/deployment-test-env'
+ import { ChildProcess } from 'child_process'
+ import spawn from 'cross-spawn'
+ import { quote as shellQuote } from 'shell-quote'
+@@ -538,11 +539,7 @@ export class NextInstance {
+           await fs.writeFile(
+             fileName,
+             `${content}\n` +
+-              // Capture the test flag in the config so it does not need a
+-              // deployment-compatible environment variable alias.
+-              (process.env.__NEXT_CACHE_COMPONENTS
+-                ? `process.env.__NEXT_CACHE_COMPONENTS = ${JSON.stringify(process.env.__NEXT_CACHE_COMPONENTS)}\n`
+-                : '') +
++              getDeploymentTestEnvAssignments() +
+               `
+           // alias __NEXT_TEST_MODE for next-deploy as "_" is not a valid
+           // env variable during deploy
+diff --git a/test/unit/deployment-test-env/deployment-test-env.test.ts b/test/unit/deployment-test-env/deployment-test-env.test.ts
+new file mode 100644
+index 0000000000..6a6146a2f9
+--- /dev/null
++++ b/test/unit/deployment-test-env/deployment-test-env.test.ts
+@@ -0,0 +1,71 @@
++import { runInNewContext } from 'vm'
++import { getDeploymentTestEnvAssignments } from '../../lib/e2e-utils/deployment-test-env'
++
++describe.each(['__NEXT_CACHE_COMPONENTS'])(
++  'deployment capture of %s',
++  (flag) => {
++    beforeEach(() => {
++      jest.replaceProperty(process, 'env', {
++        ...process.env,
++        __NEXT_CACHE_COMPONENTS: '',
++      })
++    })
++
++    afterEach(() => {
++      jest.restoreAllMocks()
++    })
++
++    it.each(['true', 'false', '0', '"; process.env.INJECTED = "yes"; //\n\\'])(
++      'restores the literal value %j in the deployed process',
++      (value) => {
++        process.env[flag] = value
++        const env: Record<string, string> = {}
++
++        runInNewContext(getDeploymentTestEnvAssignments(), { process: { env } })
++
++        expect(env).toEqual({ [flag]: value })
++      }
++    )
++
++    it.each(['', undefined])(
++      'leaves the deployed environment unchanged when the local flag is %j',
++      (value) => {
++        if (value === undefined) delete process.env[flag]
++        else process.env[flag] = value
++        const env = { [flag]: 'deployment-value' }
++
++        runInNewContext(getDeploymentTestEnvAssignments(), { process: { env } })
++
++        expect(env).toEqual({ [flag]: 'deployment-value' })
++      }
++    )
++
++    it('captures the value when generating the config, without needing a remote alias', () => {
++      process.env[flag] = 'true'
++      const assignments = getDeploymentTestEnvAssignments()
++      process.env[flag] = 'false'
++      const env: Record<string, string> = {}
++
++      runInNewContext(assignments, { process: { env } })
++
++      expect(env[flag]).toBe('true')
++    })
++  }
++)
++
++it('does not copy unrelated environment variables into the config', () => {
++  jest.replaceProperty(process, 'env', {
++    ...process.env,
++    __NEXT_CACHE_COMPONENTS: 'true',
++    UNRELATED_TEST_ENV: 'local-value',
++  })
++  try {
++    const env = { UNRELATED_TEST_ENV: 'deployment-value' }
++
++    runInNewContext(getDeploymentTestEnvAssignments(), { process: { env } })
++
++    expect(env.UNRELATED_TEST_ENV).toBe('deployment-value')
++  } finally {
++    jest.restoreAllMocks()
++  }
++})

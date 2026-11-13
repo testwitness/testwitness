@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ray-project/ray/pull/64322",
+  "repo": "ray-project/ray",
+  "number": 64322,
+  "title": "[serve][test] Centralize HAProxy-aware actor assertions in a shared test_utils helper",
+  "merged_at": "2026-06-25T17:13:41Z",
+  "stars": 44187,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "47f793068ce637096b500c44df58b40673a067e2",
+  "head_sha": "0feb0cb6db3f0eb0445a573ede15e5508d78aa80",
+  "files_changed": 8,
+  "additions": 85,
+  "deletions": 58
+}

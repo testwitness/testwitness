@@ -1,0 +1,516 @@
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-chromium].png
+new file mode 100644
+index 00000000..996b68f9
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-firefox].png
+new file mode 100644
+index 00000000..29b030e2
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-webkit].png
+new file mode 100644
+index 00000000..5654c44b
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-chromium].png
+new file mode 100644
+index 00000000..79cd6e25
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-firefox].png
+new file mode 100644
+index 00000000..be0ae7a5
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-webkit].png
+new file mode 100644
+index 00000000..358f276d
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-chromium].png
+new file mode 100644
+index 00000000..2ef34f99
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-firefox].png
+new file mode 100644
+index 00000000..ecef09e9
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-webkit].png
+new file mode 100644
+index 00000000..4dfb351f
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-chromium].png
+new file mode 100644
+index 00000000..4f3fa216
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-firefox].png
+new file mode 100644
+index 00000000..104c5e94
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-webkit].png
+new file mode 100644
+index 00000000..8087b867
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-chromium].png
+new file mode 100644
+index 00000000..aab1bee2
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-firefox].png
+new file mode 100644
+index 00000000..72b9b089
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-webkit].png
+new file mode 100644
+index 00000000..3815a780
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-chromium].png
+new file mode 100644
+index 00000000..c919126c
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-firefox].png
+new file mode 100644
+index 00000000..9aee3d78
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-webkit].png
+new file mode 100644
+index 00000000..29f6708e
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-chromium].png
+new file mode 100644
+index 00000000..2ef34f99
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-firefox].png
+new file mode 100644
+index 00000000..ecef09e9
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-webkit].png
+new file mode 100644
+index 00000000..4dfb351f
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-chromium].png
+new file mode 100644
+index 00000000..4f3fa216
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-firefox].png
+new file mode 100644
+index 00000000..104c5e94
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-webkit].png
+new file mode 100644
+index 00000000..8087b867
+Binary files /dev/null and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-chromium].png
+index fc572400..22e80f4d 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-firefox].png
+index ffe3c48d..de901e4e 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-webkit].png
+index 53243ea0..e6d33d9b 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-chromium].png
+index cc046ca1..1280fb39 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-firefox].png
+index 891f35e9..14912ddb 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-webkit].png
+index 805853e9..280ecfdf 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-chromium].png
+index 3354d142..fe941633 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-firefox].png
+index 5cd4800e..72b9b089 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-webkit].png
+index b9edc4a0..3815a780 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-chromium].png
+index bb729270..be5d5779 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-firefox].png
+index 67c93258..9aee3d78 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-webkit].png
+index 46dd5e66..29f6708e 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-chromium].png
+index 93ba8599..996b68f9 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-firefox].png
+index 22b54a63..29b030e2 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-webkit].png
+index b11fec6e..5654c44b 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-webkit].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-chromium].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-chromium].png
+index 26e3d45f..79cd6e25 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-chromium].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-chromium].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-firefox].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-firefox].png
+index 273d6e73..be0ae7a5 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-firefox].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-firefox].png differ
+diff --git a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-webkit].png b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-webkit].png
+index 0c97a600..358f276d 100644
+Binary files a/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-webkit].png and b/e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-webkit].png differ
+diff --git a/e2e_playwright/st_plotly_chart.py b/e2e_playwright/st_plotly_chart.py
+index 1bbb0c99..41ac1784 100644
+--- a/e2e_playwright/st_plotly_chart.py
++++ b/e2e_playwright/st_plotly_chart.py
+@@ -16,6 +16,7 @@ from datetime import datetime
+ 
+ import numpy as np
+ import pandas as pd
++import plotly
+ import plotly.express as px
+ import plotly.graph_objects as go
+ from plotly.subplots import make_subplots
+@@ -248,7 +249,7 @@ fig.update_layout(
+     legend_title_font_color="green",
+     title_font_size=30,
+ )
+-st.plotly_chart(fig, theme="streamlit")
++st.plotly_chart(fig, config=dict(displayModeBar=False), theme="streamlit")
+ 
+ data = pd.DataFrame((100, 120, 104, 102, 203, 102), columns=["some_col"])
+ 
+@@ -264,4 +265,6 @@ st.plotly_chart(
+ )
+ 
+ # uses container width when use_container_width flag is True
+-st.plotly_chart(fig, use_container_width=True, theme=None)
++st.plotly_chart(
++    fig, config=dict(displayModeBar=False), use_container_width=True, theme=None
++)
+diff --git a/e2e_playwright/st_plotly_chart_test.py b/e2e_playwright/st_plotly_chart_test.py
+index b03a02c7..f83c9681 100644
+--- a/e2e_playwright/st_plotly_chart_test.py
++++ b/e2e_playwright/st_plotly_chart_test.py
+@@ -16,7 +16,7 @@
+ import pytest
+ from playwright.sync_api import Page, expect
+ 
+-from e2e_playwright.conftest import ImageCompareFunction
++from e2e_playwright.conftest import ImageCompareFunction, wait_for_app_run
+ 
+ 
+ # Only do chromium as this can create a lot of screenshots
+@@ -56,8 +56,53 @@ def test_plotly_has_correct_visuals(
+         "st_plotly_chart-use-container-width-false-and-specified-height",
+         "st_plotly_chart-none-theme-and-use-container-width",
+     ]
++    plotly_indices = [13, 14, 15]
+     for i, name in enumerate(snapshot_names):
+         assert_snapshot(
+-            themed_app.locator(".stPlotlyChart").nth(i),
++            themed_app.locator(".stPlotlyChart").nth(plotly_indices[i]),
+             name=name,
+         )
++
++
++def test_plotly_use_container_width_false_fullscreen(
++    themed_app: Page, assert_snapshot: ImageCompareFunction
++):
++    index = 14
++    themed_app.locator(".stPlotlyChart").nth(index).hover()
++    fullscreen_button = themed_app.get_by_test_id("StyledFullScreenButton").nth(index)
++    fullscreen_button.hover()
++    fullscreen_button.click()
++    assert_snapshot(
++        themed_app.locator(".stPlotlyChart").nth(index),
++        name="st_plotly_chart-container_width_false_fullscreen",
++    )
++
++    fullscreen_button = themed_app.get_by_test_id("StyledFullScreenButton").nth(index)
++    fullscreen_button.hover()
++    fullscreen_button.click()
++    assert_snapshot(
++        themed_app.locator(".stPlotlyChart").nth(index),
++        name="st_plotly_chart-container_width_false_exited_fullscreen",
++    )
++
++
++def test_plotly_use_container_width_true_fullscreen(
++    themed_app: Page, assert_snapshot: ImageCompareFunction
++):
++    index = 15
++    themed_app.locator(".stPlotlyChart").nth(index).hover()
++    fullscreen_button = themed_app.get_by_test_id("StyledFullScreenButton").nth(index)
++    fullscreen_button.hover()
++    fullscreen_button.click()
++    assert_snapshot(
++        themed_app.locator(".stPlotlyChart").nth(index),
++        name="st_plotly_chart-container_width_true_fullscreen",
++    )
++
++    fullscreen_button = themed_app.get_by_test_id("StyledFullScreenButton").nth(index)
++    fullscreen_button.hover()
++    fullscreen_button.click()
++    assert_snapshot(
++        themed_app.locator(".stPlotlyChart").nth(index),
++        name="st_plotly_chart-container_width_true_exited_fullscreen",
++    )
+diff --git a/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.test.tsx b/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.test.tsx
+index 80397f0f..ab50c0bc 100644
+--- a/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.test.tsx
++++ b/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.test.tsx
+@@ -13,21 +13,16 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
+-import React, { useState, ReactElement, ReactNode } from "react"
++import React from "react"
+ import "@testing-library/jest-dom"
+ import { screen } from "@testing-library/react"
+ import { render } from "@streamlit/lib/src/test_util"
+-import { act } from "react-dom/test-utils"
+ 
+ import { PlotlyChart as PlotlyChartProto } from "@streamlit/lib/src/proto"
+ import mock from "./mock"
+ 
+ import { PlotlyChart, DEFAULT_HEIGHT, PlotlyChartProps } from "./PlotlyChart"
+ 
+-const DEFAULT_PLOTLY_WIDTH = "700"
+-const DEFAULT_PLOTLY_HEIGHT = "450"
+-
+ const getProps = (
+   elementProps: Partial<PlotlyChartProto> = {}
+ ): PlotlyChartProps => ({
+@@ -37,6 +32,7 @@ const getProps = (
+   }),
+   width: 0,
+   height: 0,
++  isFullScreen: false,
+ })
+ 
+ // eslint-disable-next-line testing-library/no-node-access -- There's no other way to get the parent element
+@@ -50,88 +46,6 @@ const getPlotlyRoot = (wrapper: Element): Element | null => {
+   return root
+ }
+ 
+-type Setter<T> = React.Dispatch<React.SetStateAction<T>>
+-interface DimensionsSetterProps {
+-  width: number
+-  height: number | undefined
+-  setWidth: Setter<number>
+-  setHeight: Setter<number | undefined>
+-}
+-
+-interface ChildrenFunction {
+-  children: (props: DimensionsSetterProps) => ReactNode
+-}
+-
+-function DimensionsSetter({ children }: ChildrenFunction): ReactElement {
+-  const [width, setWidth] = useState<number>(0)
+-  const [height, setHeight] = useState<number | undefined>(undefined)
+-
+-  return <div>{children({ width, height, setWidth, setHeight })}</div>
+-}
+-
+-async function testEnterAndExitFullscreen(
+-  useContainerWidth: boolean
+-): Promise<void> {
+-  let setWidth: Setter<number>, setHeight: Setter<number | undefined>
+-  render(
+-    <DimensionsSetter>
+-      {({ width, height, setWidth: w, setHeight: h }) => {
+-        setWidth = w
+-        setHeight = h
+-
+-        const nonFullScreenProps = {
+-          ...getProps({
+-            useContainerWidth,
+-          }),
+-          height: undefined,
+-        }
+-
+-        return (
+-          <PlotlyChart {...nonFullScreenProps} width={width} height={height} />
+-        )
+-      }}
+-    </DimensionsSetter>
+-  )
+-  await new Promise(process.nextTick)
+-  const label = screen.getByText("Group 1")
+-  // eslint-disable-next-line testing-library/no-node-access
+-  const svg = getPlotlyRoot(label)?.querySelector("svg")
+-
+-  expect(svg).toHaveAttribute("width", DEFAULT_PLOTLY_WIDTH)
+-  expect(svg).toHaveAttribute("height", DEFAULT_PLOTLY_HEIGHT)
+-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Test verifies this
+-  expect(setWidth!).toBeDefined()
+-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Test verifies this
+-  expect(setHeight!).toBeDefined()
+-
+-  act(() => {
+-    setWidth(800)
+-    setHeight(800)
+-  })
+-  await new Promise(process.nextTick)
+-  const label2 = screen.getByText("Group 1")
+-  // eslint-disable-next-line testing-library/no-node-access
+-  const svg2 = getPlotlyRoot(label2)?.querySelector("svg")
+-  expect(svg2).toHaveAttribute("width", "800")
+-  expect(svg2).toHaveAttribute("height", "800")
+-
+-  act(() => {
+-    setWidth(300)
+-    setHeight(undefined)
+-  })
+-  await new Promise(process.nextTick)
+-
+-  const label3 = screen.getByText("Group 1")
+-  // eslint-disable-next-line testing-library/no-node-access
+-  const svg3 = getPlotlyRoot(label3)?.querySelector("svg")
+-  if (useContainerWidth) {
+-    expect(svg3).toHaveAttribute("width", "300")
+-  } else {
+-    expect(svg3).toHaveAttribute("width", DEFAULT_PLOTLY_WIDTH)
+-  }
+-  expect(svg3).toHaveAttribute("height", DEFAULT_PLOTLY_HEIGHT)
+-}
+-
+ describe("PlotlyChart Element", () => {
+   it("renders without crashing", async () => {
+     const props = getProps()
+@@ -142,63 +56,6 @@ describe("PlotlyChart Element", () => {
+     expect(screen.getByText("Group 1")).toBeInTheDocument()
+   })
+ 
+-  describe("Dimensions", () => {
+-    it("fullscreen", async () => {
+-      const props = {
+-        ...getProps(),
+-        height: 400,
+-        width: 400,
+-      }
+-      render(<PlotlyChart {...props} />)
+-      await new Promise(process.nextTick)
+-      const label = screen.getByText("Group 1")
+-      // eslint-disable-next-line testing-library/no-node-access
+-      const svg = getPlotlyRoot(label)?.querySelector("svg")
+-      expect(svg).toHaveAttribute("width", "400")
+-      expect(svg).toHaveAttribute("height", "400")
+-    })
+-
+-    it("useContainerWidth true", async () => {
+-      const props = {
+-        ...getProps({
+-          useContainerWidth: true,
+-        }),
+-      }
+-      render(<PlotlyChart {...props} />)
+-      await new Promise(process.nextTick)
+-      const label = screen.getByText("Group 1")
+-      // eslint-disable-next-line testing-library/no-node-access
+-      const svg = getPlotlyRoot(label)?.querySelector("svg")
+-
+-      expect(svg).toHaveAttribute("width", DEFAULT_PLOTLY_WIDTH)
+-      expect(svg).toHaveAttribute("height", DEFAULT_PLOTLY_HEIGHT)
+-    })
+-
+-    it("useContainerWidth false", async () => {
+-      const props = {
+-        ...getProps({
+-          useContainerWidth: false,
+-        }),
+-      }
+-      render(<PlotlyChart {...props} />)
+-      await new Promise(process.nextTick)
+-      const label = screen.getByText("Group 1")
+-      // eslint-disable-next-line testing-library/no-node-access
+-      const svg = getPlotlyRoot(label)?.querySelector("svg")
+-
+-      expect(svg).toHaveAttribute("width", DEFAULT_PLOTLY_WIDTH)
+-      expect(svg).toHaveAttribute("height", DEFAULT_PLOTLY_HEIGHT)
+-    })
+-
+-    // eslint-disable-next-line jest/expect-expect -- underlying testEnterAndExitFullscreen function has expect statements
+-    it("renders properly when entering fullscreen and out of fullscreen and useContainerWidth is false", async () => {
+-      await testEnterAndExitFullscreen(false)
+-    })
+-    // eslint-disable-next-line jest/expect-expect -- underlying testEnterAndExitFullscreen function has expect statements
+-    it("renders properly when entering fullscreen and out of fullscreen and useContainerWidth is true", async () => {
+-      await testEnterAndExitFullscreen(true)
+-    })
+-  })
+   describe("Render iframe", () => {
+     const props = getProps({
+       chart: "url",
+diff --git a/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.tsx b/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.tsx
+index 9a2e66f4..e984610f 100644
+--- a/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.tsx
++++ b/frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.tsx
+@@ -38,6 +38,7 @@ export interface PlotlyChartProps {
+   width: number
+   element: PlotlyChartProto
+   height: number | undefined
++  isFullScreen: boolean
+ }
+ 
+ export interface PlotlyIFrameProps {
+@@ -48,10 +49,6 @@ export interface PlotlyIFrameProps {
+ 
+ export const DEFAULT_HEIGHT = 450
+ 
+-function isFullScreen(height: number | undefined): boolean {
+-  return !!height
+-}
+-
+ /** Render an iframed Plotly chart from a URL */
+ function renderIFrame({
+   url,
+@@ -73,6 +70,7 @@ function PlotlyFigure({
+   element,
+   width,
+   height,
++  isFullScreen,
+ }: PlotlyChartProps): ReactElement {
+   const figure = element.figure as FigureProto
+ 
+@@ -85,7 +83,7 @@ function PlotlyFigure({
+     const initialHeight = spec.layout.height
+     const initialWidth = spec.layout.width
+ 
+-    if (isFullScreen(height)) {
++    if (isFullScreen) {
+       spec.layout.width = width
+       spec.layout.height = height
+     } else if (element.useContainerWidth) {
+@@ -109,6 +107,7 @@ function PlotlyFigure({
+     height,
+     theme,
+     width,
++    isFullScreen,
+   ])
+ 
+   const [config, setConfig] = useState(JSON.parse(figure.config))
+@@ -126,7 +125,7 @@ function PlotlyFigure({
+ 
+   return (
+     <Plot
+-      key={isFullScreen(height) ? "fullscreen" : "original"}
++      key={isFullScreen ? "fullscreen" : "original"}
+       className="stPlotlyChart"
+       data={data}
+       layout={layout}
+@@ -140,6 +139,7 @@ export function PlotlyChart({
+   width,
+   element,
+   height,
++  isFullScreen,
+ }: PlotlyChartProps): ReactElement {
+   switch (element.chart) {
+     case "url":
+@@ -149,7 +149,14 @@ export function PlotlyChart({
+         width,
+       })
+     case "figure":
+-      return <PlotlyFigure width={width} element={element} height={height} />
++      return (
++        <PlotlyFigure
++          width={width}
++          element={element}
++          height={height}
++          isFullScreen={isFullScreen}
++        />
++      )
+     default:
+       throw new Error(`Unrecognized PlotlyChart type: ${element.chart}`)
+   }

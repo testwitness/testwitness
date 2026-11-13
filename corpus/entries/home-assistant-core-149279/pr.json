@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/home-assistant/core/pull/149279",
+  "repo": "home-assistant/core",
+  "number": 149279,
+  "title": "Consolidate REST sensor encoding tests using pytest parametrize",
+  "merged_at": "2025-07-23T12:57:07Z",
+  "stars": 92279,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "2f6c0a1b7f28480ac236c2b484d169ea4bbea8bf",
+  "head_sha": "ec70e57ed549dc029a0da0f75101d254d299997c",
+  "files_changed": 1,
+  "additions": 42,
+  "deletions": 66
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/home-assistant/core/pull/176253",
+  "repo": "home-assistant/core",
+  "number": 176253,
+  "title": "Move iZone discovery unit tests to test_discovery.py",
+  "merged_at": "2026-07-13T15:51:27Z",
+  "stars": 92279,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "9cd694008baf1222fc3815f9c0d9303dc583c46f",
+  "head_sha": "c574ae8d41ad51f416016acb4591953eec487d14",
+  "files_changed": 2,
+  "additions": 338,
+  "deletions": 320
+}

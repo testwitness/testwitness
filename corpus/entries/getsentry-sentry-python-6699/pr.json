@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/getsentry/sentry-python/pull/6699",
+  "repo": "getsentry/sentry-python",
+  "number": 6699,
+  "title": "test: Move conversation ID tests to their own file",
+  "merged_at": "2026-06-30T14:22:11Z",
+  "stars": 2219,
+  "license": "MIT",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "7024d199a564dafb4da50f6e7a462b8e2c20e385",
+  "head_sha": "b2dcb38b422b314abe7c0744608cdee3827cef91",
+  "files_changed": 2,
+  "additions": 185,
+  "deletions": 184
+}

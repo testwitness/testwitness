@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pola-rs/polars/pull/29983",
+  "repo": "pola-rs/polars",
+  "number": 29983,
+  "title": "test: Move SQL `read_csv` option tests from Rust to Python",
+  "merged_at": "2026-10-16T15:47:10Z",
+  "stars": 40342,
+  "license": "MIT",
+  "language": "rust",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "b0de4fc51a1acf54f0e242406535a14eb6b4b882",
+  "head_sha": "d4f195d11805807eaaa222f1485b3f40b54a2a80",
+  "files_changed": 4,
+  "additions": 63,
+  "deletions": 360
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "packages/next/src/client/link.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "test/development/acceptance/ReactRefreshLogBoxMisc.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "test/development/acceptance/__snapshots__/ReactRefreshLogBoxMisc.test.ts.snap",
+    "status": "deleted"
+  },
+  {
+    "path": "test/development/pages-dir/client-navigation/index.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/server-source-maps/server-source-maps.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/next-link-errors/app/invalid-href/page.js",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-link-errors/app/layout.js",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-link-errors/app/multiple-children/page.js",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-link-errors/app/no-children/page.js",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-link-errors/next-link-errors.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/e2e/next-link-errors/next.config.js",
+    "status": "added"
+  },
+  {
+    "path": "test/turbopack-dev-tests-manifest.json",
+    "status": "modified"
+  }
+]

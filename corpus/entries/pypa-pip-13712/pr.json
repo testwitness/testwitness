@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pypa/pip/pull/13712",
+  "repo": "pypa/pip",
+  "number": 13712,
+  "title": "test: Move `create_file()` helper and add `script.temporary_file()`",
+  "merged_at": "2025-12-20T22:37:02Z",
+  "stars": 10307,
+  "license": "MIT",
+  "language": "python",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "812f4817d662dc7a576ae2025396af1db7908d59",
+  "head_sha": "766f50c7ac8f931deefbd59e019bde5445eb11cd",
+  "files_changed": 3,
+  "additions": 19,
+  "deletions": 13
+}

@@ -1,0 +1,406 @@
+diff --git a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx b/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx
+deleted file mode 100644
+index e9de2c4092..0000000000
+--- a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx
++++ /dev/null
+@@ -1,127 +0,0 @@
+-/**
+- * @jest-environment jsdom
+- */
+-/* eslint-disable import/no-extraneous-dependencies */
+-import { render, screen, fireEvent, act } from '@testing-library/react'
+-import { ErrorOverlayLayout } from './error-overlay-layout'
+-import '@testing-library/jest-dom'
+-
+-global.ResizeObserver = jest.fn().mockImplementation(() => ({
+-  observe: jest.fn(),
+-  unobserve: jest.fn(),
+-  disconnect: jest.fn(),
+-}))
+-
+-const renderTestComponent = () => {
+-  return render(
+-    <ErrorOverlayLayout
+-      errorType="Build Error"
+-      errorMessage="Failed to compile"
+-      errorCode="E001"
+-      error={new Error('Sample error')}
+-      isBuildError={true}
+-      onClose={() => {}}
+-      rendered={true}
+-      transitionDurationMs={200}
+-      isTurbopack={false}
+-      errorCount={1}
+-      versionInfo={{
+-        installed: '15.0.0',
+-        staleness: 'fresh',
+-      }}
+-      generateErrorInfo={() => ''}
+-    >
+-      Module not found: Cannot find module './missing-module'
+-    </ErrorOverlayLayout>
+-  )
+-}
+-
+-describe('ErrorOverlayLayout Component', () => {
+-  beforeEach(() => {
+-    // Mock fetch
+-    global.fetch = jest.fn(() => {
+-      return Promise.resolve({
+-        ok: true,
+-        headers: new Headers(),
+-        redirected: false,
+-        status: 200,
+-        statusText: 'OK',
+-        type: 'basic',
+-        url: '',
+-        json: () => Promise.resolve({}),
+-        text: () => Promise.resolve(''),
+-        blob: () => Promise.resolve(new Blob()),
+-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+-        formData: () => Promise.resolve(new FormData()),
+-        clone: () => new Response(),
+-      } as Response)
+-    }) as jest.Mock
+-  })
+-
+-  test('renders ErrorOverlayLayout with provided props', () => {
+-    renderTestComponent()
+-    expect(screen.getByText('Failed to compile')).toBeInTheDocument()
+-    expect(
+-      screen.getByText(
+-        "Module not found: Cannot find module './missing-module'"
+-      )
+-    ).toBeInTheDocument()
+-  })
+-  test('voting buttons have aria-hidden icons', () => {
+-    renderTestComponent()
+-
+-    const helpfulButton = screen.getByRole('button', {
+-      name: 'Mark as helpful',
+-    })
+-    const notHelpfulButton = screen.getByRole('button', {
+-      name: 'Mark as not helpful',
+-    })
+-
+-    expect(helpfulButton.querySelector('svg')).toHaveAttribute(
+-      'aria-hidden',
+-      'true'
+-    )
+-    expect(notHelpfulButton.querySelector('svg')).toHaveAttribute(
+-      'aria-hidden',
+-      'true'
+-    )
+-  })
+-
+-  test('sends feedback when clicking helpful button', async () => {
+-    renderTestComponent()
+-
+-    expect(
+-      screen.queryByText('Thanks for your feedback!')
+-    ).not.toBeInTheDocument()
+-
+-    await act(async () => {
+-      fireEvent.click(screen.getByRole('button', { name: 'Mark as helpful' }))
+-    })
+-
+-    expect(fetch).toHaveBeenCalledWith(
+-      '/__nextjs_error_feedback?errorCode=E001&wasHelpful=true'
+-    )
+-
+-    expect(screen.getByText('Thanks for your feedback!')).toBeInTheDocument()
+-  })
+-
+-  test('sends feedback when clicking not helpful button', async () => {
+-    renderTestComponent()
+-
+-    expect(
+-      screen.queryByText('Thanks for your feedback!')
+-    ).not.toBeInTheDocument()
+-
+-    await act(async () => {
+-      fireEvent.click(
+-        screen.getByRole('button', { name: 'Mark as not helpful' })
+-      )
+-    })
+-
+-    expect(fetch).toHaveBeenCalledWith(
+-      '/__nextjs_error_feedback?errorCode=E001&wasHelpful=false'
+-    )
+-
+-    expect(screen.getByText('Thanks for your feedback!')).toBeInTheDocument()
+-  })
+-})
+diff --git a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.stories.tsx b/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.stories.tsx
+deleted file mode 100644
+index 1d4eac1591..0000000000
+--- a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.stories.tsx
++++ /dev/null
+@@ -1,20 +0,0 @@
+-import type { Meta, StoryObj } from '@storybook/react'
+-import { IssueFeedbackButton } from './issue-feedback-button'
+-import { withShadowPortal } from '../../../storybook/with-shadow-portal'
+-
+-const meta: Meta<typeof IssueFeedbackButton> = {
+-  component: IssueFeedbackButton,
+-  parameters: {
+-    layout: 'centered',
+-  },
+-  decorators: [withShadowPortal],
+-}
+-
+-export default meta
+-type Story = StoryObj<typeof IssueFeedbackButton>
+-
+-export const Default: Story = {
+-  args: {
+-    errorCode: 'E001_FAKE',
+-  },
+-}
+diff --git a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.tsx b/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.tsx
+deleted file mode 100644
+index fb42f38e6c..0000000000
+--- a/packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.tsx
++++ /dev/null
+@@ -1,115 +0,0 @@
+-import { useCallback, useState } from 'react'
+-
+-import { ThumbsDown } from '../../../icons/thumbs/thumbs-down'
+-import { ThumbsUp } from '../../../icons/thumbs/thumbs-up'
+-import { cx } from '../../../utils/cx'
+-import { css } from '../../../utils/css'
+-
+-export function IssueFeedbackButton({ errorCode }: { errorCode: string }) {
+-  const [votedMap, setVotedMap] = useState<Record<string, boolean>>({})
+-  const voted = votedMap[errorCode]
+-  const disabled = process.env.__NEXT_TELEMETRY_DISABLED
+-
+-  const handleFeedback = useCallback(
+-    async (wasHelpful: boolean) => {
+-      // Optimistically set feedback state without loading/error states to keep implementation simple
+-      setVotedMap((prev) => ({
+-        ...prev,
+-        [errorCode]: wasHelpful,
+-      }))
+-
+-      try {
+-        const response = await fetch(
+-          `${process.env.__NEXT_ROUTER_BASEPATH || ''}/__nextjs_error_feedback?${new URLSearchParams(
+-            {
+-              errorCode,
+-              wasHelpful: wasHelpful.toString(),
+-            }
+-          )}`
+-        )
+-
+-        if (!response.ok) {
+-          // Handle non-2xx HTTP responses here if needed
+-          console.error('Failed to record feedback on the server.')
+-        }
+-      } catch (error) {
+-        console.error('Failed to record feedback:', error)
+-      }
+-    },
+-    [errorCode]
+-  )
+-
+-  return (
+-    <div data-nextjs-issue-feedback-button-group>
+-      <button
+-        aria-disabled={disabled ? 'true' : undefined}
+-        aria-label="Mark as helpful"
+-        onClick={disabled ? undefined : () => handleFeedback(true)}
+-        className={cx('feedback-button', voted === true && 'voted')}
+-        title={
+-          disabled
+-            ? 'Feedback disabled due to setting NEXT_TELEMETRY_DISABLED'
+-            : undefined
+-        }
+-        type="button"
+-      >
+-        <ThumbsUp aria-hidden="true" />
+-      </button>
+-      <div data-nextjs-issue-feedback-separator />
+-      <button
+-        aria-disabled={disabled ? 'true' : undefined}
+-        aria-label="Mark as not helpful"
+-        onClick={disabled ? undefined : () => handleFeedback(false)}
+-        className={cx('feedback-button', voted === false && 'voted')}
+-        title={
+-          disabled
+-            ? 'Feedback disabled due to setting NEXT_TELEMETRY_DISABLED'
+-            : undefined
+-        }
+-        type="button"
+-      >
+-        <ThumbsDown
+-          aria-hidden="true"
+-          // Optical alignment
+-          style={{
+-            translate: '1px 1px',
+-          }}
+-        />
+-      </button>
+-    </div>
+-  )
+-}
+-
+-export const ISSUE_FEEDBACK_BUTTON_STYLES = css`
+-  [data-nextjs-issue-feedback-button-group] {
+-    display: flex;
+-    align-items: center;
+-    border: 1px solid var(--color-gray-400);
+-    border-radius: var(--rounded-full);
+-    background: var(--color-background-100);
+-    box-shadow: var(--shadow-small);
+-  }
+-
+-  [data-nextjs-issue-feedback-button-group] button {
+-    height: 100%;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-  }
+-
+-  [data-nextjs-issue-feedback-button-group] button:first-child {
+-    padding: 4px 3px 4px 5px;
+-    border-radius: var(--rounded-full) 0 0 var(--rounded-full);
+-  }
+-
+-  [data-nextjs-issue-feedback-button-group] button:last-child {
+-    padding: 4px 5px 4px 3px;
+-    border-radius: 0 var(--rounded-full) var(--rounded-full) 0;
+-  }
+-
+-  [data-nextjs-issue-feedback-separator] {
+-    width: 1px;
+-    height: 100%;
+-    background: var(--color-gray-400);
+-  }
+-`
+diff --git a/packages/next/src/next-devtools/dev-overlay/styles/component-styles.tsx b/packages/next/src/next-devtools/dev-overlay/styles/component-styles.tsx
+index 657f6c929f..041e92dfef 100644
+--- a/packages/next/src/next-devtools/dev-overlay/styles/component-styles.tsx
++++ b/packages/next/src/next-devtools/dev-overlay/styles/component-styles.tsx
+@@ -20,7 +20,6 @@ import { DEV_TOOLS_INFO_ROUTE_INFO_STYLES } from '../components/errors/dev-tools
+ import { DEV_TOOLS_INFO_USER_PREFERENCES_STYLES } from '../components/errors/dev-tools-indicator/dev-tools-info/user-preferences'
+ import { FADER_STYLES } from '../components/fader'
+ import { CALL_STACK_STYLES } from '../components/call-stack/call-stack'
+-import { ISSUE_FEEDBACK_BUTTON_STYLES } from '../components/errors/error-overlay-toolbar/issue-feedback-button'
+ import { SHORTCUT_RECORDER_STYLES } from '../components/errors/dev-tools-indicator/dev-tools-info/shortcut-recorder'
+ 
+ export function ComponentStyles() {
+@@ -48,7 +47,6 @@ export function ComponentStyles() {
+         ${DEV_TOOLS_INFO_ROUTE_INFO_STYLES}
+         ${DEV_TOOLS_INFO_USER_PREFERENCES_STYLES}
+         ${FADER_STYLES}
+-        ${ISSUE_FEEDBACK_BUTTON_STYLES}
+         ${SHORTCUT_RECORDER_STYLES}
+       `}
+     </style>
+diff --git a/test/development/error-overlay/index.test.tsx b/test/development/error-overlay/index.test.tsx
+index e05ef1a730..6808ef40fb 100644
+--- a/test/development/error-overlay/index.test.tsx
++++ b/test/development/error-overlay/index.test.tsx
+@@ -4,30 +4,71 @@ import { assertHasRedbox } from 'next-test-utils'
+ describe('DevErrorOverlay', () => {
+   const { next } = nextTestSetup({
+     files: __dirname,
++    env: {
++      NEXT_TELEMETRY_DISABLED: '',
++    },
+   })
+ 
+   it('can get error code from RSC error thrown by framework', async () => {
+-    await next.render('/known-rsc-error')
+     const browser = await next.browser('/known-rsc-error')
+-    const errorCode = await browser.waitForElementByCss(
+-      '[data-nextjs-error-code]'
+-    )
++
++    const errorCode = await browser.elementByCss('[data-nextjs-error-code]')
+     const code = await errorCode.getAttribute('data-nextjs-error-code')
+     expect(code).toBe('E127')
+   })
+ 
+-  it('can get error code from client side error thrown by framework', async () => {
+-    await next.render('/known-client-error')
++  it('sends feedback when clicking helpful button', async () => {
++    const feedbackRequests: string[] = []
++    const browser = await next.browser('/known-client-error', {
++      beforePageLoad(page) {
++        page.route(/__nextjs_error_feedback/, (route) => {
++          const url = new URL(route.request().url())
++          feedbackRequests.push(url.pathname + url.search)
+ 
+-    const browser = await next.browser('/known-client-error')
++          route.fulfill({ status: 204, body: 'No Content' })
++        })
++      },
++    })
+ 
+     await browser.elementByCss('button').click() // clicked "break on client"
++    await browser.getByRole('button', { name: 'Mark as helpful' }).click()
+ 
+-    const errorCode = await browser.waitForElementByCss(
+-      '[data-nextjs-error-code]'
+-    )
+-    const code = await errorCode.getAttribute('data-nextjs-error-code')
+-    expect(code).toBe('E794')
++    expect(
++      await browser
++        .getByRole('region', { name: 'Error feedback' })
++        .getByRole('status')
++        .textContent()
++    ).toEqual('Thanks for your feedback!')
++    expect(feedbackRequests).toEqual([
++      '/__nextjs_error_feedback?errorCode=E794&wasHelpful=true',
++    ])
++  })
++
++  it('sends feedback when clicking not helpful button', async () => {
++    const feedbackRequests: string[] = []
++    const browser = await next.browser('/known-client-error', {
++      beforePageLoad(page) {
++        page.route(/__nextjs_error_feedback/, (route) => {
++          const url = new URL(route.request().url())
++          feedbackRequests.push(url.pathname + url.search)
++
++          route.fulfill({ status: 204, body: 'No Content' })
++        })
++      },
++    })
++
++    await browser.elementByCss('button').click() // clicked "break on client"
++    await browser.getByRole('button', { name: 'Mark as not helpful' }).click()
++
++    expect(
++      await browser
++        .getByRole('region', { name: 'Error feedback' })
++        .getByRole('status')
++        .textContent()
++    ).toEqual('Thanks for your feedback!')
++    expect(feedbackRequests).toEqual([
++      '/__nextjs_error_feedback?errorCode=E794&wasHelpful=false',
++    ])
+   })
+ 
+   it('loads fonts successfully', async () => {
+diff --git a/test/lib/browsers/playwright.ts b/test/lib/browsers/playwright.ts
+index 7b1cd585cb..c5fb177101 100644
+--- a/test/lib/browsers/playwright.ts
++++ b/test/lib/browsers/playwright.ts
+@@ -573,6 +573,13 @@ export class Playwright<TCurrent = undefined> {
+     })
+   }
+ 
++  getByRole(
++    role: Parameters<(typeof page)['getByRole']>[0],
++    options?: Parameters<(typeof page)['getByRole']>[1]
++  ) {
++    return page.getByRole(role, options)
++  }
++
+   locateRedbox(): Locator {
+     return page.locator(
+       'nextjs-portal [aria-labelledby="nextjs__container_errors_label"]'

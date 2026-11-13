@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jestjs/jest/pull/12595",
+  "repo": "jestjs/jest",
+  "number": 12595,
+  "title": "refactor(e2e): consolidate all end-to-end tests of fake timers",
+  "merged_at": "2022-03-23T12:18:38Z",
+  "stars": 45471,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "consolidate",
+  "split": "heldout",
+  "base_sha": "abca0fe6c1d9fed884e4dc8bb911b3497db506ee",
+  "head_sha": "d49e2735805ea8b2462af27e59c876f114b2faa1",
+  "files_changed": 42,
+  "additions": 215,
+  "deletions": 207
+}

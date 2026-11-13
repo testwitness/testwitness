@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/home-assistant/core/pull/181916",
+  "repo": "home-assistant/core",
+  "number": 181916,
+  "title": "Consolidate Duco capability recovery tests",
+  "merged_at": "2026-09-11T07:12:39Z",
+  "stars": 92279,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "consolidate",
+  "split": "tuning",
+  "base_sha": "ce399d5ab26dac1eb0020804b5f33122a46db895",
+  "head_sha": "8bdc1dca09c271495d9bac3e2a6ec23528de59f1",
+  "files_changed": 2,
+  "additions": 45,
+  "deletions": 64
+}

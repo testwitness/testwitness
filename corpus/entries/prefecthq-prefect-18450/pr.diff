@@ -1,0 +1,1160 @@
+diff --git a/.github/workflows/integration-tests.yaml b/.github/workflows/integration-tests.yaml
+index cd31f1a2..d68ba199 100644
+--- a/.github/workflows/integration-tests.yaml
++++ b/.github/workflows/integration-tests.yaml
+@@ -77,7 +77,6 @@ jobs:
+           PREFECT_SERVER_LOGGING_LEVEL: DEBUG
+         run: >
+           uv run prefect server start --analytics-off --host 0.0.0.0 2>&1 > server.log &
+-
+           uv run ./scripts/wait-for-server.py
+ 
+       - name: Run integration flows
+@@ -85,7 +84,7 @@ jobs:
+           PREFECT_API_URL: http://127.0.0.1:4200/api
+           SERVER_VERSION: ${{ matrix.server-version.version }}
+         run: >
+-          uv run ./scripts/run-integration-flows.py flows/
++          uv run pytest integration-tests/ -n auto -vv
+ 
+       - name: Show server logs
+         if: always()
+@@ -137,8 +136,7 @@ jobs:
+           PREFECT_API_URL: http://127.0.0.1:4200/api
+           PREFECT_SERVER_LOGGING_LEVEL: DEBUG
+         run: >
+-          uv run --isolated prefect server start --analytics-off --host 0.0.0.0 2>&1 > server.log &
+-
++          uv run prefect server start --analytics-off --host 0.0.0.0 2>&1 > server.log &
+           uv run --isolated ./scripts/wait-for-server.py
+ 
+       - name: Verify the CLI isn't available in the active environment
+@@ -148,9 +146,19 @@ jobs:
+       - name: Run integration flows
+         env:
+           PREFECT_API_URL: http://127.0.0.1:4200/api
+-        run: >
+-          ./scripts/run-integration-flows.py flows/
+-        
++        run: |
++          # Install dependencies for integration tests. We don't want to install the whole project because that will override the prefect-client build.
++          # We ignore test_task_worker.py because it relies on starting an ephemeral server via the `prefect.server` module which is not available in the client build.
++          uv pip install pytest \
++            uv \
++            docker \
++            sqlalchemy \
++            pytest-mypy-plugins \
++            pytest-asyncio \
++            pytest-xdist \
++            pytest-timeout \
++            pytest-env
++          pytest --ignore=integration-tests/test_task_worker.py integration-tests/ -n auto -vv
+ 
+   sqlite-3-24-0:
+     name: Test SQLite 3.24.0 Compatibility
+diff --git a/docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes.mdx b/docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes.mdx
+index e9f68952..b245a6f9 100644
+--- a/docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes.mdx
++++ b/docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes.mdx
+@@ -189,13 +189,13 @@ A flow `entrypoint` is the path to the file where the flow is located within tha
+ {path}:{flow_name}
+ ```
+ 
+-For example, the following code will load the `hello` flow from the `flows/hello_world.py` file in the `PrefectHQ/prefect` repository:
++For example, the following code will load the `hello` flow from the `flows/hello_world.py` file in the `PrefectHQ/examples` repository:
+ ```python load_from_url.py
+ from prefect import flow
+ 
+ 
+ my_flow = flow.from_source(
+-    source="https://github.com/PrefectHQ/prefect.git",
++    source="https://github.com/PrefectHQ/examples.git",
+     entrypoint="flows/hello_world.py:hello"
+ )
+ 
+diff --git a/flows/serve_a_flow.py b/flows/serve_a_flow.py
+deleted file mode 100644
+index 5f40707a..00000000
+--- a/flows/serve_a_flow.py
++++ /dev/null
+@@ -1,55 +0,0 @@
+-import signal
+-import tempfile
+-from datetime import timedelta
+-from pathlib import Path
+-
+-from prefect import flow
+-from prefect.settings import PREFECT_RUNNER_POLL_FREQUENCY, temporary_settings
+-
+-
+-@flow
+-def may_i_take_your_hat_sir(item: str, counter_dir: Path):
+-    assert item == "hat", "I don't know how to do everything"
+-    (counter_dir / f"{id(may_i_take_your_hat_sir)}.txt").touch()
+-    return f"May I take your {item}?"
+-
+-
+-def _handler(signum, frame):
+-    raise KeyboardInterrupt("Simulating user interruption")
+-
+-
+-def count_runs(counter_dir: Path):
+-    return len(list(counter_dir.glob("*.txt")))
+-
+-
+-if __name__ == "__main__":
+-    TIMEOUT: int = 15
+-    INTERVAL_SECONDS: int = 3
+-
+-    MINIMUM_EXPECTED_N_FLOW_RUNS: int = 3
+-
+-    signal.signal(signal.SIGALRM, _handler)
+-    signal.alarm(TIMEOUT)
+-
+-    with tempfile.TemporaryDirectory() as tmp_dir:
+-        counter_dir = Path(tmp_dir) / "flow_run_counter"
+-        counter_dir.mkdir(exist_ok=True)
+-
+-        with temporary_settings({PREFECT_RUNNER_POLL_FREQUENCY: 1}):
+-            try:
+-                may_i_take_your_hat_sir.serve(
+-                    interval=timedelta(seconds=INTERVAL_SECONDS),
+-                    parameters={"item": "hat", "counter_dir": counter_dir},
+-                )
+-            except KeyboardInterrupt as e:
+-                print(str(e))
+-            finally:
+-                signal.alarm(0)
+-
+-        actual_run_count = count_runs(counter_dir)
+-
+-        assert actual_run_count >= MINIMUM_EXPECTED_N_FLOW_RUNS, (
+-            f"Expected at least {MINIMUM_EXPECTED_N_FLOW_RUNS} flow runs, got {actual_run_count}"
+-        )
+-
+-        print(f"Successfully completed and audited {actual_run_count} flow runs")
+diff --git a/integration-tests/serve_a_flow.py b/integration-tests/serve_a_flow.py
+new file mode 100644
+index 00000000..2df5332c
+--- /dev/null
++++ b/integration-tests/serve_a_flow.py
+@@ -0,0 +1,30 @@
++import signal
++from datetime import timedelta
++from types import FrameType
++
++from prefect import flow
++
++
++def _handler(signum: int, frame: FrameType | None):
++    raise KeyboardInterrupt("Simulating user interruption")
++
++
++@flow
++def may_i_take_your_hat_sir(item: str):
++    assert item == "hat", "I don't know how to do everything"
++    return f"May I take your {item}?"
++
++
++if __name__ == "__main__":
++    signal.signal(signal.SIGALRM, _handler)
++    # Raise a KeyboardInterrupt after 5 seconds
++    signal.alarm(5)
++    try:
++        may_i_take_your_hat_sir.serve(
++            interval=timedelta(seconds=60),
++            parameters={"item": "hat"},
++        )
++    except KeyboardInterrupt as e:
++        print(str(e))
++    finally:
++        signal.alarm(0)
+diff --git a/flows/automation-assessments.py b/integration-tests/test_automation_assessments.py
+similarity index 90%
+rename from flows/automation-assessments.py
+rename to integration-tests/test_automation_assessments.py
+index 1f895a91..d1dd2cf5 100644
+--- a/flows/automation-assessments.py
++++ b/integration-tests/test_automation_assessments.py
+@@ -7,6 +7,7 @@ from typing import Any, AsyncGenerator, Dict
+ from uuid import uuid4
+ 
+ import anyio
++import pytest
+ 
+ from prefect import flow
+ from prefect.client.orchestration import get_client
+@@ -21,6 +22,8 @@ from prefect.events.filters import (
+ from prefect.logging import get_run_logger
+ from prefect.types._datetime import now, parse_datetime
+ 
++SERVER_VERSION = os.getenv("SERVER_VERSION")
++
+ 
+ @asynccontextmanager
+ async def create_or_replace_automation(
+@@ -49,7 +52,7 @@ async def create_or_replace_automation(
+ 
+         automation["name"] = f"{automation['name']}:{uuid4()}"
+ 
+-        response = await prefect._client.post("/automations", json=automation)
++        response = await prefect._client.post("/automations/", json=automation)
+         response.raise_for_status()
+ 
+         automation = response.json()
+@@ -312,13 +315,33 @@ async def assess_sequence_automation():
+             raise Exception("Sequence automation did not trigger in 60s")
+ 
+ 
+-if __name__ == "__main__":
+-    if os.getenv("SERVER_VERSION") == "9.9.9+for.the.tests":
+-        print(
+-            "Prefect Cloud has its own automation assessment integration test, skipping"
+-        )
+-    else:
+-        asyncio.run(assess_reactive_automation())
+-        asyncio.run(assess_proactive_automation())
+-        asyncio.run(assess_compound_automation())
+-        asyncio.run(assess_sequence_automation())
++@pytest.mark.skipif(
++    SERVER_VERSION == "9.9.9+for.the.tests",
++    reason="Prefect Cloud has its own automation assessment integration test, skipping",
++)
++async def test_reactive_automation():
++    await assess_reactive_automation()
++
++
++@pytest.mark.skipif(
++    SERVER_VERSION == "9.9.9+for.the.tests",
++    reason="Prefect Cloud has its own automation assessment integration test, skipping",
++)
++async def test_proactive_automation():
++    await assess_proactive_automation()
++
++
++@pytest.mark.skipif(
++    SERVER_VERSION == "9.9.9+for.the.tests",
++    reason="Prefect Cloud has its own automation assessment integration test, skipping",
++)
++async def test_compound_automation():
++    await assess_compound_automation()
++
++
++@pytest.mark.skipif(
++    SERVER_VERSION == "9.9.9+for.the.tests",
++    reason="Prefect Cloud has its own automation assessment integration test, skipping",
++)
++async def test_sequence_automation():
++    await assess_sequence_automation()
+diff --git a/flows/check_output_of_interrupted_serve.py b/integration-tests/test_check_output_of_interrupted_serve.py
+similarity index 93%
+rename from flows/check_output_of_interrupted_serve.py
+rename to integration-tests/test_check_output_of_interrupted_serve.py
+index 8bd85877..d6f955c6 100644
+--- a/flows/check_output_of_interrupted_serve.py
++++ b/integration-tests/test_check_output_of_interrupted_serve.py
+@@ -1,4 +1,3 @@
+-import asyncio
+ import sys
+ from io import StringIO
+ from pathlib import Path
+@@ -6,7 +5,7 @@ from pathlib import Path
+ from prefect.utilities.processutils import run_process
+ 
+ 
+-async def main():
++async def test_check_output_of_interrupted_serve():
+     python_executable = sys.executable
+ 
+     stderr_buffer = StringIO()
+@@ -45,7 +44,3 @@ async def main():
+         )
+ 
+     print("All expected log messages were found")
+-
+-
+-if __name__ == "__main__":
+-    asyncio.run(main())
+diff --git a/flows/client_context_lifespan.py b/integration-tests/test_client_context_lifespan.py
+similarity index 80%
+rename from flows/client_context_lifespan.py
+rename to integration-tests/test_client_context_lifespan.py
+index 9a966531..00a81501 100644
+--- a/flows/client_context_lifespan.py
++++ b/integration-tests/test_client_context_lifespan.py
+@@ -1,4 +1,3 @@
+-import asyncio
+ import random
+ import threading
+ from contextlib import asynccontextmanager
+@@ -25,7 +24,7 @@ def make_lifespan(startup, shutdown) -> Callable:
+     return asynccontextmanager(lifespan)
+ 
+ 
+-def client_context_lifespan_is_robust_to_threaded_concurrency():
++def test_client_context_lifespan_is_robust_to_threaded_concurrency():
+     startup, shutdown = MagicMock(), MagicMock()
+     app = FastAPI(lifespan=make_lifespan(startup, shutdown))
+ 
+@@ -48,13 +47,13 @@ def client_context_lifespan_is_robust_to_threaded_concurrency():
+         thread.start()
+ 
+     for thread in threads:
+-        thread.join(3)
++        thread.join(15)
+ 
+     assert startup.call_count == shutdown.call_count
+     assert startup.call_count > 0
+ 
+ 
+-async def client_context_lifespan_is_robust_to_high_async_concurrency():
++async def test_client_context_lifespan_is_robust_to_high_async_concurrency():
+     startup, shutdown = MagicMock(), MagicMock()
+     app = FastAPI(lifespan=make_lifespan(startup, shutdown))
+ 
+@@ -73,22 +72,22 @@ async def client_context_lifespan_is_robust_to_high_async_concurrency():
+     assert startup.call_count > 0
+ 
+ 
+-async def client_context_lifespan_is_robust_to_mixed_concurrency():
++async def test_client_context_lifespan_is_robust_to_mixed_concurrency():
+     startup, shutdown = MagicMock(), MagicMock()
+     app = FastAPI(lifespan=make_lifespan(startup, shutdown))
+ 
+     async def enter_client():
+         # Use random sleeps to interleave clients
+-        await anyio.sleep(random.random())
++        await anyio.sleep(random.random() * 0.1)
+         async with PrefectClient(app):
+-            await anyio.sleep(random.random())
++            await anyio.sleep(random.random() * 0.1)
+ 
+     async def enter_client_many_times(context):
+         # We must re-enter the profile context in the new thread
+         try:
+             with context:
+                 async with anyio.create_task_group() as tg:
+-                    for _ in range(100):
++                    for _ in range(50):
+                         tg.start_soon(enter_client)
+         except Exception as e:
+             print(f"Error entering client many times {e}")
+@@ -108,17 +107,9 @@ async def client_context_lifespan_is_robust_to_mixed_concurrency():
+         thread.start()
+ 
+     for thread in threads:
+-        thread.join(3)
++        thread.join(60)
++        if thread.is_alive():
++            raise TimeoutError(f"Thread {thread.name} did not complete within timeout")
+ 
+     assert startup.call_count == shutdown.call_count
+     assert startup.call_count > 0
+-
+-
+-async def concurrency_tests():
+-    client_context_lifespan_is_robust_to_threaded_concurrency()
+-    await client_context_lifespan_is_robust_to_high_async_concurrency()
+-    await client_context_lifespan_is_robust_to_mixed_concurrency()
+-
+-
+-if __name__ == "__main__":
+-    asyncio.run(concurrency_tests())
+diff --git a/flows/concurrent_subflows.py b/integration-tests/test_concurrent_subflows.py
+similarity index 75%
+rename from flows/concurrent_subflows.py
+rename to integration-tests/test_concurrent_subflows.py
+index a88edd2c..35a3d11d 100644
+--- a/flows/concurrent_subflows.py
++++ b/integration-tests/test_concurrent_subflows.py
+@@ -30,5 +30,7 @@ async def parent_flow(n_subflows: int, n_tasks_per_subflow: int):
+     )
+ 
+ 
+-if __name__ == "__main__":
+-    asyncio.run(parent_flow(10, 10))
++def test_concurrent_subflows():
++    result = asyncio.run(parent_flow(10, 10))
++    # Test passes if the flow completes without error
++    assert result is None  # Flow doesn't return anything, just completes
+diff --git a/flows/deploy.py b/integration-tests/test_deploy.py
+similarity index 68%
+rename from flows/deploy.py
+rename to integration-tests/test_deploy.py
+index 1496554a..1a85392c 100644
+--- a/flows/deploy.py
++++ b/integration-tests/test_deploy.py
+@@ -4,6 +4,7 @@ import sys
+ from pathlib import Path
+ 
+ import anyio
++import uv
+ 
+ import prefect
+ from prefect.deployments import run_deployment
+@@ -14,10 +15,20 @@ async def read_flow_run(flow_run_id):
+         return await client.read_flow_run(flow_run_id)
+ 
+ 
+-def main():
++def test_deploy():
+     try:
+         subprocess.check_call(
+-            ["prefect", "work-pool", "create", "test-deploy-pool", "-t", "process"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "prefect",
++                "work-pool",
++                "create",
++                "test-deploy-pool",
++                "-t",
++                "process",
++            ],
+             stdout=sys.stdout,
+             stderr=sys.stderr,
+         )
+@@ -37,6 +48,9 @@ def main():
+ 
+         subprocess.check_call(
+             [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
+                 "prefect",
+                 "flow-run",
+                 "execute",
+@@ -51,7 +65,16 @@ def main():
+ 
+     finally:
+         subprocess.check_call(
+-            ["prefect", "--no-prompt", "work-pool", "delete", "test-deploy-pool"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "prefect",
++                "--no-prompt",
++                "work-pool",
++                "delete",
++                "test-deploy-pool",
++            ],
+             stdout=sys.stdout,
+             stderr=sys.stderr,
+         )
+@@ -59,7 +82,3 @@ def main():
+         shutil.rmtree(
+             Path(__file__).parent.parent / "prefect-recipes", ignore_errors=True
+         )
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/flows/docker_deploy.py b/integration-tests/test_docker_deploy.py
+similarity index 74%
+rename from flows/docker_deploy.py
+rename to integration-tests/test_docker_deploy.py
+index 8abd345f..d92ad3d9 100644
+--- a/flows/docker_deploy.py
++++ b/integration-tests/test_docker_deploy.py
+@@ -4,6 +4,8 @@ import sys
+ from pathlib import Path
+ from textwrap import dedent
+ 
++import uv
++
+ from prefect import flow, get_client
+ from prefect.deployments import run_deployment
+ from prefect.docker.docker_image import DockerImage
+@@ -27,14 +29,24 @@ def flow_that_needs_pandas() -> str:
+     return "we're done"
+ 
+ 
+-def main():
++def test_docker_deploy():
+     """
+     Deploy and run a flow in a Docker container with runtime package installation using uv.
+     Demonstrates using EXTRA_PIP_PACKAGES to install dependencies at runtime.
+     """
+     try:
+         subprocess.check_call(
+-            ["prefect", "work-pool", "create", "test-docker-pool", "-t", "docker"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "prefect",
++                "work-pool",
++                "create",
++                "test-docker-pool",
++                "-t",
++                "docker",
++            ],
+             stdout=sys.stdout,
+             stderr=sys.stderr,
+         )
+@@ -45,7 +57,7 @@ def main():
+             dedent(
+                 """
+                 FROM prefecthq/prefect:3-latest
+-                COPY flows/docker_deploy.py /opt/prefect/flows/docker_deploy.py
++                COPY integration-tests/test_docker_deploy.py /opt/prefect/integration-tests/test_docker_deploy.py
+                 """
+             )
+         )
+@@ -75,14 +87,17 @@ def main():
+         # Execute the flow run
+         subprocess.check_call(
+             [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "--with",
++                "prefect-docker",
+                 "prefect",
+                 "worker",
+                 "start",
+                 "--pool",
+                 "test-docker-pool",
+                 "--run-once",
+-                "--install-policy",
+-                "if-not-present",
+             ],
+             stdout=sys.stdout,
+             stderr=sys.stderr,
+@@ -95,11 +110,16 @@ def main():
+     finally:
+         # Cleanup
+         subprocess.check_call(
+-            ["prefect", "--no-prompt", "work-pool", "delete", "test-docker-pool"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "prefect",
++                "--no-prompt",
++                "work-pool",
++                "delete",
++                "test-docker-pool",
++            ],
+             stdout=sys.stdout,
+             stderr=sys.stderr,
+         )
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/flows/flow_pauses.py b/integration-tests/test_flow_pauses.py
+similarity index 77%
+rename from flows/flow_pauses.py
+rename to integration-tests/test_flow_pauses.py
+index 552bc5e9..7f5877d7 100644
+--- a/flows/flow_pauses.py
++++ b/integration-tests/test_flow_pauses.py
+@@ -29,6 +29,8 @@ def resume_after_started():
+     resume_flow_run(flow_run_id)
+ 
+ 
+-if __name__ == "__main__":
++def test_flow_pauses():
+     threading.Thread(target=resume_after_started, daemon=True).start()
+-    pause_test()
++    result = pause_test()
++    # Test passes if the flow completes the pause/resume cycle without error
++    assert result is None  # Flow doesn't return anything, just completes
+diff --git a/flows/flow_results.py b/integration-tests/test_flow_results.py
+similarity index 95%
+rename from flows/flow_results.py
+rename to integration-tests/test_flow_results.py
+index 54b6b2cd..ba3123b7 100644
+--- a/flows/flow_results.py
++++ b/integration-tests/test_flow_results.py
+@@ -15,7 +15,7 @@ async def get_state_from_api(flow_run_id):
+         return flow_run.state
+ 
+ 
+-if __name__ == "__main__":
++def test_flow_results():
+     state = hello(return_state=True)
+     assert state.result() == "Hello!", f"Got state {state}"
+ 
+diff --git a/flows/flow_retries.py b/integration-tests/test_flow_retries.py
+similarity index 84%
+rename from flows/flow_retries.py
+rename to integration-tests/test_flow_retries.py
+index 6334903d..572c229b 100644
+--- a/flows/flow_retries.py
++++ b/integration-tests/test_flow_retries.py
+@@ -24,7 +24,11 @@ def hello():
+     return first + 1
+ 
+ 
+-if __name__ == "__main__":
++def test_flow_retries():
++    global flow_run_count, task_run_count
++    flow_run_count = 0
++    task_run_count = 0
++
+     result = hello()
+     assert result == 2, f"Got {result}"
+     assert flow_run_count == 3, f"Got {flow_run_count}"
+diff --git a/flows/flow_retries_with_subflows.py b/integration-tests/test_flow_retries_with_subflows.py
+similarity index 84%
+rename from flows/flow_retries_with_subflows.py
+rename to integration-tests/test_flow_retries_with_subflows.py
+index 43cfbf59..3036d3b5 100644
+--- a/flows/flow_retries_with_subflows.py
++++ b/integration-tests/test_flow_retries_with_subflows.py
+@@ -30,7 +30,11 @@ def parent_flow():
+     return result
+ 
+ 
+-if __name__ == "__main__":
++def test_flow_retries_with_subflows():
++    global flow_run_count, child_flow_run_count
++    flow_run_count = 0
++    child_flow_run_count = 0
++
+     result = parent_flow()
+     assert result == "hello", f"Got {result}"
+     assert flow_run_count == 3, f"Got {flow_run_count}"
+diff --git a/flows/hello_tasks.py b/integration-tests/test_hello_tasks.py
+similarity index 71%
+rename from flows/hello_tasks.py
+rename to integration-tests/test_hello_tasks.py
+index 1837e3ba..80b333a4 100644
+--- a/flows/hello_tasks.py
++++ b/integration-tests/test_hello_tasks.py
+@@ -16,7 +16,9 @@ def hello(name: str = "world", count: int = 1):
+         future.wait()
+ 
+ 
+-if __name__ == "__main__":
++def test_hello_tasks():
+     if os.getenv("SERVER_VERSION") == "2.19":
+         raise NotImplementedError("This example does not work against 2.19")
+-    hello(count=3)
++    result = hello(count=3)
++    # Test passes if the flow completes without error
++    assert result is None  # Flow doesn't return anything, just completes
+diff --git a/flows/hello_world.py b/integration-tests/test_hello_world.py
+similarity index 86%
+rename from flows/hello_world.py
+rename to integration-tests/test_hello_world.py
+index 2574d9b8..a88f42b1 100644
+--- a/flows/hello_world.py
++++ b/integration-tests/test_hello_world.py
+@@ -7,5 +7,5 @@ def hello(name: str = "world"):
+     get_run_logger().info(f"Hello {name}!")
+ 
+ 
+-if __name__ == "__main__":
++def test_hello_world():
+     hello()
+diff --git a/flows/load_flows_concurrently.py b/integration-tests/test_load_flows_concurrently.py
+similarity index 82%
+rename from flows/load_flows_concurrently.py
+rename to integration-tests/test_load_flows_concurrently.py
+index 849cc130..e1b1cca1 100644
+--- a/flows/load_flows_concurrently.py
++++ b/integration-tests/test_load_flows_concurrently.py
+@@ -16,7 +16,7 @@ async def load_flow(entrypoint: str) -> Flow[..., Any]:
+ 
+ async def test_iteration():
+     entrypoints = [
+-        "flows/hello-world.py:hello",
++        "flows/hello_world.py:hello",
+         "flows/whoami.py:whoami",
+     ] * 5  # Load each flow 5 times concurrently
+     futures = [load_flow(entrypoint) for entrypoint in entrypoints]
+@@ -24,7 +24,7 @@ async def test_iteration():
+     return len(flows)
+ 
+ 
+-async def run_stress_test():
++async def test_load_flows_concurrently():
+     for i in range(10):  # Run 10 iterations
+         try:
+             count = await test_iteration()
+@@ -33,8 +33,3 @@ async def run_stress_test():
+             print(f"Iteration {i + 1}: Failed with error: {str(e)}")
+             return False
+     return True
+-
+-
+-if __name__ == "__main__":
+-    success = asyncio.run(run_stress_test())
+-    print(f"\nStress test {'passed' if success else 'failed'}")
+diff --git a/flows/multiprocessing_flow.py b/integration-tests/test_multiprocessing_flow.py
+similarity index 97%
+rename from flows/multiprocessing_flow.py
+rename to integration-tests/test_multiprocessing_flow.py
+index c64f3dd8..7025c719 100644
+--- a/flows/multiprocessing_flow.py
++++ b/integration-tests/test_multiprocessing_flow.py
+@@ -32,7 +32,7 @@ def _handler(signum, frame):
+     raise KeyboardInterrupt("Simulating user interruption")
+ 
+ 
+-if __name__ == "__main__":
++def test_multiprocessing_flow():
+     TIMEOUT: int = 15
+     INTERVAL_SECONDS: int = 3
+     TAGS = ["unique", "integration"]
+diff --git a/flows/runner_resilience.py b/integration-tests/test_runner_resilience.py
+similarity index 81%
+rename from flows/runner_resilience.py
+rename to integration-tests/test_runner_resilience.py
+index a2ec4d7b..8298d10a 100644
+--- a/flows/runner_resilience.py
++++ b/integration-tests/test_runner_resilience.py
+@@ -4,10 +4,7 @@ Demonstrate that process workers are resilient when flow files go missing.
+ Workers should continue operating when they can't load flow files for hook execution.
+ """
+ 
+-import asyncio
+ import shutil
+-import sys
+-import tempfile
+ from pathlib import Path
+ from textwrap import dedent
+ 
+@@ -15,13 +12,12 @@ from prefect import flow
+ from prefect.runner import Runner
+ 
+ 
+-async def test_runner_resilience_with_missing_file():
++async def test_runner_resilience_with_missing_file(tmp_path: Path):
+     """Test that runners handle missing flow files gracefully"""
+ 
+-    temp_dir = Path(tempfile.mkdtemp())
+-    flow_file = temp_dir / "my_flow.py"
++    flow_file = tmp_path / "my_flow.py"
+ 
+-    print(f"Working in: {temp_dir}")
++    print(f"Working in: {tmp_path}")
+ 
+     # Create a flow file with on_crashed hook
+     flow_content = dedent("""
+@@ -49,7 +45,7 @@ async def test_runner_resilience_with_missing_file():
+             # Deploy the flow
+             deployment_id = await runner.add_flow(
+                 await flow.from_source(
+-                    source=str(temp_dir),
++                    source=str(tmp_path),
+                     entrypoint="my_flow.py:my_flow",
+                 ),
+                 name="test-deployment",
+@@ -91,8 +87,8 @@ async def test_runner_resilience_with_missing_file():
+ 
+     finally:
+         # Cleanup
+-        if temp_dir.exists():
+-            shutil.rmtree(temp_dir, ignore_errors=True)
++        if tmp_path.exists():
++            shutil.rmtree(tmp_path, ignore_errors=True)
+ 
+     if not runner_crashed:
+         print("\n✅ Runner survived missing flow file!")
+@@ -101,18 +97,3 @@ async def test_runner_resilience_with_missing_file():
+     else:
+         print("\nRunner crashed - this demonstrates the bug")
+         return False
+-
+-
+-def main():
+-    """Run the test"""
+-    try:
+-        success = asyncio.run(test_runner_resilience_with_missing_file())
+-        if not success:
+-            sys.exit(1)
+-    except Exception as e:
+-        print(f"\nTest failed with exception: {type(e).__name__}: {e}")
+-        sys.exit(1)
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/flows/schedule_statefulness.py b/integration-tests/test_schedule_statefulness.py
+similarity index 71%
+rename from flows/schedule_statefulness.py
+rename to integration-tests/test_schedule_statefulness.py
+index 66e674ca..0e9b0e7f 100644
+--- a/flows/schedule_statefulness.py
++++ b/integration-tests/test_schedule_statefulness.py
+@@ -17,12 +17,18 @@ this integration test should
+ 
+ import signal
+ from typing import Any
++from uuid import uuid4
++
++import pytest
+ 
+ from prefect import flow, get_client
+ from prefect.client.schemas.objects import DeploymentSchedule
+ from prefect.schedules import Cron
+ 
+-DEPLOYMENT_NAME = "my-deployment"
++
++@pytest.fixture()
++def deployment_name():
++    return f"my-deployment-{uuid4()}"
+ 
+ 
+ @flow
+@@ -40,7 +46,7 @@ def run_serve_with_schedule(
+     signal.signal(signal.SIGALRM, _handler)
+     signal.alarm(timeout)
+     try:
+-        my_flow.serve(name=DEPLOYMENT_NAME, **(serve_kwargs or {}))
++        my_flow.serve(**(serve_kwargs or {}))
+     except KeyboardInterrupt:
+         print("Serve interrupted")
+     finally:
+@@ -53,12 +59,14 @@ def check_deployment_schedules(deployment_name: str) -> list[DeploymentSchedule]
+         return deployment.schedules
+ 
+ 
+-def main():
++def test_schedule_statefulness(deployment_name: str):
+     # case 1: Schedule without slug
+     print("\nTest case 1: Schedule without slug")
+-    run_serve_with_schedule(serve_kwargs={"schedules": [Cron("0 9 * * *")]})
+-    run_serve_with_schedule(serve_kwargs={"schedules": []})
+-    schedules = check_deployment_schedules(f"my-flow/{DEPLOYMENT_NAME}")
++    run_serve_with_schedule(
++        serve_kwargs={"name": deployment_name, "schedules": [Cron("0 9 * * *")]}
++    )
++    run_serve_with_schedule(serve_kwargs={"name": deployment_name, "schedules": []})
++    schedules = check_deployment_schedules(f"my-flow/{deployment_name}")
+     assert not schedules, (
+         f"Expected no schedules after removing unnamed schedule: {schedules}"
+     )
+@@ -66,15 +74,14 @@ def main():
+     # case 2: Schedule with slug
+     print("\nTest case 2: Schedule with slug")
+     run_serve_with_schedule(
+-        serve_kwargs={"schedules": [Cron("0 9 * * *", slug="every-day-at-9am")]}
++        serve_kwargs={
++            "name": deployment_name,
++            "schedules": [Cron("0 9 * * *", slug="every-day-at-9am")],
++        }
+     )
+     run_serve_with_schedule(serve_kwargs={"schedules": []})
+-    schedules = check_deployment_schedules(f"my-flow/{DEPLOYMENT_NAME}")
++    schedules = check_deployment_schedules(f"my-flow/{deployment_name}")
+     assert any(s.slug == "every-day-at-9am" for s in schedules), (
+         f"Expected named schedule to persist: {schedules}"
+     )
+     print("All tests passed!")
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/flows/secret_block.py b/integration-tests/test_secret_block.py
+similarity index 94%
+rename from flows/secret_block.py
+rename to integration-tests/test_secret_block.py
+index 92fffa5c..b5b43219 100644
+--- a/flows/secret_block.py
++++ b/integration-tests/test_secret_block.py
+@@ -20,5 +20,5 @@ def save_and_load_secret():
+     assert secret.get() == "super secret contents", secret
+ 
+ 
+-if __name__ == "__main__":
++def test_secret_block():
+     save_and_load_secret()
+diff --git a/integration-tests/test_serve_a_flow.py b/integration-tests/test_serve_a_flow.py
+new file mode 100644
+index 00000000..dd4c16ed
+--- /dev/null
++++ b/integration-tests/test_serve_a_flow.py
+@@ -0,0 +1,54 @@
++import signal
++from datetime import timedelta
++from pathlib import Path
++from types import FrameType
++
++from prefect import flow
++from prefect.settings import PREFECT_RUNNER_POLL_FREQUENCY, temporary_settings
++
++
++@flow
++def may_i_take_your_hat_sir(item: str, counter_dir: Path):
++    assert item == "hat", "I don't know how to do everything"
++    (counter_dir / f"{id(may_i_take_your_hat_sir)}.txt").touch()
++    return f"May I take your {item}?"
++
++
++def _handler(signum: int, frame: FrameType | None):
++    raise KeyboardInterrupt("Simulating user interruption")
++
++
++def count_runs(counter_dir: Path):
++    return len(list(counter_dir.glob("*.txt")))
++
++
++def test_serve_a_flow(tmp_path: Path):
++    TIMEOUT: int = 15
++    INTERVAL_SECONDS: int = 3
++
++    MINIMUM_EXPECTED_N_FLOW_RUNS: int = 3
++
++    signal.signal(signal.SIGALRM, _handler)
++    signal.alarm(TIMEOUT)
++
++    counter_dir = tmp_path / "flow_run_counter"
++    counter_dir.mkdir(exist_ok=True)
++
++    with temporary_settings({PREFECT_RUNNER_POLL_FREQUENCY: 1}):
++        try:
++            may_i_take_your_hat_sir.serve(
++                interval=timedelta(seconds=INTERVAL_SECONDS),
++                parameters={"item": "hat", "counter_dir": counter_dir},
++            )
++        except KeyboardInterrupt as e:
++            print(str(e))
++        finally:
++            signal.alarm(0)
++
++    actual_run_count = count_runs(counter_dir)
++
++    assert actual_run_count >= MINIMUM_EXPECTED_N_FLOW_RUNS, (
++        f"Expected at least {MINIMUM_EXPECTED_N_FLOW_RUNS} flow runs, got {actual_run_count}"
++    )
++
++    print(f"Successfully completed and audited {actual_run_count} flow runs")
+diff --git a/flows/setup_logging.py b/integration-tests/test_setup_logging.py
+similarity index 93%
+rename from flows/setup_logging.py
+rename to integration-tests/test_setup_logging.py
+index 0223e90e..105aa418 100644
+--- a/flows/setup_logging.py
++++ b/integration-tests/test_setup_logging.py
+@@ -18,7 +18,6 @@ def myflow():
+     return "Hello"
+ 
+ 
+-if __name__ == "__main__":
++def test_setup_logging():
+     result = myflow()
+-
+     assert result == "Hello"
+diff --git a/flows/task_results.py b/integration-tests/test_task_results.py
+similarity index 97%
+rename from flows/task_results.py
+rename to integration-tests/test_task_results.py
+index 59fd5c31..8f09a86f 100644
+--- a/flows/task_results.py
++++ b/integration-tests/test_task_results.py
+@@ -25,7 +25,7 @@ async def get_state_from_api(task_run_id: UUID) -> State[str]:
+         return task_run.state
+ 
+ 
+-if __name__ == "__main__":
++def test_task_results():
+     task_state = wrapper_flow()
+     assert task_state.result() == "Hello!"
+     assert task_state.state_details.task_run_id is not None
+diff --git a/flows/task_retries.py b/integration-tests/test_task_retries.py
+similarity index 84%
+rename from flows/task_retries.py
+rename to integration-tests/test_task_retries.py
+index 3f1ac3c4..a2625e29 100644
+--- a/flows/task_retries.py
++++ b/integration-tests/test_task_retries.py
+@@ -17,7 +17,9 @@ def hello():
+     return sad_task()
+ 
+ 
+-if __name__ == "__main__":
++def test_task_retries():
++    global run_count
++    run_count = 0
+     result = hello()
+     assert result == 1, f"Got {result}"
+     assert run_count == 3, f"Got {run_count}"
+diff --git a/flows/task_worker.py b/integration-tests/test_task_worker.py
+similarity index 92%
+rename from flows/task_worker.py
+rename to integration-tests/test_task_worker.py
+index 5046e419..c58fad72 100644
+--- a/flows/task_worker.py
++++ b/integration-tests/test_task_worker.py
+@@ -20,8 +20,8 @@ from prefect.settings import (
+ 
+ CLIENT_SECRET = SERVER_SECRET = "very-secret-server-auth-string"
+ CLIENT_DUMMY_API_KEY = "dummy-key-should-be-ignored"
+-STARTUP_TIMEOUT = 5
+-CONNECTION_TIMEOUT = 5
++STARTUP_TIMEOUT = 30
++CONNECTION_TIMEOUT = 30
+ 
+ counter = 0
+ 
+@@ -51,7 +51,7 @@ async def run_ephemeral_server_with_auth() -> AsyncGenerator[str, None]:
+             server.stop()
+ 
+ 
+-async def smoke_test_authed_task_worker():
++async def test_authed_task_worker():
+     async with run_ephemeral_server_with_auth() as api_url:
+         try:
+             with temporary_settings(
+@@ -73,7 +73,3 @@ async def smoke_test_authed_task_worker():
+         except Exception as e:
+             print(f"task worker failed to connect: {e!r}")
+             raise
+-
+-
+-if __name__ == "__main__":
+-    anyio.run(smoke_test_authed_task_worker)
+diff --git a/flows/worker.py b/integration-tests/test_worker.py
+similarity index 62%
+rename from flows/worker.py
+rename to integration-tests/test_worker.py
+index 79c18770..4b43217d 100644
+--- a/flows/worker.py
++++ b/integration-tests/test_worker.py
+@@ -3,6 +3,9 @@ import subprocess
+ import sys
+ from threading import Thread
+ from typing import List
++from uuid import uuid4
++
++import uv
+ 
+ from prefect.events import Event
+ from prefect.events.clients import get_events_subscriber
+@@ -27,27 +30,43 @@ def run_event_listener(events: List[Event]):
+     asyncio.run(watch_worker_events(events))
+ 
+ 
+-def main():
++def test_worker():
++    WORKER_NAME = f"test-worker-{uuid4()}"  # noqa: F821
+     events: List[Event] = []
+ 
+     listener_thread = Thread(target=run_event_listener, args=(events,), daemon=True)
+     listener_thread.start()
+ 
+-    subprocess.check_call(
+-        ["python", "-m", "pip", "install", "prefect-kubernetes>=0.5.0"],
+-        stdout=sys.stdout,
+-        stderr=sys.stderr,
+-    )
+     try:
+         subprocess.check_output(
+-            ["prefect", "work-pool", "delete", "test-worker-pool"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "prefect",
++                "work-pool",
++                "delete",
++                "test-worker-pool",
++            ],
+         )
+     except subprocess.CalledProcessError:
+         pass
+ 
+     try:
+         subprocess.check_output(
+-            ["prefect", "work-pool", "create", "test-worker-pool", "-t", "nonsense"],
++            [
++                uv.find_uv_bin(),
++                "run",
++                "--isolated",
++                "--with",
++                "prefect-kubernetes>=0.5.0",
++                "prefect",
++                "work-pool",
++                "create",
++                "test-worker-pool",
++                "-t",
++                "nonsense",
++            ],
+         )
+     except subprocess.CalledProcessError as e:
+         # Check that the error message contains kubernetes worker type
+@@ -57,12 +76,27 @@ def main():
+             )
+ 
+     subprocess.check_call(
+-        ["prefect", "work-pool", "create", "test-worker-pool", "-t", "kubernetes"],
++        [
++            uv.find_uv_bin(),
++            "run",
++            "--isolated",
++            "prefect",
++            "work-pool",
++            "create",
++            "test-worker-pool",
++            "-t",
++            "kubernetes",
++        ],
+         stdout=sys.stdout,
+         stderr=sys.stderr,
+     )
+     subprocess.check_call(
+         [
++            uv.find_uv_bin(),
++            "run",
++            "--isolated",
++            "--with",
++            "prefect-kubernetes",
+             "prefect",
+             "worker",
+             "start",
+@@ -70,23 +104,33 @@ def main():
+             "test-worker-pool",
+             "-t",
+             "kubernetes",
++            "-n",
++            WORKER_NAME,
+             "--run-once",
+         ],
+         stdout=sys.stdout,
+         stderr=sys.stderr,
+     )
+     subprocess.check_call(
+-        ["python", "-m", "pip", "uninstall", "prefect-kubernetes", "-y"],
+-        stdout=sys.stdout,
+-        stderr=sys.stderr,
+-    )
+-    subprocess.check_call(
+-        ["prefect", "--no-prompt", "work-pool", "delete", "test-worker-pool"],
++        [
++            uv.find_uv_bin(),
++            "run",
++            "--isolated",
++            "prefect",
++            "--no-prompt",
++            "work-pool",
++            "delete",
++            "test-worker-pool",
++        ],
+         stdout=sys.stdout,
+         stderr=sys.stderr,
+     )
+ 
+-    worker_events = [e for e in events if e.event.startswith("prefect.worker.")]
++    worker_events = [
++        e
++        for e in events
++        if e.event.startswith("prefect.worker.") and e.resource.name == WORKER_NAME
++    ]
+     assert len(worker_events) == 2, (
+         f"Expected 2 worker events, got {len(worker_events)}"
+     )
+@@ -102,7 +146,3 @@ def main():
+     assert stop_events[0].follows == start_events[0].id, (
+         "Stop event should follow start event"
+     )
+-
+-
+-if __name__ == "__main__":
+-    main()

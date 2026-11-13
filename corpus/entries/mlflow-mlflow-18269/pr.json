@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/18269",
+  "repo": "mlflow/mlflow",
+  "number": 18269,
+  "title": "Migrate mock.patch decorators to context managers in tests/langchain/test_langchain_model_export.py",
+  "merged_at": "2025-10-13T00:40:55Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "migration",
+  "split": "tuning",
+  "base_sha": "4eed699a9995609b0ab83a9f210af44e17338494",
+  "head_sha": "0a45dd1122803eeeaddccdd07d88f9cc25afbffd",
+  "files_changed": 2,
+  "additions": 46,
+  "deletions": 28
+}

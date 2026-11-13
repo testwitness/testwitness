@@ -1,0 +1,779 @@
+[
+  {
+    "path": ".eslintignore",
+    "status": "modified"
+  },
+  {
+    "path": "docs/src/modules/utils/helpers.test.js",
+    "status": "renamed",
+    "oldPath": "docs/src/modules/utils/helpers.spec.js"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/eslint-plugin-material-ui/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.test.js",
+    "status": "renamed",
+    "oldPath": "packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.spec.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/.npmignore",
+    "status": "modified"
+  },
+  {
+    "path": "packages/material-ui-codemod/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v0.15.0/import-path.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v0.15.0/import-path.spec.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v0.15.0/import-path.test/actual.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v0.15.0/import-path.spec/actual.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v0.15.0/import-path.test/expected.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v0.15.0/import-path.spec/expected.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/color-imports.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/color-imports.spec.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/color-imports.test/actual.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/color-imports.spec/actual.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/color-imports.test/expected.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/color-imports.spec/expected.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/actual.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/actual.js"
+  },
+  {
+    "path": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/expected.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/expected.js"
+  },
+  {
+    "path": "packages/material-ui-icons/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/material-ui-icons/test/index.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-icons/test/index.spec.js"
+  },
+  {
+    "path": "packages/material-ui-lab/package.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/material-ui-lab/src/SpeedDial/SpeedDial.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-lab/src/SpeedDial/SpeedDial.spec.js"
+  },
+  {
+    "path": "packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.spec.js"
+  },
+  {
+    "path": "packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.spec.js"
+  },
+  {
+    "path": "packages/material-ui-lab/src/index.test.js",
+    "status": "renamed",
+    "oldPath": "packages/material-ui-lab/src/index.spec.js"
+  },
+  {
+    "path": "src/AppBar/AppBar.test.js",
+    "status": "renamed",
+    "oldPath": "src/AppBar/AppBar.spec.js"
+  },
+  {
+    "path": "src/Avatar/Avatar.test.js",
+    "status": "renamed",
+    "oldPath": "src/Avatar/Avatar.spec.js"
+  },
+  {
+    "path": "src/Badge/Badge.test.js",
+    "status": "renamed",
+    "oldPath": "src/Badge/Badge.spec.js"
+  },
+  {
+    "path": "src/BottomNavigation/BottomNavigation.test.js",
+    "status": "renamed",
+    "oldPath": "src/BottomNavigation/BottomNavigation.spec.js"
+  },
+  {
+    "path": "src/BottomNavigation/BottomNavigationAction.test.js",
+    "status": "renamed",
+    "oldPath": "src/BottomNavigation/BottomNavigationAction.spec.js"
+  },
+  {
+    "path": "src/Button/Button.test.js",
+    "status": "renamed",
+    "oldPath": "src/Button/Button.spec.js"
+  },
+  {
+    "path": "src/ButtonBase/ButtonBase.test.js",
+    "status": "renamed",
+    "oldPath": "src/ButtonBase/ButtonBase.spec.js"
+  },
+  {
+    "path": "src/ButtonBase/Ripple.test.js",
+    "status": "renamed",
+    "oldPath": "src/ButtonBase/Ripple.spec.js"
+  },
+  {
+    "path": "src/ButtonBase/TouchRipple.test.js",
+    "status": "renamed",
+    "oldPath": "src/ButtonBase/TouchRipple.spec.js"
+  },
+  {
+    "path": "src/Card/Card.test.js",
+    "status": "renamed",
+    "oldPath": "src/Card/Card.spec.js"
+  },
+  {
+    "path": "src/Card/CardActions.test.js",
+    "status": "renamed",
+    "oldPath": "src/Card/CardActions.spec.js"
+  },
+  {
+    "path": "src/Card/CardContent.test.js",
+    "status": "renamed",
+    "oldPath": "src/Card/CardContent.spec.js"
+  },
+  {
+    "path": "src/Card/CardHeader.test.js",
+    "status": "renamed",
+    "oldPath": "src/Card/CardHeader.spec.js"
+  },
+  {
+    "path": "src/Card/CardMedia.test.js",
+    "status": "renamed",
+    "oldPath": "src/Card/CardMedia.spec.js"
+  },
+  {
+    "path": "src/Checkbox/Checkbox.test.js",
+    "status": "renamed",
+    "oldPath": "src/Checkbox/Checkbox.spec.js"
+  },
+  {
+    "path": "src/Chip/Chip.test.js",
+    "status": "renamed",
+    "oldPath": "src/Chip/Chip.spec.js"
+  },
+  {
+    "path": "src/CssBaseline/CssBaseline.test.js",
+    "status": "renamed",
+    "oldPath": "src/CssBaseline/CssBaseline.spec.js"
+  },
+  {
+    "path": "src/Dialog/Dialog.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/Dialog.spec.js"
+  },
+  {
+    "path": "src/Dialog/DialogActions.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/DialogActions.spec.js"
+  },
+  {
+    "path": "src/Dialog/DialogContent.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/DialogContent.spec.js"
+  },
+  {
+    "path": "src/Dialog/DialogContentText.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/DialogContentText.spec.js"
+  },
+  {
+    "path": "src/Dialog/DialogTitle.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/DialogTitle.spec.js"
+  },
+  {
+    "path": "src/Dialog/withMobileDialog.test.js",
+    "status": "renamed",
+    "oldPath": "src/Dialog/withMobileDialog.spec.js"
+  },
+  {
+    "path": "src/Divider/Divider.test.js",
+    "status": "renamed",
+    "oldPath": "src/Divider/Divider.spec.js"
+  },
+  {
+    "path": "src/Drawer/Drawer.test.js",
+    "status": "renamed",
+    "oldPath": "src/Drawer/Drawer.spec.js"
+  },
+  {
+    "path": "src/ExpansionPanel/ExpansionPanel.test.js",
+    "status": "renamed",
+    "oldPath": "src/ExpansionPanel/ExpansionPanel.spec.js"
+  },
+  {
+    "path": "src/ExpansionPanel/ExpansionPanelActions.test.js",
+    "status": "renamed",
+    "oldPath": "src/ExpansionPanel/ExpansionPanelActions.spec.js"
+  },
+  {
+    "path": "src/ExpansionPanel/ExpansionPanelDetails.test.js",
+    "status": "renamed",
+    "oldPath": "src/ExpansionPanel/ExpansionPanelDetails.spec.js"
+  },
+  {
+    "path": "src/ExpansionPanel/ExpansionPanelSummary.test.js",
+    "status": "renamed",
+    "oldPath": "src/ExpansionPanel/ExpansionPanelSummary.spec.js"
+  },
+  {
+    "path": "src/Form/FormControl.test.js",
+    "status": "renamed",
+    "oldPath": "src/Form/FormControl.spec.js"
+  },
+  {
+    "path": "src/Form/FormControlLabel.test.js",
+    "status": "renamed",
+    "oldPath": "src/Form/FormControlLabel.spec.js"
+  },
+  {
+    "path": "src/Form/FormGroup.test.js",
+    "status": "renamed",
+    "oldPath": "src/Form/FormGroup.spec.js"
+  },
+  {
+    "path": "src/Form/FormHelperText.test.js",
+    "status": "renamed",
+    "oldPath": "src/Form/FormHelperText.spec.js"
+  },
+  {
+    "path": "src/Form/FormLabel.test.js",
+    "status": "renamed",
+    "oldPath": "src/Form/FormLabel.spec.js"
+  },
+  {
+    "path": "src/Grid/Grid.test.js",
+    "status": "renamed",
+    "oldPath": "src/Grid/Grid.spec.js"
+  },
+  {
+    "path": "src/GridList/GridList.test.js",
+    "status": "renamed",
+    "oldPath": "src/GridList/GridList.spec.js"
+  },
+  {
+    "path": "src/GridList/GridListTile.test.js",
+    "status": "renamed",
+    "oldPath": "src/GridList/GridListTile.spec.js"
+  },
+  {
+    "path": "src/GridList/GridListTileBar.test.js",
+    "status": "renamed",
+    "oldPath": "src/GridList/GridListTileBar.spec.js"
+  },
+  {
+    "path": "src/Hidden/Hidden.test.js",
+    "status": "renamed",
+    "oldPath": "src/Hidden/Hidden.spec.js"
+  },
+  {
+    "path": "src/Hidden/HiddenCss.test.js",
+    "status": "renamed",
+    "oldPath": "src/Hidden/HiddenCss.spec.js"
+  },
+  {
+    "path": "src/Hidden/HiddenJs.test.js",
+    "status": "renamed",
+    "oldPath": "src/Hidden/HiddenJs.spec.js"
+  },
+  {
+    "path": "src/Icon/Icon.test.js",
+    "status": "renamed",
+    "oldPath": "src/Icon/Icon.spec.js"
+  },
+  {
+    "path": "src/IconButton/IconButton.test.js",
+    "status": "renamed",
+    "oldPath": "src/IconButton/IconButton.spec.js"
+  },
+  {
+    "path": "src/Input/Input.test.js",
+    "status": "renamed",
+    "oldPath": "src/Input/Input.spec.js"
+  },
+  {
+    "path": "src/Input/InputAdornment.test.js",
+    "status": "renamed",
+    "oldPath": "src/Input/InputAdornment.spec.js"
+  },
+  {
+    "path": "src/Input/InputLabel.test.js",
+    "status": "renamed",
+    "oldPath": "src/Input/InputLabel.spec.js"
+  },
+  {
+    "path": "src/Input/Textarea.test.js",
+    "status": "renamed",
+    "oldPath": "src/Input/Textarea.spec.js"
+  },
+  {
+    "path": "src/List/List.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/List.spec.js"
+  },
+  {
+    "path": "src/List/ListItem.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListItem.spec.js"
+  },
+  {
+    "path": "src/List/ListItemAvatar.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListItemAvatar.spec.js"
+  },
+  {
+    "path": "src/List/ListItemIcon.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListItemIcon.spec.js"
+  },
+  {
+    "path": "src/List/ListItemSecondaryAction.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListItemSecondaryAction.spec.js"
+  },
+  {
+    "path": "src/List/ListItemText.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListItemText.spec.js"
+  },
+  {
+    "path": "src/List/ListSubheader.test.js",
+    "status": "renamed",
+    "oldPath": "src/List/ListSubheader.spec.js"
+  },
+  {
+    "path": "src/Menu/Menu.test.js",
+    "status": "renamed",
+    "oldPath": "src/Menu/Menu.spec.js"
+  },
+  {
+    "path": "src/Menu/MenuItem.test.js",
+    "status": "renamed",
+    "oldPath": "src/Menu/MenuItem.spec.js"
+  },
+  {
+    "path": "src/Menu/MenuList.test.js",
+    "status": "renamed",
+    "oldPath": "src/Menu/MenuList.spec.js"
+  },
+  {
+    "path": "src/MobileStepper/MobileStepper.test.js",
+    "status": "renamed",
+    "oldPath": "src/MobileStepper/MobileStepper.spec.js"
+  },
+  {
+    "path": "src/Modal/Backdrop.test.js",
+    "status": "renamed",
+    "oldPath": "src/Modal/Backdrop.spec.js"
+  },
+  {
+    "path": "src/Modal/Modal.test.js",
+    "status": "renamed",
+    "oldPath": "src/Modal/Modal.spec.js"
+  },
+  {
+    "path": "src/Modal/ModalManager.test.js",
+    "status": "renamed",
+    "oldPath": "src/Modal/ModalManager.spec.js"
+  },
+  {
+    "path": "src/Modal/isOverflowing.test.js",
+    "status": "renamed",
+    "oldPath": "src/Modal/isOverflowing.spec.js"
+  },
+  {
+    "path": "src/Paper/Paper.test.js",
+    "status": "renamed",
+    "oldPath": "src/Paper/Paper.spec.js"
+  },
+  {
+    "path": "src/Popover/Popover.test.js",
+    "status": "renamed",
+    "oldPath": "src/Popover/Popover.spec.js"
+  },
+  {
+    "path": "src/Portal/Portal.test.js",
+    "status": "renamed",
+    "oldPath": "src/Portal/Portal.spec.js"
+  },
+  {
+    "path": "src/Progress/CircularProgress.test.js",
+    "status": "renamed",
+    "oldPath": "src/Progress/CircularProgress.spec.js"
+  },
+  {
+    "path": "src/Progress/LinearProgress.test.js",
+    "status": "renamed",
+    "oldPath": "src/Progress/LinearProgress.spec.js"
+  },
+  {
+    "path": "src/Radio/Radio.test.js",
+    "status": "renamed",
+    "oldPath": "src/Radio/Radio.spec.js"
+  },
+  {
+    "path": "src/Radio/RadioGroup.test.js",
+    "status": "renamed",
+    "oldPath": "src/Radio/RadioGroup.spec.js"
+  },
+  {
+    "path": "src/Select/Select.test.js",
+    "status": "renamed",
+    "oldPath": "src/Select/Select.spec.js"
+  },
+  {
+    "path": "src/Select/SelectInput.test.js",
+    "status": "renamed",
+    "oldPath": "src/Select/SelectInput.spec.js"
+  },
+  {
+    "path": "src/Snackbar/Snackbar.test.js",
+    "status": "renamed",
+    "oldPath": "src/Snackbar/Snackbar.spec.js"
+  },
+  {
+    "path": "src/Snackbar/SnackbarContent.test.js",
+    "status": "renamed",
+    "oldPath": "src/Snackbar/SnackbarContent.spec.js"
+  },
+  {
+    "path": "src/Stepper/Step.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/Step.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepButton.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepButton.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepConnector.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepConnector.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepContent.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepContent.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepIcon.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepIcon.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepLabel.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepLabel.spec.js"
+  },
+  {
+    "path": "src/Stepper/StepPositionIcon.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/StepPositionIcon.spec.js"
+  },
+  {
+    "path": "src/Stepper/Stepper.test.js",
+    "status": "renamed",
+    "oldPath": "src/Stepper/Stepper.spec.js"
+  },
+  {
+    "path": "src/SvgIcon/SvgIcon.test.js",
+    "status": "renamed",
+    "oldPath": "src/SvgIcon/SvgIcon.spec.js"
+  },
+  {
+    "path": "src/SwipeableDrawer/SwipeableDrawer.test.js",
+    "status": "renamed",
+    "oldPath": "src/SwipeableDrawer/SwipeableDrawer.spec.js"
+  },
+  {
+    "path": "src/Switch/Switch.test.js",
+    "status": "renamed",
+    "oldPath": "src/Switch/Switch.spec.js"
+  },
+  {
+    "path": "src/Table/Table.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/Table.spec.js"
+  },
+  {
+    "path": "src/Table/TableBody.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableBody.spec.js"
+  },
+  {
+    "path": "src/Table/TableCell.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableCell.spec.js"
+  },
+  {
+    "path": "src/Table/TableFooter.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableFooter.spec.js"
+  },
+  {
+    "path": "src/Table/TableHead.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableHead.spec.js"
+  },
+  {
+    "path": "src/Table/TablePagination.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TablePagination.spec.js"
+  },
+  {
+    "path": "src/Table/TableRow.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableRow.spec.js"
+  },
+  {
+    "path": "src/Table/TableSortLabel.test.js",
+    "status": "renamed",
+    "oldPath": "src/Table/TableSortLabel.spec.js"
+  },
+  {
+    "path": "src/Tabs/Tab.test.js",
+    "status": "renamed",
+    "oldPath": "src/Tabs/Tab.spec.js"
+  },
+  {
+    "path": "src/Tabs/TabIndicator.test.js",
+    "status": "renamed",
+    "oldPath": "src/Tabs/TabIndicator.spec.js"
+  },
+  {
+    "path": "src/Tabs/TabScrollButton.test.js",
+    "status": "renamed",
+    "oldPath": "src/Tabs/TabScrollButton.spec.js"
+  },
+  {
+    "path": "src/Tabs/Tabs.test.js",
+    "status": "renamed",
+    "oldPath": "src/Tabs/Tabs.spec.js"
+  },
+  {
+    "path": "src/TextField/TextField.test.js",
+    "status": "renamed",
+    "oldPath": "src/TextField/TextField.spec.js"
+  },
+  {
+    "path": "src/Toolbar/Toolbar.test.js",
+    "status": "renamed",
+    "oldPath": "src/Toolbar/Toolbar.spec.js"
+  },
+  {
+    "path": "src/Tooltip/Tooltip.test.js",
+    "status": "renamed",
+    "oldPath": "src/Tooltip/Tooltip.spec.js"
+  },
+  {
+    "path": "src/Typography/Typography.test.js",
+    "status": "renamed",
+    "oldPath": "src/Typography/Typography.spec.js"
+  },
+  {
+    "path": "src/index.test.js",
+    "status": "renamed",
+    "oldPath": "src/index.spec.js"
+  },
+  {
+    "path": "src/internal/SwitchBase.test.js",
+    "status": "renamed",
+    "oldPath": "src/internal/SwitchBase.spec.js"
+  },
+  {
+    "path": "src/internal/svg-icons/index.test.js",
+    "status": "renamed",
+    "oldPath": "src/internal/svg-icons/index.spec.js"
+  },
+  {
+    "path": "src/styles/MuiThemeProvider.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/MuiThemeProvider.spec.js"
+  },
+  {
+    "path": "src/styles/colorManipulator.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/colorManipulator.spec.js"
+  },
+  {
+    "path": "src/styles/createBreakpoints.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createBreakpoints.spec.js"
+  },
+  {
+    "path": "src/styles/createGenerateClassName.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createGenerateClassName.spec.js"
+  },
+  {
+    "path": "src/styles/createMixins.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createMixins.spec.js"
+  },
+  {
+    "path": "src/styles/createMuiTheme.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createMuiTheme.spec.js"
+  },
+  {
+    "path": "src/styles/createPalette.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createPalette.spec.js"
+  },
+  {
+    "path": "src/styles/createTypography.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/createTypography.spec.js"
+  },
+  {
+    "path": "src/styles/getStylesCreator.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/getStylesCreator.spec.js"
+  },
+  {
+    "path": "src/styles/getThemeProps.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/getThemeProps.spec.js"
+  },
+  {
+    "path": "src/styles/themeListener.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/themeListener.spec.js"
+  },
+  {
+    "path": "src/styles/transitions.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/transitions.spec.js"
+  },
+  {
+    "path": "src/styles/withStyles.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/withStyles.spec.js"
+  },
+  {
+    "path": "src/styles/withTheme.test.js",
+    "status": "renamed",
+    "oldPath": "src/styles/withTheme.spec.js"
+  },
+  {
+    "path": "src/test-utils/until.test.js",
+    "status": "renamed",
+    "oldPath": "src/test-utils/until.spec.js"
+  },
+  {
+    "path": "src/transitions/Collapse.test.js",
+    "status": "renamed",
+    "oldPath": "src/transitions/Collapse.spec.js"
+  },
+  {
+    "path": "src/transitions/Fade.test.js",
+    "status": "renamed",
+    "oldPath": "src/transitions/Fade.spec.js"
+  },
+  {
+    "path": "src/transitions/Grow.test.js",
+    "status": "renamed",
+    "oldPath": "src/transitions/Grow.spec.js"
+  },
+  {
+    "path": "src/transitions/Slide.test.js",
+    "status": "renamed",
+    "oldPath": "src/transitions/Slide.spec.js"
+  },
+  {
+    "path": "src/transitions/Zoom.test.js",
+    "status": "renamed",
+    "oldPath": "src/transitions/Zoom.spec.js"
+  },
+  {
+    "path": "src/utils/ClickAwayListener.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/ClickAwayListener.spec.js"
+  },
+  {
+    "path": "src/utils/exactProp.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/exactProp.spec.js"
+  },
+  {
+    "path": "src/utils/helpers.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/helpers.spec.js"
+  },
+  {
+    "path": "src/utils/reactHelpers.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/reactHelpers.spec.js"
+  },
+  {
+    "path": "src/utils/requirePropFactory.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/requirePropFactory.spec.js"
+  },
+  {
+    "path": "src/utils/withWidth.test.js",
+    "status": "renamed",
+    "oldPath": "src/utils/withWidth.spec.js"
+  },
+  {
+    "path": "test/integration/Menu.test.js",
+    "status": "renamed",
+    "oldPath": "test/integration/Menu.spec.js"
+  },
+  {
+    "path": "test/integration/MenuList.test.js",
+    "status": "renamed",
+    "oldPath": "test/integration/MenuList.spec.js"
+  },
+  {
+    "path": "test/integration/Select.test.js",
+    "status": "renamed",
+    "oldPath": "test/integration/Select.spec.js"
+  },
+  {
+    "path": "test/karma.tests.js",
+    "status": "modified"
+  },
+  {
+    "path": "test/utils/consoleErrorMock.test.js",
+    "status": "renamed",
+    "oldPath": "test/utils/consoleErrorMock.spec.js"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "test/development/app-dir/basic/basic.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/development/app-dir/experimental-lightningcss/experimental-lightningcss.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/lib/next-test-utils.ts",
+    "status": "modified"
+  }
+]

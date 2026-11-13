@@ -1,0 +1,15 @@
+[
+  {
+    "path": "tests/components/openai_conversation/snapshots/test_ai_task.ambr",
+    "status": "renamed",
+    "oldPath": "tests/components/openai_conversation/snapshots/test_evaluation.ambr"
+  },
+  {
+    "path": "tests/components/openai_conversation/test_ai_task.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/components/openai_conversation/test_evaluation.py",
+    "status": "deleted"
+  }
+]

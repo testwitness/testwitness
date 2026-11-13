@@ -1,0 +1,86 @@
+[
+  {
+    "path": "tests/models/aimv2/test_modeling_aimv2.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/aria/test_modeling_aria.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/deepseek_vl_hybrid/test_image_processing_deepseek_vl_hybrid.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/eomt/test_modeling_eomt.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/fast_vlm/test_modeling_fast_vlm.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/flava/test_image_processing_flava.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/fuyu/test_image_processing_fuyu.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/idefics/test_image_processing_idefics.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/imagegpt/test_image_processing_imagegpt.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/kimi_k25/test_image_processing_kimi_k25.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/layoutlmv2/test_image_processing_layoutlmv2.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/lfm2_vl/test_modeling_lfm2_vl.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/llava/test_modeling_llava.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/minimax_m3_vl/test_modeling_minimax_m3_vl.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/pix2struct/test_image_processing_pix2struct.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/qwen2_vl/test_image_processing_qwen2_vl.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/video_llama_3/test_image_processing_video_llama_3.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/models/vitpose/test_image_processing_vitpose.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/test_image_processing_common.py",
+    "status": "modified"
+  },
+  {
+    "path": "utils/fetch_hub_objects_for_ci.py",
+    "status": "modified"
+  }
+]

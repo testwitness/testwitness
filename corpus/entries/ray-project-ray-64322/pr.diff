@@ -1,0 +1,355 @@
+diff --git a/ci/ray_ci/serve_hap_test_names.txt b/ci/ray_ci/serve_hap_test_names.txt
+index 8bb89cfa..ca79885b 100644
+--- a/ci/ray_ci/serve_hap_test_names.txt
++++ b/ci/ray_ci/serve_hap_test_names.txt
+@@ -55,6 +55,7 @@
+ //python/ray/serve/tests:test_shutdown
+ //python/ray/serve/tests:test_standalone
+ //python/ray/serve/tests:test_standalone_2
++//python/ray/serve/tests:test_standalone_3
+ //python/ray/serve/tests:test_streaming_response
+ //python/ray/serve/tests:test_target_capacity
+ //python/ray/serve/tests:test_task_processor
+diff --git a/python/ray/serve/_private/test_utils.py b/python/ray/serve/_private/test_utils.py
+index 934010bb..f3b42e25 100644
+--- a/python/ray/serve/_private/test_utils.py
++++ b/python/ray/serve/_private/test_utils.py
+@@ -34,6 +34,7 @@ from ray.serve._private.common import (
+     RunningReplicaInfo,
+ )
+ from ray.serve._private.constants import (
++    RAY_SERVE_ENABLE_HA_PROXY,
+     SERVE_DEFAULT_APP_NAME,
+     SERVE_NAMESPACE,
+ )
+@@ -821,6 +822,26 @@ def get_num_alive_replicas(
+     return len(actors)
+ 
+ 
++def expected_proxy_actors(num_proxy_nodes: int = 1) -> Dict[str, int]:
++    """Proxy actors expected ALIVE by class name for the given number of proxy nodes.
++
++    Natively each proxy node runs one ProxyActor. Under HAProxy each proxy node runs an
++    HAProxyManager and the head node also runs a single fallback ProxyActor. Set-based
++    callers can take the keys, count-based callers use the counts directly.
++    """
++    if RAY_SERVE_ENABLE_HA_PROXY:
++        return {"HAProxyManager": num_proxy_nodes, "ProxyActor": 1}
++    return {"ProxyActor": num_proxy_nodes}
++
++
++def alive_actor_counts() -> Dict[str, int]:
++    """Count of ALIVE actors by class name in the current Ray session."""
++    counts: Dict[str, int] = {}
++    for actor in list_actors(filters=[("STATE", "=", "ALIVE")]):
++        counts[actor["class_name"]] = counts.get(actor["class_name"], 0) + 1
++    return counts
++
++
+ def check_num_replicas_gte(
+     name: str, target: int, app_name: str = SERVE_DEFAULT_APP_NAME
+ ) -> int:
+diff --git a/python/ray/serve/tests/test_haproxy.py b/python/ray/serve/tests/test_haproxy.py
+index 551e57d0..145f1386 100644
+--- a/python/ray/serve/tests/test_haproxy.py
++++ b/python/ray/serve/tests/test_haproxy.py
+@@ -30,7 +30,11 @@ from ray.serve._private.constants import (
+     SERVE_SESSION_ID,
+ )
+ from ray.serve._private.haproxy import HAProxyManager
+-from ray.serve._private.test_utils import get_application_url
++from ray.serve._private.test_utils import (
++    alive_actor_counts,
++    expected_proxy_actors,
++    get_application_url,
++)
+ from ray.serve.config import HTTPOptions, RequestRouterConfig
+ from ray.serve.context import _get_global_client
+ from ray.serve.exceptions import RayServeException
+@@ -123,8 +127,7 @@ def test_single_app_shutdown_actors(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        "HAProxyManager",
+-        "ProxyActor",
++        *expected_proxy_actors(),
+         "ServeReplica:app:f",
+     }
+ 
+@@ -165,8 +168,7 @@ async def test_single_app_shutdown_actors_async(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        "HAProxyManager",
+-        "ProxyActor",
++        *expected_proxy_actors(),
+         "ServeReplica:app:f",
+     }
+ 
+@@ -347,8 +349,13 @@ async def test_drain_and_undrain_haproxy_manager(
+ 
+     serve.run(HelloModel.options(num_replicas=2).bind())
+ 
+-    # 3 haproxies, 1 controller, 2 replicas, 1 signal actor, 1 fallback proxy
+-    wait_for_condition(lambda: len(list_actors()) == 8)
++    expected_actors = {
++        "ServeController": 1,
++        **expected_proxy_actors(num_proxy_nodes=3),
++        "ServeReplica:default:HelloModel": 2,
++        "SignalActor": 1,
++    }
++    wait_for_condition(lambda: alive_actor_counts() == expected_actors)
+     assert len(ray.nodes()) == 3
+ 
+     client = _get_global_client()
+diff --git a/python/ray/serve/tests/test_metrics_haproxy.py b/python/ray/serve/tests/test_metrics_haproxy.py
+index fa4fcd9a..ef7e2d2f 100644
+--- a/python/ray/serve/tests/test_metrics_haproxy.py
++++ b/python/ray/serve/tests/test_metrics_haproxy.py
+@@ -38,7 +38,11 @@ from ray._common.test_utils import (
+ from ray._common.utils import reset_ray_address
+ from ray.serve import HTTPOptions
+ from ray.serve._private.long_poll import LongPollHost, UpdatedObject
+-from ray.serve._private.test_utils import get_application_url, get_metric_dictionaries
++from ray.serve._private.test_utils import (
++    expected_proxy_actors,
++    get_application_url,
++    get_metric_dictionaries,
++)
+ from ray.serve._private.utils import block_until_http_ready
+ from ray.serve.tests.conftest import (
+     TEST_METRICS_EXPORT_PORT,
+@@ -1051,7 +1055,7 @@ def test_actor_summary(serve_instance):
+     actors = list_actors(filters=[("state", "=", "ALIVE")])
+     class_names = {actor["class_name"] for actor in actors}
+     assert class_names.issuperset(
+-        {"ServeController", "HAProxyManager", "ServeReplica:app:f"}
++        {"ServeController", *expected_proxy_actors(), "ServeReplica:app:f"}
+     )
+ 
+ 
+diff --git a/python/ray/serve/tests/test_shutdown.py b/python/ray/serve/tests/test_shutdown.py
+index 4a63e9fa..b4208e6a 100644
+--- a/python/ray/serve/tests/test_shutdown.py
++++ b/python/ray/serve/tests/test_shutdown.py
+@@ -9,26 +9,18 @@ from ray import serve
+ from ray._common.test_utils import wait_for_condition
+ from ray._raylet import GcsClient
+ from ray.serve._private.constants import (
+-    RAY_SERVE_ENABLE_HA_PROXY,
+     SERVE_CONTROLLER_NAME,
+     SERVE_DEPLOYMENT_ACTOR_PREFIX,
+     SERVE_NAMESPACE,
+     SERVE_PROXY_NAME,
+ )
+ from ray.serve._private.default_impl import create_cluster_node_info_cache
++from ray.serve._private.test_utils import expected_proxy_actors
+ from ray.serve._private.utils import format_actor_name
+ from ray.serve.config import DeploymentActorConfig
+ from ray.util.state import list_actors
+ 
+ 
+-def _expected_proxy_classes():
+-    """Proxy actor class names expected ALIVE while a Serve app is running."""
+-    # Under HAProxy the per-node HAProxyManager joins the head-node fallback ProxyActor.
+-    if RAY_SERVE_ENABLE_HA_PROXY:
+-        return {"ProxyActor", "HAProxyManager"}
+-    return {"ProxyActor"}
+-
+-
+ def test_shutdown(ray_shutdown):
+     ray.init(num_cpus=8)
+     serve.start(http_options=dict(port=8003))
+@@ -139,7 +131,7 @@ def test_single_app_shutdown_actors(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        *_expected_proxy_classes(),
++        *expected_proxy_actors(),
+         "ServeReplica:app:f",
+     }
+ 
+@@ -180,7 +172,7 @@ async def test_single_app_shutdown_actors_async(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        *_expected_proxy_classes(),
++        *expected_proxy_actors(),
+         "ServeReplica:app:f",
+     }
+ 
+@@ -221,7 +213,7 @@ def test_multi_app_shutdown_actors(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        *_expected_proxy_classes(),
++        *expected_proxy_actors(),
+         "ServeReplica:app1:f",
+         "ServeReplica:app2:f",
+     }
+@@ -264,7 +256,7 @@ async def test_multi_app_shutdown_actors_async(ray_shutdown):
+ 
+     actor_names = {
+         "ServeController",
+-        *_expected_proxy_classes(),
++        *expected_proxy_actors(),
+         "ServeReplica:app1:f",
+         "ServeReplica:app2:f",
+     }
+diff --git a/python/ray/serve/tests/test_standalone.py b/python/ray/serve/tests/test_standalone.py
+index 72b64414..d0ba0d10 100644
+--- a/python/ray/serve/tests/test_standalone.py
++++ b/python/ray/serve/tests/test_standalone.py
+@@ -26,6 +26,7 @@ from ray.serve._private.constants import (
+ )
+ from ray.serve._private.default_impl import create_cluster_node_info_cache
+ from ray.serve._private.http_util import set_socket_reuse_port
++from ray.serve._private.test_utils import expected_proxy_actors
+ from ray.serve._private.utils import block_until_http_ready, format_actor_name
+ from ray.serve.config import (
+     ControllerOptions,
+@@ -370,11 +371,9 @@ def test_http_head_only(ray_cluster):
+ 
+     serve.start(http_options={"port": _get_random_port(), "location": "HeadOnly"})
+ 
+-    # Controller and proxy on the head node. HAProxy adds the HAProxyManager
+-    # alongside the fallback ProxyActor, which registers asynchronously.
+-    expected_classes = {"ServeController", "ProxyActor"}
+-    if RAY_SERVE_ENABLE_HA_PROXY:
+-        expected_classes.add("HAProxyManager")
++    # Controller and proxy on the head node. Under HAProxy the proxy is the
++    # HAProxyManager alongside the fallback ProxyActor, which registers asynchronously.
++    expected_classes = {"ServeController", *expected_proxy_actors()}
+ 
+     def check_head_only_actors():
+         actors = list_actors(
+diff --git a/python/ray/serve/tests/test_standalone_2.py b/python/ray/serve/tests/test_standalone_2.py
+index 3741af0c..619031b4 100644
+--- a/python/ray/serve/tests/test_standalone_2.py
++++ b/python/ray/serve/tests/test_standalone_2.py
+@@ -12,10 +12,10 @@ from ray import serve
+ from ray._common.test_utils import wait_for_condition
+ from ray.exceptions import RayActorError
+ from ray.serve._private.constants import (
+-    RAY_SERVE_ENABLE_HA_PROXY,
+     SERVE_DEFAULT_APP_NAME,
+     SERVE_NAMESPACE,
+ )
++from ray.serve._private.test_utils import expected_proxy_actors
+ from ray.serve.context import _get_global_client
+ from ray.tests.conftest import call_ray_stop_only  # noqa: F401
+ from ray.util.state import list_actors
+@@ -103,11 +103,11 @@ def test_serve_namespace(shutdown_ray_and_serve, ray_namespace):
+ 
+         serve.run(f.bind())
+ 
+-        proxy_classes = {"ProxyActor"}
+-        if RAY_SERVE_ENABLE_HA_PROXY:
+-            # Under HAProxy the per-node HAProxyManager joins the fallback ProxyActor.
+-            proxy_classes.add("HAProxyManager")
+-        expected_actors = {"ServeController", *proxy_classes, "ServeReplica:default:f"}
++        expected_actors = {
++            "ServeController",
++            *expected_proxy_actors(),
++            "ServeReplica:default:f",
++        }
+ 
+         def check_serve_actors():
+             actors = list_actors(
+diff --git a/python/ray/serve/tests/test_standalone_3.py b/python/ray/serve/tests/test_standalone_3.py
+index a7706682..12a54469 100644
+--- a/python/ray/serve/tests/test_standalone_3.py
++++ b/python/ray/serve/tests/test_standalone_3.py
+@@ -15,7 +15,11 @@ from ray.cluster_utils import AutoscalingCluster, Cluster
+ from ray.exceptions import RayActorError
+ from ray.serve._private.constants import SERVE_DEFAULT_APP_NAME, SERVE_LOGGER_NAME
+ from ray.serve._private.logging_utils import get_serve_logs_dir
+-from ray.serve._private.test_utils import SharedCounter
++from ray.serve._private.test_utils import (
++    SharedCounter,
++    alive_actor_counts,
++    expected_proxy_actors,
++)
+ from ray.serve._private.utils import get_head_node_id
+ from ray.serve.context import _get_global_client
+ from ray.serve.schema import ProxyStatus, ServeInstanceDetails
+@@ -23,13 +27,6 @@ from ray.tests.conftest import call_ray_stop_only  # noqa: F401
+ from ray.util.state import list_actors
+ 
+ 
+-# Some tests are not possible to run if proxy is not available on every node.
+-# We skip them if proxy is not available.
+-def is_proxy_on_every_node() -> bool:
+-    client = _get_global_client()
+-    return client._http_config.location == "EveryNode"
+-
+-
+ @pytest.fixture
+ def shutdown_ray():
+     if ray.is_initialized():
+@@ -283,19 +280,22 @@ def test_autoscaler_shutdown_node_http_everynode(
+ 
+     serve.run(A.bind(), name="app_f")
+ 
+-    # If proxy is on every node, total actors are 2 proxies, 1 controller, 2 replicas.
+-    # Otherwise, total actors are 1 proxy, 1 controller, 2 replicas.
+-    expected_actors = 5 if is_proxy_on_every_node() else 4
+-    wait_for_condition(lambda: len(list_actors()) == expected_actors)
++    # The second replica needs more CPU than the head node has free, so the autoscaler
++    # brings up the worker node. Requiring two proxies waits for that node to join.
++    expected_actors = {
++        "ServeController": 1,
++        **expected_proxy_actors(num_proxy_nodes=2),
++        "ServeReplica:app_f:A": 2,
++    }
++    wait_for_condition(lambda: alive_actor_counts() == expected_actors)
+     assert len(ray.nodes()) == 2
+ 
+     # Stop all deployment replicas.
+     serve.delete("app_f")
+ 
+-    # The http proxy on worker node should exit as well.
+-    wait_for_condition(
+-        lambda: len(list_actors(filters=[("STATE", "=", "ALIVE")])) == 2,
+-    )
++    # The worker node and its proxy exit, leaving only the head-node proxy.
++    expected_actors = {"ServeController": 1, **expected_proxy_actors(num_proxy_nodes=1)}
++    wait_for_condition(lambda: alive_actor_counts() == expected_actors)
+ 
+     client = _get_global_client()
+ 
+@@ -360,10 +360,12 @@ def test_controller_shutdown_gracefully(
+     model = HelloModel.bind()
+     serve.run(target=model)
+ 
+-    # If proxy is on every node, total actors are 2 proxies, 1 controller, and 2 replicas
+-    # Otherwise, total actors are 1 proxy, 1 controller, and 2 replicas
+-    expected_actors = 5 if is_proxy_on_every_node() else 4
+-    wait_for_condition(lambda: len(list_actors()) == expected_actors)
++    expected_actors = {
++        "ServeController": 1,
++        **expected_proxy_actors(num_proxy_nodes=2),
++        f"ServeReplica:{SERVE_DEFAULT_APP_NAME}:HelloModel": 2,
++    }
++    wait_for_condition(lambda: alive_actor_counts() == expected_actors)
+     assert len(ray.nodes()) == 2
+ 
+     # Call `graceful_shutdown()` on the controller, so it will start shutdown.
+@@ -421,11 +423,12 @@ def test_client_shutdown_gracefully_when_timeout(
+     model = HelloModel.bind()
+     serve.run(target=model)
+ 
+-    # Check expected actors based on mode
+-    # If proxy is on every node, total actors are 2 proxies, 1 controller, and 2 replicas
+-    # Otherwise, total actors are 1 proxy, 1 controller, and 2 replicas
+-    expected_actors = 5 if is_proxy_on_every_node() else 4
+-    wait_for_condition(lambda: len(list_actors()) == expected_actors)
++    expected_actors = {
++        "ServeController": 1,
++        **expected_proxy_actors(num_proxy_nodes=2),
++        f"ServeReplica:{SERVE_DEFAULT_APP_NAME}:HelloModel": 2,
++    }
++    wait_for_condition(lambda: alive_actor_counts() == expected_actors)
+     assert len(ray.nodes()) == 2
+ 
+     # Ensure client times out if the controller does not shutdown within timeout.

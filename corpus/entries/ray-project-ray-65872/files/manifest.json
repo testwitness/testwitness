@@ -1,0 +1,35 @@
+[
+  {
+    "path": "python/ray/data/BUILD.bazel",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/data/_internal/logical/operators/tests/__init__.py",
+    "status": "deleted"
+  },
+  {
+    "path": "python/ray/data/tests/datasource_v2/test_footer_chunking.py",
+    "status": "renamed",
+    "oldPath": "python/ray/data/_internal/datasource_v2/tests/test_footer_chunking.py"
+  },
+  {
+    "path": "python/ray/data/tests/datasource_v2/test_footer_reader.py",
+    "status": "renamed",
+    "oldPath": "python/ray/data/_internal/datasource_v2/tests/test_footer_reader.py"
+  },
+  {
+    "path": "python/ray/data/tests/test_read_files_logical.py",
+    "status": "renamed",
+    "oldPath": "python/ray/data/_internal/logical/operators/tests/test_read_files_logical.py"
+  },
+  {
+    "path": "python/ray/data/tests/unit/datasource_v2/test_file_partitioners.py",
+    "status": "renamed",
+    "oldPath": "python/ray/data/_internal/datasource_v2/tests/test_file_partitioners.py"
+  },
+  {
+    "path": "python/ray/data/tests/unit/datasource_v2/test_parquet_datasource_v2.py",
+    "status": "renamed",
+    "oldPath": "python/ray/data/_internal/datasource_v2/tests/test_parquet_datasource_v2.py"
+  }
+]

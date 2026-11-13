@@ -1,0 +1,26 @@
+[
+  {
+    "path": "packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.stories.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-toolbar/issue-feedback-button.tsx",
+    "status": "deleted"
+  },
+  {
+    "path": "packages/next/src/next-devtools/dev-overlay/styles/component-styles.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "test/development/error-overlay/index.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "test/lib/browsers/playwright.ts",
+    "status": "modified"
+  }
+]

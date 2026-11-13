@@ -1,0 +1,10 @@
+[
+  {
+    "path": "lib/tests/streamlit/typing/button_column_types.py",
+    "status": "deleted"
+  },
+  {
+    "path": "lib/tests/streamlit/typing/column_config_types.py",
+    "status": "modified"
+  }
+]

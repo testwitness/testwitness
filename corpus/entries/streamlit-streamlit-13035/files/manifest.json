@@ -1,0 +1,366 @@
+[
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_center[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_center[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_center[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_right_with_help[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_right_with_help[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_header-text_alignment_right_with_help[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_center_with_help[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_center_with_help[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_center_with_help[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_justify_with_help[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_justify_with_help[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_subheader-text_alignment_justify_with_help[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_center_with_help[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_center_with_help[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_center_with_help[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_right_with_help[chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_right_with_help[firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_heading_test/st_title-text_alignment_right_with_help[webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_100px[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_100px[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_content[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_content[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_badge-width_stretch[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_300px[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_300px[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_content[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_content[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_caption-width_stretch[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-formula[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-formula[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-latex[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-latex[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_latex-sympy[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_beside_widget[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_beside_widget[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_beside_widget[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_bold_syntax[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_bold_syntax[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_bold_syntax[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_columns[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_columns[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_columns[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_labeled_columns[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_labeled_columns[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_labeled_columns[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_in_sidebar[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_joined_in_single_command[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_joined_in_single_command[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_joined_in_single_command[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_via_multiple_commands[chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_via_multiple_commands[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-headers_via_multiple_commands[webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-long_word_in_container[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-many_elements_in_one_block[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-unsafe_allow_html[firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_200px[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_200px[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_content[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_markdown_test/st_markdown-width_stretch[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/shared/app_utils.py",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_heading.py",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_heading_test.py",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_markdown.py",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_markdown_test.py",
+    "status": "modified"
+  },
+  {
+    "path": "lib/streamlit/elements/heading.py",
+    "status": "modified"
+  },
+  {
+    "path": "lib/tests/streamlit/elements/heading_test.py",
+    "status": "modified"
+  }
+]

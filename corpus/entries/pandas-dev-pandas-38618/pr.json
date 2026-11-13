@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/38618",
+  "repo": "pandas-dev/pandas",
+  "number": 38618,
+  "title": "TST/REF: consolidate hist tests",
+  "merged_at": "2020-12-21T22:29:14Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "consolidate",
+  "split": "tuning",
+  "base_sha": "9a46a4b700d1b794d9a944928ac95f4cb742b259",
+  "head_sha": "dc3bd1dec9389cff2f69839722efc1ad1d3063b0",
+  "files_changed": 2,
+  "additions": 110,
+  "deletions": 110
+}

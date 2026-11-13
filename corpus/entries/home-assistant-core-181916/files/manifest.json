@@ -1,0 +1,10 @@
+[
+  {
+    "path": "tests/components/duco/test_init.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/components/duco/test_sensor.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/76214",
+  "repo": "vercel/next.js",
+  "number": 76214,
+  "title": "Consolidate `next/link` error tests",
+  "merged_at": "2025-02-19T22:34:05Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "consolidate",
+  "split": "heldout",
+  "base_sha": "929e3060ab66da1a989c569e0b5f1c9304f2efe6",
+  "head_sha": "29a7471f5431e3cb55f40e37d2931ed772331a1d",
+  "files_changed": 12,
+  "additions": 135,
+  "deletions": 274
+}

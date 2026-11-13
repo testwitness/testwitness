@@ -1,0 +1,1167 @@
+diff --git a/tests/models/aimv2/test_modeling_aimv2.py b/tests/models/aimv2/test_modeling_aimv2.py
+index 085e3075..b741c756 100644
+--- a/tests/models/aimv2/test_modeling_aimv2.py
++++ b/tests/models/aimv2/test_modeling_aimv2.py
+@@ -18,7 +18,6 @@ import tempfile
+ import unittest
+ 
+ import numpy as np
+-import requests
+ from parameterized import parameterized
+ 
+ from transformers import Aimv2Config, Aimv2TextConfig, Aimv2VisionConfig
+@@ -35,6 +34,7 @@ from transformers.utils import (
+ )
+ 
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image
+ from ...test_modeling_common import (
+     TEST_EAGER_MATCHES_SDPA_INFERENCE_PARAMETERIZATION,
+     ModelTesterMixin,
+@@ -58,8 +58,6 @@ if is_torch_available():
+ 
+ 
+ if is_vision_available():
+-    from PIL import Image
+-
+     from transformers import AutoImageProcessor, AutoProcessor
+ 
+ 
+@@ -479,7 +477,7 @@ class Aimv2ModelIntegrationTest(unittest.TestCase):
+         model = Aimv2Model.from_pretrained(model_name, device_map=torch_device)
+         processor = AutoProcessor.from_pretrained(model_name)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+         inputs = processor(
+             text=["a photo of a cat", "a photo of a dog"], images=image, padding=True, return_tensors="pt"
+         ).to(model.device)
+@@ -513,7 +511,7 @@ class Aimv2VisionModelIntegrationTests(unittest.TestCase):
+         model = Aimv2VisionModel.from_pretrained(model_name, device_map=torch_device)
+         processor = AutoImageProcessor.from_pretrained(model_name)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+         inputs = processor(image, return_tensors="pt").to(model.device)
+ 
+         with torch.no_grad():
+@@ -544,7 +542,7 @@ class Aimv2VisionModelIntegrationTests(unittest.TestCase):
+         model = Aimv2VisionModel.from_pretrained(model_name, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(model_name)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+         inputs = processor(image, return_tensors="pt").to(model.device)
+ 
+         with torch.no_grad():
+diff --git a/tests/models/aria/test_modeling_aria.py b/tests/models/aria/test_modeling_aria.py
+index 9813f79b..d02b4a59 100644
+--- a/tests/models/aria/test_modeling_aria.py
++++ b/tests/models/aria/test_modeling_aria.py
+@@ -16,7 +16,6 @@
+ import unittest
+ 
+ import pytest
+-import requests
+ 
+ from transformers import (
+     AriaConfig,
+@@ -27,7 +26,6 @@ from transformers import (
+     AutoTokenizer,
+     BitsAndBytesConfig,
+     is_torch_available,
+-    is_vision_available,
+ )
+ from transformers.models.idefics3 import Idefics3VisionConfig
+ from transformers.testing_utils import (
+@@ -43,6 +41,7 @@ from transformers.testing_utils import (
+ 
+ from ...generation.test_utils import GenerationTesterMixin
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image, load_test_image
+ from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor
+ 
+ 
+@@ -50,9 +49,6 @@ if is_torch_available():
+     import torch
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+ # Used to be https://aria-vl.github.io/static/images/view.jpg but it was removed, llava-vl has the same image
+ IMAGE_OF_VIEW_URL = "https://llava-vl.github.io/static/images/view.jpg"
+ 
+@@ -246,7 +242,7 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         )
+ 
+         prompt = "<|img|>\nUSER: What are the things I should be cautious about when I visit this place?\nASSISTANT:"
+-        raw_image = Image.open(requests.get(IMAGE_OF_VIEW_URL, stream=True).raw)
++        raw_image = load_test_image(IMAGE_OF_VIEW_URL)
+         inputs = self.processor(images=raw_image, text=prompt, return_tensors="pt").to(model.device, model.dtype)
+ 
+         non_img_tokens = [
+@@ -286,7 +282,7 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         processor = AutoProcessor.from_pretrained(model_id)
+ 
+         prompt = "USER: <|img|>\nWhat are the things I should be cautious about when I visit this place? ASSISTANT:"
+-        raw_image = Image.open(requests.get(IMAGE_OF_VIEW_URL, stream=True).raw)
++        raw_image = load_test_image(IMAGE_OF_VIEW_URL)
+         inputs = processor(images=raw_image, text=prompt, return_tensors="pt").to(model.device, model.dtype)
+ 
+         output = model.generate(**inputs, max_new_tokens=90, do_sample=False)
+@@ -320,8 +316,8 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <|img|>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me? ASSISTANT:",
+             "USER: <|img|>\nWhat is this? ASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get(IMAGE_OF_VIEW_URL, stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image(IMAGE_OF_VIEW_URL)
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=[image1, image2], text=prompts, return_tensors="pt", padding=True).to(
+             model.device, model.dtype
+@@ -358,8 +354,8 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <|img|>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me?\nASSISTANT:",
+             "USER: <|img|>\nWhat is this?\nASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get(IMAGE_OF_VIEW_URL, stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image(IMAGE_OF_VIEW_URL)
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = self.processor(images=[image1, image2], text=prompts, return_tensors="pt", padding=True).to(
+             model.device, model.dtype
+@@ -398,8 +394,8 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <|img|>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me?\nASSISTANT:",
+             "USER: <|img|>\nWhat is this?\nASSISTANT: Two cats lying on a bed!\nUSER: <|img|>\nAnd this?\nASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get(IMAGE_OF_VIEW_URL, stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image(IMAGE_OF_VIEW_URL)
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=[image1, image2, image1], text=prompts, return_tensors="pt", padding=True)
+         inputs = inputs.to(model.device, model.dtype)
+@@ -431,8 +427,8 @@ class AriaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         prompt3 = "<image>\nUSER: Describe the image.\nASSISTANT:"
+         url1 = "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=3062&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         url2 = "https://images.unsplash.com/photo-1617258683320-61900b281ced?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+-        image1 = Image.open(requests.get(url1, stream=True).raw)
+-        image2 = Image.open(requests.get(url2, stream=True).raw)
++        image1 = load_test_image(url1)
++        image2 = load_test_image(url2)
+ 
+         # Create inputs
+         messages = [
+diff --git a/tests/models/deepseek_vl_hybrid/test_image_processing_deepseek_vl_hybrid.py b/tests/models/deepseek_vl_hybrid/test_image_processing_deepseek_vl_hybrid.py
+index f8646f19..3972b879 100644
+--- a/tests/models/deepseek_vl_hybrid/test_image_processing_deepseek_vl_hybrid.py
++++ b/tests/models/deepseek_vl_hybrid/test_image_processing_deepseek_vl_hybrid.py
+@@ -19,7 +19,11 @@ import numpy as np
+ from transformers.testing_utils import require_torch, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -203,15 +207,7 @@ class DeepseekVLHybridImageProcessingTest(ImageProcessingTestMixin, unittest.Tes
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        import io
+-
+-        import httpx
+-
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         encodings = {}
+         for backend_name, image_processing_class in self.image_processing_classes.items():
+diff --git a/tests/models/eomt/test_modeling_eomt.py b/tests/models/eomt/test_modeling_eomt.py
+index 54126d70..c52742a2 100644
+--- a/tests/models/eomt/test_modeling_eomt.py
++++ b/tests/models/eomt/test_modeling_eomt.py
+@@ -15,13 +15,12 @@
+ 
+ import unittest
+ 
+-import requests
+-
+ from transformers import AutoImageProcessor, EomtConfig, EomtForUniversalSegmentation, pipeline
+ from transformers.testing_utils import require_torch, require_torch_accelerator, require_torch_fp16, slow, torch_device
+-from transformers.utils import is_torch_available, is_vision_available
++from transformers.utils import is_torch_available
+ 
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image
+ from ...test_modeling_common import ModelTesterMixin, floats_tensor
+ from ...test_pipeline_mixin import PipelineTesterMixin
+ 
+@@ -30,10 +29,6 @@ if is_torch_available():
+     import torch
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+-
+ class EomtForUniversalSegmentationTester:
+     def __init__(
+         self,
+@@ -175,7 +170,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtForUniversalSegmentation.from_pretrained(self.model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -218,7 +213,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtForUniversalSegmentation.from_pretrained(self.model_id, dtype=torch.float16, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -234,7 +229,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtForUniversalSegmentation.from_pretrained(model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -271,7 +266,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtForUniversalSegmentation.from_pretrained(self.model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -320,7 +315,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtForUniversalSegmentation.from_pretrained(model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -366,7 +361,7 @@ class EomtForUniversalSegmentationIntegrationTest(unittest.TestCase):
+ 
+     @slow
+     def test_segmentation_pipeline(self):
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         pipe = pipeline(model=self.model_id, subtask="panoptic", device=torch_device)
+         output = pipe(image)
+diff --git a/tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py b/tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py
+index 1e3e2f87..fcf065b0 100644
+--- a/tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py
++++ b/tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py
+@@ -15,8 +15,6 @@
+ 
+ import unittest
+ 
+-import requests
+-
+ from transformers import AutoImageProcessor, EomtDinov3Config, EomtDinov3ForUniversalSegmentation, pipeline
+ from transformers.testing_utils import (
+     Expectations,
+@@ -26,9 +24,10 @@ from transformers.testing_utils import (
+     slow,
+     torch_device,
+ )
+-from transformers.utils import is_torch_available, is_vision_available
++from transformers.utils import is_torch_available
+ 
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image
+ from ...test_modeling_common import ModelTesterMixin, _config_zero_init, floats_tensor
+ from ...test_pipeline_mixin import PipelineTesterMixin
+ 
+@@ -37,10 +36,6 @@ if is_torch_available():
+     import torch
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+-
+ class EomtDinov3ForUniversalSegmentationTester:
+     def __init__(
+         self,
+@@ -220,7 +215,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtDinov3ForUniversalSegmentation.from_pretrained(self.model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -262,7 +257,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         )
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -319,7 +314,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtDinov3ForUniversalSegmentation.from_pretrained(model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -375,7 +370,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtDinov3ForUniversalSegmentation.from_pretrained(self.model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -421,7 +416,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+         model = EomtDinov3ForUniversalSegmentation.from_pretrained(model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(model_id)
+ 
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=image, return_tensors="pt").to(model.device)
+ 
+@@ -463,7 +458,7 @@ class EomtDinov3ForUniversalSegmentationIntegrationTest(unittest.TestCase):
+             self.assertTrue(0.0 <= info["score"] <= 1.0)
+ 
+     def test_segmentation_pipeline(self):
+-        image = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image = load_coco_image("000000039769.jpg")
+ 
+         model = EomtDinov3ForUniversalSegmentation.from_pretrained(self.model_id, device_map="auto")
+         processor = AutoImageProcessor.from_pretrained(self.model_id)
+diff --git a/tests/models/fast_vlm/test_modeling_fast_vlm.py b/tests/models/fast_vlm/test_modeling_fast_vlm.py
+index 5e26b591..f8c6505d 100644
+--- a/tests/models/fast_vlm/test_modeling_fast_vlm.py
++++ b/tests/models/fast_vlm/test_modeling_fast_vlm.py
+@@ -16,15 +16,12 @@
+ import copy
+ import unittest
+ 
+-import requests
+-
+ from transformers import (
+     AutoProcessor,
+     FastVlmConfig,
+     FastVlmForConditionalGeneration,
+     FastVlmModel,
+     is_torch_available,
+-    is_vision_available,
+ )
+ from transformers.testing_utils import (
+     Expectations,
+@@ -38,6 +35,7 @@ from transformers.testing_utils import (
+ 
+ from ...generation.test_utils import GenerationTesterMixin
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image, load_test_image
+ from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor
+ 
+ 
+@@ -45,10 +43,6 @@ if is_torch_available():
+     import torch
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+-
+ class FastVlmVisionText2TextModelTester:
+     def __init__(
+         self,
+@@ -257,7 +251,7 @@ class FastVlmForConditionalGenerationIntegrationTest(unittest.TestCase):
+ 
+         prompt = "user\n<image>\nWhat are the things I should be cautious about when I visit this place?\nassistant"
+         image_file = "https://llava-vl.github.io/static/images/view.jpg"
+-        raw_image = Image.open(requests.get(image_file, stream=True).raw)
++        raw_image = load_test_image(image_file)
+         inputs = self.processor(images=raw_image, text=prompt, return_tensors="pt").to(torch_device, dtype=model.dtype)
+ 
+         output = model.generate(**inputs, max_new_tokens=20)
+@@ -281,8 +275,8 @@ class FastVlmForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "user\n<image>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me?\nassistant",
+             "user\n<image>\nWhat is this?\nassistant",
+         ]
+-        image1 = Image.open(requests.get("https://llava-vl.github.io/static/images/view.jpg", stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image("https://llava-vl.github.io/static/images/view.jpg")
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         self.processor.tokenizer.padding_side = "left"
+         inputs = self.processor(images=[image1, image2], text=prompts, return_tensors="pt", padding=True).to(
+diff --git a/tests/models/flava/test_image_processing_flava.py b/tests/models/flava/test_image_processing_flava.py
+index cb0dd10b..b01c911b 100644
+--- a/tests/models/flava/test_image_processing_flava.py
++++ b/tests/models/flava/test_image_processing_flava.py
+@@ -12,18 +12,19 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import io
+ import random
+ import unittest
+ 
+-import httpx
+ import numpy as np
+-from PIL import Image
+ 
+ from transformers.testing_utils import require_torch, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -404,11 +405,7 @@ class FlavaImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         # Create processors for each backend
+         encodings = {}
+diff --git a/tests/models/fuyu/test_image_processing_fuyu.py b/tests/models/fuyu/test_image_processing_fuyu.py
+index f0b1a311..dbbb78a8 100644
+--- a/tests/models/fuyu/test_image_processing_fuyu.py
++++ b/tests/models/fuyu/test_image_processing_fuyu.py
+@@ -1,7 +1,5 @@
+-import io
+ import unittest
+ 
+-import httpx
+ import numpy as np
+ import pytest
+ 
+@@ -16,7 +14,7 @@ from transformers.testing_utils import (
+ )
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin
++from ...test_image_processing_common import ImageProcessingTestMixin, load_coco_image
+ 
+ 
+ if is_torch_available() and is_vision_available():
+@@ -180,11 +178,7 @@ class FuyuImageProcessorTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         encodings = {}
+         for backend_name, image_processing_class in self.image_processing_classes.items():
+diff --git a/tests/models/idefics/test_image_processing_idefics.py b/tests/models/idefics/test_image_processing_idefics.py
+index c3b64654..5f5d87b2 100644
+--- a/tests/models/idefics/test_image_processing_idefics.py
++++ b/tests/models/idefics/test_image_processing_idefics.py
+@@ -11,10 +11,8 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-import io
+ import unittest
+ 
+-import httpx
+ import pytest
+ 
+ from transformers.testing_utils import (
+@@ -27,7 +25,11 @@ from transformers.testing_utils import (
+ )
+ from transformers.utils import is_torch_available, is_torchvision_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -151,11 +153,7 @@ class IdeficsImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         # Create processors for each backend
+         encodings = {}
+diff --git a/tests/models/imagegpt/test_image_processing_imagegpt.py b/tests/models/imagegpt/test_image_processing_imagegpt.py
+index 8853b123..75140460 100644
+--- a/tests/models/imagegpt/test_image_processing_imagegpt.py
++++ b/tests/models/imagegpt/test_image_processing_imagegpt.py
+@@ -20,7 +20,6 @@ import unittest
+ 
+ import numpy as np
+ import pytest
+-import requests
+ from datasets import load_dataset
+ 
+ from transformers import AutoImageProcessor
+@@ -34,7 +33,11 @@ from transformers.testing_utils import (
+ )
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -285,9 +288,7 @@ class ImageGPTImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         encodings = {}
+         for backend_name, image_processing_class in self.image_processing_classes.items():
+diff --git a/tests/models/kimi_k25/test_image_processing_kimi_k25.py b/tests/models/kimi_k25/test_image_processing_kimi_k25.py
+index 8e973825..18e8cb37 100644
+--- a/tests/models/kimi_k25/test_image_processing_kimi_k25.py
++++ b/tests/models/kimi_k25/test_image_processing_kimi_k25.py
+@@ -12,17 +12,20 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import io
+ import unittest
+ 
+-import httpx
+ import numpy as np
+ 
+ from transformers.image_utils import OPENAI_CLIP_MEAN, OPENAI_CLIP_STD
+ from transformers.testing_utils import require_torch, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs, prepare_video_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++    prepare_video_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -267,11 +270,7 @@ class Kimi26ImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+ 
+     # Override to test additional outputs for equivalence such as `image_grid_thw`
+     def test_backends_equivalence(self):
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         # Create processors for each backend
+         encodings = {}
+diff --git a/tests/models/layoutlmv2/test_image_processing_layoutlmv2.py b/tests/models/layoutlmv2/test_image_processing_layoutlmv2.py
+index 13f24bfd..3a479eed 100644
+--- a/tests/models/layoutlmv2/test_image_processing_layoutlmv2.py
++++ b/tests/models/layoutlmv2/test_image_processing_layoutlmv2.py
+@@ -15,7 +15,6 @@
+ import unittest
+ 
+ import pytest
+-import requests
+ 
+ from transformers.testing_utils import (
+     require_pytesseract,
+@@ -26,19 +25,19 @@ from transformers.testing_utils import (
+     torch_device,
+ )
+ from transformers.utils import (
+-    is_pytesseract_available,
+     is_torch_available,
+ )
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+     import torch
+ 
+-if is_pytesseract_available():
+-    from PIL import Image
+-
+ 
+ class LayoutLMv2ImageProcessingTester:
+     def __init__(
+@@ -148,9 +147,7 @@ class LayoutLMv2ImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase)
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         encodings = {}
+         for backend_name, image_processing_class in self.image_processing_classes.items():
+diff --git a/tests/models/lfm2_vl/test_modeling_lfm2_vl.py b/tests/models/lfm2_vl/test_modeling_lfm2_vl.py
+index 74e34cb9..fff17594 100644
+--- a/tests/models/lfm2_vl/test_modeling_lfm2_vl.py
++++ b/tests/models/lfm2_vl/test_modeling_lfm2_vl.py
+@@ -15,10 +15,8 @@
+ 
+ import math
+ import unittest
+-from io import BytesIO
+ 
+ import pytest
+-import requests
+ 
+ from transformers import AutoProcessor, is_torch_available
+ from transformers.models.lfm2_vl.modeling_lfm2_vl import Lfm2VlForConditionalGeneration
+@@ -31,17 +29,14 @@ from transformers.testing_utils import (
+     slow,
+     torch_device,
+ )
+-from transformers.utils.import_utils import is_vision_available
+ 
+ from ...causal_lm_tester import CausalLMModelTester
+ from ...generation.test_utils import GenerationTesterMixin
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image, load_test_image
+ from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+ if is_torch_available():
+     import torch
+ 
+@@ -210,15 +205,9 @@ class Lfm2VlForConditionalGenerationIntegrationTest(unittest.TestCase):
+     def setUp(self):
+         self.processor = AutoProcessor.from_pretrained("LiquidAI/LFM2-VL-1.6B")
+         self.processor.tokenizer.padding_side = "left"
+-        self.image = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        )
+-        self.image2 = Image.open(
+-            BytesIO(
+-                requests.get(
+-                    "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+-                ).content
+-            )
++        self.image = load_coco_image("000000039769.jpg")
++        self.image2 = load_test_image(
++            "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+         )
+ 
+     def tearDown(self):
+@@ -296,15 +285,9 @@ class Lfm2_5VlForConditionalGenerationIntegrationTest(unittest.TestCase):
+     def setUp(self):
+         self.processor = AutoProcessor.from_pretrained("LiquidAI/LFM2.5-VL-1.6B")
+         self.processor.tokenizer.padding_side = "left"
+-        self.image = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        )
+-        self.image2 = Image.open(
+-            BytesIO(
+-                requests.get(
+-                    "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+-                ).content
+-            )
++        self.image = load_coco_image("000000039769.jpg")
++        self.image2 = load_test_image(
++            "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+         )
+ 
+     def tearDown(self):
+diff --git a/tests/models/llava/test_modeling_llava.py b/tests/models/llava/test_modeling_llava.py
+index b0bcf5af..7b9f2487 100644
+--- a/tests/models/llava/test_modeling_llava.py
++++ b/tests/models/llava/test_modeling_llava.py
+@@ -17,7 +17,6 @@ import copy
+ import unittest
+ 
+ import pytest
+-import requests
+ from parameterized import parameterized
+ 
+ from transformers import (
+@@ -28,7 +27,6 @@ from transformers import (
+     LlavaForConditionalGeneration,
+     LlavaModel,
+     is_torch_available,
+-    is_vision_available,
+ )
+ from transformers.testing_utils import (
+     Expectations,
+@@ -43,6 +41,7 @@ from transformers.testing_utils import (
+ 
+ from ...generation.test_utils import GenerationTesterMixin
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image, load_test_image
+ from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor
+ from ...test_pipeline_mixin import PipelineTesterMixin
+ 
+@@ -51,10 +50,6 @@ if is_torch_available():
+     import torch
+ 
+ 
+-if is_vision_available():
+-    from PIL import Image
+-
+-
+ class LlavaVisionText2TextModelTester:
+     def __init__(
+         self,
+@@ -305,7 +300,7 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+ 
+         prompt = "<image>\nUSER: What are the things I should be cautious about when I visit this place?\nASSISTANT:"
+         image_file = "https://llava-vl.github.io/static/images/view.jpg"
+-        raw_image = Image.open(requests.get(image_file, stream=True).raw)
++        raw_image = load_test_image(image_file)
+         inputs = self.processor(images=raw_image, text=prompt, return_tensors="pt").to(torch_device, torch.float16)
+ 
+         output = model.generate(**inputs, max_new_tokens=20)
+@@ -334,7 +329,7 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+ 
+         prompt = "USER: <image>\nWhat are the things I should be cautious about when I visit this place? ASSISTANT:"
+         image_file = "https://llava-vl.github.io/static/images/view.jpg"
+-        raw_image = Image.open(requests.get(image_file, stream=True).raw)
++        raw_image = load_test_image(image_file)
+         inputs = processor(images=raw_image, text=prompt, return_tensors="pt").to(torch_device, torch.float16)
+ 
+         output = model.generate(**inputs, max_new_tokens=900, do_sample=False)
+@@ -366,8 +361,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <image>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me? ASSISTANT:",
+             "USER: <image>\nWhat is this? ASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get("https://llava-vl.github.io/static/images/view.jpg", stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image("https://llava-vl.github.io/static/images/view.jpg")
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=[image1, image2], text=prompts, return_tensors="pt", padding=True).to(torch_device)
+ 
+@@ -417,8 +412,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <image>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me?\nASSISTANT:",
+             "USER: <image>\nWhat is this?\nASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get("https://llava-vl.github.io/static/images/view.jpg", stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image("https://llava-vl.github.io/static/images/view.jpg")
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = self.processor(images=[image1, image2], text=prompts, return_tensors="pt", padding=True).to(
+             torch_device, torch.float16
+@@ -470,8 +465,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+             "USER: <image>\nWhat are the things I should be cautious about when I visit this place? What should I bring with me?\nASSISTANT:",
+             "USER: <image>\nWhat is this?\nASSISTANT: Two cats lying on a bed!\nUSER: <image>\nAnd this?\nASSISTANT:",
+         ]
+-        image1 = Image.open(requests.get("https://llava-vl.github.io/static/images/view.jpg", stream=True).raw)
+-        image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw)
++        image1 = load_test_image("https://llava-vl.github.io/static/images/view.jpg")
++        image2 = load_coco_image("000000039769.jpg")
+ 
+         inputs = processor(images=[image1, image2, image1], text=prompts, return_tensors="pt", padding=True).to(
+             torch_device
+@@ -523,8 +518,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         prompt3 = "<image>\nUSER: Describe the image.\nASSISTANT:"
+         url1 = "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=3062&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         url2 = "https://images.unsplash.com/photo-1617258683320-61900b281ced?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+-        image1 = Image.open(requests.get(url1, stream=True).raw)
+-        image2 = Image.open(requests.get(url2, stream=True).raw)
++        image1 = load_test_image(url1)
++        image2 = load_test_image(url2)
+ 
+         inputs = processor(
+             images=[image1, image2, image1, image2],
+@@ -604,7 +599,7 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         processor = AutoProcessor.from_pretrained(model_id)
+ 
+         image_file = "http://images.cocodataset.org/val2017/000000039769.jpg"
+-        raw_image = Image.open(requests.get(image_file, stream=True).raw)
++        raw_image = load_test_image(image_file)
+         inputs = processor(
+             text="<|im_start|>user\n<image>\nWhat are these?<|im_end|>\n<|im_start|>assistant",
+             images=raw_image,
+@@ -631,8 +626,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         processor = AutoProcessor.from_pretrained(model_id)
+ 
+         IMG_URLS = [
+-            Image.open(requests.get("https://picsum.photos/id/237/400/300", stream=True).raw),
+-            Image.open(requests.get("https://picsum.photos/id/231/200/300", stream=True).raw),
++            load_test_image("https://picsum.photos/id/237/400/300"),
++            load_test_image("https://picsum.photos/id/231/200/300"),
+         ]
+         PROMPT = "<s>[INST]Describe the images.\n[IMG][IMG][/INST]"
+ 
+@@ -660,8 +655,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         processor = AutoProcessor.from_pretrained(model_id)
+ 
+         IMG_URLS = [
+-            Image.open(requests.get("https://picsum.photos/id/237/400/300", stream=True).raw),
+-            Image.open(requests.get("https://picsum.photos/id/231/200/300", stream=True).raw),
++            load_test_image("https://picsum.photos/id/237/400/300"),
++            load_test_image("https://picsum.photos/id/231/200/300"),
+         ]
+         PROMPT = "<s>[INST][IMG][IMG]Describe the images.[/INST]"
+ 
+@@ -693,8 +688,8 @@ class LlavaForConditionalGenerationIntegrationTest(unittest.TestCase):
+         processor.tokenizer.pad_token_id = processor.tokenizer.eos_token_id
+ 
+         IMG_URLS = [
+-            Image.open(requests.get("https://picsum.photos/id/237/400/300", stream=True).raw),
+-            Image.open(requests.get("https://picsum.photos/id/17/150/500", stream=True).raw),
++            load_test_image("https://picsum.photos/id/237/400/300"),
++            load_test_image("https://picsum.photos/id/17/150/500"),
+         ]
+         PROMPT = [
+             "<s>[INST][IMG]What breed is the dog?[/INST]",
+diff --git a/tests/models/minimax_m3_vl/test_modeling_minimax_m3_vl.py b/tests/models/minimax_m3_vl/test_modeling_minimax_m3_vl.py
+index ce483eee..ed836fff 100644
+--- a/tests/models/minimax_m3_vl/test_modeling_minimax_m3_vl.py
++++ b/tests/models/minimax_m3_vl/test_modeling_minimax_m3_vl.py
+@@ -37,6 +37,7 @@ from transformers.testing_utils import (
+ 
+ from ...generation.test_utils import GenerationTesterMixin
+ from ...test_configuration_common import ConfigTester
++from ...test_image_processing_common import load_coco_image, load_test_image
+ from ...test_modeling_common import (
+     TEST_EAGER_MATCHES_BATCHED_AND_GROUPED_INFERENCE_PARAMETERIZATION,
+     ModelTesterMixin,
+@@ -651,7 +652,6 @@ class MiniMaxM3VLIntegrationTest(unittest.TestCase):
+         * LEFT padding is therefore the side to use for batched ``generate``: every real token's
+           continuation stays anchored to the live slots, so each row decodes coherently.
+         """
+-        import requests
+ 
+         model = self._load_model()
+         processor = self._load_processor()
+@@ -695,10 +695,8 @@ class MiniMaxM3VLIntegrationTest(unittest.TestCase):
+         # Two real, semantically distinct images downloaded from the hub/web (the picsum dog and the
+         # canonical COCO two-cats photo), paired with deliberately different-length questions so the
+         # batch genuinely needs padding.
+-        dog = Image.open(requests.get("https://picsum.photos/id/237/400/300", stream=True).raw).convert("RGB")
+-        cats = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        ).convert("RGB")
++        dog = load_test_image("https://picsum.photos/id/237/400/300").convert("RGB")
++        cats = load_coco_image("000000039769.jpg").convert("RGB")
+         texts = [
+             self._prompt(processor, "What animal is this? One word."),
+             self._prompt(
+diff --git a/tests/models/pix2struct/test_image_processing_pix2struct.py b/tests/models/pix2struct/test_image_processing_pix2struct.py
+index 386de5e8..1e3ef7b3 100644
+--- a/tests/models/pix2struct/test_image_processing_pix2struct.py
++++ b/tests/models/pix2struct/test_image_processing_pix2struct.py
+@@ -21,7 +21,11 @@ from transformers.image_utils import load_image
+ from transformers.testing_utils import require_torch, require_torch_accelerator, require_vision, slow, torch_device
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ from ...test_processing_common import url_to_local_path
+ 
+ 
+@@ -99,16 +103,7 @@ class Pix2StructImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase)
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        import io
+-
+-        import httpx
+-        from PIL import Image
+-
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         # Create processors for each backend
+         encodings = {}
+diff --git a/tests/models/qwen2_vl/test_image_processing_qwen2_vl.py b/tests/models/qwen2_vl/test_image_processing_qwen2_vl.py
+index fdad0a9a..6079046c 100644
+--- a/tests/models/qwen2_vl/test_image_processing_qwen2_vl.py
++++ b/tests/models/qwen2_vl/test_image_processing_qwen2_vl.py
+@@ -12,13 +12,11 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import io
+ import itertools
+ import json
+ import tempfile
+ import unittest
+ 
+-import httpx
+ import numpy as np
+ 
+ from transformers.image_utils import OPENAI_CLIP_MEAN, OPENAI_CLIP_STD
+@@ -26,7 +24,12 @@ from transformers.models.qwen2_vl.image_processing_qwen2_vl import smart_resize
+ from transformers.testing_utils import require_torch, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs, prepare_video_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++    prepare_video_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -294,11 +297,7 @@ class Qwen2VLImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         # Create processors for each backend
+         encodings = {}
+diff --git a/tests/models/video_llama_3/test_image_processing_video_llama_3.py b/tests/models/video_llama_3/test_image_processing_video_llama_3.py
+index b6d956e2..047522a5 100644
+--- a/tests/models/video_llama_3/test_image_processing_video_llama_3.py
++++ b/tests/models/video_llama_3/test_image_processing_video_llama_3.py
+@@ -18,14 +18,18 @@ import tempfile
+ import unittest
+ 
+ import numpy as np
+-import requests
+ 
+ from transformers.image_utils import IMAGENET_STANDARD_MEAN, IMAGENET_STANDARD_STD
+ from transformers.models.video_llama_3.image_processing_video_llama_3 import smart_resize
+ from transformers.testing_utils import require_torch, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs, prepare_video_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++    prepare_video_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -296,9 +300,7 @@ class VideoLlama3ImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            requests.get("http://images.cocodataset.org/val2017/000000039769.jpg", stream=True).raw
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+ 
+         encodings = {}
+         for backend_name, image_processing_class in self.image_processing_classes.items():
+diff --git a/tests/models/vitpose/test_image_processing_vitpose.py b/tests/models/vitpose/test_image_processing_vitpose.py
+index a20426d7..a8af2731 100644
+--- a/tests/models/vitpose/test_image_processing_vitpose.py
++++ b/tests/models/vitpose/test_image_processing_vitpose.py
+@@ -11,17 +11,19 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-import io
+ import unittest
+ 
+-import httpx
+ import numpy as np
+ import pytest
+ 
+ from transformers.testing_utils import require_torch, require_torch_accelerator, require_vision
+ from transformers.utils import is_torch_available, is_vision_available
+ 
+-from ...test_image_processing_common import ImageProcessingTestMixin, prepare_image_inputs
++from ...test_image_processing_common import (
++    ImageProcessingTestMixin,
++    load_coco_image,
++    prepare_image_inputs,
++)
+ 
+ 
+ if is_torch_available():
+@@ -233,11 +235,7 @@ class VitPoseImageProcessingTest(ImageProcessingTestMixin, unittest.TestCase):
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_coco_image("000000039769.jpg")
+         boxes = [[[0, 0, 1, 1]]]
+ 
+         encodings = {}
+diff --git a/tests/test_image_processing_common.py b/tests/test_image_processing_common.py
+index 4233df64..c8a03e8d 100644
+--- a/tests/test_image_processing_common.py
++++ b/tests/test_image_processing_common.py
+@@ -12,7 +12,6 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ import inspect
+-import io
+ import json
+ import os
+ import pathlib
+@@ -21,7 +20,6 @@ import tempfile
+ import warnings
+ from copy import deepcopy
+ 
+-import httpx
+ import numpy as np
+ import pytest
+ 
+@@ -49,6 +47,26 @@ if is_vision_available():
+     from PIL import Image
+ 
+ 
++_parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
++sys.path.append(os.path.join(_parent_dir, "utils"))
++from fetch_hub_objects_for_ci import url_to_local_path  # noqa: E402
++
++
++COCO_CATS_IMAGE_URL = (
++    "https://huggingface.co/datasets/hf-internal-testing/fixtures-coco/resolve/main/val2017/000000039769.jpg"
++)
++
++
++def load_test_image(url: str):
++    """
++    Loads a test image from a given URL, properly routing through HuggingFace's
++    local hub caching mechanism using url_to_local_path.
++    """
++    from transformers.image_utils import load_image
++
++    return load_image(url_to_local_path(url))
++
++
+ def prepare_image_inputs(
+     batch_size,
+     min_resolution,
+@@ -175,11 +193,7 @@ class ImageProcessingTestMixin:
+         if len(self.image_processing_classes) < 2:
+             self.skipTest(reason="Skipping backends equivalence test as there are less than 2 backends")
+ 
+-        dummy_image = Image.open(
+-            io.BytesIO(
+-                httpx.get("http://images.cocodataset.org/val2017/000000039769.jpg", follow_redirects=True).content
+-            )
+-        )
++        dummy_image = load_test_image(COCO_CATS_IMAGE_URL)
+ 
+         # Create processors for each backend
+         encodings = {}
+@@ -810,3 +824,13 @@ class AnnotationFormatTestMixin:
+                 first_encoding = image_processor_first(**params)
+                 second_encoding = image_processor_second(**params)
+                 _compare(first_encoding, second_encoding)
++
++
++COCO_DATASET_URL = "https://huggingface.co/datasets/hf-internal-testing/fixtures-coco/resolve/main/val2017/"
++
++
++def load_coco_image(image_name: str):
++    """
++    Helper to load a COCO fixture image by its filename.
++    """
++    return load_test_image(f"{COCO_DATASET_URL}{image_name}")
+diff --git a/utils/fetch_hub_objects_for_ci.py b/utils/fetch_hub_objects_for_ci.py
+index dfab2e2c..bf6fd4d8 100644
+--- a/utils/fetch_hub_objects_for_ci.py
++++ b/utils/fetch_hub_objects_for_ci.py
+@@ -51,19 +51,6 @@ URLS_FOR_TESTING_DATA = [
+     "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png",
+     "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.png",
+     "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg",
+-    # Don't use the original COCO URLs anymore. Replace with images from https://huggingface.co/datasets/hf-internal-testing/fixtures-coco below
+-    "http://images.cocodataset.org/val2017/000000000139.jpg",
+-    "http://images.cocodataset.org/val2017/000000000285.jpg",
+-    "http://images.cocodataset.org/val2017/000000000632.jpg",
+-    "http://images.cocodataset.org/val2017/000000000724.jpg",
+-    "http://images.cocodataset.org/val2017/000000000776.jpg",
+-    "http://images.cocodataset.org/val2017/000000000785.jpg",
+-    "http://images.cocodataset.org/val2017/000000000802.jpg",
+-    "http://images.cocodataset.org/val2017/000000000872.jpg",
+-    "http://images.cocodataset.org/val2017/000000001000.jpg",
+-    "http://images.cocodataset.org/val2017/000000039769.jpg",
+-    "http://images.cocodataset.org/val2017/000000077595.jpg",
+-    "http://images.cocodataset.org/val2017/000000136466.jpg",
+     "https://cdn.britannica.com/59/94459-050-DBA42467/Skyline-Chicago.jpg",
+     "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+     "https://llava-vl.github.io/static/images/view.jpg",

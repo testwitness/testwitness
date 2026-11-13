@@ -1,0 +1,34 @@
+[
+  {
+    "path": "ci/ray_ci/serve_hap_test_names.txt",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/_private/test_utils.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_haproxy.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_metrics_haproxy.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_shutdown.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_standalone.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_standalone_2.py",
+    "status": "modified"
+  },
+  {
+    "path": "python/ray/serve/tests/test_standalone_3.py",
+    "status": "modified"
+  }
+]

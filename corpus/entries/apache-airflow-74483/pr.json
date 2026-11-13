@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/74483",
+  "repo": "apache/airflow",
+  "number": 74483,
+  "title": "Rename the max_active_runs recompute test and drop a no-op mock",
+  "merged_at": "2026-10-09T20:56:00Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "dc38f84ff46d55b6e22961520636b1b7c9711994",
+  "head_sha": "fad918037a810365e58055ad926384d4fedd92dd",
+  "files_changed": 1,
+  "additions": 14,
+  "deletions": 12
+}

@@ -1,0 +1,132 @@
+[
+  {
+    "path": ".github/workflows/integration-tests.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes.mdx",
+    "status": "modified"
+  },
+  {
+    "path": "flows/serve_a_flow.py",
+    "status": "deleted"
+  },
+  {
+    "path": "integration-tests/serve_a_flow.py",
+    "status": "added"
+  },
+  {
+    "path": "integration-tests/test_automation_assessments.py",
+    "status": "renamed",
+    "oldPath": "flows/automation-assessments.py"
+  },
+  {
+    "path": "integration-tests/test_check_output_of_interrupted_serve.py",
+    "status": "renamed",
+    "oldPath": "flows/check_output_of_interrupted_serve.py"
+  },
+  {
+    "path": "integration-tests/test_client_context_lifespan.py",
+    "status": "renamed",
+    "oldPath": "flows/client_context_lifespan.py"
+  },
+  {
+    "path": "integration-tests/test_concurrent_subflows.py",
+    "status": "renamed",
+    "oldPath": "flows/concurrent_subflows.py"
+  },
+  {
+    "path": "integration-tests/test_deploy.py",
+    "status": "renamed",
+    "oldPath": "flows/deploy.py"
+  },
+  {
+    "path": "integration-tests/test_docker_deploy.py",
+    "status": "renamed",
+    "oldPath": "flows/docker_deploy.py"
+  },
+  {
+    "path": "integration-tests/test_flow_pauses.py",
+    "status": "renamed",
+    "oldPath": "flows/flow_pauses.py"
+  },
+  {
+    "path": "integration-tests/test_flow_results.py",
+    "status": "renamed",
+    "oldPath": "flows/flow_results.py"
+  },
+  {
+    "path": "integration-tests/test_flow_retries.py",
+    "status": "renamed",
+    "oldPath": "flows/flow_retries.py"
+  },
+  {
+    "path": "integration-tests/test_flow_retries_with_subflows.py",
+    "status": "renamed",
+    "oldPath": "flows/flow_retries_with_subflows.py"
+  },
+  {
+    "path": "integration-tests/test_hello_tasks.py",
+    "status": "renamed",
+    "oldPath": "flows/hello_tasks.py"
+  },
+  {
+    "path": "integration-tests/test_hello_world.py",
+    "status": "renamed",
+    "oldPath": "flows/hello_world.py"
+  },
+  {
+    "path": "integration-tests/test_load_flows_concurrently.py",
+    "status": "renamed",
+    "oldPath": "flows/load_flows_concurrently.py"
+  },
+  {
+    "path": "integration-tests/test_multiprocessing_flow.py",
+    "status": "renamed",
+    "oldPath": "flows/multiprocessing_flow.py"
+  },
+  {
+    "path": "integration-tests/test_runner_resilience.py",
+    "status": "renamed",
+    "oldPath": "flows/runner_resilience.py"
+  },
+  {
+    "path": "integration-tests/test_schedule_statefulness.py",
+    "status": "renamed",
+    "oldPath": "flows/schedule_statefulness.py"
+  },
+  {
+    "path": "integration-tests/test_secret_block.py",
+    "status": "renamed",
+    "oldPath": "flows/secret_block.py"
+  },
+  {
+    "path": "integration-tests/test_serve_a_flow.py",
+    "status": "added"
+  },
+  {
+    "path": "integration-tests/test_setup_logging.py",
+    "status": "renamed",
+    "oldPath": "flows/setup_logging.py"
+  },
+  {
+    "path": "integration-tests/test_task_results.py",
+    "status": "renamed",
+    "oldPath": "flows/task_results.py"
+  },
+  {
+    "path": "integration-tests/test_task_retries.py",
+    "status": "renamed",
+    "oldPath": "flows/task_retries.py"
+  },
+  {
+    "path": "integration-tests/test_task_worker.py",
+    "status": "renamed",
+    "oldPath": "flows/task_worker.py"
+  },
+  {
+    "path": "integration-tests/test_worker.py",
+    "status": "renamed",
+    "oldPath": "flows/worker.py"
+  }
+]

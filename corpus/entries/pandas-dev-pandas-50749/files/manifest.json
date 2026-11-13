@@ -1,0 +1,22 @@
+[
+  {
+    "path": "pandas/tests/groupby/aggregate/test_cython.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_categorical.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_groupby.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_index_as_string.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_raises.py",
+    "status": "modified"
+  }
+]

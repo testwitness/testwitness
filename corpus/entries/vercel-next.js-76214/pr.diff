@@ -1,0 +1,501 @@
+diff --git a/packages/next/src/client/link.tsx b/packages/next/src/client/link.tsx
+index 685033eed..ac8b1adc0 100644
+--- a/packages/next/src/client/link.tsx
++++ b/packages/next/src/client/link.tsx
+@@ -293,7 +293,8 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkPropsReal>(
+         return new Error(
+           `Failed prop type: The prop \`${args.key}\` expects a ${args.expected} in \`<Link>\`, but got \`${args.actual}\` instead.` +
+             (typeof window !== 'undefined'
+-              ? "\nOpen your browser's console to view the Component stack trace."
++              ? // TODO: Remove this addendum if Owner Stacks are available
++                "\nOpen your browser's console to view the Component stack trace."
+               : '')
+         )
+       }
+diff --git a/test/development/acceptance/ReactRefreshLogBoxMisc.test.ts b/test/development/acceptance/ReactRefreshLogBoxMisc.test.ts
+deleted file mode 100644
+index 27823b524..000000000
+--- a/test/development/acceptance/ReactRefreshLogBoxMisc.test.ts
++++ /dev/null
+@@ -1,230 +0,0 @@
+-import { createSandbox } from 'development-sandbox'
+-import { FileRef, nextTestSetup } from 'e2e-utils'
+-import path from 'path'
+-import { outdent } from 'outdent'
+-
+-// TODO: re-enable these tests after figuring out what is causing
+-// them to be so unreliable in CI
+-describe.skip('ReactRefreshLogBox', () => {
+-  const { next } = nextTestSetup({
+-    files: new FileRef(path.join(__dirname, 'fixtures', 'default-template')),
+-    skipStart: true,
+-  })
+-
+-  test('<Link> with multiple children', async () => {
+-    await using sandbox = await createSandbox(next)
+-    const { session } = sandbox
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Index() {
+-          return (
+-            <Link href="/">
+-              <p>One</p>
+-              <p>Two</p>
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-
+-    await session.assertHasRedbox()
+-    expect(await session.getRedboxDescription()).toMatchInlineSnapshot(
+-      `"Error: Multiple children were passed to <Link> with \`href\` of \`/\` but only one child is supported https://nextjs.org/docs/messages/link-multiple-children"`
+-    )
+-    expect(
+-      await session.evaluate(
+-        () =>
+-          (
+-            document
+-              .querySelector('body > nextjs-portal')
+-              .shadowRoot.querySelector(
+-                '#nextjs__container_errors_desc a:nth-of-type(1)'
+-              ) as any
+-          ).href
+-      )
+-    ).toMatch('https://nextjs.org/docs/messages/link-multiple-children')
+-  })
+-
+-  test('<Link> component props errors', async () => {
+-    await using sandbox = await createSandbox(next)
+-    const { session } = sandbox
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return <Link />
+-        }
+-      `
+-    )
+-
+-    await session.assertHasRedbox()
+-    expect(await session.getRedboxDescription()).toMatchInlineSnapshot(
+-      `"Error: Failed prop type: The prop \`href\` expects a \`string\` or \`object\` in \`<Link>\`, but got \`undefined\` instead."`
+-    )
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return <Link href="/">Abc</Link>
+-        }
+-      `
+-    )
+-    await session.assertNoRedbox()
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return (
+-            <Link
+-              href="/"
+-              as="/"
+-              replace={false}
+-              scroll={false}
+-              shallow={false}
+-              passHref={false}
+-              prefetch={false}
+-            >
+-              Abc
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-    await session.assertNoRedbox()
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return (
+-            <Link
+-              href="/"
+-              as="/"
+-              replace={true}
+-              scroll={true}
+-              shallow={true}
+-              passHref={true}
+-              prefetch={true}
+-            >
+-              Abc
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-    await session.assertNoRedbox()
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return (
+-            <Link
+-              href="/"
+-              as="/"
+-              replace={undefined}
+-              scroll={undefined}
+-              shallow={undefined}
+-              passHref={undefined}
+-              prefetch={undefined}
+-            >
+-              Abc
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-    await session.assertNoRedbox()
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return (
+-            <Link
+-              href="/"
+-              as="/"
+-              replace={undefined}
+-              scroll={'oops'}
+-              shallow={undefined}
+-              passHref={undefined}
+-              prefetch={undefined}
+-            >
+-              Abc
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-    await session.assertHasRedbox()
+-    expect(await session.getRedboxDescription()).toMatchSnapshot()
+-
+-    await session.patch(
+-      'index.js',
+-      outdent`
+-        import Link from 'next/link'
+-
+-        export default function Hello() {
+-          return (
+-            <Link
+-              href={false}
+-              as="/"
+-              replace={undefined}
+-              scroll={'oops'}
+-              shallow={undefined}
+-              passHref={undefined}
+-              prefetch={undefined}
+-            >
+-              Abc
+-            </Link>
+-          )
+-        }
+-      `
+-    )
+-    await session.assertHasRedbox()
+-    expect(await session.getRedboxDescription()).toMatchSnapshot()
+-  })
+-
+-  test('server-side only compilation errors', async () => {
+-    await using sandbox = await createSandbox(next)
+-    const { session } = sandbox
+-
+-    await session.patch(
+-      'pages/index.js',
+-      outdent`
+-        import myLibrary from 'my-non-existent-library'
+-        export async function getStaticProps() {
+-          return {
+-            props: {
+-              result: myLibrary()
+-            }
+-          }
+-        }
+-        export default function Hello(props) {
+-          return <h1>{props.result}</h1>
+-        }
+-      `
+-    )
+-
+-    await session.assertHasRedbox()
+-  })
+-})
+diff --git a/test/development/acceptance/__snapshots__/ReactRefreshLogBoxMisc.test.ts.snap b/test/development/acceptance/__snapshots__/ReactRefreshLogBoxMisc.test.ts.snap
+deleted file mode 100644
+index 59e269694..000000000
+--- a/test/development/acceptance/__snapshots__/ReactRefreshLogBoxMisc.test.ts.snap
++++ /dev/null
+@@ -1,11 +0,0 @@
+-// Jest Snapshot v1, https://goo.gl/fbAQLP
+-
+-exports[`ReactRefreshLogBox <Link> component props errors 2`] = `
+-"Error: Failed prop type: The prop \`scroll\` expects a \`boolean\` in \`<Link>\`, but got \`string\` instead.
+-Open your browser's console to view the Component stack trace."
+-`;
+-
+-exports[`ReactRefreshLogBox <Link> component props errors 3`] = `
+-"Error: Failed prop type: The prop \`href\` expects a \`string\` or \`object\` in \`<Link>\`, but got \`boolean\` instead.
+-Open your browser's console to view the Component stack trace."
+-`;
+diff --git a/test/development/pages-dir/client-navigation/index.test.ts b/test/development/pages-dir/client-navigation/index.test.ts
+index e4e04ecf9..aa2b28a13 100644
+--- a/test/development/pages-dir/client-navigation/index.test.ts
++++ b/test/development/pages-dir/client-navigation/index.test.ts
+@@ -56,27 +56,6 @@ describe('Client Navigation', () => {
+       await browser.close()
+     })
+ 
+-    it('should have a redbox when no children are provided', async () => {
+-      const pageErrors: unknown[] = []
+-      const browser = await webdriver(next.appPort, '/link-no-child', {
+-        beforePageLoad: (page) => {
+-          page.on('pageerror', (error: unknown) => {
+-            pageErrors.push(error)
+-          })
+-        },
+-      })
+-      await assertHasRedbox(browser)
+-      expect(await getRedboxHeader(browser)).toContain(
+-        'No children were passed to <Link> with `href` of `/about` but one child is required'
+-      )
+-      expect(pageErrors).toEqual([
+-        expect.objectContaining({
+-          message:
+-            'No children were passed to <Link> with `href` of `/about` but one child is required https://nextjs.org/docs/messages/link-no-children',
+-        }),
+-      ])
+-    })
+-
+     it('should not throw error when one number type child is provided', async () => {
+       const browser = await webdriver(next.appPort, '/link-number-child')
+       await assertNoRedbox(browser)
+diff --git a/test/e2e/app-dir/server-source-maps/server-source-maps.test.ts b/test/e2e/app-dir/server-source-maps/server-source-maps.test.ts
+index 8e3b308fc..7487c2dc2 100644
+--- a/test/e2e/app-dir/server-source-maps/server-source-maps.test.ts
++++ b/test/e2e/app-dir/server-source-maps/server-source-maps.test.ts
+@@ -216,6 +216,7 @@ describe('app-dir - server source maps', () => {
+       )
+       expect(cliOutput).toMatch(/digest: '\d+'/)
+ 
++      // TODO(veil): Should be a single error
+       await expect(browser).toDisplayRedbox(`
+        {
+          "count": 2,
+diff --git a/test/e2e/next-link-errors/app/invalid-href/page.js b/test/e2e/next-link-errors/app/invalid-href/page.js
+new file mode 100644
+index 000000000..dcbb4ab39
+--- /dev/null
++++ b/test/e2e/next-link-errors/app/invalid-href/page.js
+@@ -0,0 +1,7 @@
++import Link from 'next/link'
++
++export const dynamic = 'force-dynamic'
++
++export default function Hello() {
++  return <Link>Hello, Dave!</Link>
++}
+diff --git a/test/e2e/next-link-errors/app/layout.js b/test/e2e/next-link-errors/app/layout.js
+new file mode 100644
+index 000000000..803f17d86
+--- /dev/null
++++ b/test/e2e/next-link-errors/app/layout.js
+@@ -0,0 +1,7 @@
++export default function RootLayout({ children }) {
++  return (
++    <html>
++      <body>{children}</body>
++    </html>
++  )
++}
+diff --git a/test/e2e/next-link-errors/app/multiple-children/page.js b/test/e2e/next-link-errors/app/multiple-children/page.js
+new file mode 100644
+index 000000000..e837fb376
+--- /dev/null
++++ b/test/e2e/next-link-errors/app/multiple-children/page.js
+@@ -0,0 +1,12 @@
++import Link from 'next/link'
++
++export const dynamic = 'force-dynamic'
++
++export default function Index() {
++  return (
++    <Link href="/" legacyBehavior>
++      <p>Hello</p>
++      <p>Dave!</p>
++    </Link>
++  )
++}
+diff --git a/test/e2e/next-link-errors/app/no-children/page.js b/test/e2e/next-link-errors/app/no-children/page.js
+new file mode 100644
+index 000000000..dd802d4a0
+--- /dev/null
++++ b/test/e2e/next-link-errors/app/no-children/page.js
+@@ -0,0 +1,8 @@
++import React from 'react'
++import Link from 'next/link'
++
++export const dynamic = 'force-dynamic'
++
++export default function Page() {
++  return <Link href="/about" legacyBehavior></Link>
++}
+diff --git a/test/e2e/next-link-errors/next-link-errors.test.ts b/test/e2e/next-link-errors/next-link-errors.test.ts
+new file mode 100644
+index 000000000..f1a59b798
+--- /dev/null
++++ b/test/e2e/next-link-errors/next-link-errors.test.ts
+@@ -0,0 +1,92 @@
++import { nextTestSetup } from 'e2e-utils'
++import webdriver from 'next-webdriver'
++
++describe('next-link', () => {
++  const { skipped, next, isNextDev } = nextTestSetup({
++    files: __dirname,
++    skipDeployment: true,
++  })
++
++  if (skipped) return
++
++  it('errors on invalid href', async () => {
++    const browser = await webdriver(next.appPort, '/invalid-href')
++
++    if (isNextDev) {
++      // TODO(veil): Should be a single error
++      // TODO(veil): https://linear.app/vercel/issue/NDX-554/hide-the-anonymous-frames-which-are-between-2-ignored-frames
++      await expect(browser).toDisplayRedbox(`
++       {
++         "count": 2,
++         "description": "Error: Failed prop type: The prop \`href\` expects a \`string\` or \`object\` in \`<Link>\`, but got \`undefined\` instead.
++       Open your browser's console to view the Component stack trace.",
++         "environmentLabel": null,
++         "label": "Unhandled Runtime Error",
++         "source": "app/invalid-href/page.js (6:10) @ Hello
++       > 6 |   return <Link>Hello, Dave!</Link>
++           |          ^",
++         "stack": [
++           "Array.forEach <anonymous> (0:0)",
++           "Hello app/invalid-href/page.js (6:10)",
++         ],
++       }
++      `)
++    }
++    expect(await browser.elementByCss('body').text()).toMatchInlineSnapshot(
++      `"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)."`
++    )
++  })
++
++  it('no children', async () => {
++    const browser = await webdriver(next.appPort, '/no-children')
++
++    if (isNextDev) {
++      // TODO(veil): Should be a single error
++      // TODO(veil): https://linear.app/vercel/issue/NDX-554/hide-the-anonymous-frames-which-are-between-2-ignored-frames
++      await expect(browser).toDisplayRedbox(`
++       {
++         "count": 2,
++         "description": "Error: No children were passed to <Link> with \`href\` of \`/about\` but one child is required https://nextjs.org/docs/messages/link-no-children",
++         "environmentLabel": null,
++         "label": "Unhandled Runtime Error",
++         "source": "app/no-children/page.js (7:10) @ Page
++       > 7 |   return <Link href="/about" legacyBehavior></Link>
++           |          ^",
++         "stack": [
++           "Page app/no-children/page.js (7:10)",
++         ],
++       }
++      `)
++    }
++    expect(await browser.elementByCss('body').text()).toMatchInlineSnapshot(
++      `"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)."`
++    )
++  })
++
++  it('multiple children', async () => {
++    const browser = await webdriver(next.appPort, '/multiple-children')
++
++    if (isNextDev) {
++      // TODO(veil): Should be a single error
++      // TODO(veil): https://linear.app/vercel/issue/NDX-554/hide-the-anonymous-frames-which-are-between-2-ignored-frames
++      await expect(browser).toDisplayRedbox(`
++       {
++         "count": 2,
++         "description": "Error: Multiple children were passed to <Link> with \`href\` of \`/\` but only one child is supported https://nextjs.org/docs/messages/link-multiple-children 
++       Open your browser's console to view the Component stack trace.",
++         "environmentLabel": null,
++         "label": "Unhandled Runtime Error",
++         "source": "app/multiple-children/page.js (7:5) @ Index
++       >  7 |     <Link href="/" legacyBehavior>
++            |     ^",
++         "stack": [
++           "Index app/multiple-children/page.js (7:5)",
++         ],
++       }
++      `)
++    }
++    expect(await browser.elementByCss('body').text()).toMatchInlineSnapshot(
++      `"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)."`
++    )
++  })
++})
+diff --git a/test/e2e/next-link-errors/next.config.js b/test/e2e/next-link-errors/next.config.js
+new file mode 100644
+index 000000000..807126e4c
+--- /dev/null
++++ b/test/e2e/next-link-errors/next.config.js
+@@ -0,0 +1,6 @@
++/**
++ * @type {import('next').NextConfig}
++ */
++const nextConfig = {}
++
++module.exports = nextConfig
+diff --git a/test/turbopack-dev-tests-manifest.json b/test/turbopack-dev-tests-manifest.json
+index 1804824aa..e343bb7c7 100644
+--- a/test/turbopack-dev-tests-manifest.json
++++ b/test/turbopack-dev-tests-manifest.json
+@@ -1612,17 +1612,6 @@
+     "flakey": [],
+     "runtimeError": false
+   },
+-  "test/development/acceptance-app/ReactRefreshLogBoxMisc.test.ts": {
+-    "passed": [],
+-    "failed": [],
+-    "pending": [
+-      "ReactRefreshLogBox app <Link> component props errors",
+-      "ReactRefreshLogBox app <Link> with multiple children",
+-      "ReactRefreshLogBox app server-side only compilation errors"
+-    ],
+-    "flakey": [],
+-    "runtimeError": false
+-  },
+   "test/development/acceptance-app/ReactRefreshModule.test.ts": {
+     "passed": ["ReactRefreshModule app should allow any variable names"],
+     "failed": [],

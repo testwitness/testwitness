@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/getsentry/sentry-python/pull/6225",
+  "repo": "getsentry/sentry-python",
+  "number": 6225,
+  "title": "test: Move batcher fork safety test to batcher tests",
+  "merged_at": "2026-05-07T11:21:12Z",
+  "stars": 2219,
+  "license": "MIT",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "bd567bd14c9333f3426dc34d7137586ab6043fcd",
+  "head_sha": "0eab27111f8f3cad8c3fe9a8b09d548e70694d16",
+  "files_changed": 2,
+  "additions": 68,
+  "deletions": 65
+}

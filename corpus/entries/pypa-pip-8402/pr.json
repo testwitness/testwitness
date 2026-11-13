@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pypa/pip/pull/8402",
+  "repo": "pypa/pip",
+  "number": 8402,
+  "title": "Parametrize test_install_package_to_usersite_with_target_must_fail",
+  "merged_at": "2020-06-05T15:39:24Z",
+  "stars": 10307,
+  "license": "MIT",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "7a60395dbd646401192252c4c2834607ff05fa96",
+  "head_sha": "d2730ba2db58c6dbf9fc19fb5a68f1dfaffd848d",
+  "files_changed": 2,
+  "additions": 4,
+  "deletions": 9
+}

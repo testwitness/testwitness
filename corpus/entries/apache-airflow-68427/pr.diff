@@ -1,0 +1,4 @@
+diff --git a/task-sdk/tests/task_sdk/bases/test_resumablemixin.py b/task-sdk/tests/task_sdk/bases/test_resumablejobmixin.py
+similarity index 100%
+rename from task-sdk/tests/task_sdk/bases/test_resumablemixin.py
+rename to task-sdk/tests/task_sdk/bases/test_resumablejobmixin.py

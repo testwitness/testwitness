@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/django/django/pull/21566",
+  "repo": "django/django",
+  "number": 21566,
+  "title": "Renamed tests/migrations/test_base.py to tests/migrations/base.py.",
+  "merged_at": "2026-06-29T17:34:42Z",
+  "stars": 91705,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "e78991410b78391bc07a4b5010b273dfec814ff6",
+  "head_sha": "b097ee1dabbb2f0a2cec04d442b1d4f9bf36e28d",
+  "files_changed": 9,
+  "additions": 8,
+  "deletions": 8
+}

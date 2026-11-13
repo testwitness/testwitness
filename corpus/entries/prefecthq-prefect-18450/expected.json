@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "E001",
+    "severity": "high",
+    "subject": "test_load_flows_concurrently",
+    "verdict": "tp",
+    "reason": "except Exception prints and returns False; pytest ignores the return value"
+  },
+  {
+    "ruleId": "E001",
+    "severity": "high",
+    "subject": "test_runner_resilience_with_missing_file",
+    "verdict": "tp",
+    "reason": "crash is caught and turned into return False, which pytest treats as a pass; the old main exited 1"
+  }
+]

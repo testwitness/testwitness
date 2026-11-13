@@ -1,0 +1,14 @@
+[
+  {
+    "path": "providers/teradata/tests/unit/teradata/operators/test_bteq.py",
+    "status": "modified"
+  },
+  {
+    "path": "providers/teradata/tests/unit/teradata/utils/test_bteq_util.py",
+    "status": "modified"
+  },
+  {
+    "path": "providers/teradata/tests/unit/teradata/utils/test_encryption_utils.py",
+    "status": "modified"
+  }
+]

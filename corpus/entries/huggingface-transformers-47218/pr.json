@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/transformers/pull/47218",
+  "repo": "huggingface/transformers",
+  "number": 47218,
+  "title": "Refactor image loading in tests to use load_test_image helper",
+  "merged_at": "2026-07-17T08:20:15Z",
+  "stars": 168462,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "150eb7c9ed4091294c829fa0e9466b090cb0f87f",
+  "head_sha": "0f9f11ce31aa0c8b579ee2a60fc277e5c121a5f0",
+  "files_changed": 21,
+  "additions": 159,
+  "deletions": 218
+}

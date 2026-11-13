@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ray-project/ray/pull/65872",
+  "repo": "ray-project/ray",
+  "number": 65872,
+  "title": "[Data] Move out-of-tree Ray Data tests into python/ray/data/tests",
+  "merged_at": "2026-09-17T21:10:04Z",
+  "stars": 44187,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "e0fa111564b1d609582c78f0c132154b33b383a5",
+  "head_sha": "9af1ab2a4f4fe4b1b4d86dbdefde2a0113b361b6",
+  "files_changed": 7,
+  "additions": 4,
+  "deletions": 3
+}

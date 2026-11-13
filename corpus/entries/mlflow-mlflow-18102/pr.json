@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/18102",
+  "repo": "mlflow/mlflow",
+  "number": 18102,
+  "title": "tests: remove `to_db_uri` helper and use `f\"sqlite:///{db_path}\"` directly",
+  "merged_at": "2025-10-03T05:38:14Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "0ebfecfcffd429aee9bb607241b8ef397a297008",
+  "head_sha": "50770f24cf06c08a6d160c421890799146105969",
+  "files_changed": 2,
+  "additions": 4,
+  "deletions": 15
+}

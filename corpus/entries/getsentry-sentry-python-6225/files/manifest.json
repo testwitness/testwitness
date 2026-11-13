@@ -1,0 +1,10 @@
+[
+  {
+    "path": "tests/tracing/test_span_batcher.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/tracing/test_span_streaming.py",
+    "status": "modified"
+  }
+]

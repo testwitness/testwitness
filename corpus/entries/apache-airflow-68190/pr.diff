@@ -1,0 +1,60 @@
+diff --git a/providers/teradata/tests/unit/teradata/operators/test_bteq.py b/providers/teradata/tests/unit/teradata/operators/test_bteq.py
+index f943ae09c..a09957696 100644
+--- a/providers/teradata/tests/unit/teradata/operators/test_bteq.py
++++ b/providers/teradata/tests/unit/teradata/operators/test_bteq.py
+@@ -18,7 +18,6 @@ from __future__ import annotations
+ 
+ import logging
+ import tempfile
+-import unittest
+ from unittest import mock
+ 
+ import pytest
+@@ -288,7 +287,3 @@ class TestBteqOperator:
+         )
+         result = op.execute({})
+         assert result == 42  # still returns, but caller can fail on RC if desired
+-
+-
+-if __name__ == "__main__":
+-    unittest.main()
+diff --git a/providers/teradata/tests/unit/teradata/utils/test_bteq_util.py b/providers/teradata/tests/unit/teradata/utils/test_bteq_util.py
+index c8a0095f4..0f705c9cf 100644
+--- a/providers/teradata/tests/unit/teradata/utils/test_bteq_util.py
++++ b/providers/teradata/tests/unit/teradata/utils/test_bteq_util.py
+@@ -18,7 +18,6 @@ from __future__ import annotations
+ 
+ import os
+ import stat
+-import unittest
+ from unittest.mock import MagicMock, call, patch
+ 
+ import pytest
+@@ -348,7 +347,3 @@ class TestBteqUtils:
+         ssh_client = MagicMock()
+         result = is_valid_remote_bteq_script_file(ssh_client, None)
+         assert result is False
+-
+-
+-if __name__ == "__main__":
+-    unittest.main()
+diff --git a/providers/teradata/tests/unit/teradata/utils/test_encryption_utils.py b/providers/teradata/tests/unit/teradata/utils/test_encryption_utils.py
+index ba688182a..fdf1c8bc2 100644
+--- a/providers/teradata/tests/unit/teradata/utils/test_encryption_utils.py
++++ b/providers/teradata/tests/unit/teradata/utils/test_encryption_utils.py
+@@ -17,7 +17,6 @@
+ from __future__ import annotations
+ 
+ import string
+-import unittest
+ from unittest.mock import MagicMock, patch
+ 
+ from airflow.providers.teradata.utils.encryption_utils import (
+@@ -102,7 +101,3 @@ class TestEncryptionUtils:
+         assert exit_status == 0
+         assert output == "decrypted output"
+         assert err == ""
+-
+-
+-if __name__ == "__main__":
+-    unittest.main()

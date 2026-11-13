@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vitest-dev/vitest/pull/10711",
+  "repo": "vitest-dev/vitest",
+  "number": 10711,
+  "title": "test: move browser-mode e2e tests to the sequential browser suite",
+  "merged_at": "2026-07-04T14:58:40Z",
+  "stars": 17322,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "01280a85399ad149f0d3a7e0ce0215f5ae116d7b",
+  "head_sha": "b79636489379c5dc42127e4ca6b29c894bbb7c55",
+  "files_changed": 8,
+  "additions": 3,
+  "deletions": 4
+}

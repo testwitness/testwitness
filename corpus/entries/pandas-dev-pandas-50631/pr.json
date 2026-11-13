@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/50631",
+  "repo": "pandas-dev/pandas",
+  "number": 50631,
+  "title": "CLN: Consolidate groupby.value_counts tests",
+  "merged_at": "2023-01-09T21:51:21Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "consolidate",
+  "split": "heldout",
+  "base_sha": "47c9ee7b32d8bde2ff8cf50288a8787b11d512cb",
+  "head_sha": "e9e5adcc47a41d61a4b820b3c069df11cde9203b",
+  "files_changed": 2,
+  "additions": 809,
+  "deletions": 821
+}

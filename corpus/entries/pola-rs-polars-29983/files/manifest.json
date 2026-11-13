@@ -1,0 +1,18 @@
+[
+  {
+    "path": "Cargo.lock",
+    "status": "modified"
+  },
+  {
+    "path": "crates/polars-sql/Cargo.toml",
+    "status": "modified"
+  },
+  {
+    "path": "crates/polars-sql/tests/functions_io.rs",
+    "status": "modified"
+  },
+  {
+    "path": "py-polars/tests/unit/sql/test_table_functions.py",
+    "status": "modified"
+  }
+]

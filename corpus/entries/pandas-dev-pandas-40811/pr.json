@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/40811",
+  "repo": "pandas-dev/pandas",
+  "number": 40811,
+  "title": "TST: Consolidate groupby any, all tests",
+  "merged_at": "2021-04-07T19:45:26Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "consolidate",
+  "split": "tuning",
+  "base_sha": "757e15189883c00c2b4de0597ee71e1d7cb5e405",
+  "head_sha": "5ca9c4b7fdbe009f91dc2575be15c93b15b1729e",
+  "files_changed": 3,
+  "additions": 70,
+  "deletions": 55
+}

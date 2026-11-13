@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/scikit-learn/scikit-learn/pull/28842",
+  "repo": "scikit-learn/scikit-learn",
+  "number": 28842,
+  "title": "MAINT Clean-up utils.__init__: move tests into corresponding test files",
+  "merged_at": "2024-04-30T15:27:25Z",
+  "stars": 67956,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "395761a76397a560303f00d3db24a50a00ca11ed",
+  "head_sha": "40e630cc443354db58384e6ee46bb386dc19c04e",
+  "files_changed": 4,
+  "additions": 102,
+  "deletions": 147
+}

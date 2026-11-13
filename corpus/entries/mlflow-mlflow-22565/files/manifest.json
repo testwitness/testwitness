@@ -1,0 +1,35 @@
+[
+  {
+    "path": ".github/workflows/master.yml",
+    "status": "modified"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/__init__.py",
+    "status": "added"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store.py",
+    "status": "renamed",
+    "oldPath": "tests/store/tracking/test_sqlalchemy_store.py"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_issues.py",
+    "status": "renamed",
+    "oldPath": "tests/store/tracking/test_sqlalchemy_store_issues.py"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_query_trace_metrics.py",
+    "status": "renamed",
+    "oldPath": "tests/store/tracking/test_sqlalchemy_store_query_trace_metrics.py"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_schema.py",
+    "status": "renamed",
+    "oldPath": "tests/store/tracking/test_sqlalchemy_store_schema.py"
+  },
+  {
+    "path": "tests/store/tracking/sqlalchemy_store/test_sqlalchemy_workspace_store.py",
+    "status": "renamed",
+    "oldPath": "tests/store/tracking/test_sqlalchemy_workspace_store.py"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mui/material-ui/pull/10854",
+  "repo": "mui/material-ui",
+  "number": 10854,
+  "title": "[core] Rename .spec.js to .test.js",
+  "merged_at": "2018-03-30T10:35:32Z",
+  "stars": 99292,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "0c98b8b4630fa5f2d030d8d9a08408d74ab5d61a",
+  "head_sha": "ed290516ea846dd8b2b7532843557e837e15d547",
+  "files_changed": 157,
+  "additions": 20,
+  "deletions": 19
+}

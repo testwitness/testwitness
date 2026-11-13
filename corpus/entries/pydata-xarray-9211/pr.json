@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pydata/xarray/pull/9211",
+  "repo": "pydata/xarray",
+  "number": 9211,
+  "title": "Consolidate some numbagg tests",
+  "merged_at": "2024-07-07T21:46:58Z",
+  "stars": 4226,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "consolidate",
+  "split": "tuning",
+  "base_sha": "52a73711968337f5e623780facfb0d0d6d636633",
+  "head_sha": "2535343818c6318593c192184505a8a862256aa3",
+  "files_changed": 1,
+  "additions": 21,
+  "deletions": 30
+}
