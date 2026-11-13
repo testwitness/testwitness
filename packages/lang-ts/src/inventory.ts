@@ -274,8 +274,12 @@ function analyseQUnit(call: Node, chain: Chain): Declaration | undefined {
 /**
  * Local bindings of a test function at the top of the file: `const testWithVmEsm = cond ? test : test.skip`,
  * `const it2 = it`, `const run = test.concurrent`. A call through the binding declares a test. `conditional` is true
- * when the binding picks a skipping variant under a condition, so the test runs only sometimes.
+ * when the binding picks a skipping variant under a condition, so the test runs only sometimes. Imported functions
+ * named like a test function (testWithVmEsm, itIf) count too.
  */
+/** Names of imported test wrappers: test or it followed by a capitalised word (testWithVmEsm, itIf, testOnLinux). */
+const WRAPPER_NAME = /^(test|it)[A-Z]\w*$/;
+
 export function localTestAliases(root: Node): Map<string, { conditional: boolean }> {
   const out = new Map<string, { conditional: boolean }>();
   const testRef = (n: Node | null | undefined): 'run' | 'skip' | undefined => {
@@ -289,6 +293,14 @@ export function localTestAliases(root: Node): Map<string, { conditional: boolean
     return MODIFIERS[prop]?.marker === 'skip' || MODIFIERS[prop]?.marker === 'todo' ? 'skip' : 'run';
   };
   for (const stmt of root.namedChildren) {
+    // Imported wrappers named like test functions (`import { testWithVmEsm, itIf } from '...'`); analyseDeclaration
+    // still needs a title and a function before a call through one counts as a test.
+    if (stmt?.type === 'import_statement') {
+      for (const id of stmt.descendantsOfType('identifier')) {
+        if (id && WRAPPER_NAME.test(id.text) && id.parent?.type !== 'string') out.set(id.text, { conditional: false });
+      }
+      continue;
+    }
     if (!stmt || (stmt.type !== 'lexical_declaration' && stmt.type !== 'variable_declaration')) continue;
     for (const d of stmt.namedChildren) {
       if (!d || d.type !== 'variable_declarator') continue;

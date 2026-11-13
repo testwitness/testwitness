@@ -553,6 +553,15 @@ describe('jest catch alls', () => {
     expect(byName(inventory, 'runs always').markers).toEqual([]);
   });
 
+  it('reads tests declared through an imported wrapper named like a test function', async () => {
+    const inventory = await inv(src(`
+      import { testWithVmEsm, testUtils } from '@acme/test-utils';
+      testWithVmEsm('loads a module', () => { expect(load('a')).toBe(1); });
+      testUtils.setup('not a test', () => {});
+    `));
+    expect(inventory.tests.map((t) => t.qualifiedName)).toEqual(['loads a module']);
+  });
+
   it('records promise .catch handlers that swallow', async () => {
     const inventory = await inv(src(`
       test('promise catches', async () => {
