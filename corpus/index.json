@@ -2890,6 +2890,23 @@
     "deletions": 19
   },
   {
+    "url": "https://github.com/mui/material-ui/pull/24969",
+    "repo": "mui/material-ui",
+    "number": 24969,
+    "title": "[test] Remove internal icons smoke test",
+    "merged_at": "2021-02-16T17:24:57Z",
+    "stars": 99292,
+    "license": "MIT",
+    "language": "javascript",
+    "category": "R002",
+    "split": "heldout",
+    "base_sha": "2fe9dbb6d73f72d5d0467a41081c53d1df606c78",
+    "head_sha": "3c0328317640ce3ea552d04303ecdd25c14c9920",
+    "files_changed": 1,
+    "additions": 0,
+    "deletions": 44
+  },
+  {
     "url": "https://github.com/mui/material-ui/pull/26407",
     "repo": "mui/material-ui",
     "number": 26407,
@@ -3417,6 +3434,23 @@
     "deletions": 360
   },
   {
+    "url": "https://github.com/PrefectHQ/prefect/pull/17920",
+    "repo": "PrefectHQ/prefect",
+    "number": 17920,
+    "title": "Add smoke test for remote execution via `prefect-client`",
+    "merged_at": "2025-04-28T13:17:08Z",
+    "stars": 24106,
+    "license": "Apache-2.0",
+    "language": "python",
+    "category": "config",
+    "split": "tuning",
+    "base_sha": "28b55e7b1eb4be9610f7a52ed2aeb7c3b820a847",
+    "head_sha": "ea0579deb76b7e4a9a96bc1e3656f1b8ca89f443",
+    "files_changed": 4,
+    "additions": 57,
+    "deletions": 14
+  },
+  {
     "url": "https://github.com/PrefectHQ/prefect/pull/18450",
     "repo": "PrefectHQ/prefect",
     "number": 18450,
@@ -3432,6 +3466,23 @@
     "files_changed": 27,
     "additions": 323,
     "deletions": 204
+  },
+  {
+    "url": "https://github.com/PrefectHQ/prefect/pull/20155",
+    "repo": "PrefectHQ/prefect",
+    "number": 20155,
+    "title": "Add E2E auth test infrastructure and smoke test",
+    "merged_at": "2026-01-09T15:56:34Z",
+    "stars": 24106,
+    "license": "Apache-2.0",
+    "language": "typescript",
+    "category": "fixture",
+    "split": "heldout",
+    "base_sha": "e56e6be16f24ca7621229513f294b48dc3e82113",
+    "head_sha": "5da03bf63f90ebb1d337d9295843ed069b1bc23f",
+    "files_changed": 4,
+    "additions": 168,
+    "deletions": 0
   },
   {
     "url": "https://github.com/PrefectHQ/prefect/pull/22880",
@@ -4216,6 +4267,23 @@
     "deletions": 2
   },
   {
+    "url": "https://github.com/streamlit/streamlit/pull/16911",
+    "repo": "streamlit/streamlit",
+    "number": 16911,
+    "title": "[fix] Add AppTest proto-variant parse smoke tests",
+    "merged_at": "2026-09-10T08:48:29Z",
+    "stars": 46220,
+    "license": "Apache-2.0",
+    "language": "python",
+    "category": "helper",
+    "split": "tuning",
+    "base_sha": "8acacc96ecfcf24cf52bc2b864cdc45fda2eea1c",
+    "head_sha": "ac198689b99aef83bab7479c7a3311c205ffaf19",
+    "files_changed": 1,
+    "additions": 369,
+    "deletions": 0
+  },
+  {
     "url": "https://github.com/streamlit/streamlit/pull/17458",
     "repo": "streamlit/streamlit",
     "number": 17458,
@@ -4299,6 +4367,40 @@
     "files_changed": 1,
     "additions": 1,
     "deletions": 1
+  },
+  {
+    "url": "https://github.com/TanStack/query/pull/10624",
+    "repo": "TanStack/query",
+    "number": 10624,
+    "title": "chore(svelte-query-devtools): set up vitest environment with '@testing-library/svelte' and a smoke test",
+    "merged_at": "2026-05-03T01:25:44Z",
+    "stars": 50514,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "fixture",
+    "split": "tuning",
+    "base_sha": "9800c8f1a3f7907956410c23426a26d981e7d694",
+    "head_sha": "d2e16da6ebbcd6f34a264aa9c8b3a6137bd00884",
+    "files_changed": 6,
+    "additions": 44,
+    "deletions": 3
+  },
+  {
+    "url": "https://github.com/TanStack/query/pull/10679",
+    "repo": "TanStack/query",
+    "number": 10679,
+    "title": "test(query-devtools/DevtoolsComponent): add smoke test for rendering without throwing",
+    "merged_at": "2026-05-09T19:20:32Z",
+    "stars": 50514,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "helper",
+    "split": "tuning",
+    "base_sha": "4731c0721643d52fdcaa208d80bc5d183408de81",
+    "head_sha": "3c7572fdc08b4c6899f1e8d2441038e256174881",
+    "files_changed": 1,
+    "additions": 76,
+    "deletions": 0
   },
   {
     "url": "https://github.com/TanStack/query/pull/10950",
@@ -4758,6 +4860,23 @@
     "files_changed": 9,
     "additions": 86,
     "deletions": 115
+  },
+  {
+    "url": "https://github.com/vercel/next.js/pull/87010",
+    "repo": "vercel/next.js",
+    "number": 87010,
+    "title": "bundle-analyzer: fix regression and add basic smoke test",
+    "merged_at": "2025-12-11T04:13:12Z",
+    "stars": 143460,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "fixture",
+    "split": "heldout",
+    "base_sha": "593cef1b97c7524d786510487c6df240d7453011",
+    "head_sha": "3332c5e3b4addb6e9d6ec897523399dd381e2ccc",
+    "files_changed": 4,
+    "additions": 114,
+    "deletions": 3
   },
   {
     "url": "https://github.com/vercel/next.js/pull/93323",

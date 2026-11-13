@@ -1,0 +1,117 @@
+diff --git a/.github/workflows/prefect-client.yaml b/.github/workflows/prefect-client.yaml
+index 44020c0a..1e3c1ee7 100644
+--- a/.github/workflows/prefect-client.yaml
++++ b/.github/workflows/prefect-client.yaml
+@@ -73,6 +73,14 @@ jobs:
+           PREFECT_API_KEY: ${{ secrets.PREFECT_CLIENT_SA_API_KEY }}
+           PREFECT_API_URL: "https://api.prefect.cloud/api/accounts/9b649228-0419-40e1-9e0d-44954b5c0ab6/workspaces/96bd3cf8-85c9-4545-9713-b4e3c3e03466" # sandbox, prefect-client workspace
+ 
++      - name: Run deploy and execute smoke test using the built client
++        run: python client/client_deploy.py
++        working-directory: ${{ env.TMPDIR }}
++        env:
++          PREFECT_API_KEY: ${{ secrets.PREFECT_CLIENT_SA_API_KEY }}
++          PREFECT_API_URL: "https://api.prefect.cloud/api/accounts/9b649228-0419-40e1-9e0d-44954b5c0ab6/workspaces/96bd3cf8-85c9-4545-9713-b4e3c3e03466" # sandbox, prefect-client workspace
++
++
+       - name: Install prefect from source
+         run: uv pip install .
+ 
+diff --git a/client/client_deploy.py b/client/client_deploy.py
+new file mode 100644
+index 00000000..f23b7c49
+--- /dev/null
++++ b/client/client_deploy.py
+@@ -0,0 +1,40 @@
++"""
++This PR tests the code path for remote execution works for prefect-client. Because of prefect-client's reduced
++dependency set, we need to guard against accidentally adding extraneous dependencies to this code path.
++"""
++
++import asyncio
++import inspect
++from pathlib import Path
++from typing import TYPE_CHECKING
++
++from prefect import Flow, get_client
++from prefect.runner.runner import Runner
++
++
++async def main():
++    async with get_client() as client:
++        smoke_test_flow = await Flow.afrom_source(
++            source=Path(__file__).resolve().parent,
++            entrypoint="client_flow.py:smoke_test_flow",
++        )
++
++        coro = smoke_test_flow.deploy(
++            name="prefect-client-smoke-test",
++            work_pool_name="smoke-test",
++            print_next_steps=False,
++        )
++        if TYPE_CHECKING:
++            assert inspect.iscoroutine(coro)
++
++        deployment_id = await coro
++
++        flow_run = await client.create_flow_run_from_deployment(
++            deployment_id=deployment_id
++        )
++
++        await Runner().execute_flow_run(flow_run.id)
++
++
++if __name__ == "__main__":
++    asyncio.run(main())
+diff --git a/client/client_flow.py b/client/client_flow.py
+index b068077e..f5f2f81e 100644
+--- a/client/client_flow.py
++++ b/client/client_flow.py
+@@ -1,3 +1,5 @@
++from typing import Any
++
+ import prefect.main  # noqa: F401
+ from prefect import flow, task
+ from prefect.concurrency import asyncio, services, sync  # noqa: F401
+@@ -19,7 +21,7 @@ def skip_remote_run():
+ 
+ 
+ @task
+-def smoke_test_task(*args, **kwargs):
++def smoke_test_task(*args: Any, **kwargs: Any):
+     print(args, kwargs)
+ 
+ 
+diff --git a/src/prefect/_experimental/bundles/execute.py b/src/prefect/_experimental/bundles/execute.py
+index 3b690563..51db1041 100644
+--- a/src/prefect/_experimental/bundles/execute.py
++++ b/src/prefect/_experimental/bundles/execute.py
+@@ -1,6 +1,5 @@
+ import json
+-
+-import typer
++import sys
+ 
+ from prefect.utilities.asyncutils import run_coro_as_sync
+ 
+@@ -20,15 +19,9 @@ def execute_bundle_from_file(key: str):
+     run_coro_as_sync(Runner().execute_bundle(bundle))
+ 
+ 
+-def _execute_bundle_from_file(key: str = typer.Option(...)):
+-    """
+-    Loads a bundle from a file and executes it.
+-
+-    Args:
+-        key: The key of the bundle to execute.
+-    """
+-    execute_bundle_from_file(key)
+-
+-
+ if __name__ == "__main__":
+-    typer.run(_execute_bundle_from_file)
++    if len(sys.argv) < 3 and sys.argv[1] != "--key":
++        print("Please provide a key representing a path to a bundle")
++        sys.exit(1)
++    key = sys.argv[2]
++    execute_bundle_from_file(key)

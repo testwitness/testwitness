@@ -1,0 +1,18 @@
+[
+  {
+    "path": ".github/workflows/prefect-client.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "client/client_deploy.py",
+    "status": "added"
+  },
+  {
+    "path": "client/client_flow.py",
+    "status": "modified"
+  },
+  {
+    "path": "src/prefect/_experimental/bundles/execute.py",
+    "status": "modified"
+  }
+]

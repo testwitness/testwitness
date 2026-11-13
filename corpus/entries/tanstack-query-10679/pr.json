@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/10679",
+  "repo": "TanStack/query",
+  "number": 10679,
+  "title": "test(query-devtools/DevtoolsComponent): add smoke test for rendering without throwing",
+  "merged_at": "2026-05-09T19:20:32Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "4731c0721643d52fdcaa208d80bc5d183408de81",
+  "head_sha": "3c7572fdc08b4c6899f1e8d2441038e256174881",
+  "files_changed": 1,
+  "additions": 76,
+  "deletions": 0
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/10624",
+  "repo": "TanStack/query",
+  "number": 10624,
+  "title": "chore(svelte-query-devtools): set up vitest environment with '@testing-library/svelte' and a smoke test",
+  "merged_at": "2026-05-03T01:25:44Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "fixture",
+  "split": "tuning",
+  "base_sha": "9800c8f1a3f7907956410c23426a26d981e7d694",
+  "head_sha": "d2e16da6ebbcd6f34a264aa9c8b3a6137bd00884",
+  "files_changed": 6,
+  "additions": 44,
+  "deletions": 3
+}
