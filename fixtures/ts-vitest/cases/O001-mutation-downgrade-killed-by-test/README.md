@@ -1,0 +1,3 @@
+O001 downgrade. The PR adds parseQty() and a test that calls parseQty('3') without an assertion. The mutant that turns the NaN guard into if (true) throws, and the report records that this very test killed it (killedBy). The oracle is measured, so O001 is dropped and M002 is silent. M001 still reports lines 1 and 4, whose mutants survived or were not covered (2 of 3 mutated changed lines: medium).
+
+mutation/mutation.json was written by StrykerJS 10.1.1 with @stryker-mutator/vitest-runner 10.1.1 and Vitest 5.0.5 (coverageAnalysis perTest, json reporter), running the head tree with --mutate set to the changed production file, as testwitness mutate-plan plans it. It is real output, kept as written (projectRoot names the temporary run directory).

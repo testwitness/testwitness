@@ -4,7 +4,8 @@
 //   2. pnpm pack it into a temp dir and check the tarball manifest is clean
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
-//      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools)
+//      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
+//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan and the run history
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -164,7 +165,22 @@ try {
   if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
   else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
 
-  // 4f. --history-out writes a run history and --history reads it back
+  // 4f. --mutation reads a real StrykerJS report (the golden fixture's) and M001 reports the changed lines whose mutants survived
+  const mutCase = join(root, 'fixtures/ts-vitest/cases/M001-survivors-on-changed-lines');
+  writeFileSync(join(repo, 'src/shipping.ts'), readFileSync(join(mutCase, 'head/src/shipping.ts'), 'utf8'));
+  gitIn('add', '-A');
+  gitIn('commit', '-q', '-m', 'shipping fee');
+  const mut = spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--mutation', join(mutCase, 'mutation/mutation.json'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  const mutReport = mut.status === 0 ? JSON.parse(mut.stdout) : undefined;
+  const m001 = mutReport?.findings.find((f) => f.ruleId === 'M001');
+  if (m001?.label === 'measured weak' && m001.location?.path === 'src/shipping.ts' && mutReport.mutation?.mutants === 18) ok(`--mutation read the Stryker report and M001 reported: ${m001.message}`);
+  else fail(`--mutation did not produce M001 and a mutation section (exit ${mut.status}, stderr ${mut.stderr.trim()})`);
+  const plan = spawnSync(bin, ['mutate-plan', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json'], { encoding: 'utf8', env: cleanEnv });
+  const planJson = plan.status === 0 ? JSON.parse(plan.stdout) : undefined;
+  if (planJson?.stryker?.mutate?.includes('src/shipping.ts:1-10')) ok(`mutate-plan planned ${planJson.stryker.mutate.join(', ')}`);
+  else fail(`mutate-plan did not plan src/shipping.ts (exit ${plan.status}, stderr ${plan.stderr.trim()})`);
+
+  // 4g. --history-out writes a run history and --history reads it back
   writeFileSync(join(work, 'junit.xml'), '<testsuite name="s"><testcase classname="tests.test_math" name="test_adds"/><testcase classname="tests.test_math" name="test_negatives"><failure/></testcase></testsuite>');
   const historyPath = join(work, 'history.json');
   const hist = (id, extra) => spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });

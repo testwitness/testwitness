@@ -98,6 +98,11 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
     lines.push(`- Coverage: ${c.sources.length} report${c.sources.length === 1 ? '' : 's'}, ${c.files} source file${c.files === 1 ? '' : 's'}, ${c.linesExecuted} of ${c.linesInstrumented} instrumented lines executed`);
     for (const n of c.notes) lines.push(`- ${esc(n)}`);
   }
+  const m = report.mutation;
+  if (m) {
+    lines.push(`- Mutation: ${m.sources.length} report${m.sources.length === 1 ? '' : 's'}, ${m.files} source file${m.files === 1 ? '' : 's'}, ${m.mutants} mutant${m.mutants === 1 ? '' : 's'}: ${m.killed} killed, ${m.survived} survived, ${m.noCoverage} not covered`);
+    for (const n of m.notes) lines.push(`- ${esc(n)}`);
+  }
   const h = report.history;
   if (h) {
     lines.push(

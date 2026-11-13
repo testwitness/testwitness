@@ -1,0 +1,3 @@
+[
+  { "ruleId": "M001", "severity": "medium", "subject": "src/shipping.ts", "label": "measured weak" }
+]
