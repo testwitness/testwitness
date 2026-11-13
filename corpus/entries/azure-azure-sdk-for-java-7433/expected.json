@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "jacoco.min.branchcoverage",
+    "verdict": "tp",
+    "reason": "module overrides the inherited branch coverage minimum with 0.28"
+  }
+]

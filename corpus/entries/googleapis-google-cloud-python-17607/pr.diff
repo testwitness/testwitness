@@ -1,0 +1,104 @@
+diff --git a/packages/django-google-spanner/.coveragerc b/packages/django-google-spanner/.coveragerc
+index b1a1aa9cf..a1d7fd2de 100644
+--- a/packages/django-google-spanner/.coveragerc
++++ b/packages/django-google-spanner/.coveragerc
+@@ -10,7 +10,7 @@
+ branch = True
+ 
+ [report]
+-fail_under = 100
++fail_under = 80
+ show_missing = True
+ exclude_lines =
+     # Re-enable the standard pragma
+diff --git a/packages/django-google-spanner/noxfile.py b/packages/django-google-spanner/noxfile.py
+index 22c4c36d4..0b94e5b87 100644
+--- a/packages/django-google-spanner/noxfile.py
++++ b/packages/django-google-spanner/noxfile.py
+@@ -225,7 +225,7 @@ def cover(session):
+     test runs (not system test runs), and then erases coverage data.
+     """
+     session.install("coverage", "pytest-cov")
+-    session.run("coverage", "report", "--show-missing", "--fail-under=80")
++    session.run("coverage", "report", "--show-missing")
+ 
+     session.run("coverage", "erase")
+ 
+diff --git a/packages/google-api-core/.coveragerc b/packages/google-api-core/.coveragerc
+index 34417c3f4..c77912659 100644
+--- a/packages/google-api-core/.coveragerc
++++ b/packages/google-api-core/.coveragerc
+@@ -2,7 +2,7 @@
+ branch = True
+ 
+ [report]
+-fail_under = 100
++fail_under = 99
+ show_missing = True
+ exclude_lines =
+     # Re-enable the standard pragma
+diff --git a/packages/google-api-core/noxfile.py b/packages/google-api-core/noxfile.py
+index 27b9b9125..0bad668a8 100644
+--- a/packages/google-api-core/noxfile.py
++++ b/packages/google-api-core/noxfile.py
+@@ -381,7 +381,7 @@ def cover(session):
+     test runs (not system test runs), and then erases coverage data.
+     """
+     session.install("coverage", "pytest-cov")
+-    session.run("coverage", "report", "--show-missing", "--fail-under=100")
++    session.run("coverage", "report", "--show-missing")
+     session.run("coverage", "erase")
+ 
+ 
+diff --git a/packages/google-cloud-ndb/.coveragerc b/packages/google-cloud-ndb/.coveragerc
+index 1cee855b5..7d18616a6 100644
+--- a/packages/google-cloud-ndb/.coveragerc
++++ b/packages/google-cloud-ndb/.coveragerc
+@@ -2,7 +2,7 @@
+ branch = True
+ 
+ [report]
+-fail_under = 100
++fail_under = 99
+ show_missing = True
+ exclude_lines =
+     # Re-enable the standard pragma
+diff --git a/packages/google-cloud-ndb/noxfile.py b/packages/google-cloud-ndb/noxfile.py
+index 47c4a4359..e447badd7 100644
+--- a/packages/google-cloud-ndb/noxfile.py
++++ b/packages/google-cloud-ndb/noxfile.py
+@@ -185,7 +185,7 @@ def cover(session):
+     test runs (not system test runs), and then erases coverage data.
+     """
+     session.install("coverage", "pytest-cov")
+-    session.run("coverage", "report", "--show-missing", "--fail-under=100")
++    session.run("coverage", "report", "--show-missing")
+ 
+     session.run("coverage", "erase")
+ 
+diff --git a/packages/sqlalchemy-bigquery/.coveragerc b/packages/sqlalchemy-bigquery/.coveragerc
+index 6d7d738da..73bf56dd1 100644
+--- a/packages/sqlalchemy-bigquery/.coveragerc
++++ b/packages/sqlalchemy-bigquery/.coveragerc
+@@ -22,7 +22,7 @@ omit =
+   sqlalchemy_bigquery/requirements.py
+ 
+ [report]
+-fail_under = 100
++fail_under = 98
+ show_missing = True
+ exclude_lines =
+     # Re-enable the standard pragma
+diff --git a/packages/sqlalchemy-bigquery/noxfile.py b/packages/sqlalchemy-bigquery/noxfile.py
+index 2e171cc31..b1e6b068c 100644
+--- a/packages/sqlalchemy-bigquery/noxfile.py
++++ b/packages/sqlalchemy-bigquery/noxfile.py
+@@ -467,7 +467,7 @@ def cover(session):
+     test runs (not system test runs), and then erases coverage data.
+     """
+     session.install("coverage", "pytest-cov")
+-    session.run("coverage", "report", "--show-missing", "--fail-under=100")
++    session.run("coverage", "report", "--show-missing")
+ 
+     session.run("coverage", "erase")
+ 

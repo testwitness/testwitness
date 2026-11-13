@@ -1,0 +1,13 @@
+diff --git a/.codecov.yml b/.codecov.yml
+index 11468ea7..991f8b08 100644
+--- a/.codecov.yml
++++ b/.codecov.yml
+@@ -467,7 +467,7 @@ coverage:
+         flags:
+         - sap_hana
+       SNMP:
+-        target: 75
++        target: 50
+         flags:
+         - snmp
+       SQL_Server:

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "subject": ".ci/integration.cloudbuild.yaml",
+    "verdict": "tp",
+    "reason": "|| echo after the spanner integration test command"
+  }
+]

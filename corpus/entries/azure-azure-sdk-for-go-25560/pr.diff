@@ -1,0 +1,21 @@
+diff --git a/eng/config.json b/eng/config.json
+index 5a90439..70e645e 100644
+--- a/eng/config.json
++++ b/eng/config.json
+@@ -50,15 +50,7 @@
+         },
+         {
+             "Name": "azopenai",
+-            "CoverageGoal": 0.16
+-        },
+-        {
+-            "Name": "ai/azopenaiassistants",
+-            "CoverageGoal": 0.00
+-        },
+-        {
+-            "Name": "ai/azopenaiextensions",
+-            "CoverageGoal": 0.00
++            "CoverageGoal": 0.10
+         },
+         {
+             "Name": "aztemplate",

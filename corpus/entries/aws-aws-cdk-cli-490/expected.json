@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": ".github/workflows/codecov.yml",
+    "verdict": "tp",
+    "reason": "run step resets jest coverage thresholds before tests"
+  }
+]

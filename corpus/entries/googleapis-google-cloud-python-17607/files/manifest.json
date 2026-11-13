@@ -1,0 +1,34 @@
+[
+  {
+    "path": "packages/django-google-spanner/.coveragerc",
+    "status": "modified"
+  },
+  {
+    "path": "packages/django-google-spanner/noxfile.py",
+    "status": "modified"
+  },
+  {
+    "path": "packages/google-api-core/.coveragerc",
+    "status": "modified"
+  },
+  {
+    "path": "packages/google-api-core/noxfile.py",
+    "status": "modified"
+  },
+  {
+    "path": "packages/google-cloud-ndb/.coveragerc",
+    "status": "modified"
+  },
+  {
+    "path": "packages/google-cloud-ndb/noxfile.py",
+    "status": "modified"
+  },
+  {
+    "path": "packages/sqlalchemy-bigquery/.coveragerc",
+    "status": "modified"
+  },
+  {
+    "path": "packages/sqlalchemy-bigquery/noxfile.py",
+    "status": "modified"
+  }
+]

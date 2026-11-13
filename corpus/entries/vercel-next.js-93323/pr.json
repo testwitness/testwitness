@@ -7,7 +7,7 @@
   "stars": 143460,
   "license": "MIT",
   "language": "javascript",
-  "category": "R010",
+  "category": "fixture",
   "split": "heldout",
   "base_sha": "b694eeb590344465594d44f2178a1c6da379c805",
   "head_sha": "1129f19e99dea7d66cd8faeb266945e757d66f2b",

@@ -72,6 +72,11 @@ Slug is `<owner>-<repo>-<number>` in lower case.
 - `deps`: dependency bumps touching lockfiles and snapshots.
 - `skip`: a conditional skip added for a platform or optional dependency with a reason.
 - `deleted`: a test deleted because the feature it covered was removed.
+- `consolidate`: tests merged into fewer files or fewer tests, or moved into one module, by the maintainers (batch 4).
+- `helper`, `migration`: helper extraction or inlining, and test framework or style migrations (unittest to pytest, mock decorators to context managers, jest to vi, unit tests to Playwright).
+- `flaky`: pull requests titled as flaky test fixes. Most are honest (labelled `[]`); a few delete or weaken tests and carry `tp` findings.
+- `config`, `fixture`: honest changes to runner, coverage or CI configuration, and new test fixtures, kept as false positive controls for the C and O rules.
+- `C001`, `C002`, `C003`: true positive entries for the configuration rules (batch 4).
 - `tp`: the first five clearly weakened tests (true positives), kept separate from the controls.
 - `R001`, `R002`, `R003`, `R004`, `R005`, `R010`, `A001`, `A002`, `A009`, `E001`, `O002`, `W002`, `W003`, `V004`: true positive entries collected per rule; the category is the rule id the entry was collected for and every finding in expected.json has verdict `tp`. Severities follow the rule defaults (R002 high, R010 low) and the catalogue notes (R004 medium when strict with an issue reference); where the engine grades a finding by a documented rule (A002 high when the strength drops two levels, O002 medium when the PR title matches its regression wording, A009 medium when the tautology is the only assertion of a new test) the label uses that severity.
 - Entries whose finding the engine does not emit yet (an unrecognised framework, wrapper or CI file) keep verdict `tp` and show as missed in the precision table. Where the weakening sits in a file files.py does not copy (a shell script, appveyor.yml, a Gradle script applied from the build), its base and head versions were copied unedited from the git mirror and NOTES.md says so.
@@ -105,9 +110,14 @@ production code was removed in the same PR and the spec credits that.
 
 Every entry is assigned by the parity of the SHA-256 of its PR url
 (`https://github.com/<owner>/<repo>/pull/<n>`), interpreted as an integer:
-even goes to `tuning`, odd goes to `heldout`. The split is stored in `pr.json`
-and must never be changed by hand. Rules may be tuned on `tuning` entries only;
-`heldout` entries are for the final false positive rate.
+even goes to `tuning`, odd goes to `heldout`. `ingest.py` computes the split
+when the entry is created, before anyone has read the diff, so the labeller
+cannot choose it, and `verify.py` recomputes it for every entry and fails if a
+stored split differs. The split is stored in `pr.json` and must never be
+changed by hand. Rules may be tuned on `tuning` entries only; `heldout` entries
+are for the final false positive rate. `pnpm corpus:report` prints the held out
+rows separately (per rule precision on medium and high findings) in the
+"Held out half" section of docs/precision.md.
 
 ## Adding an entry
 
@@ -121,3 +131,23 @@ and must never be changed by hand. Rules may be tuned on `tuning` entries only;
    sentences, no names).
 5. Run `python3 -I corpus/_tools/verify.py` to rebuild `index.json` and check
    the entry.
+
+Batch 4 (collected 2026-11-13) used the same steps with three helpers:
+`ghsearch.py` (and `search.sh`, which calls it) paces every GitHub search call
+at least 9.5 seconds apart, waits 20 seconds after a 403 or 429, and caches the
+search items so `ingest.py` does not search again for a PR it has already
+seen; `lab.py <slug> <category> <notes> [expected-json]` writes the hand label
+and appends it to `labels_batch4.jsonl`; and `treefiles.py <slug> <glob>...`
+copies unchanged test files that a C001 exclusion selects into both
+`files/base` and `files/head` (identical copies, listed in `files/tree.json`),
+because the runner materialises only changed files and a pattern would
+otherwise match nothing. Coverage configs (codecov.yml, .coveragerc, .nycrc and
+the rest of COVERAGE_CONFIG_FILES in classify.ts) are now copied by `files.py`.
+Every label was written after reading the diff. The triage output of the
+runner was used to point at hunks worth reading closely and afterwards to
+confirm a finding or record a miss; where the reading disagreed with the
+engine, the label follows the reading (engine findings on honest entries count
+as false positives, weakenings the engine does not report stay `tp` and show as
+missed). Entries whose honesty could not be settled from the diff (for example
+"remove redundant tests" with the claimed duplicates outside the diff) were
+dropped rather than guessed.

@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "jest.coverageThreshold.global.lines",
+    "verdict": "tp",
+    "reason": "30 to 29.5"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "jest.coverageThreshold.global.statements",
+    "verdict": "tp",
+    "reason": "30 to 29.5"
+  }
+]

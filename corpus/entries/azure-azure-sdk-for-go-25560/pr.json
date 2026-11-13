@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Azure/azure-sdk-for-go/pull/25560",
+  "repo": "Azure/azure-sdk-for-go",
+  "number": 25560,
+  "title": "[azopenai] Lower the coverage bar for now, so we can still use the live pipelines while it's being improved",
+  "merged_at": "2025-11-06T17:55:05Z",
+  "stars": 1858,
+  "license": "MIT",
+  "language": "go",
+  "category": "C002",
+  "split": "heldout",
+  "base_sha": "6fce23847166ed80b4cf520f668cbe696dc13eea",
+  "head_sha": "50b8577ce181371a079f4ba59e77962e53b95c1a",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 9
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Azure/azure-sdk-for-java/pull/7433",
+  "repo": "Azure/azure-sdk-for-java",
+  "number": 7433,
+  "title": "Lower branch coverage threshold for Identity",
+  "merged_at": "2020-01-15T02:34:07Z",
+  "stars": 2562,
+  "license": "MIT",
+  "language": "java",
+  "category": "C002",
+  "split": "tuning",
+  "base_sha": "5b62f0978a1393ded856fe76514a3e68f43f2bfe",
+  "head_sha": "2a99c093c42cdf77db5eb7980890df14e8570858",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 0
+}

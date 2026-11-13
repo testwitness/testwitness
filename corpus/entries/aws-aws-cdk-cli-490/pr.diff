@@ -1,0 +1,28 @@
+diff --git a/.github/workflows/codecov.yml b/.github/workflows/codecov.yml
+index c4eced0..37bf820 100644
+--- a/.github/workflows/codecov.yml
++++ b/.github/workflows/codecov.yml
+@@ -23,6 +23,8 @@ jobs:
+           node-version: lts/*
+       - name: Install dependencies
+         run: yarn install
++      - name: Reset coverage thresholds
++        run: find . -name "jest.config.json" -type f -exec chmod +w {} \; -exec node -e "const fs=require('fs'); const file=process.argv[1]; const data=JSON.parse(fs.readFileSync(file)); data.coverageThreshold={ }; fs.writeFileSync(file, JSON.stringify(data, null, 2));" {} \;
+       - name: Build and test CLI
+         run: yarn nx run aws-cdk:build
+       - name: Upload results to Codecov
+diff --git a/projenrc/codecov.ts b/projenrc/codecov.ts
+index 3458b1e..137e50f 100644
+--- a/projenrc/codecov.ts
++++ b/projenrc/codecov.ts
+@@ -40,6 +40,10 @@ export class CodeCovWorkflow extends Component {
+           name: 'Install dependencies',
+           run: 'yarn install',
+         },
++        {
++          name: 'Reset coverage thresholds',
++          run: 'find . -name "jest.config.json" -type f -exec chmod +w {} \\; -exec node -e "const fs=require(\'fs\'); const file=process.argv[1]; const data=JSON.parse(fs.readFileSync(file)); data.coverageThreshold={ }; fs.writeFileSync(file, JSON.stringify(data, null, 2));" {} \\;',
++        },
+         {
+           name: 'Build and test CLI',
+           // The 'build' job includes running tests

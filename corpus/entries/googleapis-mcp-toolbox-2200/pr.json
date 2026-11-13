@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/googleapis/mcp-toolbox/pull/2200",
+  "repo": "googleapis/mcp-toolbox",
+  "number": 2200,
+  "title": "tests: ignore spanner test failures",
+  "merged_at": "2025-12-19T00:39:50Z",
+  "stars": 16857,
+  "license": "Apache-2.0",
+  "language": "go",
+  "category": "W003",
+  "split": "tuning",
+  "base_sha": "8ea39ec32fbbaa97939c626fec8c5d86040ed464",
+  "head_sha": "65bd13ee8f08305d2c12f3b2f5a76bd5f726ed44",
+  "files_changed": 2,
+  "additions": 3,
+  "deletions": 3
+}

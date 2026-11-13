@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".ci/integration.cloudbuild.yaml",
+    "status": "modified"
+  },
+  {
+    "path": ".ci/test_with_coverage.sh",
+    "status": "modified"
+  }
+]

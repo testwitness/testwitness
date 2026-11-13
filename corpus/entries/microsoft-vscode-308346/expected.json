@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "W002",
+    "severity": "high",
+    "verdict": "tp",
+    "reason": "job level continue-on-error on the screenshot test job"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": ".ci/integration.cloudbuild.yaml",
+    "verdict": "tp",
+    "reason": "COVERAGE_THRESHOLD 40 instead of 50 on the cheap path"
+  }
+]

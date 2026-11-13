@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".github/workflows/codecov.yml",
+    "status": "modified"
+  },
+  {
+    "path": "projenrc/codecov.ts",
+    "status": "modified"
+  }
+]

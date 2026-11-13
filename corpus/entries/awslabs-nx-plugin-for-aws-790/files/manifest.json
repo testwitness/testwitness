@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/nx-plugin/src/ts/lib/grit/vitest-pass-with-no-tests.grit",
+    "status": "modified"
+  },
+  {
+    "path": "packages/nx-plugin/src/ts/lib/vitest.spec.ts",
+    "status": "modified"
+  }
+]

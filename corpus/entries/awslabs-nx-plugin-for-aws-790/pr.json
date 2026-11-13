@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/awslabs/nx-plugin-for-aws/pull/790",
+  "repo": "awslabs/nx-plugin-for-aws",
+  "number": 790,
+  "title": "fix(ts#project): add passWithNoTests via structural grit rewrite",
+  "merged_at": "2026-06-11T11:16:23Z",
+  "stars": 154,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "3d140837c9f4943344aa692c04f158fbc9d9eb0f",
+  "head_sha": "9099c257fd1bee156fefc50c563b2d90d953a20f",
+  "files_changed": 2,
+  "additions": 75,
+  "deletions": 4
+}

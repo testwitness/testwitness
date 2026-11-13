@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-cdk-cli/pull/490",
+  "repo": "aws/aws-cdk-cli",
+  "number": 490,
+  "title": "fix: prevent coverage threshold failures in CI",
+  "merged_at": "2025-05-11T21:31:25Z",
+  "stars": 110,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "C002",
+  "split": "heldout",
+  "base_sha": "9aa42ef8019959d07371bc9eccfc5f2785963feb",
+  "head_sha": "4e69597785fdc11c04e7747ce0dec6b70e3cb333",
+  "files_changed": 2,
+  "additions": 6,
+  "deletions": 0
+}
