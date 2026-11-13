@@ -38,8 +38,9 @@ inputs:
     required: false
     default: "true"
   token:
-    description: Token for the PR comment. Optional. Defaults to GITHUB_TOKEN. Never required for the check itself.
+    description: Token for the PR comment. Defaults to the workflow's GITHUB_TOKEN. Never required for the check itself.
     required: false
+    default: ${{ github.token }}
   output_dir:
     description: Directory for testwitness.json, testwitness.md and testwitness-history.json
     required: false
