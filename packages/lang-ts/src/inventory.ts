@@ -160,10 +160,22 @@ function titleOf(node: Node): string {
   if (node.type === 'string') {
     return node.namedChildren
       .filter((c): c is Node => c !== null && c.type !== 'comment')
-      .map((c) => c.text)
+      .map((c) => (c.type === 'escape_sequence' ? unescape(c.text) : c.text))
       .join('');
   }
   return node.text;
+}
+
+const SIMPLE_ESCAPES: Record<string, string> = { n: '\n', t: '\t', r: '\r', b: '\b', f: '\f', v: '\v', '0': '\0' };
+
+/** The character a string escape stands for, so a title reads as the runner reports it (`agent\'s` is agent's). */
+function unescape(seq: string): string {
+  const body = seq.slice(1);
+  if (body.startsWith('u{')) return String.fromCodePoint(parseInt(body.slice(2, -1), 16));
+  if (body.startsWith('u') && body.length === 5) return String.fromCharCode(parseInt(body.slice(1), 16));
+  if (body.startsWith('x') && body.length === 3) return String.fromCharCode(parseInt(body.slice(1), 16));
+  if (body.startsWith('\r') || body.startsWith('\n')) return ''; // line continuation
+  return SIMPLE_ESCAPES[body] ?? body;
 }
 
 function stringValue(node: Node | undefined): string | undefined {
