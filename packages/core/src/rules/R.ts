@@ -74,27 +74,6 @@ export const R001: Rule = {
         );
         continue;
       }
-      const subject = await removedSubjectOf(ctx, pair.file.path, t);
-      if (subject) {
-        out.push(
-          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted together with ${subject}, which this PR removed from the production code`, {
-            label: 'production removed',
-            line: t.startLine,
-            snippet: snippet(t),
-          }),
-        );
-        continue;
-      }
-      if (await versionGated(ctx, pair.file.path, t)) {
-        out.push(
-          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} only ran on a language version this PR stops supporting`, {
-            label: 'version dropped',
-            line: t.startLine,
-            snippet: snippet(t),
-          }),
-        );
-        continue;
-      }
       const moved = t.statementCount > 0 ? index.byHash.get(t.bodyHash)?.filter((m) => m.path !== pair.file.path || m.test.qualifiedName !== t.qualifiedName) : undefined;
       if (moved && moved.length) {
         out.push(
@@ -175,6 +154,28 @@ export const R001: Rule = {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed but all ${t.assertions.length} of its assertions appear in ${kept}`, {
             label: 'refactored',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Checked last: a move, fold, rewrite or refactor describes the deletion better when one applies.
+      const subject = await removedSubjectOf(ctx, pair.file.path, t);
+      if (subject) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted together with ${subject}, which this PR removed from the production code`, {
+            label: 'production removed',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      if (await versionGated(ctx, pair.file.path, t)) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} only ran on a language version this PR stops supporting`, {
+            label: 'version dropped',
             line: t.startLine,
             snippet: snippet(t),
           }),
