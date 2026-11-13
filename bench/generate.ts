@@ -6,6 +6,12 @@
  * content comes from a seeded PRNG so two runs with the same options produce
  * byte identical files and identical commit SHAs.
  *
+ * Sizes: SIZES holds the three benchmark cases (100, 1,000 and 5,000 changed
+ * files). Every proportion is fixed, so a case is fully described by its file
+ * count and seed: 30 percent test files, a 45/30/25 mix of TypeScript, Java and
+ * Python, 200 KB of JUnit XML per changed file, and 1 percent each of deleted,
+ * skipped and loosened tests plus 2 percent new tests without an assertion.
+ *
  * Shapes:
  *   TypeScript Jest     src/<pkg>/<name>.ts, src/<pkg>/<name>.test.ts
  *   Java JUnit 5        src/main/java/com/acme/<pkg>/<Name>.java, src/test/java/com/acme/<pkg>/<Name>Test.java
@@ -19,8 +25,9 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { closeSync, mkdirSync, openSync, rmSync, writeFileSync, writeSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 
 export interface Mutations {
   deleted: number;
@@ -58,7 +65,11 @@ export interface GenerateResult {
 }
 
 type Lang = 'ts' | 'java' | 'py';
-const LANGS: Lang[] = ['ts', 'java', 'py'];
+/** One cycle of 20 files: 9 TypeScript, 6 Java, 5 Python. Deterministic, so file i always has the same language. */
+const LANG_CYCLE: Lang[] = ['ts', 'java', 'py', 'ts', 'java', 'ts', 'py', 'java', 'ts', 'py', 'ts', 'java', 'ts', 'py', 'java', 'ts', 'java', 'py', 'ts', 'ts'];
+function langOf(i: number): Lang {
+  return LANG_CYCLE[i % LANG_CYCLE.length]!;
+}
 
 /** mulberry32: small, fast, seedable. */
 export function rng(seed: number): () => number {
@@ -353,10 +364,13 @@ const GIT_ENV = {
   GIT_COMMITTER_EMAIL: 'bench@testwitness.local',
   GIT_AUTHOR_DATE: '2026-01-01T00:00:00Z',
   GIT_COMMITTER_DATE: '2026-01-01T00:00:00Z',
+  // Same bytes and same SHAs on every platform: no CRLF conversion, no signing, no user or system config.
+  GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null',
+  GIT_CONFIG_NOSYSTEM: '1',
 };
 
 function git(cwd: string, args: string[]): string {
-  return execFileSync('git', args, { cwd, encoding: 'utf8', env: GIT_ENV, stdio: ['ignore', 'pipe', 'pipe'] });
+  return execFileSync('git', ['-c', 'core.autocrlf=false', '-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8', env: GIT_ENV, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 function write(root: string, rel: string, content: string): void {
@@ -515,10 +529,10 @@ export function generate(opts: GenerateOptions): GenerateResult {
   const junitDir = join(opts.dir, 'junit');
   mkdirSync(repo, { recursive: true });
 
-  // Models. Test files first so the mutation kinds spread across all three languages (index mod 3).
+  // Models. Test files first so the mutation kinds spread across all three languages (see LANG_CYCLE).
   const testModels: FileModel[] = [];
   for (let i = 0; i < opts.testFiles; i++) {
-    const lang = LANGS[i % 3]!;
+    const lang = langOf(i);
     const tests: TestModel[] = [];
     const count = int(r, minT, maxT);
     const seen = new Set<string>();
@@ -531,12 +545,12 @@ export function generate(opts: GenerateOptions): GenerateResult {
       seen.add(words.join(' '));
       tests.push({ words, oracle: pick(r, ['equals', 'equals', 'equals', 'length', 'greater', 'throws'] as const), qty: int(r, 1, 9), price: int(r, 1, 50) });
     }
-    testModels.push({ lang, pkg: PKGS[i % PKGS.length]!, noun: NOUNS[Math.floor(i / 3) % NOUNS.length]!, index: Math.floor(i / 60), tests });
+    testModels.push({ lang, pkg: PKGS[i % PKGS.length]!, noun: NOUNS[i % NOUNS.length]!, index: i, tests });
   }
   const prodCount = Math.max(0, opts.files - opts.testFiles);
   const prodModels: FileModel[] = [];
   for (let i = 0; i < prodCount; i++) {
-    const lang = LANGS[i % 3]!;
+    const lang = langOf(i);
     // Production files for the first testFiles slots are the subjects of the tests; the rest are standalone.
     const src = testModels[i];
     if (src) prodModels.push({ ...src, tests: [] });
@@ -569,7 +583,7 @@ export function generate(opts: GenerateOptions): GenerateResult {
   return {
     repo,
     junitDir,
-    junitGlob: `${junitDir}/**/*.xml`,
+    junitGlob: `${junitDir.split(sep).join('/')}/**/*.xml`,
     baseSha,
     headSha,
     files: testModels.length + prodModels.length,
@@ -581,18 +595,28 @@ export function generate(opts: GenerateOptions): GenerateResult {
   };
 }
 
-export const LARGE: Omit<GenerateOptions, 'dir'> = {
-  seed: 1,
-  files: 1000,
-  testFiles: 300,
-  xmlBytes: 200 * 1024 * 1024,
-  mutations: { deleted: 10, skipped: 10, loosened: 10, newWithoutAssertion: 20 },
+export type SizeName = '100' | '1000' | '5000';
+
+/** The benchmark cases. Everything but the file count and seed is derived, so the sizes stay comparable. */
+export function sizeOptions(files: number, seed: number): Omit<GenerateOptions, 'dir'> {
+  const pct = (p: number) => Math.max(1, Math.round((files * p) / 100));
+  const testFiles = Math.round(files * 0.3);
+  return {
+    seed,
+    files,
+    testFiles,
+    xmlBytes: files * 200 * 1024,
+    mutations: { deleted: pct(1), skipped: pct(1), loosened: pct(1), newWithoutAssertion: pct(2) },
+  };
+}
+
+export const SIZES: Record<SizeName, Omit<GenerateOptions, 'dir'>> = {
+  '100': sizeOptions(100, 101),
+  '1000': sizeOptions(1000, 1001),
+  '5000': sizeOptions(5000, 5001),
 };
 
-export const SMALL: Omit<GenerateOptions, 'dir'> = {
-  seed: 2,
-  files: 20,
-  testFiles: 6,
-  xmlBytes: 2 * 1024 * 1024,
-  mutations: { deleted: 1, skipped: 1, loosened: 1, newWithoutAssertion: 1 },
-};
+/** Hash of everything that decides the generated bytes: the options and this file. Used as the cache key for a generated case. */
+export function generatorHash(opts: Omit<GenerateOptions, 'dir'>, source: string): string {
+  return createHash('sha256').update(JSON.stringify(opts)).update(source.replace(/\r\n/g, '\n')).digest('hex').slice(0, 16);
+}
