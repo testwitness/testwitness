@@ -11,6 +11,7 @@ import {
   countParseErrors,
   normaliseText,
   shortHash,
+  toLf,
 } from '@testwitness/core';
 import type {
   Assertion,
@@ -1174,6 +1175,8 @@ export function isOverrideOnly(body: Node): boolean {
 
 export async function buildJavaInventory(path: string, source: string, profile: FrameworkProfile): Promise<JavaInventoryResult> {
   const { language, queries } = await loadJavaGrammar();
+  // CRLF to LF first: node text sliced from the source would otherwise keep a CR in every multi line snippet.
+  source = toLf(source);
   const tree = parseSource(language, source);
   const root = tree.rootNode;
   try {

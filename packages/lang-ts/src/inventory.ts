@@ -8,7 +8,7 @@
  * docs/conventions.md.
  */
 
-import { countParseErrors, normaliseText, parseSource, shortHash } from '@testwitness/core';
+import { countParseErrors, normaliseText, parseSource, shortHash, toLf } from '@testwitness/core';
 import type { Assertion, AssertionKind, CallSite, CatchAll, FrameworkProfile, HelperDefinition, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
 import type { Query } from '@testwitness/core';
 import { grammarFor, grammarForPath } from './grammar.js';
@@ -614,6 +614,8 @@ export interface InventoryOptions {
 export async function buildInventory(path: string, source: string, profile: FrameworkProfile, options: InventoryOptions = {}): Promise<TestInventory> {
   const grammarId = options.grammar ?? grammarForPath(path);
   const { language, queries } = await grammarFor(grammarId);
+  // CRLF to LF first: node text sliced from the source would otherwise keep a CR in every multi line snippet.
+  source = toLf(source);
   const tree = parseSource(language, source);
   const root = tree.rootNode;
   const languageId = grammarId === 'javascript' ? 'javascript' : 'typescript';
