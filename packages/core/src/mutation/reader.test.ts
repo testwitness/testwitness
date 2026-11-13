@@ -89,6 +89,23 @@ describe('Stryker JSON reader', () => {
     expect(ev.lookup('other/util.ts')).toBeUndefined();
   });
 
+  it('makes paths relative through a Windows projectRoot with backslashes and another drive letter case', async () => {
+    const text = stryker({ 'src\\cart.ts': [m(1, 'Survived')], 'C:\\a\\app\\packages\\shop\\src\\tax.ts': [m(2, 'Survived')] }, { projectRoot: 'C:\\a\\app\\packages\\shop' });
+    const data = await readMutationString(text.replace(/\n/g, '\r\n'), 'r.json', 'c:\\a\\app');
+    expect([...data.files.keys()].sort()).toEqual(['packages/shop/src/cart.ts', 'packages/shop/src/tax.ts']);
+    const ev = toMutationEvidence(data);
+    expect(ev.lookup('packages/shop/src/cart.ts')).toBeDefined();
+    expect(ev.lookup('packages/shop/src/tax.ts')).toBeDefined();
+  });
+
+  it('reads a PIT report written with CRLF line endings', async () => {
+    const lf = toMutationEvidence(await readMutationString(pit([{ status: 'SURVIVED', line: 4 }, { status: 'KILLED', line: 5, killing: J5('CartTest', 'total') }]), 'mutations.xml'));
+    const crlf = toMutationEvidence(await readMutationString(pit([{ status: 'SURVIVED', line: 4 }, { status: 'KILLED', line: 5, killing: J5('CartTest', 'total') }]).replace(/\n/g, '\r\n'), 'mutations.xml'));
+    expect(crlf.mutants).toBe(lf.mutants);
+    expect(crlf.lookup('src/main/java/com/acme/Cart.java')).toEqual(lf.lookup('src/main/java/com/acme/Cart.java'));
+    expect([...crlf.killers]).toEqual([...lf.killers]);
+  });
+
   it('reports a file that is not a Stryker report, or not JSON, as a warning', async () => {
     const bad = toMutationEvidence(await readMutationString('{"files": 3, "schemaVersion": "1"}', 'bad.json'));
     expect(bad.sources).toEqual([]);

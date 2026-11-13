@@ -38,30 +38,51 @@ function isAbsolute(p: string): boolean {
   return p.startsWith('/') || /^[A-Za-z]:\//.test(p);
 }
 
+/** Forward slashes, no file:// scheme (file:///C:/x is C:/x), no `./` segments, no doubled slashes. */
 function clean(p: string): string {
-  return p.replace(/\\/g, '/').replace(/^file:\/\//, '').replace(/\/\.\//g, '/').replace(/^\.\//, '').replace(/\/{2,}/g, '/');
+  return p
+    .replace(/\\/g, '/')
+    .replace(/^file:\/\/\/(?=[A-Za-z]:\/)/i, '')
+    .replace(/^file:\/\//i, '')
+    .replace(/\/\.\//g, '/')
+    .replace(/^\.\//, '')
+    .replace(/\/{2,}/g, '/');
+}
+
+/** A Windows path as written: a drive letter, a UNC share (\\server\share) or a file URL to a drive. */
+const WINDOWS_PATH = /^(?:[A-Za-z]:[\\/]|\\\\|file:\/\/\/[A-Za-z]:)/i;
+
+/**
+ * The part of `p` under the directory `dir`, or undefined. Both are cleaned. Windows paths compare without regard to
+ * case, as the file system does: Istanbul writes c:\repo while the runner's working directory is C:\repo.
+ */
+function under(p: string, dir: string, windows: boolean): string | undefined {
+  const same = (a: string, b: string): boolean => (windows ? a.toLowerCase() === b.toLowerCase() : a === b);
+  if (same(p, dir)) return '';
+  if (p.length > dir.length && p[dir.length] === '/' && same(p.slice(0, dir.length), dir)) return p.slice(dir.length + 1);
+  return undefined;
 }
 
 /**
  * Make a report path repository relative when it can be. An absolute path under `root` loses the root; a relative
  * path joined to a Cobertura source root under `root` becomes relative to the repository. Anything else is kept
  * (cleaned) and matched by suffix at lookup time, which covers reports written on a CI runner with another
- * checkout path.
+ * checkout path. Backslashes, drive letter case and file:// URLs are normalised, so a report written on Windows
+ * gives the same paths as one written on Linux.
  */
 export function normaliseCoveragePath(raw: string, root: string | undefined, sourceRoots: string[] = []): string {
   const p = clean(raw.trim());
-  const r = root ? clean(root).replace(/\/$/, '') : undefined;
+  const r = root ? clean(root.trim()).replace(/\/$/, '') : undefined;
+  const windows = WINDOWS_PATH.test(raw.trim()) || (root !== undefined && WINDOWS_PATH.test(root.trim()));
   if (isAbsolute(p)) {
-    if (r && p.startsWith(`${r}/`)) return p.slice(r.length + 1);
-    return p;
+    const rel = r ? under(p, r, windows) : undefined;
+    return rel ? rel : p;
   }
   for (const s of sourceRoots) {
     const sr = clean(s.trim()).replace(/\/$/, '');
     if (!sr || sr === '.') continue;
-    if (r && isAbsolute(sr) && (sr === r || sr.startsWith(`${r}/`))) {
-      const rel = sr === r ? '' : sr.slice(r.length + 1);
-      return rel ? `${rel}/${p}` : p;
-    }
+    const rel = r && isAbsolute(sr) ? under(sr, r, windows || WINDOWS_PATH.test(s.trim())) : undefined;
+    if (rel !== undefined) return rel ? `${rel}/${p}` : p;
     if (!isAbsolute(sr)) return `${sr}/${p}`;
   }
   return p;
