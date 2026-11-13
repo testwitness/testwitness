@@ -39,7 +39,7 @@ describe('BlobReader', () => {
         expect(await r.read(head, p)).toBe(await showFile(head, p, { cwd: repo }));
       }
     } finally {
-      r.close();
+      await r.close();
     }
   });
 
@@ -48,7 +48,7 @@ describe('BlobReader', () => {
     try {
       expect(await r.read(head, 'src/crlf.py')).toBe('def test_x():\n    assert 1 == 1\n');
     } finally {
-      r.close();
+      await r.close();
     }
   });
 
@@ -60,7 +60,7 @@ describe('BlobReader', () => {
       expect(await r.read('0000000000000000000000000000000000000000', 'src/a.ts')).toBeUndefined();
       expect(await r.read(head, 'src/a.ts')).toBe('export const a = 1;\n');
     } finally {
-      r.close();
+      await r.close();
     }
   });
 
@@ -77,7 +77,7 @@ describe('BlobReader', () => {
         else expect(text).toBe(`export const v${p.slice(5, -3)} = ${p.slice(5, -3)};\n`);
       });
     } finally {
-      r.close();
+      await r.close();
     }
   });
 
@@ -86,13 +86,13 @@ describe('BlobReader', () => {
     try {
       expect(await r.read(head, 'line\nbreak.ts')).toBeUndefined();
     } finally {
-      r.close();
+      await r.close();
     }
   });
 
   it('falls back to showFile when git cannot start in the directory', async () => {
     const r = new BlobReader({ cwd: join(repo, 'does-not-exist') });
     await expect(r.read(head, 'src/a.ts')).rejects.toThrow();
-    r.close();
+    await r.close();
   });
 });

@@ -233,8 +233,8 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
     });
     return { report, repo };
   } finally {
-    if (!opts.keep) rmSync(repo, { recursive: true, force: true });
-    if (evidenceDir) rmSync(evidenceDir, { recursive: true, force: true });
+    if (!opts.keep) rmSync(repo, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    if (evidenceDir) rmSync(evidenceDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 }
 

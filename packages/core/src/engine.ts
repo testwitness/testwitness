@@ -115,7 +115,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
   try {
     return await runEngineOn(opts, snapshot, blobs);
   } finally {
-    blobs.close();
+    await blobs.close();
     snapshot?.dispose();
   }
 }

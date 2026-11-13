@@ -61,6 +61,6 @@ for (const caseDir of targets) {
     const doc = JSON.parse(readFileSync(join(historyDir, 'history.json'), 'utf8')) as { runs: unknown[]; tests: Record<string, string> };
     process.stdout.write(`${relative(root, historyDir)}/history.json: ${doc.runs.length} runs, ${Object.keys(doc.tests).length} tests\n`);
   } finally {
-    rmSync(repo, { recursive: true, force: true });
+    rmSync(repo, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 }
