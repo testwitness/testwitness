@@ -116,7 +116,7 @@ type_run() {
 }
 sleep 0.5
 type_run 'git diff -U1 main -- test/'
-type_run 'testwitness check --base main --diff-only -q'
+type_run 'testwitness check --base main'
 printf '\033[1;32m$\033[0m '
 sleep 2
 EOF
