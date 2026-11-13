@@ -49,7 +49,7 @@ npm i -g testwitness
 testwitness init --agent claude    # or cursor, codex, git
 ```
 
-By default it blocks only on rules that never blocked wrongly on our corpus and on 300 real merged pull requests; deleted tests are advice only for now. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
+By default it blocks on a small proven set of rules (loosened assertions at high, expected failure markers, focused tests, failures hidden in CI, and changes to the gate itself): the ones with true positives and no wrongful block on our corpus and on 300 real merged pull requests. Every other rule, deleted tests included, is advice until the replay proves it; a maintainer can widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
 
 ## What it reports
 

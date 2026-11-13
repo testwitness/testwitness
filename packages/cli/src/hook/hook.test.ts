@@ -289,9 +289,9 @@ describe('what blocks', () => {
     expect(out(r)).toEqual({ systemMessage: 'testwitness: 1 finding shown as advice, not blocking: R003 medium src/math.test.ts:9.' });
   });
 
-  it('fail_on: medium in the base config makes the medium finding block', async () => {
+  it('fail_on: medium with the rule on hook.blocking makes the medium finding block', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: medium\n' });
+    repo = makeRepo({ '.testwitness.yml': 'fail_on: medium\nhook:\n  blocking: [R003]\n' });
     repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
     const o = out(await hook('claude', 'stop.json')) as { decision: string; reason: string };
     expect(o.decision).toBe('block');
@@ -330,7 +330,7 @@ describe('what blocks', () => {
     expect(r.decision.block).toBe(false);
   });
 
-  it('rules with a measured wrongful block are advice only by default (docs/precision.md); hook.advice_only: [] makes them block', async () => {
+  it('only the proven rules block by default (docs/precision.md); hook.blocking widens the list and hook.advice_only narrows it', async () => {
     const edit = (): void => {
       // R001 at high: a test deleted while the production file it exercises changes. R002: a test file deleted.
       repo.write('src/math.ts', 'export const add = (a: number, b: number) => a + b + 0;\n');
@@ -344,13 +344,29 @@ describe('what blocks', () => {
     expect(r.decision.note).toContain('R001 high src/math.test.ts');
     expect(r.decision.note).toContain('R002 high src/other.test.ts');
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'hook:\n  advice_only: []\n' });
+    repo = makeRepo({ '.testwitness.yml': 'hook:\n  blocking: [A002, R004, R005, W002, W003, W006, R001, R002]\n' });
     edit();
-    const strict = await hook('claude', 'stop.json');
-    expect(strict.decision.block).toBe(true);
-    expect(strict.decision.reason).toContain("it('handles negatives', () => {");
-    expect(strict.decision.reason).toContain('R002 high src/other.test.ts');
-    expect(strict.decision.reason).toContain('the whole file: git show');
+    const wide = await hook('claude', 'stop.json');
+    expect(wide.decision.block).toBe(true);
+    expect(wide.decision.reason).toContain("it('handles negatives', () => {");
+    expect(wide.decision.reason).toContain('R002 high src/other.test.ts');
+    expect(wide.decision.reason).toContain('the whole file: git show');
+    // advice_only takes a rule off the list again: A002 is on the default list, and here it only advises.
+    repo.dispose();
+    repo = makeRepo({ '.testwitness.yml': 'hook:\n  advice_only: [A002]\n' });
+    repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
+    const narrow = await hook('claude', 'stop.json');
+    expect(narrow.decision.block).toBe(false);
+    expect(narrow.evaluation!.advice.map((f) => f.ruleId).sort()).toEqual(['A002', 'R003']);
+  });
+
+  it('fail_on: medium lowers the threshold for the blocking list only; other rules stay advice', async () => {
+    repo.dispose();
+    repo = makeRepo({ '.testwitness.yml': 'fail_on: medium\n' });
+    repo.remove('src/other.test.ts');
+    const r = await hook('claude', 'stop.json');
+    expect(r.decision.block).toBe(false);
+    expect(r.evaluation!.advice.map((f) => f.ruleId)).toEqual(['R002']);
   });
 });
 

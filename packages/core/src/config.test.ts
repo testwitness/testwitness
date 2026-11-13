@@ -124,19 +124,19 @@ describe('coverage config', () => {
 });
 
 describe('agent hook config', () => {
-  it('defaults: nothing protected, 20 s, two blocks, the measured advice only list', () => {
+  it('defaults: nothing protected, 20 s, two blocks, the proven blocking list', () => {
     const c = parseConfig(undefined);
     expect(c.protect).toEqual([]);
-    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, adviceOnly: ['A001', 'A009', 'E001', 'R001', 'R002'] });
+    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, blocking: ['A002', 'R004', 'R005', 'W002', 'W003', 'W006'], adviceOnly: [] });
   });
-  it('reads protect, hook.timeout, hook.max_blocks and hook.advice_only', () => {
-    const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  advice_only: []\n', known);
+  it('reads protect, hook.timeout, hook.max_blocks, hook.blocking and hook.advice_only', () => {
+    const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  blocking: [A002, R001, R002]\n  advice_only: [A002]\n', known);
     expect(c.protect).toEqual(['tests/golden/**', '.github/workflows/test.yml']);
-    expect(c.hook).toEqual({ timeoutSeconds: 5, maxBlocks: 3, adviceOnly: [] });
+    expect(c.hook).toEqual({ timeoutSeconds: 5, maxBlocks: 3, blocking: ['A002', 'R001', 'R002'], adviceOnly: ['A002'] });
     expect(parseConfig('hook:\n  advice_only: [R001, O002]\n', known).hook.adviceOnly).toEqual(['R001', 'O002']);
   });
   it('rejects wrong types, unknown keys, unknown rules and values out of range', () => {
-    for (const bad of ['protect: "tests/**"\n', 'protect: [1]\n', 'hook: 5\n', 'hook:\n  timeout: 0\n', 'hook:\n  timeout: 601\n', 'hook:\n  timeout: "20"\n', 'hook:\n  max_blocks: 0\n', 'hook:\n  max_blocks: 1.5\n', 'hook:\n  max_blocks: 11\n', 'hook:\n  advice_only: [Z999]\n', 'hook:\n  advice_only: [r001]\n', 'hook:\n  retries: 2\n']) {
+    for (const bad of ['protect: "tests/**"\n', 'protect: [1]\n', 'hook: 5\n', 'hook:\n  timeout: 0\n', 'hook:\n  timeout: 601\n', 'hook:\n  timeout: "20"\n', 'hook:\n  max_blocks: 0\n', 'hook:\n  max_blocks: 1.5\n', 'hook:\n  max_blocks: 11\n', 'hook:\n  advice_only: [Z999]\n', 'hook:\n  advice_only: [r001]\n', 'hook:\n  blocking: [Z999]\n', 'hook:\n  blocking: all\n', 'hook:\n  retries: 2\n']) {
       expect(() => parseConfig(bad, known), bad).toThrow(ConfigError);
     }
   });

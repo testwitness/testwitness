@@ -16,12 +16,17 @@ export const HOOK_DEFAULT_TIMEOUT_SECONDS = 20;
 /** How often the same finding blocks in one agent session before the hook steps aside. */
 export const HOOK_DEFAULT_MAX_BLOCKS = 2;
 /**
- * Rules the agent hook never blocks on by default. A rule is listed here when at least one of its high findings was
- * a wrongful block on either measured set: the corpus replayed as working tree changes, or the 300 pull request trial
- * of November 2026 (docs/precision.md, "Agent hook replay"). corpus/runner/replay.test.ts fails when this list and
- * the two measurements disagree.
+ * The rules the agent hook blocks on by default: an allowlist. A rule is on it when the replay has proven it: at
+ * least one true positive at high severity on the corpus, and no wrongful block at high on the corpus or on the 300
+ * pull request trial of November 2026 (docs/precision.md, "Agent hook replay"). W006 is on it without a measurement
+ * because it is the gate protecting itself. Every other rule, measured or not, is advice in the hook.
+ * corpus/runner/replay.test.ts derives the list from both measurements and fails when this constant differs: when a
+ * listed rule gains a wrongful block, or when another rule now qualifies (it prints which), so the list is only ever
+ * widened on purpose.
  */
-export const HOOK_ADVICE_ONLY: readonly string[] = ['A001', 'A009', 'E001', 'R001', 'R002'];
+export const HOOK_BLOCKING: readonly string[] = ['A002', 'R004', 'R005', 'W002', 'W003', 'W006'];
+/** Rules on HOOK_BLOCKING without a replay measurement, and why: W006 is the gate protecting itself. */
+export const HOOK_BLOCKING_UNMEASURED: readonly string[] = ['W006'];
 
 export function defaultConfig(): ResolvedConfig {
   return {
@@ -41,7 +46,7 @@ export function defaultConfig(): ResolvedConfig {
     claims: { enabled: true, phrasesExtra: [] },
     comment: { enabled: true, collapseLow: true },
     protect: [],
-    hook: { timeoutSeconds: HOOK_DEFAULT_TIMEOUT_SECONDS, maxBlocks: HOOK_DEFAULT_MAX_BLOCKS, adviceOnly: [...HOOK_ADVICE_ONLY] },
+    hook: { timeoutSeconds: HOOK_DEFAULT_TIMEOUT_SECONDS, maxBlocks: HOOK_DEFAULT_MAX_BLOCKS, blocking: [...HOOK_BLOCKING], adviceOnly: [] },
   };
 }
 
@@ -192,7 +197,7 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
   if (doc['hook'] !== undefined) {
     if (!isRecord(doc['hook'])) throw new ConfigError('hook must be a mapping');
     const h = doc['hook'];
-    for (const k of Object.keys(h)) if (!['timeout', 'max_blocks', 'advice_only'].includes(k)) throw new ConfigError(`hook: unknown key ${k}`);
+    for (const k of Object.keys(h)) if (!['timeout', 'max_blocks', 'blocking', 'advice_only'].includes(k)) throw new ConfigError(`hook: unknown key ${k}`);
     if (h['timeout'] !== undefined) {
       if (typeof h['timeout'] !== 'number' || !(h['timeout'] > 0) || h['timeout'] > 600) throw new ConfigError('hook.timeout must be a number of seconds between 0 and 600');
       cfg.hook.timeoutSeconds = h['timeout'];
@@ -201,13 +206,17 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
       if (typeof h['max_blocks'] !== 'number' || !Number.isInteger(h['max_blocks']) || h['max_blocks'] < 1 || h['max_blocks'] > 10) throw new ConfigError('hook.max_blocks must be a whole number from 1 to 10');
       cfg.hook.maxBlocks = h['max_blocks'];
     }
-    if (h['advice_only'] !== undefined) {
-      const ids = stringList(h['advice_only'], 'hook.advice_only');
+    for (const [key, set] of [
+      ['blocking', (ids: string[]) => (cfg.hook.blocking = ids)],
+      ['advice_only', (ids: string[]) => (cfg.hook.adviceOnly = ids)],
+    ] as const) {
+      if (h[key] === undefined) continue;
+      const ids = stringList(h[key], `hook.${key}`);
       for (const id of ids) {
-        if (!/^[A-Z]\d{3}$/.test(id)) throw new ConfigError(`hook.advice_only: invalid rule id ${id}`);
-        if (knownRules && !knownRules.has(id)) throw new ConfigError(`hook.advice_only: unknown rule ${id}`);
+        if (!/^[A-Z]\d{3}$/.test(id)) throw new ConfigError(`hook.${key}: invalid rule id ${id}`);
+        if (knownRules && !knownRules.has(id)) throw new ConfigError(`hook.${key}: unknown rule ${id}`);
       }
-      cfg.hook.adviceOnly = ids;
+      set(ids);
     }
   }
   return cfg;
