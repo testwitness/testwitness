@@ -1,0 +1,1 @@
+Negative control, two levels. The new test calls ensure_receipt from tests/support/checks.py, which has no assertion of its own but calls ensure_total, which asserts. The helper index follows one more level (test, helper, helper), so the call counts as a custom assertion and O001 is silent.

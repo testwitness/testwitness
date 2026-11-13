@@ -18,6 +18,7 @@ import type {
   CallSite,
   CatchAll,
   FrameworkProfile,
+  HelperDefinition,
   Node,
   Query,
   SkipMarker,
@@ -776,7 +777,7 @@ export function collectCalls(body: Node): CallSite[] {
         if (name) {
           let up = child.parent;
           while (up && up.type === 'parenthesized_expression') up = up.parent;
-          out.push({ callee: (obj ? `${obj.text}.${name}` : name).replace(/\s+/g, ''), name, line: line(child), statement: up?.type === 'expression_statement' });
+          out.push({ callee: (obj ? `${obj.text}.${name}` : name).replace(/\s+/g, ''), name, line: line(child), statement: up?.type === 'expression_statement', text: child.text.trim() });
         }
       }
       visit(child);
@@ -1212,6 +1213,7 @@ export async function buildJavaInventory(path: string, source: string, profile: 
     // Assertion helpers: non test, non lifecycle methods whose body asserts (one level deep).
     const helpers = new Set<string>();
     const helperAssertions: Record<string, Assertion[]> = {};
+    const definitions: HelperDefinition[] = [];
     for (const m of methods) {
       if (testIds.has(m.node.id) || isLifecycle(m)) continue;
       const found = collectAssertions(m.body, queries.assertions, ctx);
@@ -1219,6 +1221,26 @@ export async function buildJavaInventory(path: string, source: string, profile: 
         helpers.add(m.name);
         (helperAssertions[m.name] ??= []).push(...found);
       }
+      const def: HelperDefinition = {
+        name: m.name,
+        line: line(m.node),
+        assertions: found,
+        calls: collectCalls(m.body)
+          .filter((c) => c.statement)
+          .map((c) => c.name),
+      };
+      const owner = m.containers[m.containers.length - 1];
+      if (owner) def.className = containerName(owner);
+      definitions.push(def);
+    }
+    const classBases: Record<string, string[]> = {};
+    for (const cls of root.descendantsOfType('class_declaration')) {
+      const name = cls.childForFieldName('name')?.text;
+      const sup = cls.childForFieldName('superclass');
+      if (!name || !sup) continue;
+      const type = sup.namedChildren[0];
+      const simple = (type?.text ?? '').replace(/<.*$/s, '').split('.').pop()?.trim();
+      if (simple) (classBases[name] ??= []).push(simple);
     }
     ctx.helpers = helpers;
 
@@ -1305,6 +1327,8 @@ export async function buildJavaInventory(path: string, source: string, profile: 
       imports: imports.map((i) => (i.isStatic ? `static ${i.path}` : i.path)),
       fileMarkers,
       parseErrors: countParseErrors(root),
+      definitions,
+      classBases,
     };
     return { inventory, timing };
   } finally {

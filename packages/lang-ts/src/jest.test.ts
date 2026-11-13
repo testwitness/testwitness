@@ -553,6 +553,6 @@ describe('calls (A001 replaced by call)', () => {
     const t = await single(src(`
       it('flushes', () => client.flush());
     `));
-    expect(t.calls).toEqual([{ callee: 'client.flush', name: 'flush', line: 1, statement: true }]);
+    expect(t.calls).toEqual([{ callee: 'client.flush', name: 'flush', line: 1, statement: true, text: 'client.flush()' }]);
   });
 });

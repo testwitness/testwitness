@@ -10,6 +10,7 @@ export * from './engine.js';
 export * from './report/json.js';
 export * from './report/markdown.js';
 export * from './inventory.js';
+export * from './helper-index.js';
 export * from './assertion-meaning.js';
 export * from './provenance.js';
 export * from './evidence/normalise.js';

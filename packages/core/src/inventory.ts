@@ -1,4 +1,14 @@
-import type { InventoryPair, TestCase, TestInventory } from './types.js';
+import type { CallSite, InventoryPair, TestCase, TestInventory } from './types.js';
+
+/** Receivers and names of calls that print, log or wait. They never stand in for an assertion. */
+const NON_ORACLE_ROOTS = new Set(['console', 'logging', 'logger', 'log', 'LOG', 'LOGGER', 'Logger', 'System', 'warnings', 'time', 'Thread']);
+const NON_ORACLE_NAMES = new Set(['print', 'pprint', 'println', 'printf', 'printStackTrace', 'breakpoint', 'sleep', 'debugger']);
+
+/** A call that prints, logs or waits (`print`, `console.*`, `logging.*`, `System.out.*`, `Thread.sleep`). */
+export function isNonOracleCall(c: CallSite): boolean {
+  const root = c.callee.split(/[.(]/, 1)[0] ?? '';
+  return NON_ORACLE_ROOTS.has(root) || NON_ORACLE_NAMES.has(c.name);
+}
 
 export type TestChange =
   | { kind: 'added'; head: TestCase }
