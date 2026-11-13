@@ -45,5 +45,5 @@ outputs:
   findings_medium:
     description: Number of open medium severity findings
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
