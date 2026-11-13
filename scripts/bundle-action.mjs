@@ -15,7 +15,7 @@ await build({
   entryPoints: [join(root, 'packages/action/src/entry.ts')],
   bundle: true,
   platform: 'node',
-  target: 'node20',
+  target: 'node24',
   format: 'esm',
   outfile: join(dist, 'index.js'),
   conditions: ['development'],
