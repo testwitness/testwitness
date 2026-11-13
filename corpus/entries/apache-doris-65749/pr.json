@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/doris/pull/65749",
+  "repo": "apache/doris",
+  "number": 65749,
+  "title": "[fix](cloud) Ignore libfdb ASAN failures in cloud UT runner",
+  "merged_at": "2026-07-17T11:11:58Z",
+  "stars": 16178,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "W003",
+  "split": "heldout",
+  "base_sha": "589fd3e9a1e8bd05d2baba5533e20f164db9854c",
+  "head_sha": "f9785d4fd2130a6b0d4237b388569c322246faab",
+  "files_changed": 2,
+  "additions": 17,
+  "deletions": 3
+}

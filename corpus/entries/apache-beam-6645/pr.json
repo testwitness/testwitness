@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/beam/pull/6645",
+  "repo": "apache/beam",
+  "number": 6645,
+  "title": "[BEAM-5692] Exclude flaky in Python 3 tests from the suite.",
+  "merged_at": "2018-10-11T01:01:13Z",
+  "stars": 8705,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "skip",
+  "split": "tuning",
+  "base_sha": "223372c7d5f8bf35dacaa21a150637cd31119975",
+  "head_sha": "f5e7b122126d49ef86da2a16f4e70bd770c72a3a",
+  "files_changed": 2,
+  "additions": 29,
+  "deletions": 0
+}

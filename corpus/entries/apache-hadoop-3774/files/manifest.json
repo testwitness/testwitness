@@ -1,0 +1,34 @@
+[
+  {
+    "path": "hadoop-common-project/hadoop-common/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-common-project/hadoop-kms/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-common-project/hadoop-registry/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-hdfs-project/hadoop-hdfs-httpfs/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-hdfs-project/hadoop-hdfs/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-project/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-tools/hadoop-distcp/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "hadoop-tools/hadoop-federation-balance/pom.xml",
+    "status": "modified"
+  }
+]

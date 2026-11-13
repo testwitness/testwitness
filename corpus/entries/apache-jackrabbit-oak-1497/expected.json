@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "VersionGarbageCollectorIT#testBundledPropUnmergedBCGC",
+    "verdict": "tp",
+    "reason": "flaky parameter combination excluded with assumeTrue"
+  }
+]

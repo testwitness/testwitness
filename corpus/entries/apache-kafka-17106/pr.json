@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/kafka/pull/17106",
+  "repo": "apache/kafka",
+  "number": 17106,
+  "title": "KAFKA-17479 Fix ignoreFailures logic in CI workflow [3/n]",
+  "merged_at": "2024-09-06T18:47:42Z",
+  "stars": 34109,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "84aa5d7a633826503ed69badd838b55552ef929c",
+  "head_sha": "111fcf7a895b35c85b3a8e545266083d8a3ca7f1",
+  "files_changed": 2,
+  "additions": 34,
+  "deletions": 10
+}

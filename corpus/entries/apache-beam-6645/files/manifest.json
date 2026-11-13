@@ -1,0 +1,10 @@
+[
+  {
+    "path": "sdks/python/apache_beam/runners/portability/fn_api_runner_test.py",
+    "status": "modified"
+  },
+  {
+    "path": "sdks/python/apache_beam/runners/portability/portable_runner_test.py",
+    "status": "modified"
+  }
+]

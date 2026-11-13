@@ -1,0 +1,10 @@
+[
+  {
+    "path": "cloud/script/run_all_tests.sh",
+    "status": "modified"
+  },
+  {
+    "path": "cloud/test/stopwatch_test.cpp",
+    "status": "modified"
+  }
+]

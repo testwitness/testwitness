@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "BranchCommitGCTest",
+    "verdict": "tp",
+    "reason": "flaky parameter combinations excluded with assumeTrue"
+  }
+]
