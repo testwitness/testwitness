@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { tsFrontEnd } from '../../lang-ts/src/index.js';
-import { computeState, exitCodeFor, runEngine, REPORT_SCHEMA, TOOL_VERSION } from './engine.js';
+import { computeState, exitCodeFor, runEngine, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, TOOL_VERSION } from './engine.js';
 import type { EngineOptions } from './engine.js';
 import { defaultConfig } from './config.js';
 import type { ChangedFile, Evidence, Finding, Report, ResolvedConfig, Rule } from './types.js';
@@ -127,6 +127,7 @@ describe('runEngine', () => {
     const { report } = await runEngine(opts());
     expect(report.state).toBe('review');
     expect(report.$schema).toBe(REPORT_SCHEMA);
+    expect(report.schemaVersion).toBe(REPORT_SCHEMA_VERSION);
     expect(report.tool).toEqual({ name: 'testwitness', version: TOOL_VERSION });
     expect(report.mode).toBe('report');
     expect(report.base).toBe(base);

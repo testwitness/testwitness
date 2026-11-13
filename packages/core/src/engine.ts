@@ -25,7 +25,10 @@ import { fingerprint as makeFingerprint } from './hash.js';
 import { builtinRules } from './rules/index.js';
 import { detectProvenance } from './provenance.js';
 
-export const REPORT_SCHEMA = 'https://testwitness.dev/schema/report/v1.json';
+/** $id of docs/report.schema.json, the JSON Schema of the report. */
+export const REPORT_SCHEMA = 'https://testwitness.github.io/testwitness/report.schema.json';
+/** Version of the report shape. Additive changes keep it; a removed or retyped field bumps it. */
+export const REPORT_SCHEMA_VERSION = '1' as const;
 export const TOOL_VERSION = '0.1.0';
 
 export interface EngineOptions {
@@ -217,6 +220,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
 
   const report: Report = {
     $schema: REPORT_SCHEMA,
+    schemaVersion: REPORT_SCHEMA_VERSION,
     tool: { name: 'testwitness', version: TOOL_VERSION },
     generatedAt: new Date().toISOString(),
     state,

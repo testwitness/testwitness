@@ -3,8 +3,8 @@
 //   1. bundle the CLI (scripts/bundle-cli.mjs)
 //   2. pnpm pack it into a temp dir and check the tarball manifest is clean
 //   3. npm install the tarball into a fresh temp project (no workspace)
-//   4. run `testwitness --version` and `testwitness check` on a temp git repo whose head
-//      weakens a TypeScript, a Python and a Java test, and require findings
+//   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
+//      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -139,6 +139,19 @@ try {
   const r001 = res2.status === 0 ? JSON.parse(res2.stdout).findings.filter((f) => f.ruleId === 'R001').length : -1;
   if (res2.stderr.includes(empty) && r001 === 0) ok('TESTWITNESS_ASSET_DIR override is honoured');
   else fail(`TESTWITNESS_ASSET_DIR override ignored (exit ${res2.status}, R001 findings ${r001})`);
+
+  // 4d. the MCP server answers initialize and tools/list over stdio from the bundle
+  const rpc = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'pack-check', version: '0' } } },
+    { jsonrpc: '2.0', method: 'notifications/initialized' },
+    { jsonrpc: '2.0', id: 2, method: 'tools/list' },
+  ];
+  const mcp = spawnSync(bin, ['mcp'], { input: rpc.map((m) => JSON.stringify(m)).join('\n') + '\n', encoding: 'utf8', env: cleanEnv, timeout: 30_000 });
+  const replies = mcp.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  const tools = (replies.find((r) => r.id === 2)?.result?.tools ?? []).map((t) => t.name).sort();
+  process.stdout.write(`testwitness mcp tools: ${tools.join(', ')}\n`);
+  if (tools.join(',') === 'testwitness_check,testwitness_explain_rule,testwitness_rules') ok('mcp server lists its three tools');
+  else fail(`mcp server tools/list returned ${JSON.stringify(tools)} (exit ${mcp.status}, stderr ${mcp.stderr.trim()})`);
 } catch (err) {
   fail(err instanceof Error ? err.message : String(err));
 } finally {

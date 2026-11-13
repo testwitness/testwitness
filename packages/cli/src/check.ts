@@ -32,6 +32,8 @@ export interface CheckOptions {
   out?: string | undefined;
   prTitle?: string | undefined;
   prBodyFile?: string | undefined;
+  /** Pull request body as text; takes precedence over prBodyFile. */
+  prBody?: string | undefined;
   /** PR author login, for provenance display only. */
   author?: string | undefined;
   /** PR author account type, e.g. User or Bot. */
@@ -98,8 +100,9 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   const config = await loadConfig(opts);
   const { evidence, notes } = await loadEvidence(opts.cwd, opts.junit ?? config.junit.head, log);
   let prText: PullRequestText | undefined;
-  if (opts.prTitle !== undefined || opts.prBodyFile) {
-    prText = { title: opts.prTitle ?? '', body: opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '' };
+  if (opts.prTitle !== undefined || opts.prBodyFile || opts.prBody !== undefined) {
+    const body = opts.prBody ?? (opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '');
+    prText = { title: opts.prTitle ?? '', body };
   }
   const { report } = await runEngine({
     cwd: opts.cwd,
