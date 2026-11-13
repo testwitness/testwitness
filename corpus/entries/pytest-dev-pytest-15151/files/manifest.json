@@ -1,0 +1,10 @@
+[
+  {
+    "path": "testing/test_debugging.py",
+    "status": "modified"
+  },
+  {
+    "path": "testing/test_terminal.py",
+    "status": "modified"
+  }
+]

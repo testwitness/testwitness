@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/22880",
+  "repo": "PrefectHQ/prefect",
+  "number": 22880,
+  "title": "Fix flaky deployment detail e2e tests: scope details assertions to the sidebar",
+  "merged_at": "2026-08-20T18:57:33Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "ff0ac9ed3451c9c3e2e3dfa94e3c50cf0d4b40f3",
+  "head_sha": "20d74b6b2594332fe0f221327ddc362beba698a3",
+  "files_changed": 1,
+  "additions": 17,
+  "deletions": 4
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C003",
+    "severity": "high",
+    "subject": "<failIfNoTests>false",
+    "verdict": "tp",
+    "reason": "surefire failIfNoTests set to false in a pom that did not have it"
+  }
+]

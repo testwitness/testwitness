@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/getsentry/sentry-python/pull/7444",
+  "repo": "getsentry/sentry-python",
+  "number": 7444,
+  "title": "test(django): Fix flaky cache tests by using uuid for cache LOCATION",
+  "merged_at": "2026-09-09T12:55:03Z",
+  "stars": 2219,
+  "license": "MIT",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "1e758fab4d210d0506d1542644084b02387fd933",
+  "head_sha": "f94120a7282e4a21c70f1f083dd019931798ce27",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 3
+}

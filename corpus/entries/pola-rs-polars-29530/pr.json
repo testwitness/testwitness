@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pola-rs/polars/pull/29530",
+  "repo": "pola-rs/polars",
+  "number": 29530,
+  "title": "test: Fix flaky test",
+  "merged_at": "2026-09-25T06:41:42Z",
+  "stars": 40342,
+  "license": "MIT",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "fcb8594f9600c93e199e6b02f36c5a7e3c541cd2",
+  "head_sha": "eaffd444fbfd157f655bfb4134cc8bd0ab87ede1",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 1
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/75030",
+  "repo": "apache/airflow",
+  "number": 75030,
+  "title": "Fix flaky LocalExecutor concurrent result refill test",
+  "merged_at": "2026-10-19T14:00:47Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "935bac04f06a125aca6cc432442af2a8de5b7cc7",
+  "head_sha": "64ce9761a857c8a5c1ff13327b18b5c8aca5492d",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 3
+}

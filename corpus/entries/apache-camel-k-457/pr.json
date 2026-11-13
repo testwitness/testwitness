@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/camel-k/pull/457",
+  "repo": "apache/camel-k",
+  "number": 457,
+  "title": "Added a FailIfNoTests option to Surefire",
+  "merged_at": "2019-02-19T09:47:28Z",
+  "stars": 937,
+  "license": "Apache-2.0",
+  "language": "go",
+  "category": "C003",
+  "split": "heldout",
+  "base_sha": "38ff3ef3b6c54a6983595c6c60b45a91d3fd7f7d",
+  "head_sha": "0c3d075af5ce5cb10ca8f2b661ca91e2b64f452b",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 0
+}

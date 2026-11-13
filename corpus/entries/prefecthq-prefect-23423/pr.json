@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/23423",
+  "repo": "PrefectHQ/prefect",
+  "number": 23423,
+  "title": "Fix flaky `test_results_with_timeout` racing a 10ms SIGALRM",
+  "merged_at": "2026-10-31T16:01:55Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "df5b008eac972d9bdad65130823c8d3b26d8861c",
+  "head_sha": "10b0a7c47b45bc0678ea0c8db45d852f1868493f",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 1
+}

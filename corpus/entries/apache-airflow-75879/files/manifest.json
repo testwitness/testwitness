@@ -1,0 +1,6 @@
+[
+  {
+    "path": "providers/cncf/kubernetes/tests/unit/cncf/kubernetes/sensors/test_spark_kubernetes.py",
+    "status": "modified"
+  }
+]

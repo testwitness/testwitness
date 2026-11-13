@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/getsentry/sentry-python/pull/6903",
+  "repo": "getsentry/sentry-python",
+  "number": 6903,
+  "title": "test: Remove flaky circular references tests",
+  "merged_at": "2026-07-28T11:57:03Z",
+  "stars": 2219,
+  "license": "MIT",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "211b0505e688f9d2324a9b9be9a59c1d5e853d8e",
+  "head_sha": "08ce565a0fafba61ff64fd2f2e94f1b391395ffc",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 119
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/63890",
+  "repo": "apache/airflow",
+  "number": 63890,
+  "title": "Fix flaky DagRunsTab E2E test race condition in markRunAs",
+  "merged_at": "2026-03-19T04:56:02Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "9a0fb150e8c91e8ba4153e375182739f100600b4",
+  "head_sha": "efce075e8dc05dd579cd87dfcb5351df118982e2",
+  "files_changed": 1,
+  "additions": 7,
+  "deletions": 0
+}

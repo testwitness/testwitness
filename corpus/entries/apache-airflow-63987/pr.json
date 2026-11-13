@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/63987",
+  "repo": "apache/airflow",
+  "number": 63987,
+  "title": "Temporarily ignore flaky e2e specs until stabilized",
+  "merged_at": "2026-03-20T12:39:38Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "C001",
+  "split": "tuning",
+  "base_sha": "122e4a21d18277055f9c0020b0790779ac6f77ca",
+  "head_sha": "16e6645b8ab07d76f43b46124f42938e8fc56c02",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 0
+}

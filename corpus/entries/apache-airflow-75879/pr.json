@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/75879",
+  "repo": "apache/airflow",
+  "number": 75879,
+  "title": "Parametrize Spark sensor waiting-state tests",
+  "merged_at": "2026-10-29T05:16:05Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "3293ced6410e6ac0a9ac042dfe2121b43979ed31",
+  "head_sha": "d4ff48f80efaf9abb8502eee6d472dc8d8569967",
+  "files_changed": 1,
+  "additions": 13,
+  "deletions": 65
+}

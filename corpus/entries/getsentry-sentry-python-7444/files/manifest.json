@@ -1,0 +1,6 @@
+[
+  {
+    "path": "tests/integrations/django/test_cache_module.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pallets/flask/pull/4293",
+  "repo": "pallets/flask",
+  "number": 4293,
+  "title": "try to address flakiness of lazy loading test",
+  "merged_at": "2021-10-05T15:06:49Z",
+  "stars": 75155,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "6f7762538bffe3ce9d03508ecab230bfff3e3dcd",
+  "head_sha": "6d65595a3c0a02d098c36f7d337e053e07975316",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 1
+}

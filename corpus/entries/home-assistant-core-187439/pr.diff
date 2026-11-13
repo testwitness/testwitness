@@ -1,0 +1,13 @@
+diff --git a/tests/helpers/test_debounce.py b/tests/helpers/test_debounce.py
+index bcfa12b6b..490593df3 100644
+--- a/tests/helpers/test_debounce.py
++++ b/tests/helpers/test_debounce.py
+@@ -553,6 +553,8 @@ async def test_shutdown_releases_parent_class(hass: HomeAssistant) -> None:
+     calls = []
+ 
+     class SomeClass:
++        # Executor workers briefly keep the job after completion, so run in the loop
++        @callback
+         def run_func(self) -> None:
+             calls.append(None)
+ 

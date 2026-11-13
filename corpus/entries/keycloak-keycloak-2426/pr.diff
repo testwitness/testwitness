@@ -1,0 +1,29 @@
+diff --git a/testsuite/integration-arquillian/pom.xml b/testsuite/integration-arquillian/pom.xml
+index 661ce28f..9d8afbb3 100644
+--- a/testsuite/integration-arquillian/pom.xml
++++ b/testsuite/integration-arquillian/pom.xml
+@@ -85,9 +85,10 @@
+         <pluginManagement>
+             <plugins>
+                 <plugin>
+-                    <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-surefire-plugin</artifactId>
+-                    <version>2.18.1</version>
++                    <configuration>
++                        <failIfNoTests>false</failIfNoTests>
++                    </configuration>
+                 </plugin>
+                 <plugin>
+                     <groupId>org.codehaus.mojo</groupId>
+diff --git a/testsuite/integration-arquillian/tests/pom.xml b/testsuite/integration-arquillian/tests/pom.xml
+index 015f5336..7d6d1a8c 100644
+--- a/testsuite/integration-arquillian/tests/pom.xml
++++ b/testsuite/integration-arquillian/tests/pom.xml
+@@ -161,7 +161,6 @@
+                                 <value>org.keycloak.testsuite.util.TestEventsLogger</value>
+                             </property>
+                         </properties>
+-                        <failIfNoTests>false</failIfNoTests>
+                     </configuration>
+                 </plugin>
+             </plugins>

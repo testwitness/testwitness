@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_circular_references",
+    "verdict": "tp",
+    "reason": "flaky test deleted, no replacement"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "test_circular_references_span_streaming",
+    "verdict": "tp",
+    "reason": "flaky test deleted, no replacement"
+  }
+]

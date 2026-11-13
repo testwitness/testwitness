@@ -1,0 +1,13 @@
+diff --git a/tests/models/test_models_unet_3d_condition.py b/tests/models/test_models_unet_3d_condition.py
+index 762c497..4193b6e 100644
+--- a/tests/models/test_models_unet_3d_condition.py
++++ b/tests/models/test_models_unet_3d_condition.py
+@@ -261,7 +261,7 @@ class UNet3DConditionModelTests(ModelTesterMixin, unittest.TestCase):
+         with torch.no_grad():
+             new_sample = new_model(**inputs_dict, cross_attention_kwargs={"scale": 0.5}).sample
+ 
+-        assert (sample - new_sample).abs().max() < 5e-4
++        assert (sample - new_sample).abs().max() < 1e-3
+ 
+         # LoRA and no LoRA should NOT be the same
+         assert (sample - old_sample).abs().max() > 1e-4

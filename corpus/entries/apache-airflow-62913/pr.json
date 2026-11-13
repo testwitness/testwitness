@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/62913",
+  "repo": "apache/airflow",
+  "number": 62913,
+  "title": "Fix flaky backfill E2E tests with stable locators",
+  "merged_at": "2026-03-07T08:56:43Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "e96907ba8c64182a47d2ddf5713cf44cbac780c3",
+  "head_sha": "3ac1bca3bc20bd569442c630bedfa6c6328862b1",
+  "files_changed": 2,
+  "additions": 480,
+  "deletions": 481
+}

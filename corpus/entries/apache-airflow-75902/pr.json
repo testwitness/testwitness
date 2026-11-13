@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/75902",
+  "repo": "apache/airflow",
+  "number": 75902,
+  "title": "Parametrize airflowctl partition-date tests",
+  "merged_at": "2026-10-29T05:23:18Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "3293ced6410e6ac0a9ac042dfe2121b43979ed31",
+  "head_sha": "82dc6a958c83ff152fe457ee189499782f85f82f",
+  "files_changed": 1,
+  "additions": 10,
+  "deletions": 36
+}

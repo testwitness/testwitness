@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/23716",
+  "repo": "PrefectHQ/prefect",
+  "number": 23716,
+  "title": "Fix flaky server signal forwarding tests by using OS-assigned ports",
+  "merged_at": "2026-11-02T22:13:45Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "d672b5e920650a8c75f4f868f17baea45ac5df45",
+  "head_sha": "33b15dd2d06f22609d5d23fb23500c27c5d5fbbb",
+  "files_changed": 1,
+  "additions": 14,
+  "deletions": 22
+}

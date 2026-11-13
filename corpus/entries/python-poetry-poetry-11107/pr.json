@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/python-poetry/poetry/pull/11107",
+  "repo": "python-poetry/poetry",
+  "number": 11107,
+  "title": "tests: make flaky test more robust",
+  "merged_at": "2026-09-27T15:22:26Z",
+  "stars": 34322,
+  "license": "MIT",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "d4e206e68dceb09efe03249bff71439318b0acc6",
+  "head_sha": "77c81a1eec2c2dffe92778f1eace915c9657aae9",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 5
+}

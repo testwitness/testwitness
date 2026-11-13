@@ -1,0 +1,6 @@
+[
+  "airflow-core/src/airflow/ui/tests/e2e/specs/dag-grid-view.spec.ts",
+  "airflow-core/src/airflow/ui/tests/e2e/specs/dag-runs-tab.spec.ts",
+  "airflow-core/src/airflow/ui/tests/e2e/specs/dag-runs.spec.ts",
+  "airflow-core/src/airflow/ui/tests/e2e/specs/task-logs.spec.ts"
+]
