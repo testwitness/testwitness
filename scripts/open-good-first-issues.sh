@@ -16,6 +16,7 @@ for part in parts:
     title = title.strip()
     if title in existing:
         print("exists:", title); continue
+    body = re.sub(r"^::: v-pre\n|^:::\n?", "", body.strip(), flags=re.M)  # VitePress markers, not issue text
     body = body.strip() + "\n\nSee docs/good-first-issues.md and docs/conventions.md to get started."
     url = subprocess.run(["gh", "issue", "create", "--repo", repo, "--title", title, "--body", body, "--label", "good first issue"], check=True, capture_output=True, text=True).stdout.strip()
     print("opened:", url)
