@@ -417,7 +417,12 @@ export interface ResolvedConfig {
   failOn: Severity;
   requireEvidence: boolean;
   languages: LanguageId[] | 'auto';
-  paths: { tests: string[]; ignore: string[] };
+  /**
+   * `followSymlinks`: whether the results, coverage, mutation and history globs follow symbolic links. Off by
+   * default, so a link committed by a pull request cannot make the check read a file outside the repository; turn it
+   * on for layouts that link their outputs into the checkout (Bazel's bazel-testlogs).
+   */
+  paths: { tests: string[]; ignore: string[]; followSymlinks: boolean };
   /** Globs of the test results of the head run (config key `results`, or its older name `junit`). Any supported format; told apart by content. */
   junit: { head: string; base: string };
   /** Globs of lcov, Cobertura or JaCoCo coverage reports of the head run. Empty: no coverage is read. */

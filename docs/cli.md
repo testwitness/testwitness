@@ -40,6 +40,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--history <file>` | run history JSON of earlier runs; R001, R003, R004 and V003 then grade by what the test did before ([run history](./history)) | none |
 | `--history-out <file>` | write the run history with this run's results merged in | none |
 | `--run-id <id>` | id of this run in the history | `GITHUB_RUN_ID`, then `local-<head sha>` |
+| `--follow-symlinks` | follow symbolic links in the results, coverage, mutation and history paths, for Bazel style layouts ([configuration](./configuration#symbolic-links-in-report-paths)) | config `paths.followSymlinks`, off |
 | `--cwd <dir>` | repository directory | current |
 | `-q, --quiet` | no progress on stderr | |
 

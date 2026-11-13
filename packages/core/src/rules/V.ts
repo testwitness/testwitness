@@ -10,10 +10,38 @@ function langOf(pair: { file: { language?: string } }): 'java' | 'typescript' | 
   return (pair.file.language ?? 'typescript') as 'java' | 'typescript' | 'javascript' | 'python';
 }
 
-/** Turn a normalised key holding a printf or $variable template into a regex that matches formatted rows. */
-export function templateRegex(key: string): RegExp {
-  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp('^' + escaped.replace(/%[sdifjop#]/g, '.+?').replace(/\\\$\w+/g, '.+?') + '$');
+/** Placeholders a template key may hold; a key with more is matched by its literal prefix only. */
+export const TEMPLATE_MAX_PLACEHOLDERS = 12;
+
+/**
+ * Turn a normalised key holding a printf or $variable template into a matcher for formatted rows: each placeholder
+ * stands for one or more characters, as `.+?` did. It used to be a regex `^a.+?b.+?c$`, which backtracks
+ * combinatorially when a row almost matches (a key of twelve `%s` against a long name did not finish in two minutes).
+ * Literals between placeholders are found leftmost, which is exact for patterns of literals and `.+` gaps, so a match
+ * costs one pass over the row. A key with more than TEMPLATE_MAX_PLACEHOLDERS placeholders matches by the literal
+ * text before its first placeholder.
+ */
+export function templateRegex(key: string): { test(row: string): boolean } {
+  const literals = key.split(/%[sdifjop#]|\$\w+/);
+  const holes = literals.length - 1;
+  if (holes > TEMPLATE_MAX_PLACEHOLDERS) return { test: (row) => row.startsWith(literals[0]!) };
+  return {
+    test(row: string): boolean {
+      // `.` never matched a line terminator; keys are whitespace collapsed, so a row with one cannot match a gap.
+      if (holes === 0) return row === key;
+      if (/[\n\r\u2028\u2029]/.test(row)) return false;
+      const first = literals[0]!;
+      const last = literals[holes]!;
+      if (!row.startsWith(first) || !row.endsWith(last)) return false;
+      let pos = first.length;
+      for (let i = 1; i < holes; i++) {
+        const at = row.indexOf(literals[i]!, pos + 1);
+        if (at < 0) return false;
+        pos = at + literals[i]!.length;
+      }
+      return row.length - last.length >= pos + 1;
+    },
+  };
 }
 
 /** V003 Changed test did not run. */

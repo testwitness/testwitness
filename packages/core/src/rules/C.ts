@@ -49,16 +49,30 @@ function isJsFile(name: string): boolean {
 }
 
 /** Read base and head text of a changed file. */
-async function texts(ctx: RuleContext, f: ChangedFile): Promise<{ base: string | undefined; head: string | undefined }> {
+/** Config text read at most per side of a changed file. Real runner and coverage configs are a few KB. */
+export const CONFIG_TEXT_MAX_BYTES = 1024 * 1024;
+
+/**
+ * Base and head text of a changed config file. `tooLarge` when either side is over CONFIG_TEXT_MAX_BYTES: the rule then
+ * reports the file at high without reading it (fail closed), because a config that large is not something a person
+ * reviews and the readers are not meant to parse it.
+ */
+async function texts(ctx: RuleContext, f: ChangedFile): Promise<{ base: string | undefined; head: string | undefined; tooLarge: boolean }> {
   const base = f.status === 'added' ? undefined : await ctx.readBase(f.oldPath ?? f.path);
   const head = f.status === 'deleted' ? undefined : await ctx.readHead(f.path);
-  return { base, head };
+  const tooLarge = [base, head].some((t) => t !== undefined && Buffer.byteLength(t, 'utf8') > CONFIG_TEXT_MAX_BYTES);
+  return tooLarge ? { base: undefined, head: undefined, tooLarge } : { base, head, tooLarge };
+}
+
+function tooLargeFinding(ctx: RuleContext, ruleId: 'C001' | 'C002', f: ChangedFile, what: string): Finding {
+  return makeFinding(ctx, ruleId, 'high', f, 'too large', `${f.path} changed and is larger than ${CONFIG_TEXT_MAX_BYTES / 1048576} MB, so its ${what} could not be read; review it by hand`, { label: 'too large' });
 }
 
 function num(v: unknown): number | undefined {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
   if (typeof v === 'string') {
-    const m = /^\s*(-?\d+(?:\.\d+)?)\s*%?\s*$/.exec(v);
+    // Trim first: `\s*%?\s*$` on an untrimmed value backtracks quadratically on a long run of spaces.
+    const m = /^(-?\d+(?:\.\d+)?)\s*%?$/.exec(v.trim());
     if (m) return Number(m[1]);
   }
   return undefined;
@@ -320,21 +334,26 @@ export const C002: Rule = {
     summary:
       'A coverage gate got weaker: a threshold was lowered (medium) or removed (high). Read as config text and compared as numbers between base and head: Jest coverageThreshold (jest.config.*, package.json jest), Vitest coverage.thresholds, nyc check-coverage values (.nycrc, package.json nyc), pytest --cov-fail-under in addopts (pytest.ini, setup.cfg, tox.ini, pyproject.toml), coverage.py fail_under (.coveragerc, [coverage:report], [tool.coverage.report]), JaCoCo limits in pom.xml and Gradle violationRules, Kover minBound and minValue, codecov.yml target and threshold, and .coveralls.yml thresholds. For an allowed drop (codecov threshold, a JaCoCo maximum, a coveralls decrease threshold) a higher value is the weaker one.',
     falsePositives:
-      'A threshold moved to another file in the same PR (or to another setting in the same file, such as --cov-fail-under to fail_under) with the same or a stricter value is silent. A new project with its own threshold is not a lowering, because only settings present in the base are compared. Removing an allowed drop (codecov threshold) is stricter and is not reported. Values that are not literal numbers (codecov auto, a variable) are not read.',
+      'A threshold moved to another file in the same PR (or to another setting in the same file, such as --cov-fail-under to fail_under) with the same or a stricter value is silent. A new project with its own threshold is not a lowering, because only settings present in the base are compared. Removing an allowed drop (codecov threshold) is stricter and is not reported. Values that are not literal numbers (codecov auto, a variable) are not read. A changed config file over 1 MB is not read and is reported high with the label too large.',
     example: '   coverageThreshold: {\n-    global: { lines: 90, branches: 80 },\n+    global: { lines: 70, branches: 80 },\n   },',
   },
   async run(ctx) {
     const entries: Array<{ f: ChangedFile; base: Threshold[]; head: Threshold[]; baseText?: string; headText?: string }> = [];
+    const tooLarge: Finding[] = [];
     for (const f of ctx.files) {
       if (f.binary || !isThresholdFile(f.path)) continue;
       const t = await texts(ctx, f);
+      if (t.tooLarge) {
+        tooLarge.push(tooLargeFinding(ctx, 'C002', f, 'coverage thresholds'));
+        continue;
+      }
       const e: (typeof entries)[number] = { f, base: thresholdsOf(f.oldPath ?? f.path, t.base), head: thresholdsOf(f.path, t.head) };
       if (t.base !== undefined) e.baseText = t.base;
       if (t.head !== undefined) e.headText = t.head;
       entries.push(e);
     }
     const allHead = entries.flatMap((e) => e.head.map((t) => ({ path: e.f.path, t })));
-    const out: Finding[] = [];
+    const out: Finding[] = [...tooLarge];
     for (const e of entries) {
       const headByKey = new Map(e.head.map((t) => [t.key, t]));
       for (const b of e.base) {
@@ -502,7 +521,10 @@ function pomSelectors(text: string, root: string, out: Selector[]): void {
   }
 }
 
-const GRADLE_TEST_BLOCK = /(?:^|\n)[ \t]*(?:test|tasks\.test|tasks\.named\(\s*["']test["']\s*\)[^\n{]*|[^\n{]*\bTest\b[^\n{]*)\s*\{/;
+// The same headers as `(?:^|\n)[ \t]*(?:test|tasks.test|tasks.named("test")[^\n{]*|[^\n{]*\bTest\b[^\n{]*)\s*\{`, written
+// so that no two quantifiers can split the same run of characters: that form took 6 s on a 100 kB line of `Test `.
+// `(?=([ \t]*))\1` takes the indentation atomically; `[^\n{]*(?:\n\s*)?\{` is `[^\n{]*\s*\{` without the overlap.
+const GRADLE_TEST_BLOCK = /(?:^|\n)(?=([ \t]*))\1(?:(?:test|tasks\.test)\s*\{|(?:tasks\.named\(\s*["']test["']\s*\)|(?=[^\n{]*\bTest\b))[^\n{]*(?:\n\s*)?\{)/;
 
 function gradleSelectors(text: string, root: string, out: Selector[]): void {
   const quoted = (s: string): string[] => [...s.matchAll(/["']([^"'\n]+)["']/g)].map((m) => m[1]!);
@@ -623,6 +645,90 @@ function jvmRel(rel: string): string {
   return rel.replace(/^(?:.*\/)?src\/(?:test|it|integrationTest|integration-test|testFixtures)\/(?:java|kotlin|groovy|scala)\//, '');
 }
 
+/** Unbounded quantifiers a selector regex may hold; each one multiplies the worst case backtracking by the path length. */
+const MAX_REGEX_QUANTIFIERS = 3;
+
+/**
+ * Compile a selector regex from the head config, or undefined when it could backtrack catastrophically: a quantified
+ * group that holds a quantifier or an alternation (`(a+)+`, `(a|a)*`), a backreference, more than a few unbounded
+ * quantifiers, or a long source. The pattern comes from the pull request, and JavaScript cannot time out a match, so
+ * an unsafe pattern is treated as one that cannot be evaluated (the finding stays high, without a file count).
+ */
+export function safeRegExp(source: string): RegExp | undefined {
+  if (source.length > 1000 || /\\[1-9]|\\k</.test(source)) return undefined;
+  const groups: Array<{ risky: boolean }> = [];
+  let unbounded = 0;
+  let lastGroupRisky = false;
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i]!;
+    const quantifier = c === '*' || c === '+' || (c === '{' && /^\{\d*,?\d*\}/.test(source.slice(i, i + 24)));
+    if (c === '\\') {
+      i++;
+      lastGroupRisky = false;
+      continue;
+    }
+    if (c === '[') {
+      for (i++; i < source.length && source[i] !== ']'; i++) if (source[i] === '\\') i++;
+      lastGroupRisky = false;
+      continue;
+    }
+    if (c === '(') {
+      groups.push({ risky: false });
+      lastGroupRisky = false;
+      continue;
+    }
+    if (c === ')') {
+      const g = groups.pop();
+      lastGroupRisky = !!g?.risky;
+      if (g?.risky && groups.length) groups[groups.length - 1]!.risky = true;
+      continue;
+    }
+    if (c === '|') {
+      if (groups.length) groups[groups.length - 1]!.risky = true;
+      lastGroupRisky = false;
+      continue;
+    }
+    if (quantifier || c === '?') {
+      if (lastGroupRisky && c !== '?') return undefined;
+      if (quantifier) {
+        if (c !== '{' || /^\{\d*,\}/.test(source.slice(i, i + 24))) unbounded++;
+        if (groups.length) groups[groups.length - 1]!.risky = true;
+      }
+      if (unbounded > MAX_REGEX_QUANTIFIERS) return undefined;
+      lastGroupRisky = false;
+      continue;
+    }
+    lastGroupRisky = false;
+  }
+  try {
+    return new RegExp(source);
+  } catch {
+    return undefined;
+  }
+}
+
+/** `*` matches any run of characters, everything else itself, over the whole string. At most pattern length times text length steps. */
+export function wildcardMatch(pattern: string, text: string): boolean {
+  let p = 0;
+  let t = 0;
+  let star = -1;
+  let mark = 0;
+  while (t < text.length) {
+    if (p < pattern.length && pattern[p] !== '*' && pattern[p] === text[t]) {
+      p++;
+      t++;
+    } else if (p < pattern.length && pattern[p] === '*') {
+      star = p++;
+      mark = t;
+    } else if (star >= 0) {
+      p = star + 1;
+      t = ++mark;
+    } else return false;
+  }
+  while (p < pattern.length && pattern[p] === '*') p++;
+  return p === pattern.length;
+}
+
 /** Head test files a selector matches, or undefined when the pattern cannot be evaluated against paths. */
 export function selectorMatches(sel: Selector, tests: string[]): string[] | undefined {
   let test: ((rel: string, full: string) => boolean) | undefined;
@@ -639,7 +745,8 @@ export function selectorMatches(sel: Selector, tests: string[]): string[] | unde
         break;
       }
       case 'regex': {
-        const re = new RegExp(sel.pattern.replace(/<rootDir>/g, ''));
+        const re = safeRegExp(sel.pattern.replace(/<rootDir>/g, ''));
+        if (!re) return undefined;
         test = (rel, full) => re.test(`/${rel}`) || re.test(`/${full}`);
         break;
       }
@@ -665,7 +772,8 @@ export function selectorMatches(sel: Selector, tests: string[]): string[] | unde
         const raw = sel.pattern.trim();
         const rx = /^%regex\[(.*)\]$/.exec(raw);
         if (rx) {
-          const re = new RegExp(rx[1]!);
+          const re = safeRegExp(rx[1]!);
+          if (!re) return undefined;
           test = (rel) => re.test(jvmRel(rel));
           break;
         }
@@ -682,7 +790,8 @@ export function selectorMatches(sel: Selector, tests: string[]): string[] | unde
       }
       case 'jvm-class': {
         const p = sel.pattern.trim();
-        const re = new RegExp(`^${p.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`);
+        // A linear wildcard match, not a `^a.*b.*c$` regex: with many stars that regex backtracks polynomially.
+        const re = { test: (x: string) => wildcardMatch(p, x) };
         test = (rel) => {
           const fqcn = jvmRel(rel).replace(/\.\w+$/, '').replace(/\//g, '.');
           const simple = fqcn.split('.').pop() ?? fqcn;
@@ -728,19 +837,24 @@ export const C001: Rule = {
     summary:
       'Runner configuration now selects fewer tests. pytest addopts gaining --ignore, --ignore-glob, --deselect or -k, testpaths narrowed, norecursedirs grown; Jest testPathIgnorePatterns or modulePathIgnorePatterns grown, testMatch or testRegex narrowed; Vitest test.include narrowed or test.exclude grown; Mocha spec narrowed or ignore grown in .mocharc; Playwright testIgnore grown or testMatch narrowed; Surefire or Failsafe <excludes> or <excludedGroups> grown, <includes> narrowed; Gradle test exclude(...), filter excludeTestsMatching, useJUnitPlatform excludeTags (and excludeCategories, excludeGroups) grown; TestNG suite <exclude> grown; junit.jupiter.conditions.deactivate set in junit-platform.properties (medium). Path patterns are matched against the test files of the head tree and the finding names how many it drops. Test tasks disabled outright (<skipTests>, <skip>, test { enabled = false }) are reported by W003.',
     falsePositives:
-      'An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high.',
+      'An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high, as do regular expressions that could backtrack without bound (nested or alternated repetition, backreferences, more than three unbounded repeats), which are not run. A changed config file over 1 MB is not read and is reported high with the label too large.',
     example: '   testPathIgnorePatterns: [\n     "/node_modules/",\n+    "<rootDir>/src/payments/",\n   ],',
   },
   async run(ctx) {
     const entries: Array<{ f: ChangedFile; base: Selector[]; head: Selector[]; headText?: string }> = [];
+    const tooLarge: Finding[] = [];
     for (const f of ctx.files) {
       if (f.binary || !isSelectionFile(f.path)) continue;
       const t = await texts(ctx, f);
+      if (t.tooLarge) {
+        tooLarge.push(tooLargeFinding(ctx, 'C001', f, 'test selection'));
+        continue;
+      }
       const e: (typeof entries)[number] = { f, base: selectorsOf(f.oldPath ?? f.path, t.base), head: selectorsOf(f.path, t.head) };
       if (t.head !== undefined) e.headText = t.head;
       if (e.base.length || e.head.length) entries.push(e);
     }
-    if (!entries.length) return [];
+    if (!entries.length) return tooLarge;
     const tests = await ctx.headTestFiles();
     const id = (s: Selector): string => `${s.key}\0${s.pattern}`;
     // Patterns removed from a setting in one file of the PR, for the moved control.
@@ -749,7 +863,7 @@ export const C001: Rule = {
       const head = new Set(e.head.map(id));
       for (const b of e.base) if (!head.has(id(b))) (removedIn.get(id(b)) ?? removedIn.set(id(b), new Set()).get(id(b))!).add(e.f.path);
     }
-    const out: Finding[] = [];
+    const out: Finding[] = [...tooLarge];
     for (const e of entries) {
       const base = new Set(e.base.map(id));
       const lineFor = (s: Selector) => lineOpt(lineOf(e.headText, s.pattern) ?? lineOf(e.headText, s.key.split(/[ .]/).pop() ?? s.key));

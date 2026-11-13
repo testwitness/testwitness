@@ -189,13 +189,24 @@ function readPytestJson(doc: Json, source: string, data: ResultIndexData): numbe
  * (`test.fail()`) is a pass. When `status` is absent the results decide: a later passed attempt after a failed one is
  * flaky. An interrupted last attempt is an error.
  */
+/** Suite nesting read at most in a Playwright report. */
+export const PLAYWRIGHT_MAX_DEPTH = 100;
+
 function readPlaywrightJson(doc: Json, source: string, data: ResultIndexData): number {
   let n = 0;
   for (const e of arr(doc['errors'])) {
     const msg = isObj(e) ? (str(e['message']) ?? '') : '';
     if (msg) data.warnings.push(`${source}: Playwright reported an error outside any test (${msg.split('\n')[0]!.replace(ANSI, '').slice(0, 200)})`);
   }
+  let tooDeep = false;
   const walk = (suite: Json, titles: string[], depth: number, file: string) => {
+    // Real reports nest a few describe levels. A hostile one nested thousands deep overflowed the stack (and copied
+    // the title chain at every level), so suites below the cap are not read.
+    if (depth > PLAYWRIGHT_MAX_DEPTH) {
+      if (!tooDeep) data.warnings.push(`${source}: suites nested deeper than ${PLAYWRIGHT_MAX_DEPTH} levels; the deeper ones are not read`);
+      tooDeep = true;
+      return;
+    }
     const here = depth === 0 ? [] : [...titles, str(suite['title']) ?? ''];
     const suiteFile = str(suite['file']) ?? file;
     for (const spec of arr(suite['specs'])) {

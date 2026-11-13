@@ -146,9 +146,12 @@ export function readStrykerJson(text: string, source: string, data: MutationData
  *   JUnit 4            demo.CartTest.adds(demo.CartTest)
  *   TestNG and others  demo.CartTest.adds
  */
+/** Longest PIT test name read. Real unique ids are well under 1 KB; the segment regex is quadratic on a long hostile one. */
+export const PIT_TEST_NAME_MAX = 4096;
+
 export function pitTestKey(raw: string): string | undefined {
   const s = raw.trim();
-  if (!s) return undefined;
+  if (!s || s.length > PIT_TEST_NAME_MAX) return undefined;
   if (s.includes('[engine:')) {
     const segs = [...s.matchAll(/\[([\w-]+):([^\]]*)\]/g)].map((m) => ({ type: m[1]!, value: m[2]! }));
     const cls = segs.filter((x) => x.type === 'class').pop()?.value;
@@ -286,25 +289,30 @@ export async function readMutationFiles(paths: string[], root?: string, caps: { 
       data.warnings.push(`mutation: stopped after ${maxFiles} report files; ${paths.length - read} not read`);
       break;
     }
-    const size = (await stat(p)).size;
-    if (data.bytes + size > maxBytes) {
-      data.capped = true;
-      data.warnings.push(`mutation: ${p} not read, it would pass the ${Math.round(maxBytes / 1048576)} MB cap`);
-      continue;
+    // A file that vanished, a directory, or a read error is a note, never a failed check.
+    try {
+      const size = (await stat(p)).size;
+      if (data.bytes + size > maxBytes) {
+        data.capped = true;
+        data.warnings.push(`mutation: ${p} not read, it would pass the ${Math.round(maxBytes / 1048576)} MB cap`);
+        continue;
+      }
+      const format = sniffMutationFormat(await readHead(p));
+      if (format === 'mutmut') {
+        data.warnings.push(`${p} ${MUTMUT_NOTE}`);
+        continue;
+      }
+      if (!format) {
+        data.warnings.push(`${p}: not a Stryker JSON or PIT mutations.xml report`);
+        continue;
+      }
+      data.bytes += size;
+      read++;
+      if (format === 'stryker') readStrykerJson(await readFile(p, 'utf8'), p, data, root);
+      else await readPitXmlStream(createReadStream(p), p, data, root);
+    } catch (e) {
+      data.warnings.push(`${p}: not read (${(e as Error).message})`);
     }
-    const format = sniffMutationFormat(await readHead(p));
-    if (format === 'mutmut') {
-      data.warnings.push(`${p} ${MUTMUT_NOTE}`);
-      continue;
-    }
-    if (!format) {
-      data.warnings.push(`${p}: not a Stryker JSON or PIT mutations.xml report`);
-      continue;
-    }
-    data.bytes += size;
-    read++;
-    if (format === 'stryker') readStrykerJson(await readFile(p, 'utf8'), p, data, root);
-    else await readPitXmlStream(createReadStream(p), p, data, root);
   }
   return data;
 }

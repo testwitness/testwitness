@@ -258,6 +258,9 @@ export function parseLiteralAt(text: string, start: number): Lit | undefined {
   }
 }
 
+/** Occurrences of one key read at most from a JavaScript or TypeScript config. */
+export const JS_KEY_MAX_OCCURRENCES = 64;
+
 /**
  * Every value written for `key` in a JavaScript or TypeScript config, as literals, in source order. A key that
  * appears in several places (projects, overrides) yields several values.
@@ -266,7 +269,10 @@ export function jsValuesForKey(text: string, key: string): Lit[] {
   const s = stripJsComments(text);
   const re = new RegExp(`(?:^|[\\s{,(])(?:${key}|'${key}'|"${key}")\\s*:\\s*`, 'g');
   const out: Lit[] = [];
-  for (let m = re.exec(s); m; m = re.exec(s)) {
+  // Each value parse can scan to the end of the text, so a file that repeats the key thousands of times was quadratic.
+  // Real configs write a key a handful of times (projects, overrides); later occurrences are not read.
+  let seen = 0;
+  for (let m = re.exec(s); m && seen < JS_KEY_MAX_OCCURRENCES; m = re.exec(s), seen++) {
     const v = parseLiteralAt(s, m.index + m[0].length);
     if (v !== undefined) out.push(v);
   }
@@ -312,10 +318,14 @@ export function parseIni(text: string): Record<string, Record<string, string>> {
       section[lastKey] = `${section[lastKey]}\n${raw.trim()}`;
       continue;
     }
-    const kv = /^([^=:]+?)\s*[=:]\s*(.*)$/.exec(raw);
-    if (kv && section) {
-      lastKey = kv[1]!.trim().toLowerCase().replace(/-/g, '_');
-      section[lastKey] = kv[2]!.replace(/\s+[#;].*$/, '').trim();
+    // Split at the first `=` or `:` by index, not with a regex: `[^=:]+?\s*[=:]` backtracks quadratically on a long
+    // line of spaces, so a hostile setup.cfg could stall the check.
+    const sep = raw.search(/[=:]/);
+    if (sep > 0 && section) {
+      lastKey = raw.slice(0, sep).trim().toLowerCase().replace(/-/g, '_');
+      const value = raw.slice(sep + 1);
+      const comment = value.search(/\s[#;]/);
+      section[lastKey] = (comment >= 0 ? value.slice(0, comment) : value).trim();
     }
   }
   return out;
@@ -446,6 +456,9 @@ export function blockBodies(text: string, header: RegExp): Array<{ body: string;
       }
     }
     out.push({ body: s.slice(open + 1, i), offset: open + 1 });
+    // A block that never closes runs to the end of the text, and so would every later header inside it: stop here, so
+    // a file of unclosed headers costs one scan instead of one per header (it was quadratic).
+    if (i >= s.length) break;
   }
   return out;
 }
