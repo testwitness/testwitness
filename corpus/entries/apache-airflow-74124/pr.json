@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/74124",
+  "repo": "apache/airflow",
+  "number": 74124,
+  "title": "Fix flaky Kafka trigger tests by awaiting the event instead of a fixed sleep",
+  "merged_at": "2026-10-03T02:20:28Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "66d751bfd2290db41f8f96757f58cdc0d8f04fae",
+  "head_sha": "efcff1dc2765c1987bbd0f7dba3cb1e1e45adc8c",
+  "files_changed": 2,
+  "additions": 24,
+  "deletions": 30
+}

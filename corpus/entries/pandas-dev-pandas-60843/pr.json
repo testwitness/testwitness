@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/60843",
+  "repo": "pandas-dev/pandas",
+  "number": 60843,
+  "title": "TST: parametrize Decimal ujson test",
+  "merged_at": "2025-02-03T22:22:19Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "e84a7f7b521d52812b227d9dab038f138373866f",
+  "head_sha": "4a6ce3f3d5d152b7f67e3a6e2d666e3d0f5468b4",
+  "files_changed": 1,
+  "additions": 17,
+  "deletions": 53
+}

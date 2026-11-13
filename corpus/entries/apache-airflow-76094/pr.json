@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/76094",
+  "repo": "apache/airflow",
+  "number": 76094,
+  "title": "Parametrize GCS-to-GCS wildcard and retention tests",
+  "merged_at": "2026-11-04T17:04:00Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "e211b4511486e9345fb7afdc7ad2288a43b2b491",
+  "head_sha": "22c51eb24c1326567eddc707dd4c0060e119401f",
+  "files_changed": 1,
+  "additions": 36,
+  "deletions": 74
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/23178",
+  "repo": "PrefectHQ/prefect",
+  "number": 23178,
+  "title": "Fix flaky interval schedule anchor time test when the clock reads 14:35",
+  "merged_at": "2026-09-22T19:33:45Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "9822056917607a54cde3810d627961fe46949283",
+  "head_sha": "33f8b603535bc4956ebbe4dba34cb7ce2d69ff51",
+  "files_changed": 1,
+  "additions": 24,
+  "deletions": 6
+}

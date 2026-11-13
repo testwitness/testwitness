@@ -1,0 +1,30 @@
+[
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/dag-runs-tab.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  },
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/dag-runs.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  },
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/dag-grid-view.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  },
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/task-logs.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/ray-project/ray/pull/67578",
+  "repo": "ray-project/ray",
+  "number": 67578,
+  "title": "[Data] Fix flaky test_lineage_reconstruction: pass the aborted arg to task_done_callback",
+  "merged_at": "2026-10-30T19:56:35Z",
+  "stars": 44187,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "1629bfb888ab9704e5b15c12b50406ef309d3110",
+  "head_sha": "fe55abb5b7a42d9b3dd8b88bd5ce37a24f50763d",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

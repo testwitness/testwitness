@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/huggingface/transformers/pull/49583",
+  "repo": "huggingface/transformers",
+  "number": 49583,
+  "title": "Fix flaky streamer timeout tests",
+  "merged_at": "2026-10-14T12:53:10Z",
+  "stars": 168462,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "34f416369d3a497e6d64042f467992ceeb212cf3",
+  "head_sha": "8e625985966f11ee82975b1f8cf30ca1b8b70186",
+  "files_changed": 1,
+  "additions": 47,
+  "deletions": 14
+}

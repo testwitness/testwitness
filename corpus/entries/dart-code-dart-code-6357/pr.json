@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Dart-Code/Dart-Code/pull/6357",
+  "repo": "Dart-Code/Dart-Code",
+  "number": 6357,
+  "title": "Tighten project coverage threshold to 0.5% and relax patch threshold to 30%",
+  "merged_at": "2026-11-05T12:07:01Z",
+  "stars": 1606,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "C002",
+  "split": "tuning",
+  "base_sha": "5d2e00a3ec9888a939079a8095926c82baea61e7",
+  "head_sha": "48c5b2da358cc7d5ce494765286d474b6b327b98",
+  "files_changed": 1,
+  "additions": 4,
+  "deletions": 4
+}

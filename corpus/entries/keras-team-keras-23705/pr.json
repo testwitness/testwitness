@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/keras-team/keras/pull/23705",
+  "repo": "keras-team/keras",
+  "number": 23705,
+  "title": "Fix flaky test_cholesky with fixed seed and float32 rtol",
+  "merged_at": "2026-09-22T04:19:44Z",
+  "stars": 64424,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "4749f97e8a642d4c631b4707b8c0abcbc7b998ee",
+  "head_sha": "c882f03e53f66eba7fc031bdef06b9ff25bd24e9",
+  "files_changed": 1,
+  "additions": 7,
+  "deletions": 1
+}

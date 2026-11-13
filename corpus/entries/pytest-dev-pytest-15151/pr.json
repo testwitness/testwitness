@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pytest-dev/pytest/pull/15151",
+  "repo": "pytest-dev/pytest",
+  "number": 15151,
+  "title": "Fix two flaky tests: slow-teardown timing and pdb EOF race",
+  "merged_at": "2026-10-08T12:46:40Z",
+  "stars": 14660,
+  "license": "MIT",
+  "language": "python",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "59200df778adf8079df6125d60662908ac0a0646",
+  "head_sha": "937b532b2d2c26ab6ec2812ab2287b8796911d76",
+  "files_changed": 2,
+  "additions": 6,
+  "deletions": 1
+}

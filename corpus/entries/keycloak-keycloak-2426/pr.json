@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/keycloak/keycloak/pull/2426",
+  "repo": "keycloak/keycloak",
+  "number": 2426,
+  "title": "Arq. TestSuite Surefire config: failIfNoTests=false",
+  "merged_at": "2016-03-28T12:48:01Z",
+  "stars": 37847,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "0f5caffbab35457cc38de574003fa343b19a798c",
+  "head_sha": "f6dea6752c41c6b2270339c7cdab99bb3fd39584",
+  "files_changed": 2,
+  "additions": 3,
+  "deletions": 3
+}

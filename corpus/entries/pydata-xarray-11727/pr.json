@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pydata/xarray/pull/11727",
+  "repo": "pydata/xarray",
+  "number": 11727,
+  "title": "Fix flaky test_zarr_region_chunk_partial_offset",
+  "merged_at": "2026-10-14T08:54:00Z",
+  "stars": 4226,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "3f29256e912b9c63bf2b5ce0b91f163f5e3910f5",
+  "head_sha": "474501a2ea7b3d2211327e6a4440c1b64a6e1984",
+  "files_changed": 1,
+  "additions": 10,
+  "deletions": 6
+}

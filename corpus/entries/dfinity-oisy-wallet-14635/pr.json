@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/dfinity/oisy-wallet/pull/14635",
+  "repo": "dfinity/oisy-wallet",
+  "number": 14635,
+  "title": "test(frontend): Update Vitest coverage thresholds",
+  "merged_at": "2026-11-12T16:40:35Z",
+  "stars": 181,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "63775391efcd13e0d1662cd0cbc14e74672eaf8a",
+  "head_sha": "845f77f6faf776c239727d3ae927acf2faf70e9b",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 3
+}

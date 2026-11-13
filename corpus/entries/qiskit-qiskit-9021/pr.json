@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Qiskit/qiskit/pull/9021",
+  "repo": "Qiskit/qiskit",
+  "number": 9021,
+  "title": "Fix exact floating-point comparison causing flaky test",
+  "merged_at": "2022-10-28T14:36:48Z",
+  "stars": 7970,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "b45afea03662bf4a2905251e26cbc008bdb3c0e1",
+  "head_sha": "4b85c860bfc13b57219bc4344b5284459b2b382b",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 2
+}

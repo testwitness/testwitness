@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/dag-tasks.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  },
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/variable.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec ignored"
+  }
+]

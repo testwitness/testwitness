@@ -1,0 +1,10 @@
+[
+  {
+    "path": "testsuite/integration-arquillian/pom.xml",
+    "status": "modified"
+  },
+  {
+    "path": "testsuite/integration-arquillian/tests/pom.xml",
+    "status": "modified"
+  }
+]

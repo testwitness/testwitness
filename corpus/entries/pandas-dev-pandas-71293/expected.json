@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "high",
+    "subject": "test_replace_dict_inplace_memory",
+    "verdict": "tp",
+    "reason": "test deleted, replaced by a benchmark that never fails CI"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "high",
+    "subject": "test_replace_small_dict_inplace_memory",
+    "verdict": "tp",
+    "reason": "test deleted, replaced by a benchmark that never fails CI"
+  }
+]

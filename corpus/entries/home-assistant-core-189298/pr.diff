@@ -1,0 +1,13 @@
+diff --git a/tests/components/wiz/test_config_flow.py b/tests/components/wiz/test_config_flow.py
+index e69e511a5..31ca4e48f 100644
+--- a/tests/components/wiz/test_config_flow.py
++++ b/tests/components/wiz/test_config_flow.py
+@@ -673,6 +673,8 @@ async def test_reconfigure_flow_loaded_entry(hass: HomeAssistant) -> None:
+     """Test reconfiguring a loaded entry reloads it once."""
+     bulb, entry = await async_setup_integration(hass)
+     assert entry.state is ConfigEntryState.LOADED
++    # The startup discovery would otherwise revert the reconfigured host
++    await hass.async_block_till_done(wait_background_tasks=True)
+ 
+     result = await entry.start_reconfigure_flow(hass)
+ 

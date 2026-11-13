@@ -1,0 +1,13 @@
+diff --git a/tests/helpers/test_event.py b/tests/helpers/test_event.py
+index 021437770..fbacd95ec 100644
+--- a/tests/helpers/test_event.py
++++ b/tests/helpers/test_event.py
+@@ -2020,6 +2020,8 @@ async def test_track_template_result_with_group(hass: HomeAssistant) -> None:
+ """
+     template_complex = Template(template_complex_str, hass)
+ 
++    # Run in the event loop; executor jobs may append results out of order
++    @callback
+     def specific_run_callback(
+         event: Event[EventStateChangedData] | None,
+         updates: list[TrackTemplateResult],

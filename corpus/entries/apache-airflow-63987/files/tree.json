@@ -1,0 +1,4 @@
+[
+  "airflow-core/src/airflow/ui/tests/e2e/specs/dag-tasks.spec.ts",
+  "airflow-core/src/airflow/ui/tests/e2e/specs/variable.spec.ts"
+]

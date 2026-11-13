@@ -14,7 +14,10 @@ SNAP = ['**/__snapshots__/**','**/*.snap','**/*.approved.*','**/*.received.*','*
 RUNNER = ['**/jest.config.{js,cjs,mjs,ts,cts,mts,json}','**/vitest.config.{js,cjs,mjs,ts,cts,mts}','**/vitest.workspace.{js,ts}','**/vite.config.{js,ts,mjs,mts}',
  '**/playwright.config.{js,ts,mjs,mts}','**/.mocharc.{js,cjs,yml,yaml,json,jsonc}','**/package.json','**/pytest.ini','**/pyproject.toml','**/setup.cfg','**/tox.ini',
  '**/noxfile.py','**/conftest.py','**/pom.xml','**/build.gradle','**/build.gradle.kts','**/settings.gradle','**/settings.gradle.kts','**/gradle.properties',
- '**/junit-platform.properties','**/testng.xml','**/testng*.xml','**/Makefile','**/.testwitness.yml']
+ '**/junit-platform.properties','**/testng.xml','**/testng*.xml','**/Makefile','**/.testwitness.yml',
+ # coverage configs (COVERAGE_CONFIG_FILES in classify.ts), read by C002
+ '**/.coveragerc','**/codecov.yml','**/.codecov.yml','**/.coveralls.yml','**/.nycrc','**/.nycrc.json','**/.nycrc.{yml,yaml}',
+ '**/codecov.yaml','**/.codecov.yaml','**/sonar-project.properties','**/stryker.config.{js,mjs,json}','**/stryker.conf.{js,json}']
 WORKFLOW = ['.github/workflows/*.{yml,yaml}','**/.gitlab-ci.yml','**/.gitlab/**/*.yml','**/Jenkinsfile','**/azure-pipelines.yml','**/.circleci/config.yml','**/bitbucket-pipelines.yml']
 CODE_EXT = ('.py','.java','.ts','.tsx','.js','.jsx','.mjs','.cjs','.mts','.cts','.kt','.scala','.groovy','.rs','.go','.cs','.vue','.svelte')
 def expand(g):
