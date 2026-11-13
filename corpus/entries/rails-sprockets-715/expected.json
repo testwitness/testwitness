@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W002",
+    "severity": "high",
+    "subject": ".github/workflows/ci.yml",
+    "verdict": "tp",
+    "reason": "continue-on-error bound to matrix.experimental on the rake job"
+  }
+]

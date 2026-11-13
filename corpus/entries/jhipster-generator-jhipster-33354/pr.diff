@@ -1,0 +1,14 @@
+diff --git a/generators/cypress/templates/src/test/javascript/cypress/e2e/lighthouse.audits.ts.ejs b/generators/cypress/templates/src/test/javascript/cypress/e2e/lighthouse.audits.ts.ejs
+index be8fd5f8d..e9f6d3c3c 100644
+--- a/generators/cypress/templates/src/test/javascript/cypress/e2e/lighthouse.audits.ts.ejs
++++ b/generators/cypress/templates/src/test/javascript/cypress/e2e/lighthouse.audits.ts.ejs
+@@ -41,6 +41,8 @@ describe('Lighthouse Audits', () => {
+         },
+         screenEmulation: {disabled: true}
+       };
+-      cy.lighthouse(customThresholds, desktopConfig);
++      cy.lighthouse(customThresholds, desktopConfig).then(results => {
++        expect(results).to.not.equal(undefined);
++      });
+     });
+ });

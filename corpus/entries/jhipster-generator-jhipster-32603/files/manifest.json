@@ -1,0 +1,10 @@
+[
+  {
+    "path": "generators/angular/__snapshots__/generator.spec.ts.snap",
+    "status": "modified"
+  },
+  {
+    "path": "generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/service/_entityFile_.service.spec.ts.ejs",
+    "status": "modified"
+  }
+]

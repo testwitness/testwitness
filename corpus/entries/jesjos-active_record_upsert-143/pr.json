@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/jesjos/active_record_upsert/pull/143",
+  "repo": "jesjos/active_record_upsert",
+  "number": 143,
+  "title": "CI: experimental: true means to continue-on-error",
+  "merged_at": "2026-06-26T07:44:33Z",
+  "stars": 208,
+  "license": "MIT",
+  "language": "ruby",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "7e4c92fa409e78872eeede48ecdcaed713ba0a7e",
+  "head_sha": "3a0e39e86f4ebcb4c3e3a06911e691552612e8f5",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}
