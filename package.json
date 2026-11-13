@@ -25,6 +25,7 @@
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "bench": "pnpm bundle:cli && tsx bench/run.ts",
+    "bench:hook": "pnpm bundle:cli && tsx bench/hook.ts",
     "mutate": "stryker run",
     "study:sample": "tsx --conditions=development study/sample.ts",
     "study:fetch": "tsx --conditions=development study/fetch.ts",
