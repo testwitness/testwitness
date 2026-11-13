@@ -84,7 +84,7 @@ Measured, not yet promoted (no headline number):
 - A001 Assertion removed: 14 true positives, 0 false positives, held out precision n/a
 - A009 Tautological assertion: 3 true positives, 0 false positives, held out precision n/a
 - O001 New test without an assertion: 5 true positives, 0 false positives, held out precision n/a
-- O002 New test with a smoke oracle only: 9 true positives, 8 false positives, held out precision 0.00
+- O002 New test with a smoke oracle only: 9 true positives, 5 false positives, held out precision n/a
 - E001 Catch all added in a test: 3 true positives, 0 false positives, held out precision 1.00
 - W002 continue-on-error added to a test step or job: 9 true positives, 2 false positives, held out precision 0.67
 - W003 Failure suppressed in the run command: 1 true positive, 0 false positives, held out precision 1.00
