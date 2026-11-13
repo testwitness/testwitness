@@ -23,6 +23,17 @@ async function a002(base: string, head: string, wrap = true): Promise<Finding[]>
 }
 
 describe('A002 Python shapes from the corpus', () => {
+  it('names both statements when a plain assert loosens into a plain assert (pydantic#14149)', async () => {
+    const out = await a002('    assert _is_simple(annotation) is expected', '    assert _is_simple(annotation)');
+    expect(out).toHaveLength(1);
+    expect(out[0]!.message).not.toMatch(/became assert$/);
+    expect(out[0]!.message).toContain('assert _is_simple(annotation)');
+  });
+
+  it('keeps a conditional of two literals as an exact expectation (fastapi#16594)', async () => {
+    expect(await a002('    assert response.status_code == 200', '    assert response.status_code == (422 if extra == "forbid" else 200)')).toEqual([]);
+  });
+
   it('dict equality becomes a per key subset with all(...) (mlflow#21066)', async () => {
     const out = await a002(
       '    assert root_span.inputs == {"kwargs": {"inputs": ["a", "b"]}}',

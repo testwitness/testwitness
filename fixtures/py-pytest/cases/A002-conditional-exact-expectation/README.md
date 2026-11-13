@@ -1,0 +1,1 @@
+Negative. A parametrised test that expected 200 for every case now expects 422 for one case and 200 for the others, written as a conditional expression whose branches are both literals. Each case still checks an exact value, so nothing weakened. Seen in a replay of public PRs on FastAPI. Nothing fires.

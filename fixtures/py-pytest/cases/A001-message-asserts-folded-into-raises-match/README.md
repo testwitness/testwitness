@@ -1,0 +1,1 @@
+Low. Two asserts on the error message after pytest.raises are replaced by match= on the pytest.raises itself, now that only one wording of the message is supported. The match is the message check, so the change is reported low as consolidated. Seen in a replay of public PRs on pydantic.
