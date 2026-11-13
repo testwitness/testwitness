@@ -45,14 +45,14 @@ jobs:
   test:
     steps:
       - run: pytest --junitxml=junit.xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: results, path: junit.xml }
   testwitness:
     needs: test
     steps:
       - uses: actions/checkout@v5
         with: { fetch-depth: 0 }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: results, path: results }
       - uses: testwitness/testwitness@v0
         with: { results: "results/**/*" }
