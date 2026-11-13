@@ -19,7 +19,8 @@ import type {
   Severity,
   TestInventory,
 } from './types.js';
-import { commitMessages, listTree, mergeBase, numstat, rawDiff, revParse, showFile } from './git.js';
+import { commitMessages, listTree, mergeBase, numstat, rawDiff, revParse } from './git.js';
+import { BlobReader } from './git-batch.js';
 import { parseUnifiedDiff } from './diff/parse.js';
 import { classifyFiles, classifyPath } from './diff/classify.js';
 import { applyConfiguredSeverity, effectiveSeverity, SEVERITY_RANK } from './config.js';
@@ -102,6 +103,15 @@ export function historyResults(evidence: Evidence): HistoryResult[] {
 }
 
 export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
+  const blobs = new BlobReader({ cwd: opts.cwd });
+  try {
+    return await runEngineWith(opts, blobs);
+  } finally {
+    blobs.close();
+  }
+}
+
+async function runEngineWith(opts: EngineOptions, blobs: BlobReader): Promise<EngineResult> {
   const t0 = performance.now();
   const git = { cwd: opts.cwd };
   const log = opts.log ?? (() => {});
@@ -124,7 +134,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     const k = `${ref}:${path}`;
     let p = readCache.get(k);
     if (!p) {
-      p = showFile(ref, path, git);
+      p = blobs.read(ref, path);
       readCache.set(k, p);
     }
     return p;
