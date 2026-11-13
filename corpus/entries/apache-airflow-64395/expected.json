@@ -1,0 +1,51 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Connections Page - CRUD Operations \u203a should create a new connection and display it in list",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Connections Page - CRUD Operations \u203a should edit an existing connection",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Calendar Tab \u203a verify hover shows correct run states",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Code Tab \u203a Verify DAG source code is displayed",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Code Tab \u203a Verify line numbers are displayed",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Events with Generated Data \u203a verify search for specific event type and filtered results",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Verify Required Action page \u203a Verify the actions list/table is displayed (or empty state if none)",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  }
+]

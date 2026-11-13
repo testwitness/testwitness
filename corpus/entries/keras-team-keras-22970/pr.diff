@@ -1,0 +1,39 @@
+diff --git a/keras/src/layers/attention/multi_head_attention_test.py b/keras/src/layers/attention/multi_head_attention_test.py
+index 2e7bd35..885227c 100644
+--- a/keras/src/layers/attention/multi_head_attention_test.py
++++ b/keras/src/layers/attention/multi_head_attention_test.py
+@@ -844,7 +844,7 @@ class MultiHeadAttentionTest(testing.TestCase):
+         # Try eager call and verify output correctness
+         output_quantized = layer(query, key, value)
+         mse = ops.mean(ops.square(output_float - output_quantized))
+-        self.assertLess(mse, 1e-3)  # A weak correctness test
++        self.assertLess(mse, 1e-2)  # A weak correctness test
+ 
+         layer = layers.MultiHeadAttention(
+             num_heads=3,
+diff --git a/keras/src/layers/core/einsum_dense_test.py b/keras/src/layers/core/einsum_dense_test.py
+index c3a26d5..8a3737c 100644
+--- a/keras/src/layers/core/einsum_dense_test.py
++++ b/keras/src/layers/core/einsum_dense_test.py
+@@ -534,7 +534,7 @@ class EinsumDenseTest(testing.TestCase):
+     # Test quantization-related methods.
+ 
+     @parameterized.named_parameters(
+-        ("int8", "int8", 1e-3),
++        ("int8", "int8", 2e-2),
+         ("int4", "int4", 3e-3),
+     )
+     def test_quantize_int(self, mode, error_threshold):
+diff --git a/keras/src/layers/core/reversible_embedding_test.py b/keras/src/layers/core/reversible_embedding_test.py
+index d75cb3d..b52204a 100644
+--- a/keras/src/layers/core/reversible_embedding_test.py
++++ b/keras/src/layers/core/reversible_embedding_test.py
+@@ -181,7 +181,7 @@ class ReversibleEmbeddingTest(test_case.TestCase):
+             ops.square(y_reverse_float - y_reverse_quantized)
+         )
+         self.assertLess(mse, 1e-3)  # A weak correctness test
+-        self.assertLess(mse_reverse, 1e-3)  # A weak correctness test
++        self.assertLess(mse_reverse, 1e-2)  # A weak correctness test
+ 
+         # Check model save / load round-trip.
+         model = models.Sequential([layer])

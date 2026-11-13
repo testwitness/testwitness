@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/64445",
+  "repo": "apache/airflow",
+  "number": 64445,
+  "title": "fix: mark flaky UI E2E tests as fixme",
+  "merged_at": "2026-03-30T04:57:39Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "48f0a72a0f728e6678e3c69a5beee381072c880a",
+  "head_sha": "61ebca7f75b28202d988a61bc7f602d655f0e0fb",
+  "files_changed": 8,
+  "additions": 19,
+  "deletions": 15
+}

@@ -1,0 +1,171 @@
+diff --git a/airflow-core/src/airflow/ui/playwright.config.ts b/airflow-core/src/airflow/ui/playwright.config.ts
+index 02075f841..35cf5c3af 100644
+--- a/airflow-core/src/airflow/ui/playwright.config.ts
++++ b/airflow-core/src/airflow/ui/playwright.config.ts
+@@ -119,6 +119,7 @@ export default defineConfig({
+     "**/task-logs.spec.ts",
+     "**/dag-tasks.spec.ts",
+     "**/variable.spec.ts",
++    "**/xcoms.spec.ts",
+   ],
+ 
+   timeout: 60_000,
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts
+index b97d31d8b..609a0bc6c 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts
+@@ -86,7 +86,9 @@ test.describe("Backfill", () => {
+     });
+ 
+     for (const config of backfillConfigs) {
+-      test(`verify backfill with '${REPROCESS_API_TO_UI[config.behavior]}' behavior`, async ({ page }) => {
++      test.fixme(`verify backfill with '${REPROCESS_API_TO_UI[config.behavior]}' behavior`, async ({
++        page,
++      }) => {
+         const backfillPage = new BackfillPage(page);
+ 
+         await backfillPage.navigateToBackfillsTab(testDagId);
+@@ -199,7 +201,7 @@ test.describe("Backfill", () => {
+       await expect(backfillPage.unpauseButton).toBeVisible({ timeout: 10_000 });
+     });
+ 
+-    test("verify cancel backfill", async () => {
++    test.fixme("verify cancel backfill", async () => {
+       const dates = FIXED_DATES.controls.cancel;
+ 
+       // Create + pause atomically to eliminate race with scheduler.
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-audit-log.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-audit-log.spec.ts
+index 214e3a93f..0efc828be 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-audit-log.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-audit-log.spec.ts
+@@ -75,7 +75,7 @@ test.describe("DAG Audit Log", () => {
+     await expect(dagIdColumn).not.toBeVisible();
+   });
+ 
+-  test("verify audit log entries display valid data", async () => {
++  test.fixme("verify audit log entries display valid data", async () => {
+     await eventsPage.navigateToAuditLog(testDagId);
+ 
+     await expect(eventsPage.tableRows).not.toHaveCount(0);
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
+index 11b58a22f..65d77ac80 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts
+@@ -96,7 +96,7 @@ test.describe("DAG Calendar Tab", () => {
+     await calendar.navigateToCalendar(dagId);
+   });
+ 
+-  test("verify calendar grid renders", async () => {
++  test.fixme("verify calendar grid renders", async () => {
+     await calendar.switchToHourly();
+     await calendar.verifyMonthGridRendered();
+   });
+@@ -130,7 +130,8 @@ test.describe("DAG Calendar Tab", () => {
+     expect(states).toContain("failed");
+   });
+ 
+-  test("failed filter shows only failed runs", async () => {
++  // The scheduler can override the PATCH-to-failed state back to success before tests run.
++  test.fixme("failed filter shows only failed runs", async () => {
+     await calendar.switchToHourly();
+ 
+     const totalStates = await calendar.getManualRunStates();
+@@ -158,7 +159,7 @@ test.describe("DAG Calendar Tab", () => {
+     expect(failedCount).toBeLessThan(totalCount);
+   });
+ 
+-  test("color scale changes between total and failed view", async () => {
++  test.fixme("color scale changes between total and failed view", async () => {
+     await calendar.switchToHourly();
+ 
+     const totalColors = await calendar.getActiveCellColors();
+@@ -171,7 +172,7 @@ test.describe("DAG Calendar Tab", () => {
+     expect(failedColors).not.toEqual(totalColors);
+   });
+ 
+-  test("cells reflect failed view mode attribute", async () => {
++  test.fixme("cells reflect failed view mode attribute", async () => {
+     await calendar.switchToHourly();
+     await calendar.switchToFailedView();
+ 
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
+index 00ef07e96..fc6e93d23 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts
+@@ -35,11 +35,11 @@ test.describe("DAG Code Tab", () => {
+     await codePage.verifySourceCodeDisplayed();
+   });
+ 
+-  test("Verify syntax highlighting is applied", async () => {
++  test.fixme("Verify syntax highlighting is applied", async () => {
+     await codePage.verifySyntaxHighlighting();
+   });
+ 
+-  test("Verify code is scrollable for long files", async () => {
++  test.fixme("Verify code is scrollable for long files", async () => {
+     await codePage.verifyCodeIsScrollable();
+   });
+ 
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/dags-list.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/dags-list.spec.ts
+index 6181bbc47..ef2e75b2a 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/dags-list.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/dags-list.spec.ts
+@@ -28,7 +28,7 @@ test.describe("Dag Trigger Workflow", () => {
+     dagsPage = new DagsPage(page);
+   });
+ 
+-  test("should successfully trigger a Dag run", async () => {
++  test.fixme("should successfully trigger a Dag run", async () => {
+     test.setTimeout(7 * 60 * 1000);
+ 
+     const dagRunId = await dagsPage.triggerDag(testDagId);
+@@ -48,7 +48,7 @@ test.describe("Dag Details Tab", () => {
+     dagsPage = new DagsPage(page);
+   });
+ 
+-  test("should successfully verify details tab", async () => {
++  test.fixme("should successfully verify details tab", async () => {
+     test.setTimeout(120_000);
+     await dagsPage.verifyDagDetails(testDagId);
+   });
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
+index bf7536c1f..7de6cf30e 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts
+@@ -123,7 +123,7 @@ test.describe("Events with Generated Data", () => {
+     }).toPass({ timeout: 20_000 });
+   });
+ 
+-  test("verify filter by DAG ID", async () => {
++  test.fixme("verify filter by DAG ID", async () => {
+     await eventsPage.navigate();
+     await eventsPage.addFilter("DAG ID");
+     await eventsPage.setFilterValue("DAG ID", testDagId);
+diff --git a/airflow-core/src/airflow/ui/tests/e2e/specs/task-instances.spec.ts b/airflow-core/src/airflow/ui/tests/e2e/specs/task-instances.spec.ts
+index 49e2d3839..587639758 100644
+--- a/airflow-core/src/airflow/ui/tests/e2e/specs/task-instances.spec.ts
++++ b/airflow-core/src/airflow/ui/tests/e2e/specs/task-instances.spec.ts
+@@ -142,12 +142,12 @@ test.describe("Task Instances Page", () => {
+     taskInstancesPage = new TaskInstancesPage(page);
+   });
+ 
+-  test("verify task instances table displays data", async () => {
++  test.fixme("verify task instances table displays data", async () => {
+     await taskInstancesPage.navigate();
+     await taskInstancesPage.verifyTaskInstancesExist();
+   });
+ 
+-  test("verify task details display correctly", async () => {
++  test.fixme("verify task details display correctly", async () => {
+     await taskInstancesPage.navigate();
+     await taskInstancesPage.verifyTaskDetailsDisplay();
+   });
+@@ -157,7 +157,7 @@ test.describe("Task Instances Page", () => {
+     await taskInstancesPage.verifyStateFiltering("Failed");
+   });
+ 
+-  test("verify filtering by success state", async () => {
++  test.fixme("verify filtering by success state", async () => {
+     await taskInstancesPage.navigate();
+     await taskInstancesPage.verifyStateFiltering("Success");
+   });

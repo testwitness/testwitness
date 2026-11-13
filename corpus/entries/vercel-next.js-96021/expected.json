@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "should update cached data used by a route handler after editing a file",
+    "verdict": "tp",
+    "reason": "new test added as it.failing"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "should update cached data used by a page fetched without a cookie after editing a file",
+    "verdict": "tp",
+    "reason": "new test added as it.failing"
+  }
+]

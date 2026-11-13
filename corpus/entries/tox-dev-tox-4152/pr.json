@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/tox-dev/tox/pull/4152",
+  "repo": "tox-dev/tox",
+  "number": 4152,
+  "title": "\u2705 test: fold glob, posargs and if-factor tables, drop repr smoke tests",
+  "merged_at": "2026-10-14T23:21:08Z",
+  "stars": 3979,
+  "license": "MIT",
+  "language": "python",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "8abc0f1d310f203162aefd09264dcfcc1fc44adb",
+  "head_sha": "776aeb03a6d12c5271bdafb0c55b375f1798f520",
+  "files_changed": 5,
+  "additions": 138,
+  "deletions": 331
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/requiredAction.spec.ts",
+    "status": "modified"
+  }
+]

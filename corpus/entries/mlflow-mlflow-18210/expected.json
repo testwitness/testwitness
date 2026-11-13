@@ -1,0 +1,100 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_basic_job",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_json_input_output",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_error_job",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_resume_on_job_runner_restart",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_resume_on_new_job_runner",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_queue_parallelism",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_retry_on_transient_error",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_submit_jobs_from_multi_processes",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_timeout",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_list_job_pagination",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_function_without_decorator",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_use_process",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_submit_job_bad_call",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "test_job_with_python_env",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/asset.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/connections.spec.ts",
+    "status": "modified"
+  }
+]

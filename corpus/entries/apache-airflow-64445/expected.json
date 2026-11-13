@@ -1,0 +1,114 @@
+[
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "playwright.testIgnore **/xcoms.spec.ts",
+    "verdict": "tp",
+    "reason": "flaky spec added to Playwright testIgnore"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Backfill \u203a Backfill creation and validation \u203a `verify backfill with '${REPROCESS_API_TO_UI[config.behavior]}' behavior`",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Backfill \u203a Backfill pause, resume, and cancel controls \u203a verify cancel backfill",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Audit Log \u203a verify audit log entries display valid data",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Calendar Tab \u203a verify calendar grid renders",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Calendar Tab \u203a failed filter shows only failed runs",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Calendar Tab \u203a color scale changes between total and failed view",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Calendar Tab \u203a cells reflect failed view mode attribute",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Code Tab \u203a Verify syntax highlighting is applied",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "DAG Code Tab \u203a Verify code is scrollable for long files",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Dag Trigger Workflow \u203a should successfully trigger a Dag run",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Dag Details Tab \u203a should successfully verify details tab",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Events with Generated Data \u203a verify filter by DAG ID",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Task Instances Page \u203a verify task instances table displays data",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Task Instances Page \u203a verify task details display correctly",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  },
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Task Instances Page \u203a verify filtering by success state",
+    "verdict": "tp",
+    "reason": "test.fixme added to an existing flaky e2e test, no issue reference"
+  }
+]

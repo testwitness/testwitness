@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aio-libs/aiohttp/pull/11651",
+  "repo": "aio-libs/aiohttp",
+  "number": 11651,
+  "title": "add xfail test for issue 11632",
+  "merged_at": "2025-10-15T12:49:08Z",
+  "stars": 16605,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R010",
+  "split": "tuning",
+  "base_sha": "b1bd65dbd191b318325c4b87d626bb5d7967cda7",
+  "head_sha": "8f499db7ab48ef40661397dc6327f5acb946123f",
+  "files_changed": 1,
+  "additions": 27,
+  "deletions": 0
+}

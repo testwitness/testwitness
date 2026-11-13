@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "test_subapp_domain_routing_same_path",
+    "verdict": "tp",
+    "reason": "new test added with pytest.mark.xfail"
+  }
+]

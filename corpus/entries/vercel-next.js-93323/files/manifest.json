@@ -1,0 +1,18 @@
+[
+  {
+    "path": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/index.js",
+    "status": "added"
+  },
+  {
+    "path": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/lib.js",
+    "status": "added"
+  },
+  {
+    "path": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/util.js",
+    "status": "added"
+  },
+  {
+    "path": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/options.json",
+    "status": "added"
+  }
+]

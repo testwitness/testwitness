@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/96021",
+  "repo": "vercel/next.js",
+  "number": 96021,
+  "title": "[test] Add failing tests for stale route handler and page cached data",
+  "merged_at": "2026-07-22T13:50:25Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R010",
+  "split": "tuning",
+  "base_sha": "4d122a7df15f48a1b0b6c06ca746bc9411d8da79",
+  "head_sha": "1e767664e9ac1ca9385df450d2dc5d24f8aca752",
+  "files_changed": 9,
+  "additions": 237,
+  "deletions": 19
+}

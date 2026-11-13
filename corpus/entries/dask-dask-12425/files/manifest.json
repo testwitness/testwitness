@@ -1,0 +1,22 @@
+[
+  {
+    "path": "dask/dataframe/core.py",
+    "status": "modified"
+  },
+  {
+    "path": "dask/dataframe/dask_expr/_collection.py",
+    "status": "modified"
+  },
+  {
+    "path": "dask/dataframe/dask_expr/tests/test_collection.py",
+    "status": "modified"
+  },
+  {
+    "path": "dask/dataframe/tests/test_dataframe.py",
+    "status": "modified"
+  },
+  {
+    "path": "dask/dataframe/tests/test_map.py",
+    "status": "added"
+  }
+]

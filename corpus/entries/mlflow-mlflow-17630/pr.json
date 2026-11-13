@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/17630",
+  "repo": "mlflow/mlflow",
+  "number": 17630,
+  "title": "Ignore `tests/sagemaker` in windows job",
+  "merged_at": "2025-09-10T05:18:30Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "28feaa5cbec773cd44f65fc8bb15169f6b916c04",
+  "head_sha": "7d71eae14d0d5353e3bba9fed059d9de42cd516a",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

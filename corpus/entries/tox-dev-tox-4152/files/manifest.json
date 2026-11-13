@@ -1,0 +1,22 @@
+[
+  {
+    "path": "tests/config/source/test_toml_pyproject.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/config/test_sets.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/session/cmd/test_depends.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/test_version.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/util/test_cpu.py",
+    "status": "modified"
+  }
+]

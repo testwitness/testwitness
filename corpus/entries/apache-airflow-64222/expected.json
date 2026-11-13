@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "W003",
+    "severity": "high",
+    "subject": "scripts/ci/testing/run_unit_tests.sh",
+    "verdict": "tp",
+    "reason": "pytest exit code 1 treated as success for DB scope"
+  }
+]

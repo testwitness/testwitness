@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/18210",
+  "repo": "mlflow/mlflow",
+  "number": 18210,
+  "title": "Mark flaky job tests with `xfail`",
+  "merged_at": "2025-10-09T06:10:51Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "R004",
+  "split": "heldout",
+  "base_sha": "4f36b644a3090e09ba5c191a4e4fc04454ace0b7",
+  "head_sha": "4583283fc24a524dfa1c3fcb0cece97df760da1f",
+  "files_changed": 1,
+  "additions": 5,
+  "deletions": 3
+}

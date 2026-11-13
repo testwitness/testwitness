@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestPyDAPDatatreeIO",
+    "verdict": "tp",
+    "reason": "class level pytestmark xfail added"
+  }
+]

@@ -1,0 +1,26 @@
+diff --git a/.github/workflows/js-tests.yml b/.github/workflows/js-tests.yml
+index cf0d3d2f..3f4cf763 100644
+--- a/.github/workflows/js-tests.yml
++++ b/.github/workflows/js-tests.yml
+@@ -174,7 +174,7 @@ jobs:
+         uses: actions/github-script@v8
+         with:
+           script: |
+-            const COVERAGE_CHANGE_THRESHOLD = 0.03; // 0.03%
++            const COVERAGE_CHANGE_THRESHOLD = 0.05; // 0.05%
+             const fs = require('fs');
+ 
+             try {
+diff --git a/.github/workflows/python-tests.yml b/.github/workflows/python-tests.yml
+index 96af1b9a..1e0aba11 100644
+--- a/.github/workflows/python-tests.yml
++++ b/.github/workflows/python-tests.yml
+@@ -316,7 +316,7 @@ jobs:
+         uses: actions/github-script@v8
+         with:
+           script: |
+-            const COVERAGE_CHANGE_THRESHOLD = 0.03; // 0.03%
++            const COVERAGE_CHANGE_THRESHOLD = 0.05; // 0.05%
+ 
+             try {
+               // Read current coverage from the existing file

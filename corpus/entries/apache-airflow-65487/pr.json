@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/65487",
+  "repo": "apache/airflow",
+  "number": 65487,
+  "title": "Mark tests as fixme for asset details and connection deletion",
+  "merged_at": "2026-04-19T13:01:54Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "R003",
+  "split": "heldout",
+  "base_sha": "26cbdcbe948c105322fee64064b24697f03b9dc1",
+  "head_sha": "0ec4fc714c39049d817e4de2d3fb1f2f741abd29",
+  "files_changed": 2,
+  "additions": 2,
+  "deletions": 2
+}

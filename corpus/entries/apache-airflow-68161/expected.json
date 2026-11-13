@@ -1,0 +1,16 @@
+[
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestJavaSDKAnnotationExample::test_java_tasks_execute_successfully",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  },
+  {
+    "ruleId": "R004",
+    "severity": "high",
+    "subject": "TestJavaSDKAnnotationExample::test_transform_xcom_is_numeric_timestamp",
+    "verdict": "tp",
+    "reason": "pytest.mark.xfail added to an existing test (not strict)"
+  }
+]

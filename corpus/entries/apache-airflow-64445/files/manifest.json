@@ -1,0 +1,34 @@
+[
+  {
+    "path": "airflow-core/src/airflow/ui/playwright.config.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dag-audit-log.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dag-calendar-tab.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dag-code-tab.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/dags-list.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/events-page.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "airflow-core/src/airflow/ui/tests/e2e/specs/task-instances.spec.ts",
+    "status": "modified"
+  }
+]
