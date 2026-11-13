@@ -65,7 +65,7 @@ describe('base ref and empty comparisons', () => {
       expect(report.evidence.sources).toEqual([]);
       expect(report.evidence.notes[0]).toMatch(/diff only/i);
       expect(report.state).toBe('review');
-      expect(logs.some((l) => /no test results matched/.test(l))).toBe(false);
+      expect(logs.some((l) => /no test results found/.test(l))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -274,7 +274,8 @@ export async function loadEvidence(cwd: string, globs: string, log: (s: string) 
   const matched = await matchReportFiles(cwd, patterns, followSymlinks);
   for (const n of matched.notes) log(n);
   if (!matched.files.length) {
-    log(`no test results matched ${globs}`);
+    const shown = patterns.length > 2 ? `${patterns.length} patterns, ${patterns[0]} and others` : patterns.join(', ');
+    log(`no test results found (${shown}); pass --results <glob>, or --diff-only to check the diff alone`);
     return { evidence: undefined, notes: matched.notes };
   }
   const data = await readResultsFiles(matched.files);
