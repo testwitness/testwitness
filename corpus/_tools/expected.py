@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rewrite expected.json for every entry with the real rule catalogue ids."""
 import json, os, re
-ROOT = "/home/claude/testwitness/corpus/entries"
+ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entries")
 PAT = [r'^\s*(?:async\s+)?def (test_\w+)\(', r'^\s*(?:public\s+)?void (\w+)\(', r'^\s*(?:it|test)(?:\.each\([^)]*\))?\(\s*[\'"`](.+?)[\'"`]']
 def gone_names(slug):
     rem, add = set(), set()

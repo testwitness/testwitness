@@ -3,7 +3,7 @@
 Copies every changed test file, snapshot, runner config and CI workflow (any size) and changed
 production source files under 50 KB. Globs mirror packages/core/src/diff/classify.ts."""
 import json, os, re, subprocess, sys, shutil
-ROOT = "/home/claude/testwitness/corpus/entries"
+ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entries")
 MIRRORS = "/tmp/corpus-repos"
 TEST = ['**/*Test.java','**/*Tests.java','**/*IT.java','**/*TestCase.java','**/src/test/**/*.java','**/src/test/**/*.kt',
  '**/*.test.{ts,tsx,js,jsx,mts,cts,mjs,cjs}','**/*.spec.{ts,tsx,js,jsx,mts,cts,mjs,cjs}','**/__tests__/**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',

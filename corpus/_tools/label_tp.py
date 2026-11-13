@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Labels for the true positive batch: expected.json (verdict tp) and NOTES.md."""
 import json, os
-ROOT="/home/claude/testwitness/corpus/entries"
+ROOT=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entries")
 def tp(rule, sev, subject, reason, label=None):
     f={"ruleId":rule,"severity":sev,"subject":subject,"verdict":"tp","reason":reason}
     if label: f["label"]=label

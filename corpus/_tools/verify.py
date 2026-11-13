@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify every corpus entry, rebuild index.json, print counts."""
 import json, os, re, sys, hashlib, collections
-ROOT = "/home/claude/testwitness/corpus"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 E = f"{ROOT}/entries"
 ALLOWED = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC"}
 KEYS = ["url","repo","number","title","merged_at","stars","license","language","category","split","base_sha","head_sha","files_changed","additions","deletions"]

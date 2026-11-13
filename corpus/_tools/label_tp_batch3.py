@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Labels for the batch 3 true positives (collected 2026-11-04): expected.json (verdict tp), NOTES.md, category in pr.json."""
 import json, os, sys
-ROOT="/home/claude/testwitness/corpus/entries"
+ROOT=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entries")
 def tp(rule, sev, subject, reason, label=None):
     f={"ruleId":rule,"severity":sev,"verdict":"tp","reason":reason}
     if subject is not None: f={"ruleId":rule,"severity":sev,"subject":subject,"verdict":"tp","reason":reason}
