@@ -1,0 +1,1 @@
+Negative control. The PR raises requires-python from 3.10 to 3.11 and removes a test that only ran before 3.11, as its skipif on sys.version_info says. No supported version runs it any more, so the deletion is reported low with the label version dropped. Seen in a replay of public PRs on pydantic.

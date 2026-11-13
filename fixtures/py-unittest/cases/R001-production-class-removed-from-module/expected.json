@@ -1,0 +1,1 @@
+[{"ruleId":"R001","severity":"low","subject":"ResourceScriptDirectoryTests::test_render_not_found","label":"production removed"},{"ruleId":"R001","severity":"low","subject":"ResourceScriptDirectoryTests::test_not_found_child","label":"production removed"}]

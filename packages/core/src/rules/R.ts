@@ -1,6 +1,6 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
-import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, subjectRemoved, type HeadIndex } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, removedSubjectOf, subjectRemoved, versionGated, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -42,10 +42,10 @@ export const R001: Rule = {
   docs: {
     summary: 'A test present in the base is absent in the head and no test with the same body exists elsewhere in the head tree.',
     falsePositives:
-      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Precision over recall: a deletion is medium or high only when none of those signals is present.',
+      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Reported low with the label production removed when its production file was deleted, or when a class or function the test names was removed from a production file that stays (and is defined in no other changed file). Reported low with the label version dropped when the test was gated on a language version (skipif on sys.version_info, process.versions, @EnabledOnJre) and the PR raises the minimum version (requires-python, python_requires, engines.node, the Java release). Precision over recall: a deletion is medium or high only when none of those signals is present.',
     example: '-  @Test\n-  void rejectsNegativeAmount() {\n-    assertThrows(IllegalArgumentException.class, () -> svc.charge(-1));\n-  }',
     history:
-      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored or production removed are left alone, because the test still runs somewhere or only partly stopped running.',
+      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored, production removed or version dropped are left alone, because the test still runs somewhere or only partly stopped running.',
   },
   async run(ctx) {
     const out: Finding[] = [];
@@ -67,6 +67,27 @@ export const R001: Rule = {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted together with the production code it exercised`, {
             label: 'production removed',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      const subject = await removedSubjectOf(ctx, pair.file.path, t);
+      if (subject) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was deleted together with ${subject}, which this PR removed from the production code`, {
+            label: 'production removed',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      if (await versionGated(ctx, pair.file.path, t)) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} only ran on a language version this PR stops supporting`, {
+            label: 'version dropped',
             line: t.startLine,
             snippet: snippet(t),
           }),
@@ -185,7 +206,7 @@ export const R002: Rule = {
   docs: {
     summary: 'A file matching test patterns was deleted. The number of tests lost is counted from the base inventory.',
     falsePositives:
-      'A file whose tests all reappear elsewhere in the head tree is reported low as moved: same bodies anywhere, or the same test names in a file with the same name in another directory (a class moved to another package with edits, which git sees as a deletion and an addition). Same names in a file with another name are not a move. A file deleted while new test files the PR adds in the same directory hold at least as many tests as the PR deleted is reported low as rewritten, a narrower form of the control R001 applies. Git rename detection handles pure moves before this rule runs.',
+      'A file whose tests all reappear elsewhere in the head tree is reported low as moved: same bodies anywhere, or the same test names in a file with the same name in another directory (a class moved to another package with edits, which git sees as a deletion and an addition). Same names in a file with another name are not a move. A file deleted while new test files the PR adds in the same directory hold at least as many tests as the PR deleted is reported low as rewritten, a narrower form of the control R001 applies. Reported low with the label production removed when the production file was deleted too, or when every test names a class or function the PR removed from a production file that stays, and low with the label version dropped when every test was gated on a language version the PR stops supporting. Git rename detection handles pure moves before this rule runs.',
     example: 'deleted file mode 100644 src/__tests__/billing.test.ts',
   },
   async run(ctx) {
@@ -202,6 +223,16 @@ export const R002: Rule = {
       if (tests.length === 0) continue;
       if (subjectRemoved(pair.base, pair.file.path, ctx)) {
         out.push(makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted together with the production code it exercised (${tests.length} tests)`, { label: 'production removed' }));
+        continue;
+      }
+      const subjects = await Promise.all(tests.map((t) => removedSubjectOf(ctx, pair.file.path, t)));
+      if (subjects.every((x) => x !== undefined)) {
+        out.push(makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted together with ${[...new Set(subjects)].join(', ')}, which this PR removed from the production code (${tests.length} tests)`, { label: 'production removed' }));
+        continue;
+      }
+      const gated = await Promise.all(tests.map((t) => versionGated(ctx, pair.file.path, t)));
+      if (gated.every(Boolean)) {
+        out.push(makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted whose ${tests.length} tests only ran on a language version this PR stops supporting`, { label: 'version dropped' }));
         continue;
       }
       const index = await headIndex(ctx, pair.file.path);

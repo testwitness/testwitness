@@ -667,7 +667,8 @@
         "tracked",
         "uncovered change",
         "unreadable",
-        "unsupported"
+        "unsupported",
+        "version dropped"
       ],
       "description": "Qualifier that explains why a finding has the severity it has, such as moved, smoke or replaced by call. The rules reference explains each label under its rule."
     },
