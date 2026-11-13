@@ -140,3 +140,34 @@ describe('edge cases', () => {
     expect(elapsed).toBeLessThan(TIMING_OFF ? Number.POSITIVE_INFINITY : 1000);
   });
 });
+
+describe('CRLF line endings', () => {
+  // A Windows repository commits CRLF. The inventory must be the same as for LF: same lines, and no CR left in the
+  // text of a multi line assertion, an inline snapshot, a call or a body hash.
+  const source = src(`
+    import { describe, expect, it } from 'vitest';
+    describe('receipt', () => {
+      it('renders', () => {
+        const receipt = render();
+        expect(receipt).toEqual({
+          total: 3,
+        });
+        expect(receipt).toMatchInlineSnapshot(\`
+          {
+            "total": 3,
+          }
+        \`);
+        try {
+          receipt.close();
+        } catch (e) {}
+      });
+    });
+  `);
+
+  it('gives the same inventory for CRLF as for LF', async () => {
+    const lf = await inv(source, 'src/receipt.test.ts');
+    const crlf = await inv(source.replace(/\n/g, '\r\n'), 'src/receipt.test.ts');
+    expect(crlf).toEqual(lf);
+    expect(JSON.stringify(crlf.tests)).not.toContain('\\r');
+  });
+});

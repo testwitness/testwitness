@@ -1183,3 +1183,36 @@ async def test_install(script):
     expect(t.calls?.find((c) => c.name === 'did_create')).toMatchObject({ callee: 'result.did_create', line: 6 });
   });
 });
+
+describe('CRLF line endings', () => {
+  // A Windows repository commits CRLF. The inventory must be the same as for LF: same lines, and no CR left in the
+  // text of a multi line assertion, call or snippet, or in a body hash.
+  const source = `import unittest
+
+
+class LedgerTest(unittest.TestCase):
+    def test_post(self):
+        ledger = make_ledger()
+        self.assertEqual(
+            ledger.balance(),
+            70,
+        )
+        try:
+            ledger.close()
+        except Exception:
+            pass
+
+
+def test_totals():
+    assert totals(
+        [1, 2],
+    ) == 3
+`;
+
+  it('gives the same inventory for CRLF as for LF', async () => {
+    const lf = await inv(source, 'tests/test_ledger.py');
+    const crlf = await inv(source.replace(/\n/g, '\r\n'), 'tests/test_ledger.py');
+    expect(crlf).toEqual(lf);
+    expect(JSON.stringify(crlf.tests)).not.toContain('\\r');
+  });
+});

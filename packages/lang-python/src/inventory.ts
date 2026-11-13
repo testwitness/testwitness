@@ -6,7 +6,7 @@
  * docs/conventions.md and the spec (sections 1.1, 1.2, 1.6, 1.7).
  */
 
-import { countParseErrors, normaliseText, shortHash } from '@testwitness/core';
+import { countParseErrors, normaliseText, shortHash, toLf } from '@testwitness/core';
 import type {
   Assertion,
   AssertionKind,
@@ -1090,6 +1090,8 @@ function hasFixtureDecorator(def: Node, aliases: Map<string, string>): boolean {
 // Entry point
 
 export async function buildInventory(path: string, source: string, profile: FrameworkProfile): Promise<TestInventory> {
+  // CRLF to LF first: node text sliced from the source would otherwise keep a CR in every multi line snippet.
+  source = toLf(source);
   const { tree, grammar } = await parsePython(source);
   const root = tree.rootNode;
   const aliases = new Map<string, string>();

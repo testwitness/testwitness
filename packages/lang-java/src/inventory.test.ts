@@ -1098,3 +1098,34 @@ class FooTest {
     expect(t.calls?.find((c) => c.name === 'didCreate')?.line).toBe(t.assertions[0]!.line - 2);
   });
 });
+
+describe('CRLF line endings', () => {
+  // A Windows repository commits CRLF. The inventory must be the same as for LF: same lines, and no CR left in the
+  // text of a multi line assertion, call or snippet, or in a body hash.
+  const source = `package com.acme;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CartTest {
+  @Test
+  void totals() {
+    Cart cart = new Cart();
+    assertAll(
+        () -> assertEquals(200, cart.total()),
+        () -> assertTrue(cart.isOpen()));
+    try {
+      cart.close();
+    } catch (Exception e) {
+    }
+  }
+}
+`;
+
+  it('gives the same inventory for CRLF as for LF', async () => {
+    const lf = await inv(source, 'src/test/java/com/acme/CartTest.java');
+    const crlf = await inv(source.replace(/\n/g, '\r\n'), 'src/test/java/com/acme/CartTest.java');
+    expect(crlf).toEqual(lf);
+    expect(JSON.stringify(crlf.tests)).not.toContain('\\r');
+    expect(crlf.tests[0]!.assertions.some((a) => a.text.includes('\n'))).toBe(true);
+  });
+});
