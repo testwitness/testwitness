@@ -13,7 +13,9 @@ case (the shape is reported) and a negative control (a similar shape that must s
 ## 1. W002: `continue-on-error` set from an expression
 
 Today only a literal `continue-on-error: true` on a test step or job is reported. Real workflows use
+::: v-pre
 `continue-on-error: ${{ matrix.experimental }}` or `${{ matrix.python == '3.14' }}` to let one leg of a
+:::
 matrix fail. Report these at low with the label `conditional`, because one matrix leg can now fail
 silently but the rest still gate.
 

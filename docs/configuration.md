@@ -59,7 +59,9 @@ hook:                   # agent hook only
 
 ## Symbolic links in report paths
 
+::: v-pre
 The results, coverage, mutation and history paths do not follow symbolic links by default. A matched file that is itself a link, or that lies outside the repository through a linked directory, is skipped with a note in the report. Otherwise a pull request could commit `test-results/a.xml` as a link to any file on the runner and have the check read it. A glob that names a directory outside the repository on purpose (an absolute path such as `${{ runner.temp }}/reports/**/*.xml`, or a `../` path) may read files under that directory.
+:::
 
 Layouts that link their outputs into the checkout need the links followed. Bazel is the common case: `bazel-testlogs` is a link into the output base.
 
