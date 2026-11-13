@@ -2,6 +2,13 @@
 
 Each entry: the decision, my recommendation, and the reversible default I am proceeding with. Newest first.
 
+## 2026-11-13: mutation testing runs in GitHub Actions, not here
+
+The brief asks for a Stryker score above 75 percent on core. A full run is about 14,000 mutants; this workspace has two cores and estimated 28 hours, and the old weekly workflow had a 90 minute limit, so no full score exists yet (the last partial run, 3,055 mutants, killed 30 percent and left 44 percent without coverage, which says more about which files the run reached first than about the suite).
+
+Recommendation: after batch 3 merges, start the "mutation" workflow once by hand (Actions tab, mutation, Run workflow). Eleven shards run in parallel and the summary job prints the score per package. I then read the survivors and write tests in the next batch.
+Default: the workflow also runs every Monday on its own.
+
 ## 2026-11-13: no repository or person named in public prose
 
 The brief says public material names no repository or person. The repository still did in a few places: the launch plans in docs/launch (quiet week candidates, community notes, the first push runbook), example PRs in the precision notes, and a few project names in LOG.md, design.md and the assessment.
