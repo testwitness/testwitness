@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/semantic-kernel/pull/13432",
+  "repo": "microsoft/semantic-kernel",
+  "number": 13432,
+  "title": "Python: Updated Copilot Studio README",
+  "merged_at": "2025-12-23T00:28:28Z",
+  "stars": 28726,
+  "license": "MIT",
+  "language": "python",
+  "category": "V004",
+  "split": "tuning",
+  "base_sha": "4e0ccb9c4369c3f3c0d4129c1c5fe7e85f360443",
+  "head_sha": "90e1b069e1a9231fdfbc75751071f7ab90dab616",
+  "files_changed": 2,
+  "additions": 10,
+  "deletions": 10
+}

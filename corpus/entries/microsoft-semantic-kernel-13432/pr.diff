@@ -1,0 +1,90 @@
+diff --git a/python/samples/getting_started_with_agents/copilot_studio/README.md b/python/samples/getting_started_with_agents/copilot_studio/README.md
+index 28f12a16..5df7248f 100644
+--- a/python/samples/getting_started_with_agents/copilot_studio/README.md
++++ b/python/samples/getting_started_with_agents/copilot_studio/README.md
+@@ -1,6 +1,6 @@
+ # Semantic Kernel - CopilotStudioAgent Quickstart
+ 
+-This README provides an overview on how to use the [CopilotStudioAgent](../../../semantic_kernel/agents/copilot_studio/copilot_studio_agent.py) within Semantic Kernel. 
++This README provides an overview on how to use the [CopilotStudioAgent](../../../semantic_kernel/agents/copilot_studio/copilot_studio_agent.py) within Semantic Kernel.
+ This agent allows you to interact with Microsoft Copilot Studio agents through programmatic APIs.
+ 
+ > ℹ️ **Note:** Knowledge sources must be configured **within** Microsoft Copilot Studio first. Streaming responses are **not currently supported**.
+@@ -13,10 +13,10 @@ This agent allows you to interact with Microsoft Copilot Studio agents through p
+ 2. Install Semantic Kernel with Copilot Studio dependencies:
+      ```bash
+      pip install semantic-kernel
+-     pip install microsoft-agents-core microsoft-agents-copilotstudio-client
++     pip install microsoft-agents-hosting-core microsoft-agents-copilotstudio-client
+      ```
+ 3. An agent created in **Microsoft Copilot Studio**
+-4. Ability to create an application identity in Azure for a **Public Client/Native App Registration**, 
++4. Ability to create an application identity in Azure for a **Public Client/Native App Registration**,
+ or access to an existing app registration with the `CopilotStudio.Copilots.Invoke` API permission assigned.
+ 
+ ## Create a Copilot Agent in Copilot Studio
+@@ -24,7 +24,7 @@ or access to an existing app registration with the `CopilotStudio.Copilots.Invok
+ 1. Go to [Microsoft Copilot Studio](https://copilotstudio.microsoft.com).
+ 2. Create a new **Agent**.
+ 3. Publish your newly created Agent.
+-4. In Copilot Studio, navigate to:  
++4. In Copilot Studio, navigate to:
+    `Settings` → `Advanced` → `Metadata`
+ 
+    Save the following values:
+@@ -43,7 +43,7 @@ You will create a **Native Client Application Identity** (no client secret requi
+ 4. Fill out:
+    - **Name**: Any name you like
+    - **Supported account types**: `Accounts in this organization directory only`
+-   - **Redirect URI**:  
++   - **Redirect URI**:
+      - Platform: `Public client/native (mobile & desktop)`
+      - URI: `http://localhost`
+ 5. Click **Register**
+@@ -86,7 +86,7 @@ COPILOT_STUDIO_AGENT_AUTH_MODE=interactive
+ 
+ ## Create an Application Registration in Entra ID – Service Principal Login
+ 
+-> **Warning**: Service Principal login is **not yet supported** in the current version of the `CopilotStudioClient`.  
++> **Warning**: Service Principal login is **not yet supported** in the current version of the `CopilotStudioClient`.
+ 
+ ## Creating a `CopilotStudioAgent` Client
+ 
+@@ -116,4 +116,4 @@ agent = CopilotStudioAgent(
+    name="<name>",
+    instructions="<instructions>",
+ )
+-```
+\ No newline at end of file
++```
+diff --git a/python/tests/unit/connectors/ai/mistral_ai/services/test_mistralai_chat_completion.py b/python/tests/unit/connectors/ai/mistral_ai/services/test_mistralai_chat_completion.py
+index b8b8c25b..ad1ef257 100644
+--- a/python/tests/unit/connectors/ai/mistral_ai/services/test_mistralai_chat_completion.py
++++ b/python/tests/unit/connectors/ai/mistral_ai/services/test_mistralai_chat_completion.py
+@@ -534,7 +534,7 @@ async def test_mistral_ai_chat_completion_get_streaming_chat_message_contents_fa
+     assert "service failed to complete the prompt" in str(exc.value)
+ 
+ 
+-async def test_mistral_ai_chat_completion_update_settings_from_function_call_configuration_mistral():
++def test_mistral_ai_chat_completion_update_settings_from_function_call_configuration_mistral():
+     """Test update_settings_from_function_call_configuration_mistral sets tools etc."""
+ 
+     chat_completion = MistralAIChatCompletion(
+@@ -568,7 +568,7 @@ async def test_mistral_ai_chat_completion_update_settings_from_function_call_con
+     assert settings.tools[0]["function"]["name"] == "mod.my_func"
+ 
+ 
+-async def test_mistral_ai_chat_completion_reset_function_choice_settings():
++def test_mistral_ai_chat_completion_reset_function_choice_settings():
+     """Test that _reset_function_choice_settings resets specific attributes."""
+     chat_completion = MistralAIChatCompletion(
+         ai_model_id="test-model",
+@@ -581,7 +581,7 @@ async def test_mistral_ai_chat_completion_reset_function_choice_settings():
+     assert settings.tools is None
+ 
+ 
+-async def test_mistral_ai_chat_completion_service_url():
++def test_mistral_ai_chat_completion_service_url():
+     """Test that service_url attempts to use _endpoint from the async_client."""
+     async_mock_client = MagicMock(spec=Mistral)
+     async_mock_client._endpoint = "mistral"

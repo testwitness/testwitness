@@ -1,0 +1,114 @@
+diff --git a/dotnet/README.md b/dotnet/README.md
+index 86eeff86..f63fae91 100644
+--- a/dotnet/README.md
++++ b/dotnet/README.md
+@@ -4,7 +4,7 @@
+ 
+ To run the LLM prompts and semantic functions in the examples below, make sure
+ you have an
+-[OpenAI API Key](https://openai.com/product/) or
++[OpenAI API Key](https://platform.openai.com) or
+ [Azure OpenAI Service Key](https://learn.microsoft.com/azure/cognitive-services/openai/quickstart?pivots=rest-api).
+ 
+ ## Nuget package
+diff --git a/dotnet/src/Experimental/Orchestration.Flow.IntegrationTests/README.md b/dotnet/src/Experimental/Orchestration.Flow.IntegrationTests/README.md
+index fec79f00..90bd07b0 100644
+--- a/dotnet/src/Experimental/Orchestration.Flow.IntegrationTests/README.md
++++ b/dotnet/src/Experimental/Orchestration.Flow.IntegrationTests/README.md
+@@ -4,7 +4,7 @@
+ 
+ 1. **Azure OpenAI**: go to the [Azure OpenAI Quickstart](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/quickstart)
+    and deploy an instance of Azure OpenAI, deploy a model like "text-davinci-003" find your Endpoint and API key.
+-2. **OpenAI**: go to [OpenAI](https://openai.com/product/) to register and procure your API key.
++2. **OpenAI**: go to [OpenAI](https://platform.openai.com) to register and procure your API key.
+ 3. **Azure Bing Web Search API**: go to [Bing Web Search API](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api)
+    and select `Try Now` to get started.
+ 
+diff --git a/dotnet/src/IntegrationTests/README.md b/dotnet/src/IntegrationTests/README.md
+index 2b3ca235..1db41e95 100644
+--- a/dotnet/src/IntegrationTests/README.md
++++ b/dotnet/src/IntegrationTests/README.md
+@@ -4,7 +4,7 @@
+ 
+ 1. **Azure OpenAI**: go to the [Azure OpenAI Quickstart](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/quickstart)
+    and deploy an instance of Azure OpenAI, deploy a model like "text-davinci-003" find your Endpoint and API key.
+-2. **OpenAI**: go to [OpenAI](https://openai.com/product/) to register and procure your API key.
++2. **OpenAI**: go to [OpenAI](https://platform.openai.com) to register and procure your API key.
+ 3. **HuggingFace API key**: see https://huggingface.co/docs/huggingface_hub/guides/inference for details.
+ 4. **Azure Bing Web Search API**: go to [Bing Web Search API](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api)
+    and select `Try Now` to get started.
+diff --git a/java/README.md b/java/README.md
+index abd93562..4f2780ef 100644
+--- a/java/README.md
++++ b/java/README.md
+@@ -13,7 +13,7 @@ and frameworks.
+ ## Get started
+ 
+ To run the LLM prompts and semantic functions in this kernel, make sure you have
+-an [Open AI API Key](https://openai.com/product/)
++an [Open AI API Key](https://platform.openai.com)
+ or [Azure Open AI service key](https://learn.microsoft.com/azure/cognitive-services/openai/).
+ 
+ ### Requirements
+@@ -100,4 +100,3 @@ This project is licensed under the [MIT License](../LICENSE).
+ ## Code of Conduct
+ 
+ This project has adopted the [Microsoft Open Source Code of Conduct](../CODE_OF_CONDUCT.md).
+-
+diff --git a/java/samples/sample-code/README.md b/java/samples/sample-code/README.md
+index ccf92af4..c8916912 100644
+--- a/java/samples/sample-code/README.md
++++ b/java/samples/sample-code/README.md
+@@ -35,7 +35,7 @@ They can then be run by:
+ # Configuration
+ 
+ You can define the provider of Open AI by setting the `OPENAI_CLIENT_TYPE`
+-property or environment variable to either [`OPENAI`](https://openai.com/product/)
++property or environment variable to either [`OPENAI`](https://platform.openai.com)
+ or [`AZURE_OPEN_AI`](https://learn.microsoft.com/azure/cognitive-services/openai/).
+ By default, the samples will use the Open AI client.
+ 
+diff --git a/python/DEV_SETUP.md b/python/DEV_SETUP.md
+index d1f26184..fceda780 100644
+--- a/python/DEV_SETUP.md
++++ b/python/DEV_SETUP.md
+@@ -7,7 +7,7 @@ want to run the tests included.
+ ## LLM setup
+ 
+ Make sure you have an
+-[OpenAI API Key](https://openai.com/product/) or
++[OpenAI API Key](https://platform.openai.com) or
+ [Azure OpenAI service key](https://learn.microsoft.com/azure/cognitive-services/openai/quickstart?pivots=rest-api)
+ 
+ Copy those keys into a `.env` file (see the `.env.example` file):
+@@ -256,4 +256,3 @@ or:
+ This is assuming the upstream branch refers to the main repository. If you have a different name for the upstream branch, you can replace `upstream` with the name of your upstream branch.
+ 
+ After running the rebase command, you may need to resolve any conflicts that arise. If you are unsure how to resolve a conflict, please refer to the [GitHub's documentation on resolving conflicts](https://docs.github.com/en/get-started/using-git/resolving-merge-conflicts-after-a-git-rebase), or for [VSCode](https://code.visualstudio.com/docs/sourcecontrol/overview#_merge-conflicts).
+-
+diff --git a/python/README.md b/python/README.md
+index bc189442..92a1dd6e 100644
+--- a/python/README.md
++++ b/python/README.md
+@@ -17,7 +17,7 @@ or all of them:
+ ## OpenAI / Azure OpenAI API keys
+ 
+ Make sure you have an
+-[OpenAI API Key](https://openai.com/product/) or
++[OpenAI API Key](https://platform.openai.com) or
+ [Azure OpenAI service key](https://learn.microsoft.com/azure/cognitive-services/openai/quickstart?pivots=rest-api)
+ 
+ Copy those keys into a `.env` file (see the `.env.example` file):
+diff --git a/python/samples/documentation_examples/README.md b/python/samples/documentation_examples/README.md
+index 9cd10eb6..0d34b866 100644
+--- a/python/samples/documentation_examples/README.md
++++ b/python/samples/documentation_examples/README.md
+@@ -11,7 +11,7 @@ This project contains a collection of examples used in documentation on [learn.m
+ The samples can be configured with a `.env` file in the project which holds api keys and other secrets and configurations.
+ 
+ Make sure you have an
+-[Open AI API Key](https://openai.com/product/) or
++[Open AI API Key](https://platform.openai.com) or
+ [Azure Open AI service key](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+ 
+ Copy the `.env.example` file to a new file named `.env`. Then, copy those keys into the `.env` file:

@@ -1,0 +1,13 @@
+diff --git a/README.md b/README.md
+index a5747ea5..039e60f6 100644
+--- a/README.md
++++ b/README.md
+@@ -55,7 +55,7 @@ pip install semantic-kernel
+ 
+ ```bash
+ dotnet add package Microsoft.SemanticKernel
+-dotnet add package Microsoft.SemanticKernel.Agents.core
++dotnet add package Microsoft.SemanticKernel.Agents.Core
+ ```
+ 
+ ### Java

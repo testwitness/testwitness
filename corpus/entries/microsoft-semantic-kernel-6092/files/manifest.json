@@ -1,0 +1,34 @@
+[
+  {
+    "path": "dotnet/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/Experimental/Orchestration.Flow.IntegrationTests/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "dotnet/src/IntegrationTests/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "java/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "java/samples/sample-code/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/DEV_SETUP.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/README.md",
+    "status": "modified"
+  },
+  {
+    "path": "python/samples/documentation_examples/README.md",
+    "status": "modified"
+  }
+]
