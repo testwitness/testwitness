@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['scripts/**', 'bench/rss-hook.cjs', 'bench/.prof/**', '**/dist/**', '**/node_modules/**', 'fixtures/*/project/**', 'fixtures/*/cases/**', 'corpus/**', 'study/data/**', 'study/smoke/**', 'study/cache/**', 'packages/cli/bin/**'] },
+  { ignores: ['scripts/**', 'bench/rss-hook.cjs', 'bench/.prof/**', '**/dist/**', '**/node_modules/**', 'fixtures/*/project/**', 'fixtures/*/cases/**', 'fixtures/*/results/**', 'corpus/**', 'study/data/**', 'study/smoke/**', 'study/cache/**', 'packages/cli/bin/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

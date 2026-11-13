@@ -27,13 +27,19 @@ import {
   type Report,
   type ResolvedConfig,
 } from '@testwitness/core';
-import { readJunitFiles, toEvidence } from '@testwitness/junit';
+import { readResultsFiles, toEvidence } from '@testwitness/junit';
 import { allFrontEnds } from './frontends.js';
 
 export interface CheckOptions {
   cwd: string;
   base: string;
   head: string;
+  /**
+   * Comma separated globs of test results: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or
+   * Playwright, told apart by content. Default from config `results.head` (or its older name `junit.head`).
+   */
+  results?: string | undefined;
+  /** Older name of `results`; used when `results` is not given. */
   junit?: string | undefined;
   /** Comma separated globs of lcov, Cobertura or JaCoCo reports; default from config coverage.paths. */
   coverage?: string | undefined;
@@ -115,10 +121,14 @@ export async function loadEvidence(cwd: string, globs: string, log: (s: string) 
   if (!patterns.length) return { evidence: undefined, notes: [] };
   const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
   if (!files.length) {
-    log(`no JUnit XML matched ${globs}`);
+    log(`no test results matched ${globs}`);
     return { evidence: undefined, notes: [] };
   }
-  const data = await readJunitFiles(files.sort());
+  const data = await readResultsFiles(files.sort());
+  if (!data.sources.length) {
+    for (const w of data.warnings.slice(0, 10)) log(w);
+    return { evidence: undefined, notes: data.warnings.slice(0, 10) };
+  }
   const notes = data.warnings.slice(0, 10);
   if (data.warnings.length > 10) notes.push(`${data.warnings.length - 10} more warnings`);
   return { evidence: toEvidence(data), notes };
@@ -155,7 +165,7 @@ export async function loadMutation(cwd: string, globs: string, log: (s: string) 
 export async function check(opts: CheckOptions): Promise<CheckResult> {
   const log = opts.log ?? ((s: string) => { if (!opts.quiet) process.stderr.write(`testwitness: ${s}\n`); });
   const config = await loadConfig(opts);
-  const { evidence, notes } = await loadEvidence(opts.cwd, opts.junit ?? config.junit.head, log);
+  const { evidence, notes } = await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log);
   const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log);
   const mutation = await loadMutation(opts.cwd, opts.mutation ?? config.mutation.paths.join(','), log);
   let prText: PullRequestText | undefined;

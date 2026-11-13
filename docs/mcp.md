@@ -56,7 +56,7 @@ These shapes were checked against the Claude Code, Cursor and Codex documentatio
 
 | Tool | Input | Returns |
 |---|---|---|
-| `testwitness_check` | `cwd` (required), `base`, `head`, `junit`, `coverage`, `mutation`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
+| `testwitness_check` | `cwd` (required), `base`, `head`, `results`, `junit`, `coverage`, `mutation`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
 | `testwitness_explain_rule` | `ruleId` | The rule's summary, false positive controls and an example |
 | `testwitness_rules` | none | Every rule id with its name and default severity |
 
@@ -69,7 +69,8 @@ Inputs:
 | `cwd` | Absolute path of the repository | required |
 | `base` | Base ref; the merge base with head is compared | origin's default branch, else `origin/main`, `origin/master`, `main` or `master` |
 | `head` | Head ref | `HEAD` |
-| `junit` | Comma separated globs of JUnit XML, relative to the repository root | from `.testwitness.yml` |
+| `results` | Comma separated globs of test results, relative to the repository root: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON, told apart by content ([evidence](./evidence)) | from `.testwitness.yml` |
+| `junit` | Older name of `results`, used when `results` is not given | |
 | `coverage` | Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to the repository root | from `.testwitness.yml` `coverage.paths` |
 | `mutation` | Comma separated globs of Stryker JSON or PIT mutations.xml reports, relative to the repository root; read only, the server never runs a mutation tool ([mutation on request](./mutation-on-request)) | from `.testwitness.yml` `mutation.paths` |
 | `prTitle`, `prBody` | Pull request text, for claim checks such as "all tests pass" | none |
@@ -83,10 +84,10 @@ The structured result is the full JSON report, `schemaVersion` 1, described by t
 testwitness review: 1 high, 1 medium, 1 low open findings (0 acknowledged). Evidence: unreadable.
 high A002 src/math.test.ts:6: Test add › adds two numbers: expect.toBe on add(1, 2) became expect.toBeDefined
 medium R001 src/math.test.ts:9: Test add › handles negatives was deleted
-low V005 results: No JUnit XML found for this run. Add a reporter (...) so changed tests can be checked against what ran. (unreadable)
+low V005 results: No test results found for this run. Add a reporter (...) so changed tests can be checked against what ran. (unreadable)
 ```
 
-It lists the state, the open counts by severity and the first five open findings with severity, rule, file, line and reason, then any notes from the run (for example that no JUnit XML matched). A ref that starts with a dash, a path that is not a git repository or an unknown ref comes back as a tool error with a plain message.
+It lists the state, the open counts by severity and the first five open findings with severity, rule, file, line and reason, then any notes from the run (for example that no test results matched). A ref that starts with a dash, a path that is not a git repository or an unknown ref comes back as a tool error with a plain message.
 
 ### testwitness_explain_rule
 

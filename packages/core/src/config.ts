@@ -80,15 +80,18 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
     if (tests.length) cfg.paths.tests = tests;
     if (ignore.length) cfg.paths.ignore = [...cfg.paths.ignore, ...ignore];
   }
-  if (doc['junit'] !== undefined) {
-    if (!isRecord(doc['junit'])) throw new ConfigError('junit must be a mapping');
-    if (doc['junit']['head'] !== undefined) {
-      if (typeof doc['junit']['head'] !== 'string') throw new ConfigError('junit.head must be a string');
-      cfg.junit.head = doc['junit']['head'];
+  // `results` is the preferred key; `junit` is its older name and still works. When both are set, `results` wins.
+  for (const key of ['junit', 'results'] as const) {
+    const section = doc[key];
+    if (section === undefined) continue;
+    if (!isRecord(section)) throw new ConfigError(`${key} must be a mapping`);
+    if (section['head'] !== undefined) {
+      if (typeof section['head'] !== 'string') throw new ConfigError(`${key}.head must be a string`);
+      cfg.junit.head = section['head'];
     }
-    if (doc['junit']['base'] !== undefined) {
-      if (typeof doc['junit']['base'] !== 'string') throw new ConfigError('junit.base must be a string');
-      cfg.junit.base = doc['junit']['base'];
+    if (section['base'] !== undefined) {
+      if (typeof section['base'] !== 'string') throw new ConfigError(`${key}.base must be a string`);
+      cfg.junit.base = section['base'];
     }
   }
   if (doc['coverage'] !== undefined) {

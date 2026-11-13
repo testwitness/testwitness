@@ -1,6 +1,6 @@
-# JUnit XML fixtures
+# Test results fixtures
 
-Every file under `fixtures/<name>/junit/` was produced by running the real framework, eight projects in this workspace on 1 Nov 2026 and java-junit5-maven on the maintainer's Mac on 4 Nov 2026 because Maven Central is blocked from the workspace. Nothing was hand written or edited. Each `junit/PRODUCER.md` records versions and the exact command. This page is the input for the XML normaliser, so attribute formats are quoted exactly as emitted.
+Every file under `fixtures/<name>/junit/` and `fixtures/<name>/results/<format>/` was produced by running the real framework: the JUnit XML of eight projects in this workspace on 1 Nov 2026 and of java-junit5-maven on the maintainer's Mac on 4 Nov 2026 because Maven Central is blocked from the workspace, and the TAP and JSON reporter output in this workspace on 4 Nov 2026. Nothing was hand written or edited. Each `PRODUCER.md` records versions and the exact command. This page is the input for the readers and the normaliser, so formats are quoted exactly as emitted. The file keeps its old name so links to it still work.
 
 Environment constraint: the workspace proxy denies Maven Central (`repo.maven.apache.org`, `repo1.maven.org`) and the Gradle plugin portal with HTTP 403 on CONNECT. npm and PyPI work. Consequences are noted per fixture.
 
@@ -17,6 +17,13 @@ Environment constraint: the workspace proxy denies Maven Central (`repo.maven.ap
 | ts-mocha | mocha-junit-reporter | mocha 11.8.0, mocha-junit-reporter 2.2.1 | `junit.xml` (2040), `junit-pending.xml` (2491) | OK. mocha 12 is incompatible with the reporter (constructor error), pinned to 11. |
 | py-pytest | pytest junitxml plugin | pytest 9.1.1, pytest-rerunfailures 16.7, Python 3.13.18 | `junit.xml` (2779), `junit-legacy.xml` (3311), `junit-reruns.xml` (414) | OK |
 | py-unittest | pytest junitxml plugin, and unittest-xml-reporting | pytest 9.1.1, unittest-xml-reporting 4.0.0 | `junit.xml` (1428), `xmlrunner/TEST-tests.test_shapes.ShapesTest-20261101133526.xml` (1822), `xmlrunner/TEST-tests.test_shapes.EdgeCasesTest-20261101133526.xml` (401) | OK |
+| ts-jest (results/jest-json) | `jest --json` | jest 30.5.2, Node v22.23.4 | `results.json` (6755), `results-retry.json` (3904, a temporary copy with `jest.retryTimes(2)`) | OK |
+| ts-vitest (results/vitest-json) | vitest `json` reporter | vitest 5.0.5 | `results.json` (3818), `results-retry.json` (5342, a temporary copy run with `--retry=2`) | OK |
+| ts-playwright (results/playwright-json) | @playwright/test `json` reporter | @playwright/test 1.63.0, Chromium 1243 | `results.json` (26831), `results-projects.json` (40623, two projects over `unit.spec.ts`) | OK |
+| py-pytest (results/pytest-json-report) | pytest-json-report | pytest-json-report 1.5.0, pytest-metadata 3.1.1, pytest 9.1.1, pytest-rerunfailures 16.7, Python 3.13.18 | `report.json` (9711), `report-reruns.json` (894) | OK. Installed exact from PyPI into a venv with system site packages. |
+| ts-node-test (results/tap) | Node test runner `tap` reporter | Node v22.23.4 | `results.tap` (4461) | OK. New project: Node's runner has no JUnit reporter worth recommending over TAP, so it has no `junit/`. |
+| ts-node-test (results/tap-node-tap) | node-tap `--reporter=tap` | tap 21.8.1, Node v22.23.4 | `results.tap` (3674) | OK. Source in `source/`, the slugify and clamp tests written for node-tap; reader unit tests only. |
+| ts-node-test (results/tap-perl) | Perl Test::More | perl 5.38.2, Test::More 1.302194 | `text.tap` (429), `bail.tap` (81) | OK. Source in `source/t/`; reader unit tests only. |
 
 ## Run history cases
 
@@ -120,6 +127,67 @@ The golden cases named `R003-history-*` in java-junit4-gradle, ts-jest and py-py
 - Failure: `<failure type="AssertionError" message="8 != 9">` with a CDATA traceback. `message` has the exception class stripped; `type` carries it.
 - `subTest`: single passing testcase, no detail.
 
+### Jest 30.5.2 `--json` (ts-jest/results/jest-json)
+
+- One compact line. Top level keys: `numFailedTestSuites`, `numFailedTests`, `numPassedTestSuites`, `numPassedTests`, `numPendingTestSuites`, `numPendingTests`, `numRuntimeErrorTestSuites`, `numTodoTests`, `numTotalTestSuites`, `numTotalTests`, `openHandles`, `snapshot`, `startTime`, `success`, `testResults`, `wasInterrupted`. `numTotalTests: 9` counts the todo.
+- One `testResults[]` entry per file with `name` set to the absolute path (`/home/claude/testwitness/fixtures/ts-jest/project/src/billing.test.js`), `status: "failed"`, `message` holding the formatted failure (`  ● Billing › charge › fails on purpose ...`), `assertionResults`.
+- Each assertion result: `"ancestorTitles":["Billing","charge"]`, `"title":"charges a valid card"`, `"fullName":"Billing charge charges a valid card"` (ancestors and title joined by one space), `"status":"passed"`, `"invocations":1`, `"location":null` (no `testLocationInResults`), `numPassingAsserts`, `retryReasons`, `retryMessages`, `failureDetails`, `failureMessages`, `duration`, `startAt`.
+- `it.skip` is `"status":"pending"` and `test.todo` is `"status":"todo"`, both with `"duration":null`. `test.each` rows have the formatted title (`"adds 1 and 2 to get 3"`).
+- Failure: `"status":"failed"` with `failureMessages` holding `Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 99\nReceived: 10\n    at Object.toBe (/abs/path/src/billing.test.js:30:69)`; no ANSI codes.
+- Retries (`jest.retryTimes(2)`): the test that passed on its second attempt is `"status":"passed","invocations":2` with empty `failureMessages` and empty `retryReasons`; the one that always failed is `"status":"failed","invocations":3` with one failure message. `retryReasons` stays empty unless `logErrorsBeforeRetry` is set, so `invocations` is the only trace of a retry.
+
+### Vitest 5.0.5 `json` reporter (ts-vitest/results/vitest-json)
+
+- The Jest shape with differences. No `openHandles`, `wasInterrupted` or `numRuntimeErrorTestSuites` at the top; that is how the reader tells the two apart. `numTotalTestSuites: 4` and `numFailedTestSuites: 3` count the describe blocks as suites as well as the file.
+- `testResults[]`: `assertionResults`, `startTime`, `endTime`, `status`, `message` (`""` even when a test failed), `name` (absolute path).
+- Each assertion result: `ancestorTitles`, `fullName` (joined by one space, `"Cart applyDiscount applyDiscount(100, 10) -> 90"`), `status`, `title`, `duration` (fractional milliseconds, absent for skipped and todo), `failureMessages`, `meta: {}`, `tags: []`, `benchmarks: []`. No `invocations`, no `location`.
+- `test.skip` is `"status":"skipped"` and `test.todo` is `"status":"todo"`; unlike the junit reporter, the two are told apart.
+- Failure message: `AssertionError: expected 90 to be 80 // Object.is equality\n    at /abs/path/src/cart.test.ts:35:38`.
+- Retries (`--retry=2`): no field counts attempts. The test that passed on its second attempt is `"status":"passed"` with ONE entry in `failureMessages` (the failed first attempt); the test that always failed has three.
+
+### pytest-json-report 1.5.0 (py-pytest/results/pytest-json-report)
+
+- Top level keys: `created`, `duration`, `exitcode`, `root` (absolute project path), `environment` (`{}` here although pytest-metadata 3.1.1 is installed), `summary`, `collectors`, `tests`. The file is JSON with the plugin's own line breaks (`"collectors": [\n{`), not the output of a standard indent setting.
+- `summary`: `{"passed": 7, "skipped": 2, "xfailed": 1, "xpassed": 1, "failed": 1, "error": 1, "total": 13, "collected": 13}`.
+- `tests[]`: `nodeid`, `lineno` (0 based line of the `def`, as junitxml legacy), `outcome`, `keywords`, and `setup`, `call`, `teardown` phases each with `duration` and `outcome`. A phase that did not run is absent.
+- Node ids: `tests/test_inventory.py::test_add_increases_count`, `tests/test_inventory.py::TestInventoryClass::test_rejects_non_positive`, parametrised ids with the same backslash escapes as junitxml: `tests/test_inventory.py::test_add_parametrized[\\xfcn\\xefcode[brackets]]` (JSON escaped).
+- Outcomes: `skipped` has only `setup` (outcome skipped) and `teardown`; `xfailed` has `call.outcome: "skipped"` with a `crash` and a `traceback`; `xpassed` has `call.outcome: "passed"`; `error` (fixture setup raised) has `setup.outcome: "failed"` and no `call`.
+- pytest-rerunfailures: the test that failed once and passed on the rerun is a single record with `"outcome": "rerun"` and `call.outcome: "passed"`, and the summary is `{"rerun": 1, "total": 1, "collected": 1}` with no `passed` key. The final pass is only visible in the call phase; the number of attempts is not recorded.
+
+### @playwright/test 1.63.0 `json` reporter (ts-playwright/results/playwright-json)
+
+- Indented two spaces. Top level keys: `config`, `suites`, `errors`, `stats`; `stats` is `{"startTime": "2026-11-04T17:03:01.935Z", "duration": 3725.8999999999996, "expected": 5, "skipped": 2, "unexpected": 1, "flaky": 1}`.
+- `suites[]` is one suite per spec file: `{"title": "unit.spec.ts", "file": "unit.spec.ts", "column": 0, "line": 0, "specs": [...], "suites": [...]}`, the file relative to `testDir`. Describe blocks are nested `suites` with their own `line` and `column`. A test outside any describe sits in the file suite's `specs`, listed before the nested suites.
+- Spec: `title`, `ok`, `tags`, `tests`, `id`, `file`, `line`, `column`. Test: `timeout`, `annotations`, `expectedStatus`, `projectId`, `projectName`, `results`, `status`.
+- Test `status` is `expected`, `unexpected`, `flaky` or `skipped`. `test.fail()` that fails: `"expectedStatus": "failed"`, `"status": "expected"`, one result with `"status": "failed"`. `test.skip` and `test.fixme`: `"status": "skipped"` with an annotation `{"type": "skip"}` or `{"type": "fixme"}` carrying the source location.
+- Results, one per attempt with `retry` 0, 1: the failing test (`retries: 1`) has `failed, failed` and status `unexpected`; the flaky test has `failed, passed` and status `flaky`. Error messages hold ANSI colour codes as `\u001b[2m` escapes.
+- Two projects over the same spec file (results-projects.json): still one file suite, whose `specs` repeat once per project, each holding one test with its `projectName`. The flaky test is `flaky` in `first` and `expected` in `second` because the counter file is shared.
+
+### Node v22.23.4 test runner, `tap` reporter (ts-node-test/results/tap)
+
+- `TAP version 13`. Every test AND every describe block is a test point preceded by `# Subtest: <name>` at the point's own indentation; children are indented four spaces and end with their own plan (`        1..5`) before the parent point.
+- Each point is followed by a YAML block indented two more spaces: `duration_ms: 0.900661` and `type: 'test'` or `type: 'suite'`. A failure adds `location: '/abs/path/test/text.test.js:21:5'`, `failureType: 'testCodeFailure'`, `error`, `code: 'ERR_ASSERTION'`, `name`, `expected`, `actual`, `operator`, `stack`. A describe block over a failure is `not ok 1 - slugify` with `failureType: 'subtestsFailed'` and `error: '1 subtest failed'`.
+- `location` is written for failures only, so passing tests carry no file at all.
+- No subtest per file: the points of both files share one top level sequence numbered 1 to 6 (`extras.test.js` first), and `1..6` comes last, followed by `# tests 13`, `# suites 3`, `# pass 8`, `# fail 1`, `# cancelled 0`, `# skipped 2`, `# todo 2`, `# duration_ms ...`.
+- `it.skip`: `ok 3 - handles unicode # SKIP`; `{ skip: 'reason' }`: `ok 2 - skipped with a reason # SKIP waiting on the upstream fix`; `it.todo` without a body: `ok 4 - keeps numbers # TODO`; a todo whose body fails: `not ok 3 - todo that fails # TODO not finished` with the failure YAML.
+- A test with `t.test` subtests (`clamp table`) is `type: 'test'` with its subtests as points of `type: 'test'` below it.
+
+### node-tap 21.8.1 `--reporter=tap` (ts-node-test/results/tap-node-tap)
+
+- `TAP version 14`, then the plan `1..1` first, then `# Subtest: test/text.test.js`: the whole file is one subtest named by its path relative to the project, at column 0, its body indented four spaces.
+- Each `t.test` is a subtest whose points are the assertions: `ok 1 - should be equal` and its own `1..1`, then the parent point `ok 1 - lowercases and joins with dashes # time=5.725ms`. The ` # time=` comment is not a directive. Blank lines (indented) follow each subtest.
+- Skip and todo subtests have no body: `ok 2 - handles unicode # SKIP not supported yet`, `ok 3 - keeps numbers # TODO`.
+- Failure YAML: `compare: ===`, `at:` with `fileName: test/text.test.js` (relative), `lineNumber`, `columnNumber`, `typeName`, `stack`, `source` (with a `--------^` marker), `diff`. The file point's YAML holds `command`, `args`, `cwd`, `exitCode: 1`.
+- Ends with `# No coverage generated`, `# { total: 5, pass: 2, fail: 1, todo: 1, skip: 1 }`, `# time=1124.751ms`.
+
+### Perl Test::More 1.302194 (ts-node-test/results/tap-perl)
+
+- No `TAP version` line; the plan `1..6` comes first.
+- `skip` writes no description: `ok 3 # skip unicode is not handled yet` (lower case directive).
+- A failing TODO: `not ok 4 - keeps numbers # TODO numbers are not kept yet`, then `#   Failed (TODO) test 'keeps numbers'` and the got and expected lines as comments on stdout.
+- `subtest`: `# Subtest: clamp table` at column 0, then the child plan first (`    1..2`), the child points, then `ok 6 - clamp table`.
+- `BAIL_OUT`: `Bail out!  fixture database is gone` (two spaces after the `!`), nothing after it; the plan said `1..3` and one point was written.
+
 ## Cross producer summary for the normaliser
 
 | Concept | Gradle | TestNG native | jest-junit | vitest | playwright | mocha-junit-reporter | pytest | xmlrunner |
@@ -135,3 +203,14 @@ The golden cases named `R003-history-*` in java-junit4-gradle, ts-jest and py-py
 | Flaky or rerun | surefire `flakyFailure` (not captured) | n/a | n/a | n/a | passing testcase with attachment in `system-out` only | n/a | duplicate bare testcase before the final one | n/a |
 | Disabled (TestNG) | absent | absent | | | | | | |
 | Timestamp | ISO UTC `Z` ms | local time with fake `Z` | ISO UTC no `Z` | ISO UTC `Z` ms | ISO UTC `Z` ms | ISO no `Z` | local with offset and microseconds | local no offset |
+
+## Keys from the other formats
+
+| Format | Class side of the key | Name side | Same keys as |
+|---|---|---|---|
+| Jest JSON | stem of `testResults[].name` | `ancestorTitles` and `title` joined by ` › ` | the Vitest junit shape (inventory key `stem::chain`) |
+| Vitest JSON | stem of `testResults[].name` | `ancestorTitles` and `title` joined by ` › ` | Vitest junit, checked file for file in the unit tests |
+| pytest-json-report | node id file as a dotted module, plus classes | last node id part with its `[param]` | pytest junitxml, checked in the unit tests |
+| Playwright JSON | stem of the spec file | describe titles and spec title joined by ` › ` | Playwright junit, checked in the unit tests |
+| TAP with a file subtest (node-tap) | stem of the file subtest | the chain below it | Vitest and Playwright junit shape |
+| TAP without one (Node 22, Perl) | the chain | the chain | jest-junit default shape |

@@ -1,31 +1,16 @@
 import { SaxesParser } from 'saxes';
 import type { SaxesTagPlain } from 'saxes';
 import { createReadStream } from 'node:fs';
+import { open, readFile, stat } from 'node:fs/promises';
 import { StringDecoder } from 'node:string_decoder';
-import type { Evidence, TestStatus } from '@testwitness/core';
-import { normaliseKey, classKey } from '@testwitness/core';
+import type { TestStatus } from '@testwitness/core';
+import { normaliseKey } from '@testwitness/core';
+import type { ResultFormat, ResultIndexData, TestRecord } from './records.js';
+import { addRecord, emptyIndex, finaliseTotals } from './records.js';
+import { readTapStream } from './tap.js';
+import { readJsonResults } from './json.js';
 
-export interface TestRecord {
-  /** Normalised lookup key. */
-  key: string;
-  classname: string;
-  name: string;
-  file?: string;
-  status: TestStatus;
-  timeMs?: number;
-  /** Number of rerun/flaky child elements. */
-  reruns: number;
-  source: string;
-}
-
-export interface ResultIndexData {
-  sources: string[];
-  records: Map<string, TestRecord>;
-  /** Key prefix index: class key to keys. */
-  byClass: Map<string, string[]>;
-  totals: { total: number; passed: number; failed: number; errored: number; skipped: number; flaky: number };
-  warnings: string[];
-}
+export * from './records.js';
 
 const FAIL_CHILDREN = new Set(['failure']);
 const ERROR_CHILDREN = new Set(['error']);
@@ -135,65 +120,119 @@ export function readJunitStream(stream: NodeJS.ReadableStream, source: string, d
       }
       if (!sawTestcase) data.warnings.push(`${source}: no testcase elements found`);
       data.sources.push(source);
+      data.formats.add('junit-xml');
       resolve();
     });
   });
 }
 
-function addRecord(data: ResultIndexData, rec: TestRecord): void {
-  // Duplicate keys (reruns written as separate testcases, parametrised names that normalise together) keep the worst status.
-  const existing = data.records.get(rec.key);
-  if (existing) {
-    const rank: Record<TestStatus, number> = { passed: 0, flaky: 1, skipped: 2, failed: 3, error: 4 };
-    // The same raw test written again in another file is a rerun (Surefire with rerunFailingTestsCount writes the
-    // retry of a top level test into a second TEST-*.xml). Failed in one file and passed in another is flaky, not failed.
-    const sameRawTest = existing.classname === rec.classname && existing.name === rec.name && existing.source !== rec.source;
-    const outcomes = new Set([existing.status, rec.status]);
-    const hasPass = outcomes.has('passed') || outcomes.has('flaky');
-    const hasFail = outcomes.has('failed') || outcomes.has('error');
-    if (sameRawTest && hasPass && hasFail) {
-      existing.status = 'flaky';
-      existing.reruns += rec.reruns + 1;
-      return;
-    }
-    if (rank[rec.status] > rank[existing.status]) existing.status = rec.status;
-    existing.reruns += rec.reruns;
-    return;
+/** Whole file JSON results are read within this cap per file; larger files are refused with a note. */
+export const RESULTS_JSON_MAX_BYTES = 50 * 1024 * 1024;
+
+/** Bytes read from the start of a file to tell its format. */
+const SNIFF_BYTES = 4096;
+
+/**
+ * Tell a results file's format from its first bytes: `<` is XML (JUnit), `{` is JSON (the reporter is told from the
+ * parsed shape), and TAP starts with a version line, a plan, a test point, a subtest heading or a bail out, after
+ * any comment lines. Undefined when it is none of these.
+ */
+export function sniffResultsFormat(head: string): 'junit-xml' | 'json' | 'tap' | undefined {
+  const text = head.replace(/^\uFEFF/, '');
+  const first = text.trimStart()[0];
+  if (first === '<') return 'junit-xml';
+  if (first === '{') return 'json';
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line === '') continue;
+    if (/^TAP version \d+$/i.test(line) || /^\d+\.\.\d+(\s*#.*)?$/.test(line) || /^(not )?ok\b/i.test(line) || /^#\s*Subtest\b/i.test(line) || /^Bail out!/i.test(line)) return 'tap';
+    if (line.startsWith('#')) continue;
+    return undefined;
   }
-  data.records.set(rec.key, rec);
-  const ck = classKey(rec.classname);
-  const arr = data.byClass.get(ck);
-  if (arr) arr.push(rec.key);
-  else data.byClass.set(ck, [rec.key]);
+  return undefined;
 }
 
-export function emptyIndex(): ResultIndexData {
-  return { sources: [], records: new Map(), byClass: new Map(), totals: { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, flaky: 0 }, warnings: [] };
-}
-
-export function finaliseTotals(data: ResultIndexData): void {
-  const t = { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, flaky: 0 };
-  for (const r of data.records.values()) {
-    t.total++;
-    switch (r.status) {
-      case 'passed': t.passed++; break;
-      case 'failed': t.failed++; break;
-      case 'error': t.errored++; break;
-      case 'skipped': t.skipped++; break;
-      case 'flaky': t.flaky++; t.passed++; break;
-    }
+async function readHead(path: string): Promise<string> {
+  const fh = await open(path, 'r');
+  try {
+    const buf = Buffer.alloc(SNIFF_BYTES);
+    const { bytesRead } = await fh.read(buf, 0, SNIFF_BYTES, 0);
+    return new StringDecoder('utf8').write(buf.subarray(0, bytesRead));
+  } finally {
+    await fh.close();
   }
-  data.totals = t;
 }
 
-export async function readJunitFiles(paths: string[]): Promise<ResultIndexData> {
+const NOT_RESULTS = 'not JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright; not read';
+
+/** Read one results file of any supported format into the index. Never throws for a bad file; it adds a warning. */
+export async function readResultsFile(path: string, data: ResultIndexData, caps: { maxJsonBytes?: number } = {}): Promise<ResultFormat | undefined> {
+  const maxJson = caps.maxJsonBytes ?? RESULTS_JSON_MAX_BYTES;
+  try {
+    const size = (await stat(path)).size;
+    const kind = sniffResultsFormat(await readHead(path));
+    if (kind === 'junit-xml') {
+      await readJunitStream(createReadStream(path), path, data);
+      return 'junit-xml';
+    }
+    if (kind === 'tap') {
+      await readTapStream(createReadStream(path), path, data);
+      return 'tap';
+    }
+    if (kind === 'json') {
+      if (size > maxJson) {
+        data.warnings.push(`${path}: ${size} bytes, over the ${Math.round(maxJson / 1048576)} MB cap for JSON results; not read`);
+        return undefined;
+      }
+      let doc: unknown;
+      try {
+        doc = JSON.parse((await readFile(path, 'utf8')).replace(/^\uFEFF/, ''));
+      } catch (e) {
+        data.warnings.push(`${path}: not valid JSON (${(e as Error).message.slice(0, 120)}); not read`);
+        return undefined;
+      }
+      const format = readJsonResults(doc, path, data);
+      if (!format) data.warnings.push(`${path}: ${NOT_RESULTS}`);
+      return format;
+    }
+    data.warnings.push(`${path}: ${NOT_RESULTS}`);
+    return undefined;
+  } catch (e) {
+    data.warnings.push(`${path}: ${(e as Error).message}`);
+    return undefined;
+  }
+}
+
+/** Read results files of any supported format, told apart by content. */
+export async function readResultsFiles(paths: string[], caps: { maxJsonBytes?: number } = {}): Promise<ResultIndexData> {
   const data = emptyIndex();
-  for (const p of paths) {
-    await readJunitStream(createReadStream(p), p, data);
-  }
+  for (const p of paths) await readResultsFile(p, data, caps);
   finaliseTotals(data);
   return data;
 }
+
+/** Read results text held in memory (tests and tools); the format is told from the content as for files. */
+export async function readResultsString(text: string, source = 'inline'): Promise<ResultIndexData> {
+  const data = emptyIndex();
+  const { Readable } = await import('node:stream');
+  const kind = sniffResultsFormat(text.slice(0, SNIFF_BYTES));
+  if (kind === 'junit-xml') await readJunitStream(Readable.from([text]), source, data);
+  else if (kind === 'tap') await readTapStream(Readable.from([text]), source, data);
+  else if (kind === 'json') {
+    let doc: unknown;
+    try {
+      doc = JSON.parse(text.replace(/^\uFEFF/, ''));
+    } catch (e) {
+      data.warnings.push(`${source}: not valid JSON (${(e as Error).message.slice(0, 120)}); not read`);
+    }
+    if (doc !== undefined && !readJsonResults(doc, source, data)) data.warnings.push(`${source}: ${NOT_RESULTS}`);
+  } else data.warnings.push(`${source}: ${NOT_RESULTS}`);
+  finaliseTotals(data);
+  return data;
+}
+
+/** JUnit XML files only; kept for callers that predate the other formats. Same as readResultsFiles. */
+export const readJunitFiles = readResultsFiles;
 
 export async function readJunitString(xml: string, source = 'inline.xml'): Promise<ResultIndexData> {
   const data = emptyIndex();
@@ -201,22 +240,4 @@ export async function readJunitString(xml: string, source = 'inline.xml'): Promi
   await readJunitStream(Readable.from([xml]), source, data);
   finaliseTotals(data);
   return data;
-}
-
-/** Adapt the index to the core Evidence interface. */
-export function toEvidence(data: ResultIndexData): Evidence {
-  return {
-    sources: data.sources,
-    total: data.totals.total,
-    passed: data.totals.passed,
-    failed: data.totals.failed,
-    errored: data.totals.errored,
-    skipped: data.totals.skipped,
-    flaky: data.totals.flaky,
-    has: (key) => data.records.has(key),
-    statusOf: (key) => data.records.get(key)?.status,
-    keysForClass: (ck) => data.byClass.get(ck) ?? [],
-    keys: () => data.records.keys(),
-    rerunsOf: (key) => data.records.get(key)?.reruns ?? 0,
-  };
 }

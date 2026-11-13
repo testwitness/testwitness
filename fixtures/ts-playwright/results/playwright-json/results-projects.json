@@ -1,0 +1,938 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/tmp/pw-projects-WSsB/node_modules/.bin/playwright",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "/tmp/pw-projects-WSsB/playwright.config.ts",
+    "rootDir": "/tmp/pw-projects-WSsB/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/pw-projects-WSsB/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "first",
+        "name": "first",
+        "testDir": "/tmp/pw-projects-WSsB/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/unit\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/tmp/pw-projects-WSsB/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "second",
+        "name": "second",
+        "testDir": "/tmp/pw-projects-WSsB/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/unit\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "unit.spec.ts",
+      "file": "unit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "expected to fail",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "fail",
+                  "location": {
+                    "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                    "line": 40,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "failed",
+              "projectId": "first",
+              "projectName": "first",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 9,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:41:27",
+                    "location": {
+                      "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                      "column": 27,
+                      "line": 41
+                    },
+                    "snippet": "  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n\n  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:41:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T17:03:30.007Z",
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 40,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/pw-projects-WSsB/test-results/unit-expected-to-fail-first/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                    "column": 27,
+                    "line": 41
+                  }
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1aa6966ccd4b754046b6-b7d7b239760274483a22",
+          "file": "unit.spec.ts",
+          "line": 39,
+          "column": 5
+        },
+        {
+          "title": "expected to fail",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "fail",
+                  "location": {
+                    "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                    "line": 40,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "failed",
+              "projectId": "second",
+              "projectName": "second",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:41:27",
+                    "location": {
+                      "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                      "column": 27,
+                      "line": 41
+                    },
+                    "snippet": "  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n\n  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:41:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T17:03:32.334Z",
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 40,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/tmp/pw-projects-WSsB/test-results/unit-expected-to-fail-second/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                    "column": 27,
+                    "line": 41
+                  }
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1aa6966ccd4b754046b6-d4e13b643bf39ac08fe7",
+          "file": "unit.spec.ts",
+          "line": 39,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "pricing",
+          "file": "unit.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "parses a dollar amount",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:27.622Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-b8a7bbf19ec4997bb99e",
+              "file": "unit.spec.ts",
+              "line": 12,
+              "column": 7
+            },
+            {
+              "title": "parses a bare number",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:27.683Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-31dc358a3c07c66bf53d",
+              "file": "unit.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "parses euro amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 20,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:27.725Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "line": 20,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-c0d3659ca1e4d7fd9aba",
+              "file": "unit.spec.ts",
+              "line": 20,
+              "column": 8
+            },
+            {
+              "title": "handles negative amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 24,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:27.726Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "line": 24,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-072e86b1f736708c200c",
+              "file": "unit.spec.ts",
+              "line": 24,
+              "column": 8
+            },
+            {
+              "title": "fails on purpose",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:27.727Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/tmp/pw-projects-WSsB/test-results/unit-pricing-fails-on-purpose-first/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 18,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T17:03:28.420Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/tmp/pw-projects-WSsB/test-results/unit-pricing-fails-on-purpose-first-retry1/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-3e3159de5202a5ef7d3a",
+              "file": "unit.spec.ts",
+              "line": 28,
+              "column": 7
+            },
+            {
+              "title": "flaky passes on retry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "first",
+                  "projectName": "first",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:35:22",
+                        "location": {
+                          "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                          "column": 22,
+                          "line": 35
+                        },
+                        "snippet": "  33 |     const attempts = fs.existsSync(counterFile) ? Number(fs.readFileSync(counterFile, 'utf8')) : 0;\n  34 |     fs.writeFileSync(counterFile, String(attempts + 1));\n> 35 |     expect(attempts).toBeGreaterThan(0);\n     |                      ^\n  36 |   });\n  37 | });\n  38 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "column": 22,
+                            "line": 35
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n  33 |     const attempts = fs.existsSync(counterFile) ? Number(fs.readFileSync(counterFile, 'utf8')) : 0;\n  34 |     fs.writeFileSync(counterFile, String(attempts + 1));\n> 35 |     expect(attempts).toBeGreaterThan(0);\n     |                      ^\n  36 |   });\n  37 | });\n  38 |\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:35:22"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:29.207Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/tmp/pw-projects-WSsB/test-results/unit-pricing-flaky-passes-on-retry-first/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 22,
+                        "line": 35
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T17:03:29.942Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-35087728a52aed1ba99c",
+              "file": "unit.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "parses a dollar amount",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:30.672Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-5ef4425449c896992b9d",
+              "file": "unit.spec.ts",
+              "line": 12,
+              "column": 7
+            },
+            {
+              "title": "parses a bare number",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:30.783Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-f389cb08db336851c0d4",
+              "file": "unit.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "parses euro amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 20,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:30.796Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "line": 20,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-c0126d2561b726700c10",
+              "file": "unit.spec.ts",
+              "line": 20,
+              "column": 8
+            },
+            {
+              "title": "handles negative amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "line": 24,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:30.797Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "line": 24,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-d7b343a957eea0d26449",
+              "file": "unit.spec.ts",
+              "line": 24,
+              "column": 8
+            },
+            {
+              "title": "fails on purpose",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:30.797Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/tmp/pw-projects-WSsB/test-results/unit-pricing-fails-on-purpose-second/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 14,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /tmp/pw-projects-WSsB/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T17:03:31.453Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/tmp/pw-projects-WSsB/test-results/unit-pricing-fails-on-purpose-second-retry1/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/tmp/pw-projects-WSsB/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-1c03d27575f6ffbdfac0",
+              "file": "unit.spec.ts",
+              "line": 28,
+              "column": 7
+            },
+            {
+              "title": "flaky passes on retry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "second",
+                  "projectName": "second",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 21,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:32.212Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-40d86160f6b08f411e52",
+              "file": "unit.spec.ts",
+              "line": 32,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T17:03:26.926Z",
+    "duration": 5451.032999999999,
+    "expected": 7,
+    "skipped": 4,
+    "unexpected": 2,
+    "flaky": 1
+  }
+}

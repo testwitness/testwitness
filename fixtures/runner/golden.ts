@@ -5,6 +5,8 @@
  *   expected.json  [{ ruleId, severity?, subject?, label? }]
  *   pr.json (optional) { title, body }
  *   junit/ (optional)    JUnit XML of the head run
+ *   results/ (optional)  test results of the head run in any supported format (TAP, Jest, Vitest, pytest-json-report or
+ *                        Playwright JSON, or JUnit XML), passed as the `results` globs; the reader tells them apart by content
  *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
  *   mutation/ (optional) Stryker JSON or PIT mutations.xml reports of the head, as the opt in mutation job writes them
  *   history/history.json (optional) run history of earlier runs, written by the engine through
@@ -34,6 +36,7 @@ export interface GoldenCase {
   expected: ExpectedFinding[];
   pr?: { title: string; body: string };
   junit?: string;
+  results?: string;
   coverage?: string;
   mutation?: string;
   history?: string;
@@ -58,6 +61,7 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       const prPath = join(dir, 'pr.json');
       if (existsSync(prPath)) c.pr = JSON.parse(readFileSync(prPath, 'utf8')) as { title: string; body: string };
       if (existsSync(join(dir, 'junit'))) c.junit = join(dir, 'junit');
+      if (existsSync(join(dir, 'results'))) c.results = join(dir, 'results');
       if (existsSync(join(dir, 'coverage'))) c.coverage = join(dir, 'coverage');
       if (existsSync(join(dir, 'mutation'))) c.mutation = join(dir, 'mutation');
       if (existsSync(join(dir, 'history', 'history.json'))) c.history = join(dir, 'history', 'history.json');
@@ -124,6 +128,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       base: baseSha,
       head: headSha,
       // Globs, not paths: always forward slashes, also on Windows.
+      results: c.results ? `${c.results.split(sep).join('/')}/**/*` : undefined,
       junit: c.junit ? `${c.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
       coverage: c.coverage ? `${c.coverage.split(sep).join('/')}/**/*` : '',
       mutation: c.mutation ? `${c.mutation.split(sep).join('/')}/**/*.json,${c.mutation.split(sep).join('/')}/**/*.xml` : '',

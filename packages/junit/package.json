@@ -2,7 +2,7 @@
   "name": "@testwitness/junit",
   "version": "0.1.0",
   "private": true,
-  "description": "Streaming JUnit XML reader and normaliser",
+  "description": "Test results readers (JUnit XML, TAP, Jest, Vitest, pytest-json-report and Playwright JSON) and normaliser",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

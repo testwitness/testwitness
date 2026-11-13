@@ -14,8 +14,8 @@ paths:
     - "**/*.test.ts"
   ignore:
     - "**/generated/**"
-junit:
-  head: "**/junit*.xml"
+results:                # test results of the head run; `junit` is the older name of this key and still works
+  head: "**/junit*.xml"  # JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (docs/evidence.md)
 coverage:
   paths:                # lcov, Cobertura or JaCoCo XML of the head run; empty: V008 is off
     - "coverage/lcov.info"
