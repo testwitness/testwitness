@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/transloadit/uppy/pull/3662",
+  "repo": "transloadit/uppy",
+  "number": 3662,
+  "title": "Make Cypress more stable & add e2e test for error events when upload fails",
+  "merged_at": "2022-05-04T10:05:21Z",
+  "stars": 31068,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "447cd92d8588617c130e48bc70e647e04560ebc8",
+  "head_sha": "1452644b78584c26a56bcba22f0a4d46ab1ee4fb",
+  "files_changed": 6,
+  "additions": 50,
+  "deletions": 24
+}

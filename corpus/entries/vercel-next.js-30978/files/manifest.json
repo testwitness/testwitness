@@ -1,0 +1,38 @@
+[
+  {
+    "path": "packages/next/server/dev/next-dev-server.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/server/next-server.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/server/router.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/server/web/next-url.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/shared/lib/i18n/normalize-locale-path.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/next/shared/lib/router/utils/parse-next-url.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/integration/i18n-support-base-path/next.config.js",
+    "status": "modified"
+  },
+  {
+    "path": "test/integration/i18n-support-base-path/test/index.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "test/integration/i18n-support/test/shared.js",
+    "status": "modified"
+  }
+]

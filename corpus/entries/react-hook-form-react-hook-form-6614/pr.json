@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/react-hook-form/react-hook-form/pull/6614",
+  "repo": "react-hook-form/react-hook-form",
+  "number": 6614,
+  "title": "refactor subscription logic into useSubscribe ",
+  "merged_at": "2021-09-25T00:46:00Z",
+  "stars": 44921,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "bfa02de4c4c95bd6b3927f0d6d53d7ac2f812853",
+  "head_sha": "824437fbccba971623310d3d7fa74f9ca5b0a517",
+  "files_changed": 30,
+  "additions": 831,
+  "deletions": 548
+}

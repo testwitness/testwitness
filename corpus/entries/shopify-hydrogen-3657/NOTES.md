@@ -1,0 +1,3 @@
+# Shopify/hydrogen#3657
+
+Comments out the perf-kit checks (finalizePerfKitMetrics, a wait and verifyPerfKitRequests, a page object helper that asserts on the captured requests) in four e2e tests across the new-cookies and old-cookies spec files, with a TODO to restore them when a bot detection fix ships. Each test keeps its cookie assertions but no longer checks perf-kit requests. Weakened. The engine reports A001 medium for the two privacy banner tests and A001 low labelled consolidated for the two consent tracking tests (missed at medium). Stresses A001 on a helper assertion removed by commenting out.

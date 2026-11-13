@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "useWatch \u203a fieldArray \u203a should watch correct input update with single field array input",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  }
+]

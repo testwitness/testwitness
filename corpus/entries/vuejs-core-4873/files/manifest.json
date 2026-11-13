@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/runtime-core/src/componentPublicInstance.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/vue-compat/__tests__/global.spec.ts",
+    "status": "modified"
+  }
+]

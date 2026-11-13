@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "client \u203a should be able to refetch after there was a network error",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  }
+]

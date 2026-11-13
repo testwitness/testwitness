@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pmndrs/zustand/pull/403",
+  "repo": "pmndrs/zustand",
+  "number": 403,
+  "title": "Migrating Async/Await to Promise",
+  "merged_at": "2021-06-05T09:04:53Z",
+  "stars": 58931,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "heldout",
+  "base_sha": "26aaf954872773c97ba7b0e2fb452c6d5006f631",
+  "head_sha": "473c16a8bdea40d815d6808e6aaccf5c673c4386",
+  "files_changed": 4,
+  "additions": 299,
+  "deletions": 30
+}

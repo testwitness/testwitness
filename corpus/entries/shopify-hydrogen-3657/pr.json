@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Shopify/hydrogen/pull/3657",
+  "repo": "Shopify/hydrogen",
+  "number": 3657,
+  "title": "test(e2e): comment out perf-kit assertions blocked by bot detection",
+  "merged_at": "2026-04-01T21:28:06Z",
+  "stars": 2177,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "A001",
+  "split": "tuning",
+  "base_sha": "351d55d152f25a1ce7375664498a63d80988efae",
+  "head_sha": "56067968ca1ea553efd9a467c5b87a890e3fc030",
+  "files_changed": 4,
+  "additions": 36,
+  "deletions": 28
+}

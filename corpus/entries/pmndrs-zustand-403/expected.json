@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "persist middleware with sync configuration \u203a can correclty handle a missing migrate function",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  }
+]
