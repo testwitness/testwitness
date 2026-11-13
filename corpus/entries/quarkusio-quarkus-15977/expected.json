@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "OpenshiftWithS2iTest#assertGeneratedResources",
+    "verdict": "tp",
+    "reason": "flaky assertion commented out"
+  }
+]

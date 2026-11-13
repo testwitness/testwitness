@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mermaid-js/mermaid/pull/4913",
+  "repo": "mermaid-js/mermaid",
+  "number": 4913,
+  "title": "Commented out broken test",
+  "merged_at": "2023-10-06T04:45:14Z",
+  "stars": 91088,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "2bde5ad6673b96bd94b481ba6bb7d7be46508086",
+  "head_sha": "05ba7f9350d2da2b076779e7e918613804ba56af",
+  "files_changed": 1,
+  "additions": 9,
+  "deletions": 2
+}
