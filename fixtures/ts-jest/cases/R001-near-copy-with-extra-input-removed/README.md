@@ -1,0 +1,1 @@
+Medium. Counter case for R001-near-duplicate-removed: the test that stays contains every token of the deleted one, but what it adds is input (a second line item), not a check. It renders a different receipt, so the deleted test is not a near duplicate and the deletion stays medium.

@@ -280,4 +280,13 @@ describe('R001 near duplicate removed', () => {
     expect(isNearDuplicate(lit, [...base.slice(0, 28), '"content-type', '"Accept'])).toBe(true);
     expect(isNearDuplicate(lit, [...base.slice(0, 28), '"content-type', '"accept'])).toBe(false);
   });
+
+  it('accepts added checks in the kept test, not added input', () => {
+    const base = Array.from({ length: 30 }, (_, i) => `t${i}`);
+    const withCheck = [...base.slice(0, 15), '.', 'expect', '(', 'res', '.', 'ok', ')', ...base.slice(15)];
+    expect(isNearDuplicate(base, withCheck)).toBe(true);
+    const withInput = [...base.slice(0, 15), '{', 'event', ':', 'BEGIN', ',', 'bail', ':', 'true', '}', ',', ...base.slice(15)];
+    expect(isNearDuplicate(base, withInput)).toBe(false);
+    expect(isNearDuplicate(base, [...base.slice(0, 15), ',', ...base.slice(15)])).toBe(true);
+  });
 });
