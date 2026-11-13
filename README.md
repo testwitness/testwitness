@@ -34,6 +34,7 @@ on:
   pull_request:
 permissions:
   contents: read
+  pull-requests: write # to post the comment; without it findings still show as annotations
 jobs:
   testwitness:
     runs-on: ubuntu-latest
@@ -69,6 +70,8 @@ The same engine can run before the pull request exists, as a hook in Claude Code
 npm i -g testwitness
 testwitness init --agent claude    # or cursor, codex, git
 ```
+
+In Claude Code you can install it as a plugin instead, with the hook and the read only MCP server bundled (the package must be installed as above): `/plugin marketplace add testwitness/testwitness`, then `/plugin install testwitness@testwitness`.
 
 By default it blocks on a small proven set of rules (loosened assertions at high, expected failure markers, focused tests, tests or coverage thresholds cut in config, failures ignored in CI, and changes to the gate itself): the ones with true positives and no wrongful block on our corpus and on 300 real merged pull requests. Every other rule, deleted tests included, is advice until the replay proves it; a maintainer can widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
 

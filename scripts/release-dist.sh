@@ -8,6 +8,12 @@ TAG="${1:?usage: release-dist.sh <tag>}"
 if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::tag $TAG is not vMAJOR.MINOR.PATCH"; exit 1; fi
 VERSION="$(node -p "require('./packages/cli/package.json').version")"
 if [ "v$VERSION" != "$TAG" ]; then echo "::error::tag $TAG does not match packages/cli/package.json version $VERSION"; exit 1; fi
+for f in server.json packages/cli/plugin/.claude-plugin/plugin.json; do
+  v="$(node -p "require('./$f').version")"
+  [ "$v" = "$VERSION" ] || { echo "::error::$f has version $v, packages/cli/package.json has $VERSION"; exit 1; }
+done
+SV="$(node -p "require('./server.json').packages[0].version")"
+[ "$SV" = "$VERSION" ] || { echo "::error::server.json packages[0].version is $SV, expected $VERSION"; exit 1; }
 grep -Eq '^\s+using:\s+node24\s*$' action.yml || { echo "::error::action.yml must declare runs.using node24"; exit 1; }
 [ -s dist/index.js ] || { echo "::error::dist/index.js is missing; run pnpm bundle:action first"; exit 1; }
 MAJOR="${TAG%%.*}"

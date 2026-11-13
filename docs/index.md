@@ -13,6 +13,7 @@ on:
   pull_request:
 permissions:
   contents: read
+  pull-requests: write # to post the comment; without it findings still show as annotations
 jobs:
   testwitness:
     runs-on: ubuntu-latest
