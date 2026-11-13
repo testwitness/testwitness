@@ -1,0 +1,1 @@
+Low. A new test is added with enabled = false, and the PR body is the repository template with the box "Add test case(s)" ticked. A ticked template box is not a claim that the test is coverage, so R010 stays low.
