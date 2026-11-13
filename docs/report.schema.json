@@ -1,0 +1,511 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://testwitness.github.io/testwitness/report.schema.json",
+  "title": "testwitness report",
+  "description": "The JSON report written by testwitness check --format json, returned by the testwitness_check MCP tool, and uploaded as an artifact by the GitHub Action. schemaVersion changes only when a field is removed or changes type. New optional fields and new enum values ship with an updated schema in the same release.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "tool",
+    "generatedAt",
+    "state",
+    "mode",
+    "summary",
+    "findings",
+    "evidence",
+    "provenance",
+    "files",
+    "timing",
+    "base",
+    "head"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL of this schema, so editors and validators can find it."
+    },
+    "schemaVersion": {
+      "const": "1",
+      "description": "Version of the report shape. It is the string 1 for every report this schema describes."
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "description": "The tool that wrote the report.",
+      "properties": {
+        "name": {
+          "const": "testwitness",
+          "description": "Always testwitness."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of testwitness that wrote the report, such as 0.1.0."
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "description": "When the report was written, as an ISO 8601 UTC timestamp.",
+      "format": "date-time"
+    },
+    "state": {
+      "$ref": "#/$defs/state"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "report",
+        "require-ack",
+        "strict"
+      ],
+      "description": "How the check was configured to gate. In report mode it never fails. In require-ack mode open findings at or above failOn fail the check. Strict mode also fails when test evidence was required and could not be read."
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "testsDeleted",
+        "testsSkipped",
+        "assertionsWeakened",
+        "changedTestsNotRun",
+        "findings"
+      ],
+      "description": "Headline counts for the pull request.",
+      "properties": {
+        "testsDeleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Medium or high findings from R001 and R002, the deleted test and deleted test file rules."
+        },
+        "testsSkipped": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Medium or high findings from R003 and R004, the newly skipped and expected failure rules."
+        },
+        "assertionsWeakened": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Medium or high findings from the A rules, which cover removed, loosened and tautological assertions."
+        },
+        "changedTestsNotRun": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Findings from V003: tests changed in this pull request that do not appear in the attached results."
+        },
+        "findings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Findings that are not acknowledged, counted by severity.",
+          "properties": {
+            "high": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Open high severity findings."
+            },
+            "medium": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Open medium severity findings."
+            },
+            "low": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Open low severity findings."
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      },
+      "description": "Every finding, sorted by severity (high first), then rule id, then path. Acknowledged findings stay in the list with their acknowledgement."
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "sources",
+        "total",
+        "passed",
+        "failed",
+        "errored",
+        "skipped",
+        "flaky",
+        "notes"
+      ],
+      "description": "What the attached JUnit XML results say about the run.",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "read",
+            "unreadable",
+            "partial"
+          ],
+          "description": "read when results were found and parsed, partial when only some could be read, unreadable when none were found."
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths of the JUnit XML files that were read."
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases found in the results."
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases that passed."
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases that failed."
+        },
+        "errored": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases that ended in an error."
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases that were skipped."
+        },
+        "flaky": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test cases that failed and then passed on a rerun."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Plain sentences on why evidence is missing or partial, and reader warnings."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agents"
+      ],
+      "description": "Signs that a coding agent wrote the change. Shown to reviewers; it never changes a severity unless configured to.",
+      "properties": {
+        "agents": {
+          "type": "array",
+          "description": "Agents detected from commit trailers, footers and the pull request text.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "signals"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Agent name, such as Claude Code, Codex, Cursor or GitHub Copilot."
+              },
+              "signals": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "What was seen, such as a Co-Authored-By trailer on 2 of 3 commits."
+              }
+            }
+          }
+        },
+        "botAuthor": {
+          "type": "string",
+          "description": "Login of the pull request author when the account is a bot."
+        }
+      }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changed",
+        "tests",
+        "production",
+        "config",
+        "workflows",
+        "snapshots"
+      ],
+      "description": "Changed files in the pull request, counted by kind.",
+      "properties": {
+        "changed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "All changed files."
+        },
+        "tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Changed test files."
+        },
+        "production": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Changed production source files."
+        },
+        "config": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Changed test runner or coverage configuration files."
+        },
+        "workflows": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Changed CI workflow files."
+        },
+        "snapshots": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Changed snapshot files."
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalMs",
+        "parseMs",
+        "rulesMs",
+        "evidenceMs"
+      ],
+      "description": "Where the run spent its time, in milliseconds.",
+      "properties": {
+        "totalMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Wall time of the whole engine run."
+        },
+        "parseMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time spent parsing test files."
+        },
+        "rulesMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time spent running rules."
+        },
+        "evidenceMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time spent reading results inside the engine. Results are read before the engine starts, so this is usually 0."
+        }
+      }
+    },
+    "base": {
+      "type": "string",
+      "description": "Commit sha of the merge base between the base ref and head. Findings compare this commit with head."
+    },
+    "head": {
+      "type": "string",
+      "description": "Commit sha of the head ref."
+    }
+  },
+  "$defs": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "review",
+        "unreadable"
+      ],
+      "description": "pass when no open finding reaches failOn and evidence was read or not needed. review when at least one open finding reaches failOn. unreadable when no finding reaches failOn but tests changed and no results could be read."
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "description": "How serious the finding is. High and medium findings are the ones a reviewer, or an agent before pushing, is expected to fix or acknowledge."
+    },
+    "ruleId": {
+      "type": "string",
+      "enum": [
+        "R001",
+        "R002",
+        "R003",
+        "R004",
+        "R005",
+        "R006",
+        "R010",
+        "A001",
+        "A002",
+        "A009",
+        "O001",
+        "O002",
+        "O006",
+        "E001",
+        "W002",
+        "W003",
+        "W006",
+        "S004",
+        "V003",
+        "V004",
+        "V005",
+        "V006"
+      ],
+      "description": "Id of the rule that produced the finding. See https://testwitness.github.io/testwitness/rules for each rule."
+    },
+    "label": {
+      "type": "string",
+      "enum": [
+        "assertions moved",
+        "conditional",
+        "consolidated",
+        "file not in results",
+        "in helper",
+        "maintainer only",
+        "moved",
+        "narrowed",
+        "nested",
+        "one case",
+        "override",
+        "parameterised",
+        "partial results",
+        "production removed",
+        "refactored",
+        "replaced",
+        "replaced by call",
+        "rewritten",
+        "smoke",
+        "tracked",
+        "unreadable",
+        "unsupported"
+      ],
+      "description": "Qualifier that explains why a finding has the severity it has, such as moved, smoke or replaced by call. The rules reference explains each label under its rule."
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "severity",
+        "message",
+        "location",
+        "fingerprint"
+      ],
+      "description": "One thing in the pull request that weakens a test, hides a failure, or leaves a change unproven.",
+      "properties": {
+        "ruleId": {
+          "$ref": "#/$defs/ruleId"
+        },
+        "severity": {
+          "$ref": "#/$defs/severity"
+        },
+        "message": {
+          "type": "string",
+          "description": "One plain sentence saying what changed and why it matters."
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path"
+          ],
+          "description": "Where the finding is.",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Repository relative path, or a pseudo path such as PR for the pull request text and results for the evidence."
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "First line, 1 based. In the head file, or in the base file when the code was deleted."
+            },
+            "endLine": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Last line, 1 based, when the finding spans several lines."
+            }
+          }
+        },
+        "fingerprint": {
+          "type": "string",
+          "description": "Stable id of the finding. It survives line shifts and rebases, and it is the key used to acknowledge the finding in .testwitness.yml."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Qualified test name or configuration key the finding is about, such as CartTest#rejectsNegativeAmount or describe › it."
+        },
+        "before": {
+          "type": "string",
+          "description": "Relevant source in the base, such as the removed assertion."
+        },
+        "after": {
+          "type": "string",
+          "description": "Relevant source in the head, such as the loosened assertion."
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "acknowledged": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "by",
+            "reason",
+            "at",
+            "via"
+          ],
+          "description": "Present when a person accepted the finding. Acknowledged findings are not counted in summary.findings and do not fail the check.",
+          "properties": {
+            "by": {
+              "type": "string",
+              "description": "Who acknowledged it."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why it is acceptable."
+            },
+            "at": {
+              "type": "string",
+              "description": "When it was acknowledged, as written in the source of the acknowledgement. May be empty."
+            },
+            "via": {
+              "type": "string",
+              "enum": [
+                "config",
+                "comment",
+                "label"
+              ],
+              "description": "Where the acknowledgement came from: the acknowledge list in .testwitness.yml, a pull request comment, or the testwitness:acknowledged label."
+            }
+          }
+        }
+      }
+    }
+  }
+}

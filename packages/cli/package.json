@@ -48,7 +48,9 @@
     "bundle": "node ../../scripts/bundle-cli.mjs"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
     "commander": "^14.0.0",
-    "fast-glob": "^3.3.3"
+    "fast-glob": "^3.3.3",
+    "zod": "4.6.7"
   }
 }

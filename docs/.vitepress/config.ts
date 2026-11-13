@@ -1,11 +1,17 @@
+import { copyFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'testwitness',
   description: 'Did this PR weaken its tests, and did they actually run?',
   base: '/testwitness/',
-  // Launch runbooks and drafts live in the repository for transparency but are not site pages.
-  srcExclude: ['launch/**'],
+  // Working documents for the maintainer, not site pages.
+  srcExclude: ['launch/**', 'ASSESSMENT-AND-ROADMAP.md'],
+  // Serve the report schema at its $id, https://testwitness.github.io/testwitness/report.schema.json.
+  buildEnd(site) {
+    copyFileSync(join(site.srcDir, 'report.schema.json'), join(site.outDir, 'report.schema.json'));
+  },
   themeConfig: {
     nav: [
       { text: 'Quick start', link: '/' },
@@ -19,6 +25,7 @@ export default defineConfig({
       { text: 'Evidence (reporters)', link: '/evidence' },
       { text: 'Configuration', link: '/configuration' },
       { text: 'CLI', link: '/cli' },
+      { text: 'MCP server for agents', link: '/mcp' },
       { text: 'Fork PRs and security', link: '/security' },
       { text: 'Rules reference', link: '/rules' },
       { text: 'Precision', link: '/precision' },

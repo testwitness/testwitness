@@ -302,6 +302,8 @@ export interface ResolvedConfig {
 
 export interface Report {
   $schema: string;
+  /** Version of the report shape; bumped only on a breaking change. See docs/report.schema.json. */
+  schemaVersion: '1';
   tool: { name: 'testwitness'; version: string };
   generatedAt: string;
   state: CheckState;

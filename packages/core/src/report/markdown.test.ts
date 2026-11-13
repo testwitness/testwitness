@@ -9,7 +9,8 @@ function finding(over: Partial<Finding> = {}): Finding {
 
 function report(over: Partial<Report> = {}): Report {
   return {
-    $schema: 'https://testwitness.dev/schema/report/v1.json',
+    $schema: 'https://testwitness.github.io/testwitness/report.schema.json',
+    schemaVersion: '1',
     tool: { name: 'testwitness', version: '9.9.9' },
     generatedAt: '2026-11-03T00:00:00.000Z',
     state: 'review',
@@ -226,6 +227,6 @@ describe('renderJson', () => {
   it('is indented with two spaces and ends with a newline', () => {
     const text = renderJson(report());
     expect(text.endsWith('}\n')).toBe(true);
-    expect(text.split('\n')[1]).toBe('  "$schema": "https://testwitness.dev/schema/report/v1.json",');
+    expect(text.split('\n')[1]).toBe('  "$schema": "https://testwitness.github.io/testwitness/report.schema.json",');
   });
 });
