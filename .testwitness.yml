@@ -1,0 +1,11 @@
+# testwitness checks its own pull requests (.github/workflows/testwitness.yml).
+# The golden fixture cases, the fixture projects and the corpus hold weakened or
+# failing tests on purpose: they are the inputs the rules are tested against, so
+# findings there say nothing about this repository's own tests. Everything else,
+# the packages' own tests included, is checked.
+paths:
+  ignore:
+    - "fixtures/*/cases/**"
+    - "fixtures/*/project/**"
+    - "fixtures/*/results/**"
+    - "corpus/entries/**"
