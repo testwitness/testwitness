@@ -207,16 +207,14 @@ export const R002: Rule = {
   docs: {
     summary: 'A file matching test patterns was deleted. The number of tests lost is counted from the base inventory.',
     falsePositives:
-      'A file whose tests all reappear elsewhere in the head tree is reported low as moved: same bodies anywhere, or the same test names in a file with the same name in another directory (a class moved to another package with edits, which git sees as a deletion and an addition). Same names in a file with another name are not a move. A file deleted while new test files the PR adds in the same directory hold at least as many tests as the PR deleted is reported low as rewritten, a narrower form of the control R001 applies. Reported low with the label production removed when the production file was deleted too, or when every test names a class or function the PR removed from a production file that stays, and low with the label version dropped when every test was gated on a language version the PR stops supporting. Git rename detection handles pure moves before this rule runs.',
+      'A file whose tests all reappear elsewhere in the head tree is reported low as moved: same bodies anywhere, or the same test names in a file with the same name in another directory (a class moved to another package with edits, which git sees as a deletion and an addition). Same names in a file with another name are not a move. A file deleted while new test files the PR adds in the same directory, or a new file with the same name elsewhere, hold at least as many tests as the deleted file is reported low as rewritten, a narrower form of the control R001 applies. Reported low with the label production removed when the production file was deleted too, or when every test names a class or function the PR removed from a production file that stays, and low with the label version dropped when every test was gated on a language version the PR stops supporting. Git rename detection handles pure moves before this rule runs.',
     example: 'deleted file mode 100644 src/__tests__/billing.test.ts',
   },
   async run(ctx) {
     const out: Finding[] = [];
     const added = new Map<string, number>();
-    let deletedTotal = 0;
     for (const { pair, change } of allChanges(ctx.pairs)) {
       if (change.kind === 'added') added.set(pair.file.path, (added.get(pair.file.path) ?? 0) + 1);
-      if (change.kind === 'deleted') deletedTotal++;
     }
     for (const pair of ctx.pairs) {
       if (pair.file.status !== 'deleted') continue;
@@ -251,11 +249,12 @@ export const R002: Rule = {
       // Rewritten: new test files this PR adds next to the deleted one hold at least as many tests as the PR deleted
       // (R001's control, narrowed to new files in the same directory: tests added to an existing file about another
       // subject are not a rewrite of this one).
+      // A new file with the same name in another directory is the class re-homed and rewritten (tests renamed).
       const dir = pair.file.path.slice(0, pair.file.path.lastIndexOf('/') + 1);
-      const addedElsewhere = ctx.pairs
-        .filter((p) => p.file.status === 'added' && p.file.path.slice(0, p.file.path.lastIndexOf('/') + 1) === dir)
-        .reduce((n, p) => n + (added.get(p.file.path) ?? 0), 0);
-      if (addedElsewhere >= deletedTotal && addedElsewhere > 0) {
+      const fileName = pair.file.path.slice(dir.length);
+      const nearby = (p: (typeof ctx.pairs)[number]): boolean => p.file.path.slice(0, p.file.path.lastIndexOf('/') + 1) === dir || p.file.path.endsWith(`/${fileName}`);
+      const addedElsewhere = ctx.pairs.filter((p) => p.file.status === 'added' && nearby(p)).reduce((n, p) => n + (added.get(p.file.path) ?? 0), 0);
+      if (addedElsewhere >= tests.length && addedElsewhere > 0) {
         out.push(
           makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted with ${tests.length} test${tests.length === 1 ? '' : 's'} while ${addedElsewhere} new test${addedElsewhere === 1 ? ' was' : 's were'} added in other changed test files; likely rewritten`, { label: 'rewritten' }),
         );
