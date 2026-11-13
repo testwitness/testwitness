@@ -19,6 +19,7 @@ export async function main(argv: string[]): Promise<number> {
     .description('Compare base and head, read the test results, report findings')
     .option('--base <ref>', "base ref (merge base is computed; default: origin's default branch, from origin/HEAD)")
     .option('--head <ref>', 'head ref', 'HEAD')
+    .option('--worktree', 'compare the merge base with the working tree (staged, unstaged and untracked files that are not ignored) instead of the head commit; writes nothing into the repository')
     .option('--results <globs>', 'comma separated globs of test results: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (default from config)')
     .option('--junit <globs>', 'older name of --results; used when --results is not given')
     .option('--diff-only', 'check the diff and the PR text only: read no test results and skip V005 (for local runs and existing PRs)', false)
@@ -41,10 +42,12 @@ export async function main(argv: string[]): Promise<number> {
     .option('-q, --quiet', 'no progress on stderr', false)
     .action(async (o) => {
       try {
+        if (o.worktree && o.head !== 'HEAD') throw new ConfigError('--worktree compares the working tree, which sits on HEAD; do not pass --head with it');
         const { report, exitCode, config } = await check({
           cwd: resolve(o.cwd),
           base: o.base,
           head: o.head,
+          ...(o.worktree ? { worktree: true } : {}),
           results: o.results,
           junit: o.junit,
           ...(o.diffOnly ? { diffOnly: true } : {}),

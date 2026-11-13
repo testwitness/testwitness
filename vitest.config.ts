@@ -19,6 +19,16 @@ export default defineConfig({
           testTimeout: 60_000,
         },
       },
+      {
+        // The corpus replayed as working tree changes (the agent guard's proof); about three minutes.
+        test: {
+          name: 'replay',
+          include: ['corpus/runner/*.test.ts'],
+          environment: 'node',
+          testTimeout: 120_000,
+          hookTimeout: 900_000,
+        },
+      },
     ],
   },
 });

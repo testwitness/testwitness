@@ -585,7 +585,11 @@
     },
     "head": {
       "type": "string",
-      "description": "Commit sha of the head ref."
+      "description": "Commit sha of the head ref. In a working tree check this is the commit the working tree sits on."
+    },
+    "headTree": {
+      "type": "string",
+      "description": "Git tree id of the working tree snapshot (staged, unstaged and untracked files that are not ignored). Present only when the check ran with --worktree; findings then compare base with this tree, not with the head commit."
     }
   },
   "$defs": {

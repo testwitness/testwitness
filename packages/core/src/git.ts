@@ -1,4 +1,7 @@
 import { execFile } from 'node:child_process';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { delimiter, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { toLf } from './eol.js';
 
@@ -6,6 +9,8 @@ const run = promisify(execFile);
 
 export interface GitOptions {
   cwd: string;
+  /** Environment of the git process; default the environment of this process. Set by the working tree snapshot. */
+  env?: NodeJS.ProcessEnv | undefined;
 }
 
 export class GitError extends Error {
@@ -22,7 +27,7 @@ export class GitError extends Error {
 /** Run a git command and return stdout. Never passes untrusted text as a flag: callers pass refs and paths after `--`. */
 export async function git(args: string[], opts: GitOptions, maxBuffer = 256 * 1024 * 1024): Promise<string> {
   try {
-    const { stdout } = await run('git', args, { cwd: opts.cwd, maxBuffer, encoding: 'utf8' });
+    const { stdout } = await run('git', args, { cwd: opts.cwd, maxBuffer, encoding: 'utf8', ...(opts.env ? { env: opts.env } : {}) });
     return stdout;
   } catch (err) {
     const e = err as { stderr?: string; message?: string };
@@ -104,4 +109,73 @@ export async function listTree(ref: string, opts: GitOptions): Promise<string[]>
 export async function commitMessages(base: string, head: string, opts: GitOptions): Promise<string[]> {
   const out = await git(['log', '--format=%B%x00', `${base}..${head}`], opts);
   return out.split('\0').map((s) => s.trim()).filter(Boolean);
+}
+
+export interface WorktreeSnapshot {
+  /** Id of a tree object that holds the working tree: staged, unstaged and untracked files that are not ignored. */
+  tree: string;
+  /** Options every git call that reads the tree must use: the tree lives in a temporary object directory. */
+  git: GitOptions;
+  /** Remove the temporary index and object directory. */
+  dispose(): void;
+}
+
+/**
+ * Snapshot the working tree as a git tree object without writing anything into the repository.
+ *
+ * How: a temporary directory under os.tmpdir() holds a copy of the index (GIT_INDEX_FILE) and an empty object
+ * directory (GIT_OBJECT_DIRECTORY); the repository's own object directory is added read only through
+ * GIT_ALTERNATE_OBJECT_DIRECTORIES. `git add -A` then stages every change into the temporary index, writing new blobs
+ * into the temporary object directory, and `git write-tree` writes the tree there too. The repository's index, refs,
+ * object store and working tree are not touched: no temporary commit, no stash, not even a loose object. The tree is
+ * what `git add -A && git commit` would record (same ignore rules, same line ending and clean filters), so the engine
+ * sees exactly what a commit of the current state would hold. The tree can only be read through the returned options
+ * and is gone after dispose().
+ *
+ * Why not read the files directly: the engine's rename detection, binary detection and hunks come from `git diff`, and
+ * findings must be identical to the commit check once the change is committed. One code path guarantees that.
+ */
+export async function snapshotWorktree(opts: GitOptions): Promise<WorktreeSnapshot> {
+  const top = (await git(['rev-parse', '--show-toplevel'], opts)).trim();
+  const paths = (await git(['rev-parse', '--git-path', 'objects', '--git-path', 'index'], { ...opts, cwd: top })).split('\n');
+  const objects = resolve(top, paths[0] ?? '');
+  const index = resolve(top, paths[1] ?? '');
+  const dir = mkdtempSync(join(tmpdir(), 'testwitness-worktree-'));
+  const dispose = (): void => rmSync(dir, { recursive: true, force: true });
+  try {
+    const tmpIndex = join(dir, 'index');
+    mkdirSync(join(dir, 'objects'));
+    const base = opts.env ?? process.env;
+    const alternates = [objects, base['GIT_ALTERNATE_OBJECT_DIRECTORIES']].filter(Boolean).join(delimiter);
+    const env: NodeJS.ProcessEnv = { ...base, GIT_INDEX_FILE: tmpIndex, GIT_OBJECT_DIRECTORY: join(dir, 'objects'), GIT_ALTERNATE_OBJECT_DIRECTORIES: alternates, GIT_OPTIONAL_LOCKS: '0' };
+    const snap: GitOptions = { cwd: top, env };
+    const stage = async (): Promise<void> => {
+      await git(['add', '-A', '--', '.'], snap);
+    };
+    // The copied index keeps git's stat cache, so unchanged files are not hashed again.
+    let staged = false;
+    if (existsSync(index)) {
+      copyFileSync(index, tmpIndex);
+      try {
+        await stage();
+        staged = true;
+      } catch {
+        // A split or otherwise unusual index cannot be used from a copy: start from HEAD instead.
+        rmSync(tmpIndex, { force: true });
+      }
+    }
+    if (!staged) {
+      try {
+        await git(['read-tree', 'HEAD'], snap);
+      } catch {
+        /* no commit yet: start from an empty index */
+      }
+      await stage();
+    }
+    const tree = (await git(['write-tree'], snap)).trim();
+    return { tree, git: snap, dispose };
+  } catch (err) {
+    dispose();
+    throw err;
+  }
 }

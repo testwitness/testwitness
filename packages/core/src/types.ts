@@ -486,6 +486,8 @@ export interface Report {
   history?: HistorySummary;
   base: string;
   head: string;
+  /** Git tree id of the working tree snapshot, when the check compared the working tree (--worktree) instead of the head commit. */
+  headTree?: string;
 }
 
 /** The history section of the report. */

@@ -12,6 +12,7 @@ import { RESULT_FORMATS } from '@testwitness/junit';
 import { check, render } from './check.js';
 import { discoverCases, runCase, type GoldenCase } from '../../../fixtures/runner/golden.js';
 import { generate, SMALL } from '../../../bench/generate.js';
+import { makeRepo, MATH_TEST_WEAKENED } from './testing/repo.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const schema = JSON.parse(readFileSync(join(root, 'docs/report.schema.json'), 'utf8')) as {
@@ -71,6 +72,22 @@ describe('report schema', () => {
       expectValid(JSON.parse(render(report, 'json', false)));
     }, 60_000);
   }
+
+  it('validates a working tree report, which carries headTree', async () => {
+    const repo = makeRepo();
+    try {
+      repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
+      const { report } = await check({ cwd: repo.dir, base: 'main', head: 'HEAD', worktree: true, results: '', format: 'json', quiet: true, log: () => {} });
+      const json = JSON.parse(render(report, 'json', false)) as { headTree?: string };
+      expect(json.headTree).toMatch(/^[0-9a-f]{40}$/);
+      expectValid(json);
+      // The other direction: the schema knows the field, and a wrong type fails.
+      const validate = validator();
+      expect(validate({ ...json, headTree: 7 })).toBe(false);
+    } finally {
+      repo.dispose();
+    }
+  });
 
   it('validates the JSON output of the bench small case', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'tw-schema-bench-'));
