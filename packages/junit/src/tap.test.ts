@@ -246,3 +246,27 @@ describe('TAP on hostile input (review regression)', () => {
     expect(s.records[0]!.chain[0]).toMatch(/^a +b$/);
   });
 });
+
+describe('TAP written on Windows (CRLF)', () => {
+  it('reads the same records from CRLF as from LF, the YAML blocks included', () => {
+    for (const file of [NODE, NODE_TAP, PERL]) {
+      const text = readFileSync(file, 'utf8');
+      expect(parseTap(text.replace(/\n/g, '\r\n')), file).toEqual(parseTap(text));
+    }
+  });
+
+  it('streams CRLF TAP split across chunks at the CR', async () => {
+    const text = readFileSync(NODE, 'utf8');
+    const crlf = text.replace(/\n/g, '\r\n');
+    const at = crlf.indexOf('\r\n', 200) + 1;
+    const lf = emptyIndex();
+    await readTapStream(Readable.from([text]), 'a.tap', lf);
+    const split = emptyIndex();
+    await readTapStream(Readable.from([crlf.slice(0, at), crlf.slice(at)]), 'a.tap', split);
+    finaliseTotals(lf);
+    finaliseTotals(split);
+    expect([...split.records.values()].map((r) => `${r.status} ${r.name}`)).toEqual([...lf.records.values()].map((r) => `${r.status} ${r.name}`));
+    expect(split.records.size).toBeGreaterThan(5);
+    expect(split.warnings).toEqual(lf.warnings);
+  });
+});
