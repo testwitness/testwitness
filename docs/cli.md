@@ -24,7 +24,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 
 | Option | Meaning | Default |
 |---|---|---|
-| `--base <ref>` | base ref; the merge base with head is used | `origin/main` |
+| `--base <ref>` | base ref; the merge base with head is used. A ref that does not name a commit fails with exit 2 and names the default branch. When the head is already contained in the base (the default branch itself, or a PR merged with a merge commit) there is nothing to compare: the state is `unreadable` and the report says so in `notes` | the default branch, from `origin/HEAD` (then `origin/main`, `origin/master`, `main`, `master`) |
 | `--head <ref>` | head ref | `HEAD` |
 | `--results <globs>` | comma separated globs of test results: JUnit XML (recommended), TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content ([evidence](./evidence)) | from config `results.head` |
 | `--junit <globs>` | older name of `--results`, used when `--results` is not given | |

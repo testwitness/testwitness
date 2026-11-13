@@ -55,6 +55,7 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
   lines.push(`## ${opts.title ?? 'testwitness'}: ${report.state}`);
   lines.push('');
   lines.push(STATE_LINE[report.state]);
+  for (const n of report.notes ?? []) lines.push('', esc(n));
   lines.push('');
   const s = report.summary;
   lines.push('**Summary**');

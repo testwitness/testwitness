@@ -472,6 +472,8 @@ export interface Report {
     notes: string[];
   };
   provenance: ProvenanceInfo;
+  /** Notes about the comparison itself, such as nothing to compare when the head is already in the base. Optional. */
+  notes?: string[];
   files: { changed: number; tests: number; production: number; config: number; workflows: number; snapshots: number };
   timing: { totalMs: number; parseMs: number; rulesMs: number; evidenceMs: number; helperIndexMs?: number };
   /** The helper index, when a changed test called a function the file could not resolve. Absent when it was not needed. */

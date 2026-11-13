@@ -260,6 +260,13 @@
         }
       }
     },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Notes about the comparison itself, such as nothing to compare when the head is already contained in the base. Absent when there is nothing to say."
+    },
     "files": {
       "type": "object",
       "additionalProperties": false,
