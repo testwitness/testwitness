@@ -133,3 +133,21 @@ Running: study sampler (old workspace, resumes from its checkpoint at 146 of 650
 Delivery: patches and one apply.sh per batch in ~/Project AI Builder/testwitness/outbox/<date>-<n>/; Sajjad runs one line; decisions in DECISIONS.md.
 
 Resume from here: `git clone https://github.com/testwitness/testwitness`, check open PRs, then the branches named above in /home/claude/work/<branch with slash replaced by dash>.
+
+## 2026-11-13 (cycle 2)
+
+Batch 1 was pushed as PR #3 (node24) and PR #4 (the port); not merged at the time of writing. Read access to checks is only through the public pages: PR #4's ubuntu test passed; the other results were not visible without signing in.
+
+Integrated on branch int/batch2 (stacked on PR #4, 70 commits), each part verified on its own branch first:
+- fix/crlf-windows: line ending only changes are not changes (git diff --ignore-cr-at-eol), front ends read CRLF as LF, Windows paths for coverage, mutation, history and globs, helper cache keyed on content; 107 CRLF and mixed fixture cases.
+- fix/trial-precision: a replay of 300 merged PRs on 20 popular repositories found precision 0.04 on medium and high (5 of 129). Fixes for O006 support files, V004 template checkboxes and negation, E001 capture then assert, R001 and R002 moves and removed production code, empty diff no longer reads as pass, default base from origin/HEAD, --diff-only, local use docs. Replay after: 0.42 (5 of 12), every true positive kept.
+- perf/git-batch: one git cat-file --batch process instead of one git show per file; 1,000 file PR 20 to 26 s before, 8 to 13 s after on the same machine, identical findings.
+- ci/bench-matrix: 100, 1,000 and 5,000 file benchmarks with budgets enforced, ubuntu on PRs, all three operating systems on main and on a bench label.
+- feat/agent-guard: `check --worktree`, `hook --agent claude|cursor|codex|git`, `init`, a Claude Code plugin, a loop guard, crash and timeout allow; blocks by default only on rules the replay proves (A002, C001, C002, R004, R005, W003, W006). 15 of 16 acceptance criteria met; recorded live sessions are the open one. Built from a study of 89 dated developer complaints (internal: claude/TESTWITNESS-RESEARCH-*.md in the project).
+- corpus/expand-300: 347 entries (163 held out by URL hash), README promotes a rule only with 10 confirmed true positives and held out precision of at least 0.9 (R003, R004, R005, A002, C002, V004 today).
+- docs/launch-readiness: ten good first issues with a script to open them, ROADMAP.md, README claims trimmed.
+- Integration fixes: snapshot plus batch reader in one engine entry, diff flags merged (CRLF plus no textconv), hook benchmark in its own runner (p95 0.87 s and 1.15 s), every action moved to a node24 release, docs build TypeErrors fixed, A001, A009 and O002 default to low.
+
+Verified on int/batch2: typecheck and lint clean, 2817 tests (unit, fixtures and the corpus replay) with 2 skipped, pack:check passing, docs build clean, actionlint clean.
+
+Running: study sampler (185 of 650), trial replay on the integrated bundle.
