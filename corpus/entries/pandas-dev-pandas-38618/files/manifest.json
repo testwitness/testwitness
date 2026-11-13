@@ -1,0 +1,10 @@
+[
+  {
+    "path": "pandas/tests/plotting/test_hist_method.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/plotting/test_series.py",
+    "status": "modified"
+  }
+]

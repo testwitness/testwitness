@@ -1,0 +1,7 @@
+[
+  {
+    "path": "task-sdk/tests/task_sdk/bases/test_resumablejobmixin.py",
+    "status": "renamed",
+    "oldPath": "task-sdk/tests/task_sdk/bases/test_resumablemixin.py"
+  }
+]

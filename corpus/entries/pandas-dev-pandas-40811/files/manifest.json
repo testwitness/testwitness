@@ -1,0 +1,14 @@
+[
+  {
+    "path": "pandas/tests/groupby/test_any_all.py",
+    "status": "added"
+  },
+  {
+    "path": "pandas/tests/groupby/test_function.py",
+    "status": "modified"
+  },
+  {
+    "path": "pandas/tests/groupby/test_groupby.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "path": "dev/clint/src/clint/rules/mock_patch_as_decorator.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/langchain/test_langchain_model_export.py",
+    "status": "modified"
+  }
+]

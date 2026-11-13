@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/pandas-dev/pandas/pull/50749",
+  "repo": "pandas-dev/pandas",
+  "number": 50749,
+  "title": "TST: Consolidate tests that raise in groupby",
+  "merged_at": "2023-02-09T21:55:55Z",
+  "stars": 50280,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "consolidate",
+  "split": "heldout",
+  "base_sha": "0e8331f85cde8db2841aad92054d8e896e88fcef",
+  "head_sha": "3d2ec033a5bb982ddfeb600ee802250880042750",
+  "files_changed": 5,
+  "additions": 467,
+  "deletions": 67
+}

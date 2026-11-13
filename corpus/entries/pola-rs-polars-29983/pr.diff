@@ -1,0 +1,520 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index af01b9bc..cd4aef74 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -3842,7 +3842,6 @@ dependencies = [
+  "regex",
+  "serde",
+  "sqlparser",
+- "tempfile",
+ ]
+ 
+ [[package]]
+diff --git a/crates/polars-sql/Cargo.toml b/crates/polars-sql/Cargo.toml
+index d1e1aa90..8fe89ff2 100644
+--- a/crates/polars-sql/Cargo.toml
++++ b/crates/polars-sql/Cargo.toml
+@@ -31,7 +31,6 @@ sqlparser = { workspace = true }
+ polars-core = { workspace = true, features = ["fmt"] }
+ # required for local runs of the 'iss_23134' test
+ polars-lazy = { workspace = true, features = ["streaming"] }
+-tempfile = "3"
+ 
+ [features]
+ default = []
+diff --git a/crates/polars-sql/tests/functions_io.rs b/crates/polars-sql/tests/functions_io.rs
+index 103988ff..a54a9f70 100644
+--- a/crates/polars-sql/tests/functions_io.rs
++++ b/crates/polars-sql/tests/functions_io.rs
+@@ -110,357 +110,3 @@ fn read_ipc_tbl() {
+     assert_eq!(df_2.height(), 27);
+     assert_eq!(df_2.width(), 4);
+ }
+-
+-#[cfg(feature = "csv")]
+-mod read_csv_options {
+-    use super::*;
+-
+-    /// Write `contents` to `name` in `dir` and return its path.
+-    fn write_file(dir: &tempfile::TempDir, name: &str, contents: &[u8]) -> String {
+-        let path = dir.path().join(name);
+-        std::fs::write(&path, contents).unwrap();
+-        path.to_str().unwrap().to_string()
+-    }
+-
+-    fn query(sql: &str) -> PolarsResult<DataFrame> {
+-        SQLContext::new().execute(sql)?.collect()
+-    }
+-
+-    fn query_err(sql: &str) -> String {
+-        query(sql).unwrap_err().to_string()
+-    }
+-
+-    fn dtypes(df: &DataFrame) -> Vec<DataType> {
+-        df.dtypes()
+-    }
+-
+-    #[test]
+-    fn headerless_ragged_rows() {
+-        let dir = tempfile::tempdir().unwrap();
+-        // From the issue: without a header, short rows are padded with nulls.
+-        let path = write_file(&dir, "ragged.csv", b"1,a\n2,b,extra\n3\n");
+-        let err = query_err(&format!("SELECT * FROM read_csv('{path}')"));
+-        assert!(err.contains("found more fields than defined"), "{err}");
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', has_header => false)"
+-        ))
+-        .unwrap();
+-        let expected = df! {
+-            "column_0" => [1i64, 2, 3],
+-            "column_1" => [Some("a"), Some("b"), None],
+-            "column_2" => [None, Some("extra"), None],
+-        }
+-        .unwrap();
+-        assert!(df.equals_missing(&expected), "{df}");
+-    }
+-
+-    #[test]
+-    fn wide_row_after_inference_window() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let mut contents: String = (1..=150).map(|i| format!("{i},b\n")).collect();
+-        contents.push_str("151,b,late\n");
+-        let path = write_file(&dir, "late.csv", contents.as_bytes());
+-
+-        let err = query_err(&format!(
+-            "SELECT * FROM read_csv('{path}', has_header => false)"
+-        ));
+-        assert!(err.contains("found more fields than defined"), "{err}");
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', has_header => false, infer_schema_length => NULL)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.shape(), (151, 3));
+-        assert_eq!(df.column("column_2").unwrap().null_count(), 150);
+-    }
+-
+-    #[test]
+-    fn operators_and_case_insensitive_names() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let path = write_file(&dir, "ops.csv", b"1,2\n");
+-        for options in [
+-            "has_header => false",
+-            "has_header := false",
+-            "HAS_HEADER => false",
+-        ] {
+-            let df = query(&format!("SELECT * FROM read_csv('{path}', {options})")).unwrap();
+-            assert_eq!(df.shape(), (1, 2), "{options}");
+-        }
+-    }
+-
+-    #[test]
+-    fn layout_options() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let semicolons = write_file(&dir, "semicolons.csv", b"a;b\n1;\"x;y\"\n");
+-        let df = query(&format!(
+-            "SELECT b FROM read_csv('{semicolons}', separator => ';')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("b").unwrap().str().unwrap().get(0), Some("x;y"));
+-
+-        let tabs = write_file(&dir, "tabs.tsv", b"a\tb\n1\t2\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{tabs}', separator => E'\\t')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["a", "b"]);
+-        // The path may be an `E''` string too; forward slashes keep it free of escapes.
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv(E'{}', separator => E'\\t')",
+-            tabs.replace('\\', "/")
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["a", "b"]);
+-
+-        let quoted = write_file(&dir, "quoted.csv", b"a,b\n1,\"x\"\n");
+-        let df = query(&format!(
+-            "SELECT b FROM read_csv('{quoted}', quote_char => NULL)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("b").unwrap().str().unwrap().get(0), Some("\"x\""));
+-        // As in Python, an empty `quote_char` also turns quoting off.
+-        let df = query(&format!(
+-            "SELECT b FROM read_csv('{quoted}', quote_char => '')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("b").unwrap().str().unwrap().get(0), Some("\"x\""));
+-
+-        let comments = write_file(&dir, "comments.csv", b"a,b\n# note\n1,2\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{comments}', comment_prefix => '#')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.height(), 1);
+-
+-        let preamble = write_file(&dir, "preamble.csv", b"junk\njunk\na,b\n1,2\n3,4\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{preamble}', skip_rows => 2, skip_rows_after_header => 1)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["a", "b"]);
+-        assert_eq!(df.height(), 1);
+-
+-        let unbalanced = write_file(&dir, "unbalanced.csv", b"title \"open\na,b\n1,2\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{unbalanced}', skip_lines => 1)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["a", "b"]);
+-
+-        let invalid_utf8 = write_file(&dir, "lossy.csv", b"a\n\xff\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{invalid_utf8}', encoding => 'utf8-lossy')"
+-        ))
+-        .unwrap();
+-        assert_eq!(
+-            df.column("a").unwrap().str().unwrap().get(0),
+-            Some("\u{FFFD}")
+-        );
+-    }
+-
+-    #[test]
+-    fn names_and_types() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let path = write_file(&dir, "types.csv", b"a,b\n1,2\n");
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', new_columns => ['x', 'y'])"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["x", "y"]);
+-
+-        let headerless = write_file(&dir, "headerless.csv", b"1,2\n3,4\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{headerless}', has_header => false, schema => {{'x': 'INT', 'y': 'VARCHAR'}})"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.get_column_names(), ["x", "y"]);
+-        assert_eq!(dtypes(&df), [DataType::Int32, DataType::String]);
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', schema_overrides => {{'b': 'VARCHAR'}})"
+-        ))
+-        .unwrap();
+-        assert_eq!(dtypes(&df), [DataType::Int64, DataType::String]);
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', schema_overrides => ['VARCHAR', 'DOUBLE'])"
+-        ))
+-        .unwrap();
+-        assert_eq!(dtypes(&df), [DataType::String, DataType::Float64]);
+-
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', infer_schema => false)"
+-        ))
+-        .unwrap();
+-        assert_eq!(dtypes(&df), [DataType::String, DataType::String]);
+-
+-        let dates = write_file(&dir, "dates.csv", b"d\n2026-01-01\n");
+-        let df = query(&format!("SELECT * FROM read_csv('{dates}')")).unwrap();
+-        assert_eq!(dtypes(&df), [DataType::Date]);
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{dates}', try_parse_dates => false)"
+-        ))
+-        .unwrap();
+-        assert_eq!(dtypes(&df), [DataType::String]);
+-
+-        let decimals = write_file(&dir, "decimals.csv", b"a;b\n1,5;2\n");
+-        let df = query(&format!(
+-            "SELECT a FROM read_csv('{decimals}', separator => ';', decimal_comma => true)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("a").unwrap().f64().unwrap().get(0), Some(1.5));
+-    }
+-
+-    #[test]
+-    fn null_values_and_errors() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let single = write_file(&dir, "na.csv", b"a,b\nNA,1\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{single}', null_values => 'NA')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("a").unwrap().null_count(), 1);
+-
+-        let several = write_file(&dir, "na_dash.csv", b"a,b\nNA,-\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{several}', null_values => ['NA', '-'])"
+-        ))
+-        .unwrap();
+-        assert_eq!(
+-            df.columns().iter().map(|c| c.null_count()).sum::<usize>(),
+-            2
+-        );
+-
+-        let per_column = write_file(&dir, "na_per_column.csv", b"a,b\nNA,NA\n");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{per_column}', null_values => {{'a': 'NA'}})"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("a").unwrap().null_count(), 1);
+-        assert_eq!(df.column("b").unwrap().str().unwrap().get(0), Some("NA"));
+-
+-        let bad_int = write_file(&dir, "bad_int.csv", b"a\n1\nx\n");
+-        let sql =
+-            format!("SELECT * FROM read_csv('{bad_int}', schema_overrides => {{'a': 'INT'}})");
+-        assert!(query(&sql).is_err());
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{bad_int}', schema_overrides => {{'a': 'INT'}}, ignore_errors => true)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.column("a").unwrap().null_count(), 1);
+-    }
+-
+-    #[test]
+-    fn ragged_and_multiple_files() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let path = write_file(&dir, "too_wide.csv", b"a,b\n1,2,3\n");
+-        assert!(query(&format!("SELECT * FROM read_csv('{path}')")).is_err());
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', truncate_ragged_lines => true)"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.shape(), (1, 2));
+-
+-        write_file(&dir, "part_1.csv", b"a\n1\n");
+-        let part_2 = write_file(&dir, "part_2.csv", b"a\n2\n");
+-        let glob = part_2.replace("part_2.csv", "part_*.csv");
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{glob}', include_file_paths => 'file')"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.shape(), (2, 2));
+-        assert_eq!(df.column("file").unwrap().n_unique().unwrap(), 2);
+-    }
+-
+-    #[test]
+-    fn empty_file_returns_schema_when_headerless() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let path = write_file(&dir, "empty.csv", b"");
+-        assert!(query(&format!("SELECT * FROM read_csv('{path}')")).is_err());
+-        let df = query(&format!(
+-            "SELECT * FROM read_csv('{path}', has_header => false, schema => {{'x': 'INT'}})"
+-        ))
+-        .unwrap();
+-        assert_eq!(df.shape(), (0, 1));
+-    }
+-
+-    #[test]
+-    fn option_errors() {
+-        let dir = tempfile::tempdir().unwrap();
+-        let path = write_file(&dir, "errors.csv", b"a,b\n1,2\n");
+-        let cases = [
+-            (
+-                "header => false",
+-                "unknown `read_csv` option 'header'; valid options are: has_header, separator",
+-            ),
+-            (
+-                "n_rows => 5",
+-                "`read_csv` option 'n_rows' is not supported in SQL: use LIMIT",
+-            ),
+-            (
+-                "has_header = false",
+-                "`read_csv` options must be named with '=>' (found: has_header = false)",
+-            ),
+-            (
+-                "false",
+-                "`read_csv` options must be named with '=>' (found: false)",
+-            ),
+-            (
+-                "has_header => false, HAS_HEADER => true",
+-                "`read_csv` option 'has_header' is given more than once",
+-            ),
+-            (
+-                "has_header => 'yes'",
+-                "`read_csv` option 'has_header' expects a boolean; found: 'yes'",
+-            ),
+-            (
+-                "skip_rows => -1",
+-                "`read_csv` option 'skip_rows' expects a non-negative integer",
+-            ),
+-            (
+-                "separator => '\\t'",
+-                "expects a single-byte character; found: '\\t'; escape sequences need an E'' string",
+-            ),
+-            (
+-                "schema => {'x': 'INT('}",
+-                "`read_csv` option 'schema' has an invalid type name: 'INT('",
+-            ),
+-            (
+-                "schema => ['INT']",
+-                "`read_csv` option 'schema' expects a dictionary",
+-            ),
+-            (
+-                "has_header => *",
+-                "`read_csv` option 'has_header' expects a value; found: *",
+-            ),
+-            (
+-                "encoding => 'latin1'",
+-                "`read_csv` option 'encoding' expects 'utf8' or 'utf8-lossy'; found: 'latin1'",
+-            ),
+-        ];
+-        for (options, expected) in cases {
+-            let err = query_err(&format!("SELECT * FROM read_csv('{path}', {options})"));
+-            assert!(err.contains(expected), "{options}: {err}");
+-        }
+-
+-        // Excluded options without an alternative get no trailing reason.
+-        let err = query_err(&format!("SELECT * FROM read_csv('{path}', glob => false)"));
+-        assert!(
+-            err.contains("`read_csv` option 'glob' is not supported in SQL")
+-                && !err.contains("SQL:"),
+-            "{err}"
+-        );
+-        let err = query_err("SELECT * FROM read_csv()");
+-        assert!(
+-            err.contains("`read_csv` expects a file path as its first argument"),
+-            "{err}"
+-        );
+-        let err = query_err("SELECT * FROM read_csv(has_header => false)");
+-        assert!(
+-            err.contains("`read_csv` expects a file path as its first argument"),
+-            "{err}"
+-        );
+-    }
+-}
+diff --git a/py-polars/tests/unit/sql/test_table_functions.py b/py-polars/tests/unit/sql/test_table_functions.py
+index 2c9d9c44..93ee1cdd 100644
+--- a/py-polars/tests/unit/sql/test_table_functions.py
++++ b/py-polars/tests/unit/sql/test_table_functions.py
+@@ -17,8 +17,8 @@ if TYPE_CHECKING:
+     from pathlib import Path
+ 
+ 
+-def _read_csv_sql(path: Path, options: str) -> pl.DataFrame:
+-    args = f"'{path.as_posix()}'" + (f", {options}" if options else "")
++def _read_csv_sql(path: Path, options: str, path_prefix: str = "") -> pl.DataFrame:
++    args = f"{path_prefix}'{path.as_posix()}'" + (f", {options}" if options else "")
+     with pl.SQLContext() as ctx:
+         return ctx.execute(f"SELECT * FROM read_csv({args})", eager=True)
+ 
+@@ -64,7 +64,8 @@ _WIDE_ROW_LATE = "".join(f"{i},b\n" for i in range(1, 151)) + "151,b,late\n"
+             "skip_rows => 2, skip_rows_after_header => 1",
+             {"skip_rows": 2, "skip_rows_after_header": 1},
+         ),
+-        ('title "open\na,b\n1,2\n', "skip_lines := 1", {"skip_lines": 1}),
++        # option names are case-insensitive
++        ('title "open\na,b\n1,2\n', "SKIP_LINES := 1", {"skip_lines": 1}),
+         # names and types
+         ("a,b\n1,2\n", "new_columns => ['x', 'y']", {"new_columns": ["x", "y"]}),
+         (
+@@ -142,6 +143,12 @@ def test_read_csv_options_match_scan_csv(
+             "extra_columns => 'ignore', infer_schema_files => 1",
+             {"extra_columns": "ignore", "infer_schema_files": 1},
+         ),
++        # the path of each file
++        (
++            ["a\n1\n", "a\n2\n"],
++            "include_file_paths => 'file'",
++            {"include_file_paths": "file"},
++        ),
+         # a wider type in the eleventh file, past the default of ten
+         (
+             ["a\n1.5\n" if i == 10 else "a\n1\n" for i in range(12)],
+@@ -171,6 +178,17 @@ def test_read_csv_options_lossy_encoding(tmp_path: Path) -> None:
+     assert expected["a"][0] == "�"
+ 
+ 
++def test_read_csv_path_as_escaped_string(tmp_path: Path) -> None:
++    path = tmp_path / "data.tsv"
++    path.write_text("a\tb\n1\t2\n")
++
++    # forward slashes keep the path free of escape sequences
++    expected = pl.scan_csv(path.as_posix(), separator="\t").collect()
++    assert_frame_equal(
++        _read_csv_sql(path, "separator => E'\\t'", path_prefix="E"), expected
++    )
++
++
+ def test_read_csv_options_survive_plan_roundtrip(tmp_path: Path) -> None:
+     path = tmp_path / "data.csv"
+     path.write_text("1;x\n2;y\n")
+@@ -223,6 +241,12 @@ def test_read_csv_options_survive_plan_roundtrip(tmp_path: Path) -> None:
+             SQLSyntaxError,
+             r"option 'infer_schema_files' expects a positive integer; found: 0",
+         ),
++        # an excluded option without an alternative gets no trailing reason
++        (
++            "glob => false",
++            SQLInterfaceError,
++            r"option 'glob' is not supported in SQL$",
++        ),
+         (
+             "columns => ['a']",
+             SQLInterfaceError,
+@@ -235,7 +259,12 @@ def test_read_csv_options_survive_plan_roundtrip(tmp_path: Path) -> None:
+             r"options must be named with '=>' \(found: has_header = false\)",
+         ),
+         (
+-            "has_header => false, has_header => true",
++            "false",
++            SQLSyntaxError,
++            r"options must be named with '=>' \(found: false\)",
++        ),
++        (
++            "has_header => false, HAS_HEADER => true",
+             SQLSyntaxError,
+             r"option 'has_header' is given more than once",
+         ),
+@@ -249,6 +278,16 @@ def test_read_csv_options_survive_plan_roundtrip(tmp_path: Path) -> None:
+             SQLSyntaxError,
+             r"option 'has_header' expects a boolean; found: 'no'",
+         ),
++        (
++            "skip_rows => -1",
++            SQLSyntaxError,
++            r"option 'skip_rows' expects a non-negative integer; found: -1",
++        ),
++        (
++            "encoding => 'latin1'",
++            SQLSyntaxError,
++            r"option 'encoding' expects 'utf8' or 'utf8-lossy'; found: 'latin1'",
++        ),
+         (
+             "separator => '\\t'",
+             SQLSyntaxError,
+@@ -259,6 +298,11 @@ def test_read_csv_options_survive_plan_roundtrip(tmp_path: Path) -> None:
+             SQLSyntaxError,
+             r"option 'schema' has an invalid type name: 'INT\('",
+         ),
++        (
++            "schema => ['INT']",
++            SQLSyntaxError,
++            r"option 'schema' expects a dictionary such as \{'a': 'INT'\}; found: \['INT'\]",
++        ),
+     ],
+ )
+ def test_read_csv_option_errors(
+@@ -270,6 +314,21 @@ def test_read_csv_option_errors(
+         _read_csv_sql(path, options)
+ 
+ 
++@pytest.mark.parametrize("args", ["", "has_header => false"])
++def test_read_csv_expects_a_path_first(args: str) -> None:
++    with pytest.raises(
++        SQLSyntaxError, match=r"`read_csv` expects a file path as its first argument"
++    ):
++        pl.sql(f"SELECT * FROM read_csv({args})").collect()
++
++
++def test_read_csv_override_that_does_not_fit(tmp_path: Path) -> None:
++    path = tmp_path / "data.csv"
++    path.write_text("a\n1\nx\n")
++    with pytest.raises(ComputeError, match=r"could not parse"):
++        _read_csv_sql(path, "schema_overrides => {'a': 'INT'}")
++
++
+ def _read_ndjson_sql(
+     path: Path, options: str, function: str = "read_ndjson"
+ ) -> pl.DataFrame:

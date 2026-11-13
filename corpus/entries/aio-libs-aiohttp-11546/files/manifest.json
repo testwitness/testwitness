@@ -1,0 +1,10 @@
+[
+  {
+    "path": "CHANGES/11546.contrib.rst",
+    "status": "added"
+  },
+  {
+    "path": "tests/test_websocket_writer.py",
+    "status": "modified"
+  }
+]

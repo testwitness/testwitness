@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aio-libs/aiohttp/pull/10577",
+  "repo": "aio-libs/aiohttp",
+  "number": 10577,
+  "title": "Parametrize leak tests",
+  "merged_at": "2025-03-16T23:23:43Z",
+  "stars": 16605,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "heldout",
+  "base_sha": "a59e74b7b504375bc0ac3daf1dc1306d5d056d28",
+  "head_sha": "1c91808244cab524f8321c4327987e75db3b2a1f",
+  "files_changed": 1,
+  "additions": 21,
+  "deletions": 26
+}

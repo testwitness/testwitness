@@ -1,0 +1,70 @@
+diff --git a/.gitignore b/.gitignore
+index 77a09bb..19d2686 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -28,7 +28,7 @@ test/**/__screenshots__/**/*
+ test/**/__traces__/**/*
+ test/browser/**/__benchmarks__
+ test/browser/fixtures/update-snapshot/basic.test.ts
+-test/e2e/fixtures/browser-multiple/basic-*
++test/browser/fixtures/browser-multiple/basic-*
+ *.tsbuildinfo
+ .vitest
+ explainFiles.txt
+diff --git a/test/e2e/fixtures/browser-multiple/basic.test.js b/test/browser/fixtures/browser-multiple/basic.test.js
+similarity index 100%
+rename from test/e2e/fixtures/browser-multiple/basic.test.js
+rename to test/browser/fixtures/browser-multiple/basic.test.js
+diff --git a/test/e2e/fixtures/browser-multiple/package.json b/test/browser/fixtures/browser-multiple/package.json
+similarity index 100%
+rename from test/e2e/fixtures/browser-multiple/package.json
+rename to test/browser/fixtures/browser-multiple/package.json
+diff --git a/test/e2e/fixtures/browser-multiple/vitest.config.ts b/test/browser/fixtures/browser-multiple/vitest.config.ts
+similarity index 100%
+rename from test/e2e/fixtures/browser-multiple/vitest.config.ts
+rename to test/browser/fixtures/browser-multiple/vitest.config.ts
+diff --git a/test/e2e/test/browser-multiple.test.ts b/test/browser/specs/browser-multiple.test.ts
+similarity index 100%
+rename from test/e2e/test/browser-multiple.test.ts
+rename to test/browser/specs/browser-multiple.test.ts
+diff --git a/test/e2e/test/watch/config-watching.test.ts b/test/browser/specs/config-watching.test.ts
+similarity index 97%
+rename from test/e2e/test/watch/config-watching.test.ts
+rename to test/browser/specs/config-watching.test.ts
+index 77a1d58..f4c8fc3 100644
+--- a/test/e2e/test/watch/config-watching.test.ts
++++ b/test/browser/specs/config-watching.test.ts
+@@ -1,6 +1,6 @@
+-import { runInlineTests } from '#test-utils'
+ import { playwright } from '@vitest/browser-playwright'
+ import { expect, test } from 'vitest'
++import { runInlineTests } from '../../test-utils'
+ 
+ const ts = String.raw
+ 
+diff --git a/test/e2e/test/oxc.test.ts b/test/browser/specs/oxc.test.ts
+similarity index 94%
+rename from test/e2e/test/oxc.test.ts
+rename to test/browser/specs/oxc.test.ts
+index 35f197c..a2f2a6f 100644
+--- a/test/e2e/test/oxc.test.ts
++++ b/test/browser/specs/oxc.test.ts
+@@ -1,5 +1,5 @@
+-import { runInlineTests } from '#test-utils'
+ import { expect, test } from 'vitest'
++import { runInlineTests } from '../../test-utils'
+ 
+ test('oxc config on browser', async () => {
+   const result = await runInlineTests({
+diff --git a/test/e2e/vitest.config.ts b/test/e2e/vitest.config.ts
+index 6b659ce..831ea24 100644
+--- a/test/e2e/vitest.config.ts
++++ b/test/e2e/vitest.config.ts
+@@ -95,7 +95,6 @@ export default defineConfig({
+     watch: {
+       ignored: [
+         '**/vitest-test-*/**',
+-        '**/fixtures/browser-multiple/**/*',
+         '**/fixtures/browser-init/**/*',
+         '**/package.json',
+       ],

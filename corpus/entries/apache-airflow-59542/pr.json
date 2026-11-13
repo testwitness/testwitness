@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/59542",
+  "repo": "apache/airflow",
+  "number": 59542,
+  "title": "Refactor Dag trigger e2e tests into dags-list.spec",
+  "merged_at": "2025-12-17T10:22:13Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "f6343b164ab1a06db1519cd276be10aabb6f7636",
+  "head_sha": "dddfa1c72486732249ba5dcd65a68dd315fb6093",
+  "files_changed": 2,
+  "additions": 34,
+  "deletions": 56
+}

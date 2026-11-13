@@ -1,0 +1,10 @@
+[
+  {
+    "path": "pandas/tests/groupby/test_frame_value_counts.py",
+    "status": "deleted"
+  },
+  {
+    "path": "pandas/tests/groupby/test_value_counts.py",
+    "status": "modified"
+  }
+]

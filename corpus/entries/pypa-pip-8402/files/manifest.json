@@ -1,0 +1,10 @@
+[
+  {
+    "path": "news/9B4F6DCE-FE1E-4428-BB4A-40D7C613AA97.trivial",
+    "status": "added"
+  },
+  {
+    "path": "tests/functional/test_install.py",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/73760",
+  "repo": "apache/airflow",
+  "number": 73760,
+  "title": "Move Snowflake trigger tests to match the trigger module name",
+  "merged_at": "2026-11-02T00:34:19Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "1c3252e5805028ee94efb497c7ff53ec8dbdea5b",
+  "head_sha": "86b0bd4a304d25ef18e1bc22e1cfee7a77f6cdaf",
+  "files_changed": 2,
+  "additions": 43,
+  "deletions": 1
+}

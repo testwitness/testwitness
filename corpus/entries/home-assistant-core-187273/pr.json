@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/home-assistant/core/pull/187273",
+  "repo": "home-assistant/core",
+  "number": 187273,
+  "title": "Consolidate OpenAI AI Task tests",
+  "merged_at": "2026-10-19T03:00:39Z",
+  "stars": 92279,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "consolidate",
+  "split": "tuning",
+  "base_sha": "59fa8aabb794f3c734c638cad40893e9776f3e89",
+  "head_sha": "1a2fffb4f59129c605a3ab48131ead2d72dc6a85",
+  "files_changed": 3,
+  "additions": 441,
+  "deletions": 458
+}

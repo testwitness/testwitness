@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/76631",
+  "repo": "vercel/next.js",
+  "number": 76631,
+  "title": "[test] Remove `describeVariants` helper",
+  "merged_at": "2025-03-03T10:34:32Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "helper",
+  "split": "tuning",
+  "base_sha": "b80301d30816dd93143d95b8843c81763ac3b1f9",
+  "head_sha": "cf25070ed453a43c498e5e50adf11651dba51d45",
+  "files_changed": 3,
+  "additions": 32,
+  "deletions": 68
+}

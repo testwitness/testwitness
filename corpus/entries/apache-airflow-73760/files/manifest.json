@@ -1,0 +1,11 @@
+[
+  {
+    "path": "airflow-core/tests/unit/always/test_project_structure.py",
+    "status": "modified"
+  },
+  {
+    "path": "providers/snowflake/tests/unit/snowflake/triggers/test_snowflake_trigger.py",
+    "status": "renamed",
+    "oldPath": "providers/snowflake/tests/unit/snowflake/triggers/test_snowflake.py"
+  }
+]

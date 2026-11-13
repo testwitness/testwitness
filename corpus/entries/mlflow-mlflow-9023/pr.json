@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/9023",
+  "repo": "mlflow/mlflow",
+  "number": 9023,
+  "title": "Parametrize `test_check_spark_udf_return_type`",
+  "merged_at": "2023-07-10T08:50:15Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "63494ae9c191971c1aa5abe08359618e0b447871",
+  "head_sha": "34412083a38ee90260bed56b5d0fa70a9f3cd873",
+  "files_changed": 1,
+  "additions": 36,
+  "deletions": 26
+}

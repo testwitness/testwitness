@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/PrefectHQ/prefect/pull/18450",
+  "repo": "PrefectHQ/prefect",
+  "number": 18450,
+  "title": "Migrate integration tests from custom test runner to pytest",
+  "merged_at": "2025-07-08T20:18:24Z",
+  "stars": 24106,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "migration",
+  "split": "heldout",
+  "base_sha": "656363eb04fd9f478680c8e383c4ec2b175a6a3a",
+  "head_sha": "b6c0e8cb0506c831f9c387483ec5b89450bf80ff",
+  "files_changed": 27,
+  "additions": 323,
+  "deletions": 204
+}

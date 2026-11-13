@@ -1,0 +1,750 @@
+diff --git a/e2e/__tests__/fakeTime.test.ts b/e2e/__tests__/fakeTime.test.ts
+deleted file mode 100644
+index c7cad2c..0000000
+--- a/e2e/__tests__/fakeTime.test.ts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-import runJest from '../runJest';
+-
+-describe.each(['modern', 'legacy'])(
+-  '%s implementation of fake timers',
+-  implementation => {
+-    it('should be possible to use from config', () => {
+-      const result = runJest(`fake-time/${implementation}/from-config`);
+-      expect(result.exitCode).toBe(0);
+-    });
+-
+-    it('should be possible to use from jest-object', () => {
+-      const result = runJest(`fake-time/${implementation}/from-jest-object`);
+-      expect(result.exitCode).toBe(0);
+-    });
+-  },
+-);
+diff --git a/e2e/__tests__/fakeTimers.test.ts b/e2e/__tests__/fakeTimers.test.ts
+new file mode 100644
+index 0000000..ce1afb1
+--- /dev/null
++++ b/e2e/__tests__/fakeTimers.test.ts
+@@ -0,0 +1,48 @@
++/**
++ * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++import runJest from '../runJest';
++
++describe('enableGlobally', () => {
++  test('enables fake timers from Jest config', () => {
++    const result = runJest('fake-timers/enable-globally');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('useFakeTimers', () => {
++  test('enables fake timers from Jest object', () => {
++    const result = runJest('fake-timers/use-fake-timers');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('requestAnimationFrame', () => {
++  test('fakes requestAnimationFrame', () => {
++    const result = runJest('fake-timers/request-animation-frame');
++
++    expect(result.stderr).toMatch('requestAnimationFrame test');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('setImmediate', () => {
++  test('fakes setImmediate', () => {
++    const result = runJest('fake-timers/set-immediate');
++
++    expect(result.stderr).toMatch('setImmediate test');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('useRealTimers', () => {
++  test('restores timers to the native implementation', () => {
++    const result = runJest('fake-timers/use-real-timers');
++    expect(result.stdout).toMatch('API is not mocked with fake timers.');
++    expect(result.exitCode).toBe(0);
++  });
++});
+diff --git a/e2e/__tests__/fakeTimersLegacy.test.ts b/e2e/__tests__/fakeTimersLegacy.test.ts
+new file mode 100644
+index 0000000..dbc6123
+--- /dev/null
++++ b/e2e/__tests__/fakeTimersLegacy.test.ts
+@@ -0,0 +1,60 @@
++/**
++ * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++import runJest from '../runJest';
++
++describe('enableGlobally', () => {
++  test('enables fake timers from Jest config', () => {
++    const result = runJest('fake-timers-legacy/enable-globally');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('useFakeTimers', () => {
++  test('enables fake timers from Jest object', () => {
++    const result = runJest('fake-timers-legacy/use-fake-timers');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('requestAnimationFrame', () => {
++  test('fakes requestAnimationFrame', () => {
++    const result = runJest('fake-timers-legacy/request-animation-frame');
++
++    expect(result.stderr).toMatch('requestAnimationFrame test');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('setImmediate', () => {
++  test('fakes setImmediate', () => {
++    const result = runJest('fake-timers-legacy/set-immediate');
++
++    expect(result.stderr).toMatch('setImmediate test');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('useRealTimers', () => {
++  test('restores timers to the native implementation', () => {
++    const result = runJest('fake-timers-legacy/use-real-timers');
++    expect(result.stdout).toMatch('API is not mocked with fake timers.');
++    expect(result.exitCode).toBe(0);
++  });
++});
++
++describe('when mocks are reset', () => {
++  test('calling resetAllMocks does not break tests', () => {
++    const result = runJest('fake-timers-legacy/reset-all-mocks');
++    expect(result.exitCode).toBe(0);
++  });
++
++  test('setting resetMocks in Jest config does not break tests', () => {
++    const result = runJest('fake-timers-legacy/reset-mocks');
++    expect(result.exitCode).toBe(0);
++  });
++});
+diff --git a/e2e/__tests__/modernFakeTimers.test.ts b/e2e/__tests__/modernFakeTimers.test.ts
+deleted file mode 100644
+index e004b3b..0000000
+--- a/e2e/__tests__/modernFakeTimers.test.ts
++++ /dev/null
+@@ -1,20 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-import runJest from '../runJest';
+-
+-describe('modern implementation of fake timers', () => {
+-  it('should be possible to use modern implementation from config', () => {
+-    const result = runJest('modern-fake-timers/from-config');
+-    expect(result.exitCode).toBe(0);
+-  });
+-
+-  it('should be possible to use modern implementation from jest-object', () => {
+-    const result = runJest('modern-fake-timers/from-jest-object');
+-    expect(result.exitCode).toBe(0);
+-  });
+-});
+diff --git a/e2e/__tests__/setImmediate.test.ts b/e2e/__tests__/setImmediate.test.ts
+deleted file mode 100644
+index 1b5b9bb..0000000
+--- a/e2e/__tests__/setImmediate.test.ts
++++ /dev/null
+@@ -1,15 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-import runJest from '../runJest';
+-
+-test('setImmediate', () => {
+-  const result = runJest('set-immediate', ['--verbose']);
+-
+-  expect(result.stderr).toMatch('setImmediate test');
+-  expect(result.exitCode).toBe(0);
+-});
+diff --git a/e2e/__tests__/timerResetMocks.test.ts b/e2e/__tests__/timerResetMocks.test.ts
+deleted file mode 100644
+index 9ef9f20..0000000
+--- a/e2e/__tests__/timerResetMocks.test.ts
++++ /dev/null
+@@ -1,18 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-import runJest from '../runJest';
+-
+-test('run timers after resetAllMocks test', () => {
+-  const result = runJest('timer-reset-mocks/after-reset-all-mocks');
+-  expect(result.exitCode).toBe(0);
+-});
+-
+-test('run timers with resetMocks in config test', () => {
+-  const result = runJest('timer-reset-mocks/with-reset-mocks');
+-  expect(result.exitCode).toBe(0);
+-});
+diff --git a/e2e/__tests__/timerUseRealTimers.test.ts b/e2e/__tests__/timerUseRealTimers.test.ts
+deleted file mode 100644
+index 6c5c3d8..0000000
+--- a/e2e/__tests__/timerUseRealTimers.test.ts
++++ /dev/null
+@@ -1,14 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-import runJest from '../runJest';
+-
+-test('useRealTimers cancels "timers": "fake" for whole test file', () => {
+-  const result = runJest('timer-use-real-timers');
+-  expect(result.stdout).toMatch('API is not mocked with fake timers.');
+-  expect(result.exitCode).toBe(0);
+-});
+diff --git a/e2e/fake-time/legacy/from-config/package.json b/e2e/fake-time/legacy/from-config/package.json
+deleted file mode 100644
+index 3d94760..0000000
+--- a/e2e/fake-time/legacy/from-config/package.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "jest": {
+-    "timers": "legacy",
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/fake-time/legacy/from-jest-object/package.json b/e2e/fake-time/legacy/from-jest-object/package.json
+deleted file mode 100644
+index 148788b..0000000
+--- a/e2e/fake-time/legacy/from-jest-object/package.json
++++ /dev/null
+@@ -1,5 +0,0 @@
+-{
+-  "jest": {
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/fake-time/modern/from-config/package.json b/e2e/fake-time/modern/from-config/package.json
+deleted file mode 100644
+index 8d831cc..0000000
+--- a/e2e/fake-time/modern/from-config/package.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "jest": {
+-    "timers": "fake",
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/fake-time/modern/from-jest-object/package.json b/e2e/fake-time/modern/from-jest-object/package.json
+deleted file mode 100644
+index 148788b..0000000
+--- a/e2e/fake-time/modern/from-jest-object/package.json
++++ /dev/null
+@@ -1,5 +0,0 @@
+-{
+-  "jest": {
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/fake-time/legacy/from-config/__tests__/test.js b/e2e/fake-timers-legacy/enable-globally/__tests__/enableGlobally.test.js
+similarity index 64%
+rename from e2e/fake-time/legacy/from-config/__tests__/test.js
+rename to e2e/fake-timers-legacy/enable-globally/__tests__/enableGlobally.test.js
+index b2da429..c02789c 100644
+--- a/e2e/fake-time/legacy/from-config/__tests__/test.js
++++ b/e2e/fake-timers-legacy/enable-globally/__tests__/enableGlobally.test.js
+@@ -7,7 +7,13 @@
+ 
+ 'use strict';
+ 
+-test('fake timers', () => {
++test('getRealSystemTime', () => {
++  expect(() => jest.getRealSystemTime()).toThrow(
++    'getRealSystemTime is not available when not using modern timers',
++  );
++});
++
++test('setSystemTime', () => {
+   expect(() => jest.setSystemTime(0)).toThrow(
+     'setSystemTime is not available when not using modern timers',
+   );
+diff --git a/e2e/fake-timers-legacy/enable-globally/package.json b/e2e/fake-timers-legacy/enable-globally/package.json
+new file mode 100644
+index 0000000..ad49f33
+--- /dev/null
++++ b/e2e/fake-timers-legacy/enable-globally/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "enable-globally-legacy",
++  "jest": {
++    "timers": "legacy"
++  }
++}
+diff --git a/e2e/fake-time/legacy/requestAnimationFrame/__tests__/test.js b/e2e/fake-timers-legacy/request-animation-frame/__tests__/requestAnimationFrame.test.js
+similarity index 92%
+rename from e2e/fake-time/legacy/requestAnimationFrame/__tests__/test.js
+rename to e2e/fake-timers-legacy/request-animation-frame/__tests__/requestAnimationFrame.test.js
+index 42c638b..502ce36 100644
+--- a/e2e/fake-time/legacy/requestAnimationFrame/__tests__/test.js
++++ b/e2e/fake-timers-legacy/request-animation-frame/__tests__/requestAnimationFrame.test.js
+@@ -9,7 +9,7 @@
+ 
+ 'use strict';
+ 
+-test('requestAnimationFrame', () => {
++test('requestAnimationFrame test', () => {
+   jest.useFakeTimers('legacy');
+   let frameTimestamp = -1;
+   requestAnimationFrame(timestamp => {
+diff --git a/e2e/fake-time/legacy/requestAnimationFrame/package.json b/e2e/fake-timers-legacy/request-animation-frame/package.json
+similarity index 53%
+rename from e2e/fake-time/legacy/requestAnimationFrame/package.json
+rename to e2e/fake-timers-legacy/request-animation-frame/package.json
+index 0ded940..df7deec 100644
+--- a/e2e/fake-time/legacy/requestAnimationFrame/package.json
++++ b/e2e/fake-timers-legacy/request-animation-frame/package.json
+@@ -1,4 +1,5 @@
+ {
++  "name": "request-animation-frame-legacy",
+   "jest": {
+     "testEnvironment": "jsdom"
+   }
+diff --git a/e2e/fake-timers-legacy/reset-all-mocks/__tests__/resetAllMocks.test.js b/e2e/fake-timers-legacy/reset-all-mocks/__tests__/resetAllMocks.test.js
+new file mode 100644
+index 0000000..c264859
+--- /dev/null
++++ b/e2e/fake-timers-legacy/reset-all-mocks/__tests__/resetAllMocks.test.js
+@@ -0,0 +1,25 @@
++/**
++ * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++'use strict';
++
++test('works before resetAllMocks is called', () => {
++  jest.useFakeTimers();
++  const f = jest.fn();
++  setTimeout(f, 0);
++  jest.runAllTimers();
++  expect(f).toHaveBeenCalledTimes(1);
++});
++
++test('works after resetAllMocks is called', () => {
++  jest.resetAllMocks();
++  jest.useFakeTimers();
++  const f = jest.fn();
++  setTimeout(f, 0);
++  jest.runAllTimers();
++  expect(f).toHaveBeenCalledTimes(1);
++});
+diff --git a/e2e/fake-timers-legacy/reset-all-mocks/package.json b/e2e/fake-timers-legacy/reset-all-mocks/package.json
+new file mode 100644
+index 0000000..3d15b9a
+--- /dev/null
++++ b/e2e/fake-timers-legacy/reset-all-mocks/package.json
+@@ -0,0 +1,7 @@
++{
++  "name": "reset-all-mocks",
++  "jest": {
++    "resetMocks": false,
++    "timers": "legacy"
++  }
++}
+diff --git a/e2e/fake-time/modern/from-jest-object/__tests__/test.js b/e2e/fake-timers-legacy/reset-mocks/__tests__/resetMock.test.js
+similarity index 60%
+rename from e2e/fake-time/modern/from-jest-object/__tests__/test.js
+rename to e2e/fake-timers-legacy/reset-mocks/__tests__/resetMock.test.js
+index 192f2b7..2710469 100644
+--- a/e2e/fake-time/modern/from-jest-object/__tests__/test.js
++++ b/e2e/fake-timers-legacy/reset-mocks/__tests__/resetMock.test.js
+@@ -7,14 +7,10 @@
+ 
+ 'use strict';
+ 
+-test('fake timers', () => {
++test('works when resetMocks is set in Jest config', () => {
+   jest.useFakeTimers();
+-
+-  jest.setSystemTime(0);
+-
+-  expect(Date.now()).toBe(0);
+-
+-  jest.setSystemTime(1000);
+-
+-  expect(Date.now()).toBe(1000);
++  const f = jest.fn();
++  setTimeout(f, 0);
++  jest.runAllTimers();
++  expect(f).toHaveBeenCalledTimes(1);
+ });
+diff --git a/e2e/fake-timers-legacy/reset-mocks/package.json b/e2e/fake-timers-legacy/reset-mocks/package.json
+new file mode 100644
+index 0000000..2a41b1e
+--- /dev/null
++++ b/e2e/fake-timers-legacy/reset-mocks/package.json
+@@ -0,0 +1,7 @@
++{
++  "name": "reset-mocks",
++  "jest": {
++    "resetMocks": true,
++    "timers": "legacy"
++  }
++}
+diff --git a/e2e/set-immediate/__tests__/setImmediate.test.js b/e2e/fake-timers-legacy/set-immediate/__tests__/setImmediate.test.js
+similarity index 100%
+rename from e2e/set-immediate/__tests__/setImmediate.test.js
+rename to e2e/fake-timers-legacy/set-immediate/__tests__/setImmediate.test.js
+diff --git a/e2e/fake-timers-legacy/set-immediate/package.json b/e2e/fake-timers-legacy/set-immediate/package.json
+new file mode 100644
+index 0000000..88cb677
+--- /dev/null
++++ b/e2e/fake-timers-legacy/set-immediate/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "set-immediate-legacy",
++  "jest": {
++    "timers": "legacy"
++  }
++}
+diff --git a/e2e/fake-time/legacy/from-jest-object/__tests__/test.js b/e2e/fake-timers-legacy/use-fake-timers/__tests__/useFakeTimers.test.js
+similarity index 100%
+rename from e2e/fake-time/legacy/from-jest-object/__tests__/test.js
+rename to e2e/fake-timers-legacy/use-fake-timers/__tests__/useFakeTimers.test.js
+diff --git a/e2e/fake-timers-legacy/use-fake-timers/package.json b/e2e/fake-timers-legacy/use-fake-timers/package.json
+new file mode 100644
+index 0000000..02a6620
+--- /dev/null
++++ b/e2e/fake-timers-legacy/use-fake-timers/package.json
+@@ -0,0 +1,3 @@
++{
++  "name": "use-fake-timers-legacy"
++}
+diff --git a/e2e/timer-use-real-timers/__tests__/useRealTimers.test.js b/e2e/fake-timers-legacy/use-real-timers/__tests__/useRealTimers.test.js
+similarity index 94%
+rename from e2e/timer-use-real-timers/__tests__/useRealTimers.test.js
+rename to e2e/fake-timers-legacy/use-real-timers/__tests__/useRealTimers.test.js
+index a50c55b..e82cccd 100644
+--- a/e2e/timer-use-real-timers/__tests__/useRealTimers.test.js
++++ b/e2e/fake-timers-legacy/use-real-timers/__tests__/useRealTimers.test.js
+@@ -5,6 +5,8 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
++'use strict';
++
+ jest.useRealTimers();
+ 
+ test('bar', () => {
+diff --git a/e2e/fake-timers-legacy/use-real-timers/package.json b/e2e/fake-timers-legacy/use-real-timers/package.json
+new file mode 100644
+index 0000000..e0052f4
+--- /dev/null
++++ b/e2e/fake-timers-legacy/use-real-timers/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "use-real-timers-legacy",
++  "jest": {
++    "timers": "legacy"
++  }
++}
+diff --git a/e2e/modern-fake-timers/from-config/__tests__/test.js b/e2e/fake-timers/enable-globally/__tests__/enableGlobally.test.js
+similarity index 78%
+rename from e2e/modern-fake-timers/from-config/__tests__/test.js
+rename to e2e/fake-timers/enable-globally/__tests__/enableGlobally.test.js
+index 9974cab..1d488f4 100644
+--- a/e2e/modern-fake-timers/from-config/__tests__/test.js
++++ b/e2e/fake-timers/enable-globally/__tests__/enableGlobally.test.js
+@@ -26,3 +26,9 @@ test('fake timers with Date argument', () => {
+ 
+   expect(Date.now()).toBe(1000);
+ });
++
++test('runAllImmediates', () => {
++  expect(() => jest.runAllImmediates()).toThrow(
++    'runAllImmediates is not available when using modern timers',
++  );
++});
+diff --git a/e2e/fake-timers/enable-globally/package.json b/e2e/fake-timers/enable-globally/package.json
+new file mode 100644
+index 0000000..6bc4804
+--- /dev/null
++++ b/e2e/fake-timers/enable-globally/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "enable-globally",
++  "jest": {
++    "timers": "modern"
++  }
++}
+diff --git a/e2e/fake-time/modern/requestAnimationFrame/__tests__/test.js b/e2e/fake-timers/request-animation-frame/__tests__/requestAnimationFrame.test.js
+similarity index 92%
+rename from e2e/fake-time/modern/requestAnimationFrame/__tests__/test.js
+rename to e2e/fake-timers/request-animation-frame/__tests__/requestAnimationFrame.test.js
+index 17e2944..6f43162 100644
+--- a/e2e/fake-time/modern/requestAnimationFrame/__tests__/test.js
++++ b/e2e/fake-timers/request-animation-frame/__tests__/requestAnimationFrame.test.js
+@@ -9,7 +9,7 @@
+ 
+ 'use strict';
+ 
+-test('requestAnimationFrame', () => {
++test('requestAnimationFrame test', () => {
+   jest.useFakeTimers('modern');
+   let frameTimestamp = -1;
+   requestAnimationFrame(timestamp => {
+diff --git a/e2e/fake-time/modern/requestAnimationFrame/package.json b/e2e/fake-timers/request-animation-frame/package.json
+similarity index 57%
+rename from e2e/fake-time/modern/requestAnimationFrame/package.json
+rename to e2e/fake-timers/request-animation-frame/package.json
+index 0ded940..cedbfc2 100644
+--- a/e2e/fake-time/modern/requestAnimationFrame/package.json
++++ b/e2e/fake-timers/request-animation-frame/package.json
+@@ -1,4 +1,5 @@
+ {
++  "name": "request-animation-frame",
+   "jest": {
+     "testEnvironment": "jsdom"
+   }
+diff --git a/e2e/fake-time/modern/from-config/__tests__/test.js b/e2e/fake-timers/set-immediate/__tests__/setImmediate.test.js
+similarity index 61%
+rename from e2e/fake-time/modern/from-config/__tests__/test.js
+rename to e2e/fake-timers/set-immediate/__tests__/setImmediate.test.js
+index a32e5a5..4dd6fdd 100644
+--- a/e2e/fake-time/modern/from-config/__tests__/test.js
++++ b/e2e/fake-timers/set-immediate/__tests__/setImmediate.test.js
+@@ -7,12 +7,10 @@
+ 
+ 'use strict';
+ 
+-test('fake timers', () => {
+-  jest.setSystemTime(0);
++test('setImmediate test', () => {
++  expect(true).toBe(true);
+ 
+-  expect(Date.now()).toBe(0);
+-
+-  jest.setSystemTime(1000);
+-
+-  expect(Date.now()).toBe(1000);
++  setImmediate(() => {
++    throw new Error('Scheduled Error');
++  });
+ });
+diff --git a/e2e/set-immediate/package.json b/e2e/fake-timers/set-immediate/package.json
+similarity index 56%
+rename from e2e/set-immediate/package.json
+rename to e2e/fake-timers/set-immediate/package.json
+index 1cb610c..b0c2eee 100644
+--- a/e2e/set-immediate/package.json
++++ b/e2e/fake-timers/set-immediate/package.json
+@@ -1,6 +1,6 @@
+ {
++  "name": "set-immediate",
+   "jest": {
+-    "testEnvironment": "node",
+     "timers": "fake"
+   }
+ }
+diff --git a/e2e/modern-fake-timers/from-jest-object/__tests__/test.js b/e2e/fake-timers/use-fake-timers/__tests__/useFakeTimers.test.js
+similarity index 100%
+rename from e2e/modern-fake-timers/from-jest-object/__tests__/test.js
+rename to e2e/fake-timers/use-fake-timers/__tests__/useFakeTimers.test.js
+diff --git a/e2e/fake-timers/use-fake-timers/package.json b/e2e/fake-timers/use-fake-timers/package.json
+new file mode 100644
+index 0000000..3767aec
+--- /dev/null
++++ b/e2e/fake-timers/use-fake-timers/package.json
+@@ -0,0 +1,3 @@
++{
++  "name": "use-fake-timers"
++}
+diff --git a/e2e/timer-reset-mocks/with-reset-mocks/index.js b/e2e/fake-timers/use-real-timers/__tests__/useRealTimers.test.js
+similarity index 71%
+rename from e2e/timer-reset-mocks/with-reset-mocks/index.js
+rename to e2e/fake-timers/use-real-timers/__tests__/useRealTimers.test.js
+index 3f40dc0..e82cccd 100644
+--- a/e2e/timer-reset-mocks/with-reset-mocks/index.js
++++ b/e2e/fake-timers/use-real-timers/__tests__/useRealTimers.test.js
+@@ -5,4 +5,10 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
+-module.exports = () => {};
++'use strict';
++
++jest.useRealTimers();
++
++test('bar', () => {
++  jest.runAllTimers();
++});
+diff --git a/e2e/timer-use-real-timers/package.json b/e2e/fake-timers/use-real-timers/package.json
+similarity index 56%
+rename from e2e/timer-use-real-timers/package.json
+rename to e2e/fake-timers/use-real-timers/package.json
+index 1cb610c..56af250 100644
+--- a/e2e/timer-use-real-timers/package.json
++++ b/e2e/fake-timers/use-real-timers/package.json
+@@ -1,6 +1,6 @@
+ {
++  "name": "use-real-timers",
+   "jest": {
+-    "testEnvironment": "node",
+     "timers": "fake"
+   }
+ }
+diff --git a/e2e/modern-fake-timers/from-config/package.json b/e2e/modern-fake-timers/from-config/package.json
+deleted file mode 100644
+index 48517c6..0000000
+--- a/e2e/modern-fake-timers/from-config/package.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "jest": {
+-    "timers": "modern",
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/modern-fake-timers/from-jest-object/package.json b/e2e/modern-fake-timers/from-jest-object/package.json
+deleted file mode 100644
+index 148788b..0000000
+--- a/e2e/modern-fake-timers/from-jest-object/package.json
++++ /dev/null
+@@ -1,5 +0,0 @@
+-{
+-  "jest": {
+-    "testEnvironment": "node"
+-  }
+-}
+diff --git a/e2e/timer-reset-mocks/after-reset-all-mocks/index.js b/e2e/timer-reset-mocks/after-reset-all-mocks/index.js
+deleted file mode 100644
+index 3f40dc0..0000000
+--- a/e2e/timer-reset-mocks/after-reset-all-mocks/index.js
++++ /dev/null
+@@ -1,8 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-module.exports = () => {};
+diff --git a/e2e/timer-reset-mocks/after-reset-all-mocks/package.json b/e2e/timer-reset-mocks/after-reset-all-mocks/package.json
+deleted file mode 100644
+index 24b23ca..0000000
+--- a/e2e/timer-reset-mocks/after-reset-all-mocks/package.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "jest": {
+-    "testEnvironment": "node",
+-    "resetMocks": false
+-  }
+-}
+diff --git a/e2e/timer-reset-mocks/after-reset-all-mocks/timerAndMock.test.js b/e2e/timer-reset-mocks/after-reset-all-mocks/timerAndMock.test.js
+deleted file mode 100644
+index 67c095a..0000000
+--- a/e2e/timer-reset-mocks/after-reset-all-mocks/timerAndMock.test.js
++++ /dev/null
+@@ -1,25 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-describe('timers', () => {
+-  it('should work before calling resetAllMocks', () => {
+-    jest.useFakeTimers();
+-    const f = jest.fn();
+-    setTimeout(f, 0);
+-    jest.runAllTimers();
+-    expect(f).toHaveBeenCalledTimes(1);
+-  });
+-
+-  it('should not break after calling resetAllMocks', () => {
+-    jest.resetAllMocks();
+-    jest.useFakeTimers();
+-    const f = jest.fn();
+-    setTimeout(f, 0);
+-    jest.runAllTimers();
+-    expect(f).toHaveBeenCalledTimes(1);
+-  });
+-});
+diff --git a/e2e/timer-reset-mocks/with-reset-mocks/package.json b/e2e/timer-reset-mocks/with-reset-mocks/package.json
+deleted file mode 100644
+index 7c8e0b6..0000000
+--- a/e2e/timer-reset-mocks/with-reset-mocks/package.json
++++ /dev/null
+@@ -1,7 +0,0 @@
+-{
+-  "jest": {
+-    "testEnvironment": "node",
+-    "resetMocks": true,
+-    "timers": "fake"
+-  }
+-}
+diff --git a/e2e/timer-reset-mocks/with-reset-mocks/timerWithMock.test.js b/e2e/timer-reset-mocks/with-reset-mocks/timerWithMock.test.js
+deleted file mode 100644
+index d45bb7b..0000000
+--- a/e2e/timer-reset-mocks/with-reset-mocks/timerWithMock.test.js
++++ /dev/null
+@@ -1,16 +0,0 @@
+-/**
+- * Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-describe('timers', () => {
+-  it('should work before calling resetAllMocks', () => {
+-    const f = jest.fn();
+-    jest.useFakeTimers();
+-    setTimeout(f, 0);
+-    jest.runAllTimers();
+-    expect(f).toHaveBeenCalledTimes(1);
+-  });
+-});

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/57952",
+  "repo": "vercel/next.js",
+  "number": 57952,
+  "title": "Move ReactRefreshLogBox-builtins tests to inline snapshots",
+  "merged_at": "2023-11-02T21:32:53Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "snapshot",
+  "split": "tuning",
+  "base_sha": "6f8c580386ea5c805ca7f18ff5f992bf8e13bc49",
+  "head_sha": "fd2a94b35ef9b65c9193b3cec83c2a5ffe9ac207",
+  "files_changed": 5,
+  "additions": 96,
+  "deletions": 116
+}

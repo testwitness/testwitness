@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/99533",
+  "repo": "vercel/next.js",
+  "number": 99533,
+  "title": "test: extract a shared helper for deployment feature flags",
+  "merged_at": "2026-10-02T16:58:34Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "c62c51e354977ee366ef5d9eebaa0ed12a338b01",
+  "head_sha": "207675753740b0cce0528374c927dc379d155525",
+  "files_changed": 3,
+  "additions": 89,
+  "deletions": 5
+}

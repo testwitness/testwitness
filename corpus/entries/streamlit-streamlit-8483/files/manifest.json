@@ -1,0 +1,186 @@
+[
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[dark_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_exited_fullscreen[light_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[dark_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_false_fullscreen[light_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[dark_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_exited_fullscreen[light_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[dark_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-chromium].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-firefox].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-container_width_true_fullscreen[light_theme-webkit].png",
+    "status": "added"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-line-chart-specific-height-width[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-none-theme-and-use-container-width[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[dark_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-chromium].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-firefox].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/__snapshots__/linux/st_plotly_chart_test/st_plotly_chart-use-container-width-false-and-specified-height[light_theme-webkit].png",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_plotly_chart.py",
+    "status": "modified"
+  },
+  {
+    "path": "e2e_playwright/st_plotly_chart_test.py",
+    "status": "modified"
+  },
+  {
+    "path": "frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "frontend/lib/src/components/elements/PlotlyChart/PlotlyChart.tsx",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/99135",
+  "repo": "vercel/next.js",
+  "number": 99135,
+  "title": "test: consolidate duplicate mode branches in build error tests",
+  "merged_at": "2026-09-25T20:14:55Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "consolidate",
+  "split": "heldout",
+  "base_sha": "e71848173cf199bb56e88c1c04aa977cdb0a84df",
+  "head_sha": "427eac9ea5f60e4136de0a88c81727f35c927a2c",
+  "files_changed": 7,
+  "additions": 20,
+  "deletions": 30
+}

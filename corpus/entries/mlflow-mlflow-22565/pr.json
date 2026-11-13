@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/22565",
+  "repo": "mlflow/mlflow",
+  "number": 22565,
+  "title": "Move sql store tests to the same folder",
+  "merged_at": "2026-04-14T03:25:43Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "1dfd61775ac3c5cf9917dbfeb9f09b6c6cb6f539",
+  "head_sha": "70f7544d87c16f531e5518fa3fef3a1e89a53890",
+  "files_changed": 7,
+  "additions": 7,
+  "deletions": 8
+}

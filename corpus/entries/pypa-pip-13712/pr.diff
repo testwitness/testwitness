@@ -1,0 +1,76 @@
+diff --git a/tests/lib/__init__.py b/tests/lib/__init__.py
+index 87f49c81..b153307a 100644
+--- a/tests/lib/__init__.py
++++ b/tests/lib/__init__.py
+@@ -35,6 +35,7 @@ from pip._internal.models.selection_prefs import SelectionPreferences
+ from pip._internal.models.target_python import TargetPython
+ from pip._internal.network.session import PipSession
+ 
++from tests.lib.filesystem import create_file
+ from tests.lib.venv import VirtualEnvironment
+ from tests.lib.wheel import make_wheel
+ 
+@@ -51,18 +52,6 @@ _Test = Callable[..., None]
+ _FilesState = dict[str, Union[FoundDir, FoundFile]]
+ 
+ 
+-def create_file(path: str, contents: str | None = None) -> None:
+-    """Create a file on the path, with the given contents"""
+-    from pip._internal.utils.misc import ensure_dir
+-
+-    ensure_dir(os.path.dirname(path))
+-    with open(path, "w") as f:
+-        if contents is not None:
+-            f.write(contents)
+-        else:
+-            f.write("\n")
+-
+-
+ def make_test_search_scope(
+     find_links: list[str] | None = None,
+     index_urls: list[str] | None = None,
+@@ -759,6 +748,12 @@ class PipTestEnvironment(TestFileEnvironment):
+             and x.get("editable_project_location")
+         )
+ 
++    def temporary_file(self, filename: str, contents: str) -> pathlib.Path:
++        """Create a temporary file with the given filename and contents."""
++        path = self.scratch_path.joinpath(filename)
++        create_file(path, contents)
++        return path
++
+ 
+ # FIXME ScriptTest does something similar, but only within a single
+ # ProcResult; this generalizes it so states can be compared across
+diff --git a/tests/lib/filesystem.py b/tests/lib/filesystem.py
+index ffd129f6..0af63b80 100644
+--- a/tests/lib/filesystem.py
++++ b/tests/lib/filesystem.py
+@@ -31,3 +31,14 @@ def chmod(path: str | Path, mode: int) -> Iterator[None]:
+         yield
+     finally:
+         os.chmod(path, old_mode)
++
++
++def create_file(path: str | Path, contents: str | None = None) -> None:
++    """Create a file on the path, with the given contents"""
++    _path = Path(path)
++    _path.parent.mkdir(exist_ok=True, parents=True)
++    with _path.open("w") as f:
++        if contents is not None:
++            f.write(contents)
++        else:
++            f.write("\n")
+diff --git a/tests/unit/test_req_uninstall.py b/tests/unit/test_req_uninstall.py
+index 4a40784d..e2b1c896 100644
+--- a/tests/unit/test_req_uninstall.py
++++ b/tests/unit/test_req_uninstall.py
+@@ -19,7 +19,7 @@ from pip._internal.req.req_uninstall import (
+     uninstallation_paths,
+ )
+ 
+-from tests.lib import create_file
++from tests.lib.filesystem import create_file
+ 
+ 
+ # Pretend all files are local, so UninstallPathSet accepts files in the tmpdir,

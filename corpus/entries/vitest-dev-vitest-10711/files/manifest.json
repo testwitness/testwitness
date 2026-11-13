@@ -1,0 +1,40 @@
+[
+  {
+    "path": ".gitignore",
+    "status": "modified"
+  },
+  {
+    "path": "test/browser/fixtures/browser-multiple/basic.test.js",
+    "status": "renamed",
+    "oldPath": "test/e2e/fixtures/browser-multiple/basic.test.js"
+  },
+  {
+    "path": "test/browser/fixtures/browser-multiple/package.json",
+    "status": "renamed",
+    "oldPath": "test/e2e/fixtures/browser-multiple/package.json"
+  },
+  {
+    "path": "test/browser/fixtures/browser-multiple/vitest.config.ts",
+    "status": "renamed",
+    "oldPath": "test/e2e/fixtures/browser-multiple/vitest.config.ts"
+  },
+  {
+    "path": "test/browser/specs/browser-multiple.test.ts",
+    "status": "renamed",
+    "oldPath": "test/e2e/test/browser-multiple.test.ts"
+  },
+  {
+    "path": "test/browser/specs/config-watching.test.ts",
+    "status": "renamed",
+    "oldPath": "test/e2e/test/watch/config-watching.test.ts"
+  },
+  {
+    "path": "test/browser/specs/oxc.test.ts",
+    "status": "renamed",
+    "oldPath": "test/e2e/test/oxc.test.ts"
+  },
+  {
+    "path": "test/e2e/vitest.config.ts",
+    "status": "modified"
+  }
+]

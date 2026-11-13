@@ -1,0 +1,39 @@
+[
+  {
+    "path": "tests/migrations/base.py",
+    "status": "renamed",
+    "oldPath": "tests/migrations/test_base.py"
+  },
+  {
+    "path": "tests/migrations/test_commands.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_deprecated_fields.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_executor.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_loader.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_multidb.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_operations.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/migrations/test_optimizer.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/postgres_tests/test_operations.py",
+    "status": "modified"
+  }
+]

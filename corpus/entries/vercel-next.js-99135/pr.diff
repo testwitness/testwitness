@@ -1,0 +1,160 @@
+diff --git a/test/e2e/app-dir/app-edge/app-edge-invalid-reexport.test.ts b/test/e2e/app-dir/app-edge/app-edge-invalid-reexport.test.ts
+index f0c6363a7..45afb8dde 100644
+--- a/test/e2e/app-dir/app-edge/app-edge-invalid-reexport.test.ts
++++ b/test/e2e/app-dir/app-edge/app-edge-invalid-reexport.test.ts
+@@ -13,13 +13,9 @@ describe('app-dir edge SSR invalid reexport', () => {
+   })
+ 
+   it('should warn or error about the re-export of a pages runtime/preferredRegion config', async () => {
+-    if (isNextDev || !isTurbopack) {
++    if (isNextDev) {
+       await next.start()
+-    } else {
+-      await expect(next.start()).rejects.toThrow()
+-    }
+ 
+-    if (isNextDev) {
+       const browser = await next.browser('/export/inherit')
+       // Turbopack is stricter and disallows reexports completely
+       // webpack merely warns in the CLI and still serves the page wuthout a redbox
+@@ -37,6 +33,11 @@ describe('app-dir edge SSR invalid reexport', () => {
+          }
+         `)
+       }
++    } else if (isTurbopack) {
++      // Turbopack fails the build, webpack only warns.
++      await expect(next.start()).rejects.toThrow()
++    } else {
++      await next.start()
+     }
+ 
+     expect(next.cliOutput).toInclude(
+diff --git a/test/e2e/app-dir/app-root-params-getters/generate-static-params-error.test.ts b/test/e2e/app-dir/app-root-params-getters/generate-static-params-error.test.ts
+index 316639e9b..e6a216dd1 100644
+--- a/test/e2e/app-dir/app-root-params-getters/generate-static-params-error.test.ts
++++ b/test/e2e/app-dir/app-root-params-getters/generate-static-params-error.test.ts
+@@ -7,11 +7,9 @@ describe('app-root-param-getters - generateStaticParams error', () => {
+     skipStart: true,
+   })
+ 
+-  beforeAll(async () => {
+-    if (isNextDev) await next.start()
+-  })
+-
+   if (isNextDev) {
++    beforeAll(() => next.start())
++
+     it('should error when reading a root param inside the generateStaticParams that defines it - dev', async () => {
+       const browser = await next.browser('/en/us')
+ 
+diff --git a/test/e2e/app-dir/cache-components-route-handler-errors/cache-components-route-handler-errors.test.ts b/test/e2e/app-dir/cache-components-route-handler-errors/cache-components-route-handler-errors.test.ts
+index 6486d033c..66778517f 100644
+--- a/test/e2e/app-dir/cache-components-route-handler-errors/cache-components-route-handler-errors.test.ts
++++ b/test/e2e/app-dir/cache-components-route-handler-errors/cache-components-route-handler-errors.test.ts
+@@ -14,11 +14,7 @@ describe('cache-components-route-handler-errors', () => {
+   it("should error when route handlers use segment configs that aren't supported by cacheComponents", async () => {
+     if (isNextDev) {
+       await next.start()
+-    } else {
+-      await expect(next.start()).rejects.toThrow()
+-    }
+ 
+-    if (isNextDev) {
+       // Test the first route handler with "dynamic" config
+       const browser = await next.browser('/route-with-dynamic')
+       await waitForRedbox(browser)
+@@ -40,6 +36,8 @@ describe('cache-components-route-handler-errors', () => {
+         '"dynamic" is not compatible with `nextConfig.cacheComponents`. Please remove it.'
+       )
+     } else {
++      await expect(next.start()).rejects.toThrow()
++
+       // In build mode, check for all three errors in the output
+       expect(next.cliOutput).toContain('./app/route-with-dynamic/route.ts')
+       expect(next.cliOutput).toContain(
+diff --git a/test/e2e/app-dir/cache-components-segment-configs/cache-components-edge-deduplication.test.ts b/test/e2e/app-dir/cache-components-segment-configs/cache-components-edge-deduplication.test.ts
+index e7a6e3a3a..cb03714a4 100644
+--- a/test/e2e/app-dir/cache-components-segment-configs/cache-components-edge-deduplication.test.ts
++++ b/test/e2e/app-dir/cache-components-segment-configs/cache-components-edge-deduplication.test.ts
+@@ -33,11 +33,7 @@ describe('cache-components-edge-deduplication', () => {
+   it('should not duplicate errors when layout is compiled for both edge and non-edge contexts', async () => {
+     if (isNextDev) {
+       await next.start()
+-    } else {
+-      await expect(next.start()).rejects.toThrow()
+-    }
+ 
+-    if (isNextDev) {
+       const browser = await next.browser('/edge-with-layout/edge')
+       waitForRedbox(browser)
+       await expect(browser).toDisplayRedbox(`
+@@ -62,6 +58,8 @@ describe('cache-components-edge-deduplication', () => {
+       // We don't show an error stack, just the individual error messages at each location
+       expect(layoutErrorMatches.length).toBe(1)
+     } else {
++      await expect(next.start()).rejects.toThrow()
++
+       // Check that both the layout and edge page errors appear
+       expect(next.cliOutput).toContain('./app/edge-with-layout/layout.tsx')
+       expect(next.cliOutput).toContain('./app/edge-with-layout/edge/page.tsx')
+diff --git a/test/e2e/app-dir/interception-routes-output-export/interception-routes-output-export.test.ts b/test/e2e/app-dir/interception-routes-output-export/interception-routes-output-export.test.ts
+index e66864a4a..900e4fbf7 100644
+--- a/test/e2e/app-dir/interception-routes-output-export/interception-routes-output-export.test.ts
++++ b/test/e2e/app-dir/interception-routes-output-export/interception-routes-output-export.test.ts
+@@ -9,13 +9,7 @@ describe('interception-routes-output-export', () => {
+   })
+ 
+   it('should error when using interception routes with static export', async () => {
+-    if (!isNextDev) {
+-      await expect(next.start()).rejects.toThrow()
+-      const cliOutput = next.cliOutput
+-      expect(cliOutput).toContain(
+-        'Intercepting routes are not supported with static export.'
+-      )
+-    } else if (isNextDev) {
++    if (isNextDev) {
+       let stderr = ''
+       let child: ChildProcess | undefined
+       const port = await findPort()
+@@ -42,6 +36,11 @@ describe('interception-routes-output-export', () => {
+         }
+         await exit.catch(() => {})
+       }
++    } else {
++      await expect(next.start()).rejects.toThrow()
++      expect(next.cliOutput).toContain(
++        'Intercepting routes are not supported with static export.'
++      )
+     }
+   }, 240_000)
+ })
+diff --git a/test/e2e/catches-missing-getStaticProps/catches-missing-getStaticProps.test.ts b/test/e2e/catches-missing-getStaticProps/catches-missing-getStaticProps.test.ts
+index 04591365f..5805f0e4b 100644
+--- a/test/e2e/catches-missing-getStaticProps/catches-missing-getStaticProps.test.ts
++++ b/test/e2e/catches-missing-getStaticProps/catches-missing-getStaticProps.test.ts
+@@ -15,9 +15,7 @@ import { nextTestSetup, isNextDev, isNextStart } from 'e2e-utils'
+       const html = await next.render('/hello')
+       expect(html).toMatch(errorRegex)
+     })
+-  }
+-
+-  if (!isNextDev) {
++  } else {
+     it('should catch it in server build mode', async () => {
+       await expect(next.start()).rejects.toThrow()
+       const cliOutput = next.cliOutput
+diff --git a/test/e2e/conflicting-public-file-page/conflicting-public-file-page.test.ts b/test/e2e/conflicting-public-file-page/conflicting-public-file-page.test.ts
+index da454e9f2..260478d18 100644
+--- a/test/e2e/conflicting-public-file-page/conflicting-public-file-page.test.ts
++++ b/test/e2e/conflicting-public-file-page/conflicting-public-file-page.test.ts
+@@ -20,9 +20,7 @@ describe('Errors on conflict between public file and page file', () => {
+ 
+       expect(next.cliOutput).toMatch(regex)
+     })
+-  }
+-
+-  if (!isNextDev) {
++  } else {
+     it('should show conflict error during build', async () => {
+       await expect(next.start()).rejects.toThrow()
+       const cliOutput = next.cliOutput

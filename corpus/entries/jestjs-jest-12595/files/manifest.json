@@ -1,0 +1,185 @@
+[
+  {
+    "path": "e2e/__tests__/fakeTime.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/__tests__/fakeTimers.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "e2e/__tests__/fakeTimersLegacy.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "e2e/__tests__/modernFakeTimers.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/__tests__/setImmediate.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/__tests__/timerResetMocks.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/__tests__/timerUseRealTimers.test.ts",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/fake-time/legacy/from-config/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/fake-time/legacy/from-jest-object/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/fake-time/modern/from-config/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/fake-time/modern/from-jest-object/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/enable-globally/__tests__/enableGlobally.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/legacy/from-config/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/enable-globally/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/request-animation-frame/__tests__/requestAnimationFrame.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/legacy/requestAnimationFrame/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/request-animation-frame/package.json",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/legacy/requestAnimationFrame/package.json"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/reset-all-mocks/__tests__/resetAllMocks.test.js",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/reset-all-mocks/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/reset-mocks/__tests__/resetMock.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/modern/from-jest-object/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/reset-mocks/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/set-immediate/__tests__/setImmediate.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/set-immediate/__tests__/setImmediate.test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/set-immediate/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/use-fake-timers/__tests__/useFakeTimers.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/legacy/from-jest-object/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/use-fake-timers/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/use-real-timers/__tests__/useRealTimers.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/timer-use-real-timers/__tests__/useRealTimers.test.js"
+  },
+  {
+    "path": "e2e/fake-timers-legacy/use-real-timers/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers/enable-globally/__tests__/enableGlobally.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/modern-fake-timers/from-config/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers/enable-globally/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers/request-animation-frame/__tests__/requestAnimationFrame.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/modern/requestAnimationFrame/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers/request-animation-frame/package.json",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/modern/requestAnimationFrame/package.json"
+  },
+  {
+    "path": "e2e/fake-timers/set-immediate/__tests__/setImmediate.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/fake-time/modern/from-config/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers/set-immediate/package.json",
+    "status": "renamed",
+    "oldPath": "e2e/set-immediate/package.json"
+  },
+  {
+    "path": "e2e/fake-timers/use-fake-timers/__tests__/useFakeTimers.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/modern-fake-timers/from-jest-object/__tests__/test.js"
+  },
+  {
+    "path": "e2e/fake-timers/use-fake-timers/package.json",
+    "status": "added"
+  },
+  {
+    "path": "e2e/fake-timers/use-real-timers/__tests__/useRealTimers.test.js",
+    "status": "renamed",
+    "oldPath": "e2e/timer-reset-mocks/with-reset-mocks/index.js"
+  },
+  {
+    "path": "e2e/fake-timers/use-real-timers/package.json",
+    "status": "renamed",
+    "oldPath": "e2e/timer-use-real-timers/package.json"
+  },
+  {
+    "path": "e2e/modern-fake-timers/from-config/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/modern-fake-timers/from-jest-object/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/timer-reset-mocks/after-reset-all-mocks/index.js",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/timer-reset-mocks/after-reset-all-mocks/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/timer-reset-mocks/after-reset-all-mocks/timerAndMock.test.js",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/timer-reset-mocks/with-reset-mocks/package.json",
+    "status": "deleted"
+  },
+  {
+    "path": "e2e/timer-reset-mocks/with-reset-mocks/timerWithMock.test.js",
+    "status": "deleted"
+  }
+]

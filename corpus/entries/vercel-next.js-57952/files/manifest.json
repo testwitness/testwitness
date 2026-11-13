@@ -1,0 +1,22 @@
+[
+  {
+    "path": "test/development/acceptance-app/ReactRefreshLogBox-builtins.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/development/acceptance-app/__snapshots__/ReactRefreshLogBox-builtins.test.ts.snap",
+    "status": "deleted"
+  },
+  {
+    "path": "test/development/acceptance/ReactRefreshLogBox-builtins.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/development/acceptance/__snapshots__/ReactRefreshLogBox-builtins.test.ts.snap",
+    "status": "deleted"
+  },
+  {
+    "path": "test/turbopack-tests-manifest.json",
+    "status": "modified"
+  }
+]

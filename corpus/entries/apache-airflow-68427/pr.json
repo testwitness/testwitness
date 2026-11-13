@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/68427",
+  "repo": "apache/airflow",
+  "number": 68427,
+  "title": "Rename resumablejobmixin test file to match its src file",
+  "merged_at": "2026-06-12T06:53:50Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "move",
+  "split": "heldout",
+  "base_sha": "1691f6c4678e52f3a2ef8883097f21760068065e",
+  "head_sha": "08dde06e5bfe4b06ee68fac4a882142f94b7759d",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 0
+}

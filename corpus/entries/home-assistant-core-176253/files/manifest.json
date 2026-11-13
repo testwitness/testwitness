@@ -1,0 +1,10 @@
+[
+  {
+    "path": "tests/components/izone/test_config_flow.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests/components/izone/test_discovery.py",
+    "status": "added"
+  }
+]

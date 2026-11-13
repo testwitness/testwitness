@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/68190",
+  "repo": "apache/airflow",
+  "number": 68190,
+  "title": "Refactor Teradata provider tests to remove legacy unittest imports",
+  "merged_at": "2026-06-22T06:55:32Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "migration",
+  "split": "tuning",
+  "base_sha": "f822744a0a1030d23f8889044b1a3e2ed5f54e88",
+  "head_sha": "8a222bad11604a2b238a234be7998f4ab144da67",
+  "files_changed": 3,
+  "additions": 0,
+  "deletions": 15
+}

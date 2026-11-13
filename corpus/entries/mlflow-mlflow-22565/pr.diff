@@ -1,0 +1,93 @@
+diff --git a/.github/workflows/master.yml b/.github/workflows/master.yml
+index 3f4d8519..c6ed9f49 100644
+--- a/.github/workflows/master.yml
++++ b/.github/workflows/master.yml
+@@ -148,14 +148,11 @@ jobs:
+             # Set `--no-TTY` to show container logs on GitHub Actions:
+             # https://github.com/actions/virtual-environments/issues/5022
+             ./tests/db/compose.sh run --rm --no-TTY $service pytest \
+-              tests/store/tracking/test_sqlalchemy_store.py \
+-              tests/store/tracking/test_sqlalchemy_store_issues.py \
+-              tests/store/tracking/test_sqlalchemy_store_query_trace_metrics.py \
++              tests/store/tracking/sqlalchemy_store \
+               tests/store/tracking/test_gateway_sql_store.py \
+               tests/store/model_registry/test_sqlalchemy_store.py \
+               tests/store/model_registry/test_sqlalchemy_workspace_store.py \
+               tests/store/workspace/test_sqlalchemy_store.py \
+-              tests/store/tracking/test_sqlalchemy_workspace_store.py \
+               tests/db
+               RESULTS="$RESULTS\n$service: $(if [ $? -eq 0 ]; then echo "✅"; else echo "❌"; fi)"
+           done
+diff --git a/tests/store/tracking/sqlalchemy_store/__init__.py b/tests/store/tracking/sqlalchemy_store/__init__.py
+new file mode 100644
+index 00000000..e69de29b
+diff --git a/tests/store/tracking/test_sqlalchemy_store.py b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store.py
+similarity index 99%
+rename from tests/store/tracking/test_sqlalchemy_store.py
+rename to tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store.py
+index 7742a12f..2ce5c684 100644
+--- a/tests/store/tracking/test_sqlalchemy_store.py
++++ b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store.py
+@@ -3598,7 +3598,7 @@ def test_metrics_materialization_upgrade_succeeds_and_produces_expected_latest_m
+     """
+     current_dir = os.path.dirname(os.path.abspath(__file__))
+     db_resources_path = os.path.normpath(
+-        os.path.join(current_dir, os.pardir, os.pardir, "resources", "db")
++        os.path.join(current_dir, os.pardir, os.pardir, os.pardir, "resources", "db")
+     )
+     expected_metric_values_path = os.path.join(
+         db_resources_path, "db_version_7ac759974ad8_with_metrics_expected_values.json"
+diff --git a/tests/store/tracking/test_sqlalchemy_store_issues.py b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_issues.py
+similarity index 100%
+rename from tests/store/tracking/test_sqlalchemy_store_issues.py
+rename to tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_issues.py
+diff --git a/tests/store/tracking/test_sqlalchemy_store_query_trace_metrics.py b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_query_trace_metrics.py
+similarity index 99%
+rename from tests/store/tracking/test_sqlalchemy_store_query_trace_metrics.py
+rename to tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_query_trace_metrics.py
+index f534cbe2..d89508da 100644
+--- a/tests/store/tracking/test_sqlalchemy_store_query_trace_metrics.py
++++ b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_query_trace_metrics.py
+@@ -39,7 +39,7 @@ from mlflow.tracing.constant import (
+ )
+ from mlflow.utils.time import get_current_time_millis
+ 
+-from tests.store.tracking.test_sqlalchemy_store import create_test_span
++from tests.store.tracking.sqlalchemy_store.test_sqlalchemy_store import create_test_span
+ 
+ pytestmark = pytest.mark.notrackingurimock
+ 
+diff --git a/tests/store/tracking/test_sqlalchemy_store_schema.py b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_schema.py
+similarity index 99%
+rename from tests/store/tracking/test_sqlalchemy_store_schema.py
+rename to tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_schema.py
+index 470a3551..50cb0bf2 100644
+--- a/tests/store/tracking/test_sqlalchemy_store_schema.py
++++ b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_store_schema.py
+@@ -59,7 +59,9 @@ def _assert_schema_files_equal(generated_schema_file, expected_schema_file):
+ def expected_schema_file():
+     current_dir = os.path.dirname(os.path.abspath(__file__))
+     return os.path.normpath(
+-        os.path.join(current_dir, os.pardir, os.pardir, "resources", "db", "latest_schema.sql")
++        os.path.join(
++            current_dir, os.pardir, os.pardir, os.pardir, "resources", "db", "latest_schema.sql"
++        )
+     )
+ 
+ 
+diff --git a/tests/store/tracking/test_sqlalchemy_workspace_store.py b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_workspace_store.py
+similarity index 99%
+rename from tests/store/tracking/test_sqlalchemy_workspace_store.py
+rename to tests/store/tracking/sqlalchemy_store/test_sqlalchemy_workspace_store.py
+index c2615b2c..898306bd 100644
+--- a/tests/store/tracking/test_sqlalchemy_workspace_store.py
++++ b/tests/store/tracking/sqlalchemy_store/test_sqlalchemy_workspace_store.py
+@@ -53,7 +53,7 @@ from mlflow.utils.uri import append_to_uri_path
+ from mlflow.utils.workspace_context import WorkspaceContext
+ from mlflow.utils.workspace_utils import DEFAULT_WORKSPACE_NAME
+ 
+-from tests.store.tracking.test_sqlalchemy_store import (
++from tests.store.tracking.sqlalchemy_store.test_sqlalchemy_store import (
+     _create_trace,
+     _gateway_model_scorer_json,
+     _mock_gateway_endpoint,

@@ -1,0 +1,772 @@
+diff --git a/.eslintignore b/.eslintignore
+index 7cdec5c5..2e0ac927 100644
+--- a/.eslintignore
++++ b/.eslintignore
+@@ -8,7 +8,8 @@
+ /flow
+ /flow-typed
+ /packages/material-ui-codemod/lib
+-/packages/material-ui-codemod/src/*/*.spec*
++/packages/material-ui-codemod/src/*/*.test
++/packages/material-ui-codemod/src/*/*.test.js
+ /packages/material-ui-icons/src
+ /packages/material-ui-icons/test/fixtures
+ /packages/material-ui-icons/tpl
+diff --git a/docs/src/modules/utils/helpers.spec.js b/docs/src/modules/utils/helpers.test.js
+similarity index 100%
+rename from docs/src/modules/utils/helpers.spec.js
+rename to docs/src/modules/utils/helpers.test.js
+diff --git a/package.json b/package.json
+index 0cb4f8e9..07d537a3 100644
+--- a/package.json
++++ b/package.json
+@@ -41,19 +41,19 @@
+     "size:overhead:why": "size-limit --why ./test/size/overhead.js",
+     "spellcheck": "eslint . --config .eslintrc.spellcheck.js && echo \"eslint: no lint errors\"",
+     "test": "yarn lint && yarn flow && yarn typescript && yarn test:unit",
+-    "test:unit": "cross-env NODE_ENV=test mocha test/**/*.spec.js src/{,**/}*.spec.js docs/src/**/*.spec.js",
++    "test:unit": "cross-env NODE_ENV=test mocha test/**/*.test.js src/{,**/}*.test.js docs/src/**/*.test.js",
+     "test:watch": "yarn test:unit --watch",
+-    "test:coverage": "cross-env NODE_ENV=test BABEL_ENV=coverage nyc mocha test/**/*.spec.js src/{,**/}*.spec.js && nyc report -r lcovonly",
+-    "test:coverage:html": "cross-env NODE_ENV=test BABEL_ENV=coverage nyc mocha test/**/*.spec.js src/{,**/}*.spec.js && nyc report --reporter=html",
++    "test:coverage": "cross-env NODE_ENV=test BABEL_ENV=coverage nyc mocha test/**/*.test.js src/{,**/}*.test.js && nyc report -r lcovonly",
++    "test:coverage:html": "cross-env NODE_ENV=test BABEL_ENV=coverage nyc mocha test/**/*.test.js src/{,**/}*.test.js && nyc report --reporter=html",
+     "test:karma": "cross-env NODE_ENV=test karma start test/karma.conf.js --single-run",
+     "test:regressions": "webpack --config test/regressions/webpack.config.js && rimraf test/regressions/screenshots/chrome/* && vrtest run --config test/vrtest.config.js --record",
+     "typescript": "tsc -p tsconfig.json",
+     "flow": "flow --show-all-errors",
+     "argos": "argos upload test/regressions/screenshots/chrome --token $ARGOS_TOKEN || true",
+     "prebuild": "rimraf build",
+-    "build:es2015": "cross-env NODE_ENV=production babel ./src --ignore *.spec.js --out-dir ./build",
++    "build:es2015": "cross-env NODE_ENV=production babel ./src --ignore *.test.js --out-dir ./build",
+     "build:es2015modules": "cross-env NODE_ENV=production BABEL_ENV=modules babel ./src/index.js --out-file ./build/index.es.js",
+-    "build:es": "cross-env NODE_ENV=production BABEL_ENV=es babel ./src --ignore *.spec.js --out-dir ./build/es",
++    "build:es": "cross-env NODE_ENV=production BABEL_ENV=es babel ./src --ignore *.test.js --out-dir ./build/es",
+     "build:umd:dev": "webpack --config scripts/umd.webpack.config.js",
+     "build:umd:prod": "cross-env NODE_ENV=production webpack --config scripts/umd.webpack.config.js",
+     "build:copy-files": "babel-node ./scripts/copy-files.js",
+@@ -209,7 +209,7 @@
+       "src/**/*.js"
+     ],
+     "exclude": [
+-      "**/*.spec.js"
++      "**/*.test.js"
+     ],
+     "sourceMap": false,
+     "instrument": false
+diff --git a/packages/eslint-plugin-material-ui/package.json b/packages/eslint-plugin-material-ui/package.json
+index aa4441c2..bbcfacca 100644
+--- a/packages/eslint-plugin-material-ui/package.json
++++ b/packages/eslint-plugin-material-ui/package.json
+@@ -5,7 +5,7 @@
+   "description": "Custom eslint rules for Material-UI.",
+   "main": "src/index.js",
+   "scripts": {
+-    "test": "../../node_modules/.bin/mocha src/**/*.spec.js",
++    "test": "../../node_modules/.bin/mocha src/**/*.test.js",
+     "build": "echo done"
+   },
+   "repository": {
+diff --git a/packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.spec.js b/packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.test.js
+similarity index 100%
+rename from packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.spec.js
+rename to packages/eslint-plugin-material-ui/src/rules/docgen-ignore-before-comment.test.js
+diff --git a/packages/material-ui-codemod/.npmignore b/packages/material-ui-codemod/.npmignore
+index f661a7e2..a3a82f6d 100644
+--- a/packages/material-ui-codemod/.npmignore
++++ b/packages/material-ui-codemod/.npmignore
+@@ -1,4 +1,4 @@
+ /*
+ !/src/*.js
+ !/lib/*.js
+-/test/*
++*.test.js
+diff --git a/packages/material-ui-codemod/package.json b/packages/material-ui-codemod/package.json
+index 7beeec6b..2929db75 100644
+--- a/packages/material-ui-codemod/package.json
++++ b/packages/material-ui-codemod/package.json
+@@ -14,7 +14,7 @@
+   ],
+   "scripts": {
+     "test": "yarn test:unit",
+-    "test:unit": "cd ../../ && ./node_modules/.bin/mocha packages/material-ui-codemod/src/**/*.spec.js",
++    "test:unit": "cd ../../ && ./node_modules/.bin/mocha packages/material-ui-codemod/src/**/*.test.js",
+     "test:watch": "yarn test:unit --watch",
+     "build": "../../node_modules/.bin/rimraf lib && ../../node_modules/.bin/babel ./src --out-dir ./lib",
+     "version": "npm publish"
+diff --git a/packages/material-ui-codemod/src/v0.15.0/import-path.spec.js b/packages/material-ui-codemod/src/v0.15.0/import-path.test.js
+similarity index 85%
+rename from packages/material-ui-codemod/src/v0.15.0/import-path.spec.js
+rename to packages/material-ui-codemod/src/v0.15.0/import-path.test.js
+index 92a8e29e..0ff5ce92 100644
+--- a/packages/material-ui-codemod/src/v0.15.0/import-path.spec.js
++++ b/packages/material-ui-codemod/src/v0.15.0/import-path.test.js
+@@ -17,11 +17,11 @@ describe('material-ui-codemod', () => {
+     describe('import-path', () => {
+       it('convert path as needed', () => {
+         const actual = transform(
+-          { source: read('./import-path.spec/actual.js') },
++          { source: read('./import-path.test/actual.js') },
+           { jscodeshift: jscodeshift },
+         );
+ 
+-        const expected = read('./import-path.spec/expected.js');
++        const expected = read('./import-path.test/expected.js');
+ 
+         assert.strictEqual(
+           trim(actual),
+diff --git a/packages/material-ui-codemod/src/v0.15.0/import-path.spec/actual.js b/packages/material-ui-codemod/src/v0.15.0/import-path.test/actual.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v0.15.0/import-path.spec/actual.js
+rename to packages/material-ui-codemod/src/v0.15.0/import-path.test/actual.js
+diff --git a/packages/material-ui-codemod/src/v0.15.0/import-path.spec/expected.js b/packages/material-ui-codemod/src/v0.15.0/import-path.test/expected.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v0.15.0/import-path.spec/expected.js
+rename to packages/material-ui-codemod/src/v0.15.0/import-path.test/expected.js
+diff --git a/packages/material-ui-codemod/src/v1.0.0/color-imports.spec.js b/packages/material-ui-codemod/src/v1.0.0/color-imports.test.js
+similarity index 85%
+rename from packages/material-ui-codemod/src/v1.0.0/color-imports.spec.js
+rename to packages/material-ui-codemod/src/v1.0.0/color-imports.test.js
+index 99b6e08e..d6049682 100644
+--- a/packages/material-ui-codemod/src/v1.0.0/color-imports.spec.js
++++ b/packages/material-ui-codemod/src/v1.0.0/color-imports.test.js
+@@ -17,11 +17,11 @@ describe('material-ui-codemod', () => {
+     describe('color-imports', () => {
+       it('update color module imports', () => {
+         const actual = transform(
+-          { source: read('./color-imports.spec/actual.js') },
++          { source: read('./color-imports.test/actual.js') },
+           { jscodeshift: jscodeshift },
+         );
+ 
+-        const expected = read('./color-imports.spec/expected.js');
++        const expected = read('./color-imports.test/expected.js');
+ 
+         assert.strictEqual(
+           trim(actual),
+diff --git a/packages/material-ui-codemod/src/v1.0.0/color-imports.spec/actual.js b/packages/material-ui-codemod/src/v1.0.0/color-imports.test/actual.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v1.0.0/color-imports.spec/actual.js
+rename to packages/material-ui-codemod/src/v1.0.0/color-imports.test/actual.js
+diff --git a/packages/material-ui-codemod/src/v1.0.0/color-imports.spec/expected.js b/packages/material-ui-codemod/src/v1.0.0/color-imports.test/expected.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v1.0.0/color-imports.spec/expected.js
+rename to packages/material-ui-codemod/src/v1.0.0/color-imports.test/expected.js
+diff --git a/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec.js b/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test.js
+similarity index 85%
+rename from packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec.js
+rename to packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test.js
+index d4ada240..ac61bae6 100644
+--- a/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec.js
++++ b/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test.js
+@@ -17,11 +17,11 @@ describe('material-ui-codemod', () => {
+     describe('svg-icon-imports', () => {
+       it('update svg-icon imports', () => {
+         const actual = transform(
+-          { source: read('./svg-icon-imports.spec/actual.js') },
++          { source: read('./svg-icon-imports.test/actual.js') },
+           { jscodeshift: jscodeshift },
+         );
+ 
+-        const expected = read('./svg-icon-imports.spec/expected.js');
++        const expected = read('./svg-icon-imports.test/expected.js');
+ 
+         assert.strictEqual(
+           trim(actual),
+diff --git a/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/actual.js b/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/actual.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/actual.js
+rename to packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/actual.js
+diff --git a/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/expected.js b/packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/expected.js
+similarity index 100%
+rename from packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.spec/expected.js
+rename to packages/material-ui-codemod/src/v1.0.0/svg-icon-imports.test/expected.js
+diff --git a/packages/material-ui-icons/package.json b/packages/material-ui-icons/package.json
+index 5e9f078c..6566626f 100644
+--- a/packages/material-ui-icons/package.json
++++ b/packages/material-ui-icons/package.json
+@@ -23,7 +23,7 @@
+   "homepage": "https://github.com/mui-org/material-ui/tree/v1-beta/packages/material-ui-icons",
+   "scripts": {
+     "test": "yarn test:unit",
+-    "test:unit": "cd ../../ && ./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/mocha packages/material-ui-icons/test/index.spec.js",
++    "test:unit": "cd ../../ && ./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/mocha packages/material-ui-icons/test/index.test.js",
+     "test:watch": "yarn test:unit --watch",
+     "prebuild": "../../node_modules/.bin/rimraf build",
+     "build:es2015": "../../node_modules/.bin/cross-env NODE_ENV=production ../../node_modules/.bin/babel ./src --out-dir ./build",
+diff --git a/packages/material-ui-icons/test/index.spec.js b/packages/material-ui-icons/test/index.test.js
+similarity index 100%
+rename from packages/material-ui-icons/test/index.spec.js
+rename to packages/material-ui-icons/test/index.test.js
+diff --git a/packages/material-ui-lab/package.json b/packages/material-ui-lab/package.json
+index a90d29f4..1df2ff2e 100644
+--- a/packages/material-ui-lab/package.json
++++ b/packages/material-ui-lab/package.json
+@@ -23,7 +23,7 @@
+   "homepage": "https://github.com/mui-org/material-ui/tree/v1-beta/packages/material-ui-lab",
+   "scripts": {
+     "test": "yarn test:unit",
+-    "test:unit": "cd ../../ && ./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/mocha packages/material-ui-lab/src/{,**/}*.spec.js",
++    "test:unit": "cd ../../ && ./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/mocha packages/material-ui-lab/src/{,**/}*.test.js",
+     "test:watch": "yarn test:unit --watch",
+     "prebuild": "../../node_modules/.bin/rimraf build",
+     "build:es2015": "../../node_modules/.bin/cross-env NODE_ENV=production ../../node_modules/.bin/babel ./src --out-dir ./build",
+diff --git a/packages/material-ui-lab/src/SpeedDial/SpeedDial.spec.js b/packages/material-ui-lab/src/SpeedDial/SpeedDial.test.js
+similarity index 100%
+rename from packages/material-ui-lab/src/SpeedDial/SpeedDial.spec.js
+rename to packages/material-ui-lab/src/SpeedDial/SpeedDial.test.js
+diff --git a/packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.spec.js b/packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.test.js
+similarity index 100%
+rename from packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.spec.js
+rename to packages/material-ui-lab/src/SpeedDialAction/SpeedDialAction.test.js
+diff --git a/packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.spec.js b/packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.test.js
+similarity index 100%
+rename from packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.spec.js
+rename to packages/material-ui-lab/src/SpeedDialIcon/SpeedDialIcon.test.js
+diff --git a/packages/material-ui-lab/src/index.spec.js b/packages/material-ui-lab/src/index.test.js
+similarity index 100%
+rename from packages/material-ui-lab/src/index.spec.js
+rename to packages/material-ui-lab/src/index.test.js
+diff --git a/src/AppBar/AppBar.spec.js b/src/AppBar/AppBar.test.js
+similarity index 100%
+rename from src/AppBar/AppBar.spec.js
+rename to src/AppBar/AppBar.test.js
+diff --git a/src/Avatar/Avatar.spec.js b/src/Avatar/Avatar.test.js
+similarity index 100%
+rename from src/Avatar/Avatar.spec.js
+rename to src/Avatar/Avatar.test.js
+diff --git a/src/Badge/Badge.spec.js b/src/Badge/Badge.test.js
+similarity index 100%
+rename from src/Badge/Badge.spec.js
+rename to src/Badge/Badge.test.js
+diff --git a/src/BottomNavigation/BottomNavigation.spec.js b/src/BottomNavigation/BottomNavigation.test.js
+similarity index 100%
+rename from src/BottomNavigation/BottomNavigation.spec.js
+rename to src/BottomNavigation/BottomNavigation.test.js
+diff --git a/src/BottomNavigation/BottomNavigationAction.spec.js b/src/BottomNavigation/BottomNavigationAction.test.js
+similarity index 100%
+rename from src/BottomNavigation/BottomNavigationAction.spec.js
+rename to src/BottomNavigation/BottomNavigationAction.test.js
+diff --git a/src/Button/Button.spec.js b/src/Button/Button.test.js
+similarity index 100%
+rename from src/Button/Button.spec.js
+rename to src/Button/Button.test.js
+diff --git a/src/ButtonBase/ButtonBase.spec.js b/src/ButtonBase/ButtonBase.test.js
+similarity index 100%
+rename from src/ButtonBase/ButtonBase.spec.js
+rename to src/ButtonBase/ButtonBase.test.js
+diff --git a/src/ButtonBase/Ripple.spec.js b/src/ButtonBase/Ripple.test.js
+similarity index 100%
+rename from src/ButtonBase/Ripple.spec.js
+rename to src/ButtonBase/Ripple.test.js
+diff --git a/src/ButtonBase/TouchRipple.spec.js b/src/ButtonBase/TouchRipple.test.js
+similarity index 100%
+rename from src/ButtonBase/TouchRipple.spec.js
+rename to src/ButtonBase/TouchRipple.test.js
+diff --git a/src/Card/Card.spec.js b/src/Card/Card.test.js
+similarity index 100%
+rename from src/Card/Card.spec.js
+rename to src/Card/Card.test.js
+diff --git a/src/Card/CardActions.spec.js b/src/Card/CardActions.test.js
+similarity index 100%
+rename from src/Card/CardActions.spec.js
+rename to src/Card/CardActions.test.js
+diff --git a/src/Card/CardContent.spec.js b/src/Card/CardContent.test.js
+similarity index 100%
+rename from src/Card/CardContent.spec.js
+rename to src/Card/CardContent.test.js
+diff --git a/src/Card/CardHeader.spec.js b/src/Card/CardHeader.test.js
+similarity index 100%
+rename from src/Card/CardHeader.spec.js
+rename to src/Card/CardHeader.test.js
+diff --git a/src/Card/CardMedia.spec.js b/src/Card/CardMedia.test.js
+similarity index 100%
+rename from src/Card/CardMedia.spec.js
+rename to src/Card/CardMedia.test.js
+diff --git a/src/Checkbox/Checkbox.spec.js b/src/Checkbox/Checkbox.test.js
+similarity index 100%
+rename from src/Checkbox/Checkbox.spec.js
+rename to src/Checkbox/Checkbox.test.js
+diff --git a/src/Chip/Chip.spec.js b/src/Chip/Chip.test.js
+similarity index 100%
+rename from src/Chip/Chip.spec.js
+rename to src/Chip/Chip.test.js
+diff --git a/src/CssBaseline/CssBaseline.spec.js b/src/CssBaseline/CssBaseline.test.js
+similarity index 100%
+rename from src/CssBaseline/CssBaseline.spec.js
+rename to src/CssBaseline/CssBaseline.test.js
+diff --git a/src/Dialog/Dialog.spec.js b/src/Dialog/Dialog.test.js
+similarity index 100%
+rename from src/Dialog/Dialog.spec.js
+rename to src/Dialog/Dialog.test.js
+diff --git a/src/Dialog/DialogActions.spec.js b/src/Dialog/DialogActions.test.js
+similarity index 100%
+rename from src/Dialog/DialogActions.spec.js
+rename to src/Dialog/DialogActions.test.js
+diff --git a/src/Dialog/DialogContent.spec.js b/src/Dialog/DialogContent.test.js
+similarity index 100%
+rename from src/Dialog/DialogContent.spec.js
+rename to src/Dialog/DialogContent.test.js
+diff --git a/src/Dialog/DialogContentText.spec.js b/src/Dialog/DialogContentText.test.js
+similarity index 100%
+rename from src/Dialog/DialogContentText.spec.js
+rename to src/Dialog/DialogContentText.test.js
+diff --git a/src/Dialog/DialogTitle.spec.js b/src/Dialog/DialogTitle.test.js
+similarity index 100%
+rename from src/Dialog/DialogTitle.spec.js
+rename to src/Dialog/DialogTitle.test.js
+diff --git a/src/Dialog/withMobileDialog.spec.js b/src/Dialog/withMobileDialog.test.js
+similarity index 100%
+rename from src/Dialog/withMobileDialog.spec.js
+rename to src/Dialog/withMobileDialog.test.js
+diff --git a/src/Divider/Divider.spec.js b/src/Divider/Divider.test.js
+similarity index 100%
+rename from src/Divider/Divider.spec.js
+rename to src/Divider/Divider.test.js
+diff --git a/src/Drawer/Drawer.spec.js b/src/Drawer/Drawer.test.js
+similarity index 100%
+rename from src/Drawer/Drawer.spec.js
+rename to src/Drawer/Drawer.test.js
+diff --git a/src/ExpansionPanel/ExpansionPanel.spec.js b/src/ExpansionPanel/ExpansionPanel.test.js
+similarity index 100%
+rename from src/ExpansionPanel/ExpansionPanel.spec.js
+rename to src/ExpansionPanel/ExpansionPanel.test.js
+diff --git a/src/ExpansionPanel/ExpansionPanelActions.spec.js b/src/ExpansionPanel/ExpansionPanelActions.test.js
+similarity index 100%
+rename from src/ExpansionPanel/ExpansionPanelActions.spec.js
+rename to src/ExpansionPanel/ExpansionPanelActions.test.js
+diff --git a/src/ExpansionPanel/ExpansionPanelDetails.spec.js b/src/ExpansionPanel/ExpansionPanelDetails.test.js
+similarity index 100%
+rename from src/ExpansionPanel/ExpansionPanelDetails.spec.js
+rename to src/ExpansionPanel/ExpansionPanelDetails.test.js
+diff --git a/src/ExpansionPanel/ExpansionPanelSummary.spec.js b/src/ExpansionPanel/ExpansionPanelSummary.test.js
+similarity index 100%
+rename from src/ExpansionPanel/ExpansionPanelSummary.spec.js
+rename to src/ExpansionPanel/ExpansionPanelSummary.test.js
+diff --git a/src/Form/FormControl.spec.js b/src/Form/FormControl.test.js
+similarity index 100%
+rename from src/Form/FormControl.spec.js
+rename to src/Form/FormControl.test.js
+diff --git a/src/Form/FormControlLabel.spec.js b/src/Form/FormControlLabel.test.js
+similarity index 100%
+rename from src/Form/FormControlLabel.spec.js
+rename to src/Form/FormControlLabel.test.js
+diff --git a/src/Form/FormGroup.spec.js b/src/Form/FormGroup.test.js
+similarity index 100%
+rename from src/Form/FormGroup.spec.js
+rename to src/Form/FormGroup.test.js
+diff --git a/src/Form/FormHelperText.spec.js b/src/Form/FormHelperText.test.js
+similarity index 100%
+rename from src/Form/FormHelperText.spec.js
+rename to src/Form/FormHelperText.test.js
+diff --git a/src/Form/FormLabel.spec.js b/src/Form/FormLabel.test.js
+similarity index 100%
+rename from src/Form/FormLabel.spec.js
+rename to src/Form/FormLabel.test.js
+diff --git a/src/Grid/Grid.spec.js b/src/Grid/Grid.test.js
+similarity index 100%
+rename from src/Grid/Grid.spec.js
+rename to src/Grid/Grid.test.js
+diff --git a/src/GridList/GridList.spec.js b/src/GridList/GridList.test.js
+similarity index 100%
+rename from src/GridList/GridList.spec.js
+rename to src/GridList/GridList.test.js
+diff --git a/src/GridList/GridListTile.spec.js b/src/GridList/GridListTile.test.js
+similarity index 100%
+rename from src/GridList/GridListTile.spec.js
+rename to src/GridList/GridListTile.test.js
+diff --git a/src/GridList/GridListTileBar.spec.js b/src/GridList/GridListTileBar.test.js
+similarity index 100%
+rename from src/GridList/GridListTileBar.spec.js
+rename to src/GridList/GridListTileBar.test.js
+diff --git a/src/Hidden/Hidden.spec.js b/src/Hidden/Hidden.test.js
+similarity index 100%
+rename from src/Hidden/Hidden.spec.js
+rename to src/Hidden/Hidden.test.js
+diff --git a/src/Hidden/HiddenCss.spec.js b/src/Hidden/HiddenCss.test.js
+similarity index 100%
+rename from src/Hidden/HiddenCss.spec.js
+rename to src/Hidden/HiddenCss.test.js
+diff --git a/src/Hidden/HiddenJs.spec.js b/src/Hidden/HiddenJs.test.js
+similarity index 100%
+rename from src/Hidden/HiddenJs.spec.js
+rename to src/Hidden/HiddenJs.test.js
+diff --git a/src/Icon/Icon.spec.js b/src/Icon/Icon.test.js
+similarity index 100%
+rename from src/Icon/Icon.spec.js
+rename to src/Icon/Icon.test.js
+diff --git a/src/IconButton/IconButton.spec.js b/src/IconButton/IconButton.test.js
+similarity index 100%
+rename from src/IconButton/IconButton.spec.js
+rename to src/IconButton/IconButton.test.js
+diff --git a/src/Input/Input.spec.js b/src/Input/Input.test.js
+similarity index 100%
+rename from src/Input/Input.spec.js
+rename to src/Input/Input.test.js
+diff --git a/src/Input/InputAdornment.spec.js b/src/Input/InputAdornment.test.js
+similarity index 100%
+rename from src/Input/InputAdornment.spec.js
+rename to src/Input/InputAdornment.test.js
+diff --git a/src/Input/InputLabel.spec.js b/src/Input/InputLabel.test.js
+similarity index 100%
+rename from src/Input/InputLabel.spec.js
+rename to src/Input/InputLabel.test.js
+diff --git a/src/Input/Textarea.spec.js b/src/Input/Textarea.test.js
+similarity index 100%
+rename from src/Input/Textarea.spec.js
+rename to src/Input/Textarea.test.js
+diff --git a/src/List/List.spec.js b/src/List/List.test.js
+similarity index 100%
+rename from src/List/List.spec.js
+rename to src/List/List.test.js
+diff --git a/src/List/ListItem.spec.js b/src/List/ListItem.test.js
+similarity index 100%
+rename from src/List/ListItem.spec.js
+rename to src/List/ListItem.test.js
+diff --git a/src/List/ListItemAvatar.spec.js b/src/List/ListItemAvatar.test.js
+similarity index 100%
+rename from src/List/ListItemAvatar.spec.js
+rename to src/List/ListItemAvatar.test.js
+diff --git a/src/List/ListItemIcon.spec.js b/src/List/ListItemIcon.test.js
+similarity index 100%
+rename from src/List/ListItemIcon.spec.js
+rename to src/List/ListItemIcon.test.js
+diff --git a/src/List/ListItemSecondaryAction.spec.js b/src/List/ListItemSecondaryAction.test.js
+similarity index 100%
+rename from src/List/ListItemSecondaryAction.spec.js
+rename to src/List/ListItemSecondaryAction.test.js
+diff --git a/src/List/ListItemText.spec.js b/src/List/ListItemText.test.js
+similarity index 100%
+rename from src/List/ListItemText.spec.js
+rename to src/List/ListItemText.test.js
+diff --git a/src/List/ListSubheader.spec.js b/src/List/ListSubheader.test.js
+similarity index 100%
+rename from src/List/ListSubheader.spec.js
+rename to src/List/ListSubheader.test.js
+diff --git a/src/Menu/Menu.spec.js b/src/Menu/Menu.test.js
+similarity index 100%
+rename from src/Menu/Menu.spec.js
+rename to src/Menu/Menu.test.js
+diff --git a/src/Menu/MenuItem.spec.js b/src/Menu/MenuItem.test.js
+similarity index 100%
+rename from src/Menu/MenuItem.spec.js
+rename to src/Menu/MenuItem.test.js
+diff --git a/src/Menu/MenuList.spec.js b/src/Menu/MenuList.test.js
+similarity index 100%
+rename from src/Menu/MenuList.spec.js
+rename to src/Menu/MenuList.test.js
+diff --git a/src/MobileStepper/MobileStepper.spec.js b/src/MobileStepper/MobileStepper.test.js
+similarity index 100%
+rename from src/MobileStepper/MobileStepper.spec.js
+rename to src/MobileStepper/MobileStepper.test.js
+diff --git a/src/Modal/Backdrop.spec.js b/src/Modal/Backdrop.test.js
+similarity index 100%
+rename from src/Modal/Backdrop.spec.js
+rename to src/Modal/Backdrop.test.js
+diff --git a/src/Modal/Modal.spec.js b/src/Modal/Modal.test.js
+similarity index 100%
+rename from src/Modal/Modal.spec.js
+rename to src/Modal/Modal.test.js
+diff --git a/src/Modal/ModalManager.spec.js b/src/Modal/ModalManager.test.js
+similarity index 100%
+rename from src/Modal/ModalManager.spec.js
+rename to src/Modal/ModalManager.test.js
+diff --git a/src/Modal/isOverflowing.spec.js b/src/Modal/isOverflowing.test.js
+similarity index 100%
+rename from src/Modal/isOverflowing.spec.js
+rename to src/Modal/isOverflowing.test.js
+diff --git a/src/Paper/Paper.spec.js b/src/Paper/Paper.test.js
+similarity index 100%
+rename from src/Paper/Paper.spec.js
+rename to src/Paper/Paper.test.js
+diff --git a/src/Popover/Popover.spec.js b/src/Popover/Popover.test.js
+similarity index 100%
+rename from src/Popover/Popover.spec.js
+rename to src/Popover/Popover.test.js
+diff --git a/src/Portal/Portal.spec.js b/src/Portal/Portal.test.js
+similarity index 100%
+rename from src/Portal/Portal.spec.js
+rename to src/Portal/Portal.test.js
+diff --git a/src/Progress/CircularProgress.spec.js b/src/Progress/CircularProgress.test.js
+similarity index 100%
+rename from src/Progress/CircularProgress.spec.js
+rename to src/Progress/CircularProgress.test.js
+diff --git a/src/Progress/LinearProgress.spec.js b/src/Progress/LinearProgress.test.js
+similarity index 100%
+rename from src/Progress/LinearProgress.spec.js
+rename to src/Progress/LinearProgress.test.js
+diff --git a/src/Radio/Radio.spec.js b/src/Radio/Radio.test.js
+similarity index 100%
+rename from src/Radio/Radio.spec.js
+rename to src/Radio/Radio.test.js
+diff --git a/src/Radio/RadioGroup.spec.js b/src/Radio/RadioGroup.test.js
+similarity index 100%
+rename from src/Radio/RadioGroup.spec.js
+rename to src/Radio/RadioGroup.test.js
+diff --git a/src/Select/Select.spec.js b/src/Select/Select.test.js
+similarity index 100%
+rename from src/Select/Select.spec.js
+rename to src/Select/Select.test.js
+diff --git a/src/Select/SelectInput.spec.js b/src/Select/SelectInput.test.js
+similarity index 100%
+rename from src/Select/SelectInput.spec.js
+rename to src/Select/SelectInput.test.js
+diff --git a/src/Snackbar/Snackbar.spec.js b/src/Snackbar/Snackbar.test.js
+similarity index 100%
+rename from src/Snackbar/Snackbar.spec.js
+rename to src/Snackbar/Snackbar.test.js
+diff --git a/src/Snackbar/SnackbarContent.spec.js b/src/Snackbar/SnackbarContent.test.js
+similarity index 100%
+rename from src/Snackbar/SnackbarContent.spec.js
+rename to src/Snackbar/SnackbarContent.test.js
+diff --git a/src/Stepper/Step.spec.js b/src/Stepper/Step.test.js
+similarity index 100%
+rename from src/Stepper/Step.spec.js
+rename to src/Stepper/Step.test.js
+diff --git a/src/Stepper/StepButton.spec.js b/src/Stepper/StepButton.test.js
+similarity index 100%
+rename from src/Stepper/StepButton.spec.js
+rename to src/Stepper/StepButton.test.js
+diff --git a/src/Stepper/StepConnector.spec.js b/src/Stepper/StepConnector.test.js
+similarity index 100%
+rename from src/Stepper/StepConnector.spec.js
+rename to src/Stepper/StepConnector.test.js
+diff --git a/src/Stepper/StepContent.spec.js b/src/Stepper/StepContent.test.js
+similarity index 100%
+rename from src/Stepper/StepContent.spec.js
+rename to src/Stepper/StepContent.test.js
+diff --git a/src/Stepper/StepIcon.spec.js b/src/Stepper/StepIcon.test.js
+similarity index 100%
+rename from src/Stepper/StepIcon.spec.js
+rename to src/Stepper/StepIcon.test.js
+diff --git a/src/Stepper/StepLabel.spec.js b/src/Stepper/StepLabel.test.js
+similarity index 100%
+rename from src/Stepper/StepLabel.spec.js
+rename to src/Stepper/StepLabel.test.js
+diff --git a/src/Stepper/StepPositionIcon.spec.js b/src/Stepper/StepPositionIcon.test.js
+similarity index 100%
+rename from src/Stepper/StepPositionIcon.spec.js
+rename to src/Stepper/StepPositionIcon.test.js
+diff --git a/src/Stepper/Stepper.spec.js b/src/Stepper/Stepper.test.js
+similarity index 100%
+rename from src/Stepper/Stepper.spec.js
+rename to src/Stepper/Stepper.test.js
+diff --git a/src/SvgIcon/SvgIcon.spec.js b/src/SvgIcon/SvgIcon.test.js
+similarity index 100%
+rename from src/SvgIcon/SvgIcon.spec.js
+rename to src/SvgIcon/SvgIcon.test.js
+diff --git a/src/SwipeableDrawer/SwipeableDrawer.spec.js b/src/SwipeableDrawer/SwipeableDrawer.test.js
+similarity index 100%
+rename from src/SwipeableDrawer/SwipeableDrawer.spec.js
+rename to src/SwipeableDrawer/SwipeableDrawer.test.js
+diff --git a/src/Switch/Switch.spec.js b/src/Switch/Switch.test.js
+similarity index 100%
+rename from src/Switch/Switch.spec.js
+rename to src/Switch/Switch.test.js
+diff --git a/src/Table/Table.spec.js b/src/Table/Table.test.js
+similarity index 100%
+rename from src/Table/Table.spec.js
+rename to src/Table/Table.test.js
+diff --git a/src/Table/TableBody.spec.js b/src/Table/TableBody.test.js
+similarity index 100%
+rename from src/Table/TableBody.spec.js
+rename to src/Table/TableBody.test.js
+diff --git a/src/Table/TableCell.spec.js b/src/Table/TableCell.test.js
+similarity index 100%
+rename from src/Table/TableCell.spec.js
+rename to src/Table/TableCell.test.js
+diff --git a/src/Table/TableFooter.spec.js b/src/Table/TableFooter.test.js
+similarity index 100%
+rename from src/Table/TableFooter.spec.js
+rename to src/Table/TableFooter.test.js
+diff --git a/src/Table/TableHead.spec.js b/src/Table/TableHead.test.js
+similarity index 100%
+rename from src/Table/TableHead.spec.js
+rename to src/Table/TableHead.test.js
+diff --git a/src/Table/TablePagination.spec.js b/src/Table/TablePagination.test.js
+similarity index 100%
+rename from src/Table/TablePagination.spec.js
+rename to src/Table/TablePagination.test.js
+diff --git a/src/Table/TableRow.spec.js b/src/Table/TableRow.test.js
+similarity index 100%
+rename from src/Table/TableRow.spec.js
+rename to src/Table/TableRow.test.js
+diff --git a/src/Table/TableSortLabel.spec.js b/src/Table/TableSortLabel.test.js
+similarity index 100%
+rename from src/Table/TableSortLabel.spec.js
+rename to src/Table/TableSortLabel.test.js
+diff --git a/src/Tabs/Tab.spec.js b/src/Tabs/Tab.test.js
+similarity index 100%
+rename from src/Tabs/Tab.spec.js
+rename to src/Tabs/Tab.test.js
+diff --git a/src/Tabs/TabIndicator.spec.js b/src/Tabs/TabIndicator.test.js
+similarity index 100%
+rename from src/Tabs/TabIndicator.spec.js
+rename to src/Tabs/TabIndicator.test.js
+diff --git a/src/Tabs/TabScrollButton.spec.js b/src/Tabs/TabScrollButton.test.js
+similarity index 100%
+rename from src/Tabs/TabScrollButton.spec.js
+rename to src/Tabs/TabScrollButton.test.js
+diff --git a/src/Tabs/Tabs.spec.js b/src/Tabs/Tabs.test.js
+similarity index 100%
+rename from src/Tabs/Tabs.spec.js
+rename to src/Tabs/Tabs.test.js
+diff --git a/src/TextField/TextField.spec.js b/src/TextField/TextField.test.js
+similarity index 100%
+rename from src/TextField/TextField.spec.js
+rename to src/TextField/TextField.test.js
+diff --git a/src/Toolbar/Toolbar.spec.js b/src/Toolbar/Toolbar.test.js
+similarity index 100%
+rename from src/Toolbar/Toolbar.spec.js
+rename to src/Toolbar/Toolbar.test.js
+diff --git a/src/Tooltip/Tooltip.spec.js b/src/Tooltip/Tooltip.test.js
+similarity index 100%
+rename from src/Tooltip/Tooltip.spec.js
+rename to src/Tooltip/Tooltip.test.js
+diff --git a/src/Typography/Typography.spec.js b/src/Typography/Typography.test.js
+similarity index 100%
+rename from src/Typography/Typography.spec.js
+rename to src/Typography/Typography.test.js
+diff --git a/src/index.spec.js b/src/index.test.js
+similarity index 100%
+rename from src/index.spec.js
+rename to src/index.test.js
+diff --git a/src/internal/SwitchBase.spec.js b/src/internal/SwitchBase.test.js
+similarity index 100%
+rename from src/internal/SwitchBase.spec.js
+rename to src/internal/SwitchBase.test.js
+diff --git a/src/internal/svg-icons/index.spec.js b/src/internal/svg-icons/index.test.js
+similarity index 100%
+rename from src/internal/svg-icons/index.spec.js
+rename to src/internal/svg-icons/index.test.js
+diff --git a/src/styles/MuiThemeProvider.spec.js b/src/styles/MuiThemeProvider.test.js
+similarity index 100%
+rename from src/styles/MuiThemeProvider.spec.js
+rename to src/styles/MuiThemeProvider.test.js
+diff --git a/src/styles/colorManipulator.spec.js b/src/styles/colorManipulator.test.js
+similarity index 100%
+rename from src/styles/colorManipulator.spec.js
+rename to src/styles/colorManipulator.test.js
+diff --git a/src/styles/createBreakpoints.spec.js b/src/styles/createBreakpoints.test.js
+similarity index 100%
+rename from src/styles/createBreakpoints.spec.js
+rename to src/styles/createBreakpoints.test.js
+diff --git a/src/styles/createGenerateClassName.spec.js b/src/styles/createGenerateClassName.test.js
+similarity index 100%
+rename from src/styles/createGenerateClassName.spec.js
+rename to src/styles/createGenerateClassName.test.js
+diff --git a/src/styles/createMixins.spec.js b/src/styles/createMixins.test.js
+similarity index 100%
+rename from src/styles/createMixins.spec.js
+rename to src/styles/createMixins.test.js
+diff --git a/src/styles/createMuiTheme.spec.js b/src/styles/createMuiTheme.test.js
+similarity index 100%
+rename from src/styles/createMuiTheme.spec.js
+rename to src/styles/createMuiTheme.test.js
+diff --git a/src/styles/createPalette.spec.js b/src/styles/createPalette.test.js
+similarity index 100%
+rename from src/styles/createPalette.spec.js
+rename to src/styles/createPalette.test.js
+diff --git a/src/styles/createTypography.spec.js b/src/styles/createTypography.test.js
+similarity index 100%
+rename from src/styles/createTypography.spec.js
+rename to src/styles/createTypography.test.js
+diff --git a/src/styles/getStylesCreator.spec.js b/src/styles/getStylesCreator.test.js
+similarity index 100%
+rename from src/styles/getStylesCreator.spec.js
+rename to src/styles/getStylesCreator.test.js
+diff --git a/src/styles/getThemeProps.spec.js b/src/styles/getThemeProps.test.js
+similarity index 100%
+rename from src/styles/getThemeProps.spec.js
+rename to src/styles/getThemeProps.test.js
+diff --git a/src/styles/themeListener.spec.js b/src/styles/themeListener.test.js
+similarity index 100%
+rename from src/styles/themeListener.spec.js
+rename to src/styles/themeListener.test.js
+diff --git a/src/styles/transitions.spec.js b/src/styles/transitions.test.js
+similarity index 100%
+rename from src/styles/transitions.spec.js
+rename to src/styles/transitions.test.js
+diff --git a/src/styles/withStyles.spec.js b/src/styles/withStyles.test.js
+similarity index 100%
+rename from src/styles/withStyles.spec.js
+rename to src/styles/withStyles.test.js
+diff --git a/src/styles/withTheme.spec.js b/src/styles/withTheme.test.js
+similarity index 100%
+rename from src/styles/withTheme.spec.js
+rename to src/styles/withTheme.test.js
+diff --git a/src/test-utils/until.spec.js b/src/test-utils/until.test.js
+similarity index 100%
+rename from src/test-utils/until.spec.js
+rename to src/test-utils/until.test.js
+diff --git a/src/transitions/Collapse.spec.js b/src/transitions/Collapse.test.js
+similarity index 100%
+rename from src/transitions/Collapse.spec.js
+rename to src/transitions/Collapse.test.js
+diff --git a/src/transitions/Fade.spec.js b/src/transitions/Fade.test.js
+similarity index 100%
+rename from src/transitions/Fade.spec.js
+rename to src/transitions/Fade.test.js
+diff --git a/src/transitions/Grow.spec.js b/src/transitions/Grow.test.js
+similarity index 100%
+rename from src/transitions/Grow.spec.js
+rename to src/transitions/Grow.test.js
+diff --git a/src/transitions/Slide.spec.js b/src/transitions/Slide.test.js
+similarity index 100%
+rename from src/transitions/Slide.spec.js
+rename to src/transitions/Slide.test.js
+diff --git a/src/transitions/Zoom.spec.js b/src/transitions/Zoom.test.js
+similarity index 100%
+rename from src/transitions/Zoom.spec.js
+rename to src/transitions/Zoom.test.js
+diff --git a/src/utils/ClickAwayListener.spec.js b/src/utils/ClickAwayListener.test.js
+similarity index 100%
+rename from src/utils/ClickAwayListener.spec.js
+rename to src/utils/ClickAwayListener.test.js
+diff --git a/src/utils/exactProp.spec.js b/src/utils/exactProp.test.js
+similarity index 100%
+rename from src/utils/exactProp.spec.js
+rename to src/utils/exactProp.test.js
+diff --git a/src/utils/helpers.spec.js b/src/utils/helpers.test.js
+similarity index 100%
+rename from src/utils/helpers.spec.js
+rename to src/utils/helpers.test.js
+diff --git a/src/utils/reactHelpers.spec.js b/src/utils/reactHelpers.test.js
+similarity index 100%
+rename from src/utils/reactHelpers.spec.js
+rename to src/utils/reactHelpers.test.js
+diff --git a/src/utils/requirePropFactory.spec.js b/src/utils/requirePropFactory.test.js
+similarity index 100%
+rename from src/utils/requirePropFactory.spec.js
+rename to src/utils/requirePropFactory.test.js
+diff --git a/src/utils/withWidth.spec.js b/src/utils/withWidth.test.js
+similarity index 100%
+rename from src/utils/withWidth.spec.js
+rename to src/utils/withWidth.test.js
+diff --git a/test/integration/Menu.spec.js b/test/integration/Menu.test.js
+similarity index 100%
+rename from test/integration/Menu.spec.js
+rename to test/integration/Menu.test.js
+diff --git a/test/integration/MenuList.spec.js b/test/integration/MenuList.test.js
+similarity index 100%
+rename from test/integration/MenuList.spec.js
+rename to test/integration/MenuList.test.js
+diff --git a/test/integration/Select.spec.js b/test/integration/Select.test.js
+similarity index 100%
+rename from test/integration/Select.spec.js
+rename to test/integration/Select.test.js
+diff --git a/test/karma.tests.js b/test/karma.tests.js
+index 700ba04b..0cf095f5 100644
+--- a/test/karma.tests.js
++++ b/test/karma.tests.js
+@@ -6,5 +6,5 @@ import './utils/init';
+ const integrationContext = require.context('./integration', true, /\.js$/);
+ integrationContext.keys().forEach(integrationContext);
+ 
+-const unitContext = require.context('../src/', true, /\.spec\.js$/);
++const unitContext = require.context('../src/', true, /\.test\.js$/);
+ unitContext.keys().forEach(unitContext);
+diff --git a/test/utils/consoleErrorMock.spec.js b/test/utils/consoleErrorMock.test.js
+similarity index 100%
+rename from test/utils/consoleErrorMock.spec.js
+rename to test/utils/consoleErrorMock.test.js

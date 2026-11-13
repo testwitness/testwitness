@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mlflow/mlflow/pull/19373",
+  "repo": "mlflow/mlflow",
+  "number": 19373,
+  "title": "Refactor test to use pytest.mark.parametrize",
+  "merged_at": "2025-12-15T01:27:24Z",
+  "stars": 28636,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "parametrize",
+  "split": "tuning",
+  "base_sha": "ff1728c2aad2593968f31138d6802692caea52e2",
+  "head_sha": "1bc84ccabeade46be2b8bde3fc72e21dc4cd1d21",
+  "files_changed": 1,
+  "additions": 7,
+  "deletions": 15
+}

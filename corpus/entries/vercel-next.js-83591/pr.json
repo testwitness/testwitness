@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/83591",
+  "repo": "vercel/next.js",
+  "number": 83591,
+  "title": "Tests: Move build-indicator test to test/development",
+  "merged_at": "2025-09-09T10:32:27Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "move",
+  "split": "tuning",
+  "base_sha": "da54d10487a1bbedd73ecfb85ee97de3f9082f40",
+  "head_sha": "dba5c1a40b5f368799cb31be67178b6c20433e0b",
+  "files_changed": 9,
+  "additions": 86,
+  "deletions": 115
+}

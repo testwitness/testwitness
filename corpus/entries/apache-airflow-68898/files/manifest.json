@@ -1,0 +1,6 @@
+[
+  {
+    "path": "providers/snowflake/tests/unit/snowflake/hooks/test_snowflake_sql_api.py",
+    "status": "modified"
+  }
+]

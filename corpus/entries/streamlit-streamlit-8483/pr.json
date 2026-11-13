@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/streamlit/streamlit/pull/8483",
+  "repo": "streamlit/streamlit",
+  "number": 8483,
+  "title": "Migrate Plotly unit tests to playwright because these tests dont work",
+  "merged_at": "2024-04-12T00:54:01Z",
+  "stars": 46220,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "migration",
+  "split": "tuning",
+  "base_sha": "42ee5ff3c8abd77aa62d8abc39d9a5805d9cd8a3",
+  "head_sha": "bfc2d004860943fcb6ce1e1e41828080444abe36",
+  "files_changed": 46,
+  "additions": 68,
+  "deletions": 156
+}

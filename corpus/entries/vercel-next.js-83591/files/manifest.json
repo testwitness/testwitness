@@ -1,0 +1,45 @@
+[
+  {
+    "path": "test/e2e/build-indicator/app/app/a/page.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/app/app/a/page.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/app/app/b/page.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/app/app/b/page.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/app/app/page.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/app/app/page.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/app/layout.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/app/layout.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/pages/a.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/pages/a.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/pages/b.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/pages/b.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/pages/index.js",
+    "status": "renamed",
+    "oldPath": "test/integration/build-indicator/pages/index.js"
+  },
+  {
+    "path": "test/e2e/build-indicator/test/index.test.ts",
+    "status": "added"
+  },
+  {
+    "path": "test/integration/build-indicator/test/index.test.js",
+    "status": "deleted"
+  }
+]

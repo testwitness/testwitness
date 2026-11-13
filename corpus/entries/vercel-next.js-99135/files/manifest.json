@@ -1,0 +1,30 @@
+[
+  {
+    "path": "test/e2e/app-dir/app-edge/app-edge-invalid-reexport.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/app-root-params-getters/generate-static-params-error.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/cache-components-route-handler-errors/cache-components-route-handler-errors.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/cache-components-segment-configs/cache-components-edge-deduplication.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/app-dir/interception-routes-output-export/interception-routes-output-export.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/catches-missing-getStaticProps/catches-missing-getStaticProps.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "test/e2e/conflicting-public-file-page/conflicting-public-file-page.test.ts",
+    "status": "modified"
+  }
+]
