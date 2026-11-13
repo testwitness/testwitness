@@ -1,0 +1,31 @@
+# After a release, run the published Action the way a user does (`uses: testwitness/testwitness@v0`)
+# on this repository's last commit, so a tag that does not run is found the same day.
+name: release-smoke
+on:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - uses: testwitness/testwitness@v0
+        id: tw
+        with:
+          base: HEAD~1
+          head: HEAD
+          mode: report
+          comment: 'false'
+      - name: The Action ran and reported a state
+        run: |
+          echo "state: $STATE"
+          case "$STATE" in pass|review|unreadable) ;; *) echo "::error::no state from the published Action"; exit 1;; esac
+        env:
+          STATE: ${{ steps.tw.outputs.state }}
