@@ -1,12 +1,31 @@
 # testwitness
 
-Did this PR weaken its tests, and did they actually run?
+testwitness reads a pull request's diff and test results and tells the reviewer when tests were deleted, skipped or loosened, or did not run.
+
+![A terminal running git diff on a branch that loosens one assertion, skips one test and deletes another, then testwitness check reporting review with one high finding (A002, assertion loosened) and two medium findings (R001, test deleted; R003, test skipped)](docs/public/demo.gif)
+
+```bash
+npx testwitness check --base origin/main
+```
+
+Needs Node 20 or newer and a git checkout with the base branch fetched. Supported on Linux and macOS; Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support). For pull requests, use the [GitHub Action](#github-action).
+
+Measured on 347 public pull requests ([how we measure](docs/how-we-measure-precision.md)):
+
+- R003 (test newly skipped), R004 (test converted to expected failure) and R005 (focused test added): 64, 28 and 15 true positives, 0 false positives on medium or high.
+- A002 (assertion loosened): 27 true positives, 1 false positive, held out precision 0.93 on medium or high.
+- As a Claude Code hook with default settings, it blocks 0 of the 217 pull requests that have no true positive finding.
+
+## What it checks
 
 testwitness is a GitHub Action and a CLI that reads a pull request's diff, the test code (tree-sitter) and the test results from the run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright), and tells the reviewer whether the tests still mean anything: deleted, skipped, loosened, tautological, assertion free, swallowed in a catch all, excluded in config, suppressed in CI, or claimed but never run. Java (JUnit 4 and 5, TestNG, AssertJ, Mockito), TypeScript and JavaScript (Jest, Vitest, Mocha, Playwright Test), Python (pytest, unittest). Works on PRs from Claude Code, Codex, Copilot, Cursor, Devin and people. No model, no secrets, no network.
 
 Why it exists: a June 2026 study of 86,156 agent authored test patches found 80.2% had weak or no explicit oracle ([arXiv 2606.18168](https://arxiv.org/abs/2606.18168)), and inaccurate self reporting is the failure mode that grows over time in real sessions ([arXiv 2605.29442](https://arxiv.org/abs/2605.29442)). CI is green either way. testwitness puts the answer on the PR.
 
-## Install
+## GitHub Action
+
+<details>
+<summary>Workflow file</summary>
 
 ```yaml
 # .github/workflows/testwitness.yml
@@ -27,11 +46,11 @@ jobs:
           results: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
 
+</details>
+
 That is the whole install when your test job already writes JUnit XML into the workspace (Surefire and Gradle do by default; pytest needs `--junitxml`, Jest needs jest-junit, Vitest `--reporter=junit`, Playwright the `junit` reporter). JUnit XML is the first recommendation. When a runner only gives you TAP (`node --test --test-reporter=tap`) or a JSON report (`jest --json`, `vitest --reporter=json`, `pytest --json-report`, Playwright `--reporter=json`), point `results` at that file instead; the format is told from the content ([evidence](docs/evidence.md)). `results` used to be called `junit`, and `junit` still works. Without any results the diff rules still run and the evidence section reads `unreadable`.
 
-Supported on Linux and macOS. Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support).
-
-Locally or in any CI, with Node 20 or newer, the same engine ships as one npm package with no runtime dependencies:
+The CLI ships as one npm package with no runtime dependencies and runs the same engine locally or in any CI:
 
 ```bash
 npx testwitness check --base origin/main --head HEAD --results "**/junit*.xml"
@@ -97,7 +116,7 @@ Measured, not yet promoted (no headline number):
 
 ## Precision
 
-Measured on a corpus of real public pull requests chosen because a naive detector would flag them (honest refactors) plus a few real weakenings. See [docs/precision.md](docs/precision.md) for the per rule table, regenerated with `pnpm corpus:report`. Low findings (moved, parameterised, refactored, conditional) are informational and collapsed in the comment.
+Measured on a corpus of real public pull requests chosen because a naive detector would flag them (honest refactors) plus a few real weakenings. See [docs/precision.md](docs/precision.md) for the per rule table, regenerated with `pnpm corpus:report`. How the corpus is built and labelled, the held out split and the known limits: [docs/how-we-measure-precision.md](docs/how-we-measure-precision.md). Low findings (moved, parameterised, refactored, conditional) are informational and collapsed in the comment.
 
 ## Configuration
 
