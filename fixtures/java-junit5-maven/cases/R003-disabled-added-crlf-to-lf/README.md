@@ -1,0 +1,1 @@
+The LF case R003-disabled-added with the base commit written with CRLF line endings and the head kept LF, as when a PR converts a Windows file to LF while it edits it. The findings must equal the LF case exactly, line numbers, messages and fingerprints included.
