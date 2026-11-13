@@ -642,6 +642,7 @@
         "consolidated",
         "file not in results",
         "flaky in history",
+        "generated",
         "hides failure",
         "in helper",
         "maintainer only",
