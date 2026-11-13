@@ -36,7 +36,7 @@ When a runner has no JUnit reporter you want to add, or a job already writes ano
     results: "**/junit*.xml,results.tap,jest-results.json"
 ```
 
-TAP is read line by line, so its size does not matter; a single line over 1 MB (a minified stack in a YAML block) is skipped with a note. A JSON report has no record boundary and is read whole, so each JSON file must be at most 50 MB, the same cap as coverage and mutation reports; a larger file is refused with a note and the other files are still read. A file that is none of these formats is skipped with a note, never an error. The report's `evidence.formats` lists the formats that were read.
+TAP is read line by line, so its size does not matter; a single line over 1 MB (a minified stack in a YAML block) is skipped with a note. A JSON report has no record boundary and is read whole, so each JSON file must be at most 50 MB, the same cap as coverage and mutation reports; a larger file is refused with a note and the other files are still read. All results files together are read up to 1,000 files and 500 MB; XML and TAP stream, so memory stays flat and the cap bounds the time. Files past either cap are not read, and the report's evidence notes say how many. A file that is none of these formats is skipped with a note, never an error. The report's `evidence.formats` lists the formats that were read.
 
 ## Separate test job
 

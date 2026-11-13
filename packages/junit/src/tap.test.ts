@@ -233,3 +233,15 @@ describe('TAP parser properties', () => {
     );
   });
 });
+
+describe('TAP on hostile input (review regression)', () => {
+  it('reads a line with a long run of inner spaces in linear time', () => {
+    // indentOf used /\s+$/, which took 8 s on this 100 kB line and grows with the square of its length.
+    const line = `ok 1 - a${' '.repeat(100_000)}b`;
+    const t0 = performance.now();
+    const s = parseTap(`TAP version 14\n${line}\n${line}\n1..2\n`);
+    expect(performance.now() - t0).toBeLessThan(2000);
+    expect(s.points).toBe(2);
+    expect(s.records[0]!.chain[0]).toMatch(/^a +b$/);
+  });
+});

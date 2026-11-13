@@ -10,7 +10,25 @@ const STATE_LINE: Record<Report['state'], string> = {
 
 /** Escape untrusted text (PR bodies, test names) before it lands in Markdown. */
 export function esc(s: string): string {
-  return s.replace(/[\\`*_{}[\]()#+!|<>]/g, (c) => `\\${c}`).replace(/\r?\n/g, ' ');
+  return (
+    s
+      .replace(/[\\`*_{}[\]()#+!|<>]/g, (c) => `\\${c}`)
+      .replace(/\r?\n/g, ' ')
+      // No mentions from user text: GitHub decodes &#64; back to @ before it looks for mentions, so a zero width space
+      // follows it, as Renovate does.
+      .replace(/@/g, '&#64;&#8203;')
+      // No bare links from user text: a zero width space after the scheme colon, and inside www., stops the autolink.
+      .replace(/\b([a-z][a-z0-9+.-]{0,30}):(?=\/\/)/gi, '$1:&#8203;')
+      .replace(/\bwww\./gi, (w) => `${w.slice(0, 3)}&#8203;.`)
+  );
+}
+
+/**
+ * Text for a code span inside a table cell. Backslash escapes are literal inside a code span (esc would show
+ * test\_money.py), so only what can break out is changed: a backtick would end the span and a pipe the cell.
+ */
+export function codeCell(s: string): string {
+  return s.replace(/`/g, "'").replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 }
 
 function sevIcon(s: Severity): string {
@@ -21,7 +39,7 @@ function row(f: Finding): string {
   const loc = f.location.line ? `${f.location.path}:${f.location.line}` : f.location.path;
   const label = f.label ? ` (${esc(f.label)})` : '';
   const ack = f.acknowledged ? ` acknowledged by ${esc(f.acknowledged.by)}: ${esc(f.acknowledged.reason)}` : '';
-  return `| ${f.ruleId} | ${sevIcon(f.severity)} | \`${esc(loc)}\` | ${esc(f.message)}${label}${ack} |`;
+  return `| ${f.ruleId} | ${sevIcon(f.severity)} | \`${codeCell(loc)}\` | ${esc(f.message)}${label}${ack} |`;
 }
 
 export interface MarkdownOptions {

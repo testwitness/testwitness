@@ -203,10 +203,41 @@ export async function readResultsFile(path: string, data: ResultIndexData, caps:
   }
 }
 
-/** Read results files of any supported format, told apart by content. */
-export async function readResultsFiles(paths: string[], caps: { maxJsonBytes?: number } = {}): Promise<ResultIndexData> {
+/** Results files read at most in one run. */
+export const RESULTS_MAX_FILES = 1000;
+/** Bytes of results files read at most in one run. XML and TAP stream, so memory stays flat; the cap bounds time. */
+export const RESULTS_MAX_BYTES = 500 * 1024 * 1024;
+
+/** Read results files of any supported format, told apart by content, within the file and byte caps. */
+export async function readResultsFiles(paths: string[], caps: { maxJsonBytes?: number; maxFiles?: number; maxBytes?: number } = {}): Promise<ResultIndexData> {
+  const maxFiles = caps.maxFiles ?? RESULTS_MAX_FILES;
+  const maxBytes = caps.maxBytes ?? RESULTS_MAX_BYTES;
   const data = emptyIndex();
-  for (const p of paths) await readResultsFile(p, data, caps);
+  let read = 0;
+  let bytes = 0;
+  let overBytes = 0;
+  for (let i = 0; i < paths.length; i++) {
+    const p = paths[i]!;
+    if (read >= maxFiles) {
+      data.limits.push(`results: stopped after ${maxFiles} files; ${paths.length - i} not read`);
+      break;
+    }
+    let size: number;
+    try {
+      size = (await stat(p)).size;
+    } catch (e) {
+      data.warnings.push(`${p}: ${(e as Error).message}`);
+      continue;
+    }
+    if (bytes + size > maxBytes) {
+      overBytes++;
+      continue;
+    }
+    bytes += size;
+    read++;
+    await readResultsFile(p, data, caps);
+  }
+  if (overBytes) data.limits.push(`results: ${overBytes} file${overBytes === 1 ? '' : 's'} not read, ${overBytes === 1 ? 'it' : 'they'} would pass the ${Math.round(maxBytes / 1048576)} MB cap on results`);
   finaliseTotals(data);
   return data;
 }

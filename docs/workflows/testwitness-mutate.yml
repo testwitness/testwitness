@@ -5,9 +5,13 @@
 #   1. it starts only on a comment that is `/testwitness mutate` on a line of its own;
 #   2. the gate job checks through the REST API that the commenter has write permission on this repository;
 #   3. on a pull request from a fork the comment must also name the head commit the maintainer reviewed,
-#      `/testwitness mutate <at least 7 characters of the head sha>`, and the mutation job checks out exactly that commit.
-# The job that runs the code has a read only token, no secrets, no persisted git credentials and no cache. The job that
-# comments never runs the pull request's code; it only reads the reports with the testwitness Action.
+#      `/testwitness mutate <at least 12 characters of the head sha>` (7 can be matched by a forged commit pushed after
+#      the review), and the mutation job checks out exactly that commit.
+# The gate is the protection. The job that runs the code also has a read only token, no secrets and no persisted git
+# credentials, and the job that comments never runs the pull request's code; it only reads the reports with the
+# testwitness Action. Leaving out caching does NOT prevent cache poisoning by itself: code running in an issue_comment
+# workflow is in the default branch's cache scope and can reach the cache service with the runner's own credentials.
+# Only ask for a run on code you would run in your default branch's CI.
 #
 # To use it: copy this file to .github/workflows/testwitness-mutate.yml, keep ONE of the tool blocks in the mutate job
 # (StrykerJS or PIT) and delete the other, and adjust the install and test commands to your project.
@@ -55,7 +59,7 @@ jobs:
             const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: context.payload.issue.number });
             if (pr.state !== 'open') { core.setFailed('The pull request is not open.'); return; }
             const fork = !pr.head.repo || pr.head.repo.full_name !== `${owner}/${repo}`;
-            if (fork && !wanted.sha) {
+            if (fork && (!wanted.sha || wanted.sha.length < 12)) {
               core.setFailed(`Pull request from a fork: review the head commit, then comment /testwitness mutate ${pr.head.sha.slice(0, 12)} to run its code.`);
               return;
             }
@@ -83,8 +87,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # No `cache:` on any setup step: a cache saved by an issue_comment run is scoped to the default branch, so code
-      # from a pull request could plant it for later trusted runs.
+      # No `cache:` on any setup step, so this job never restores a cache that later steps trust. That does not stop the
+      # pull request's code from writing to the default branch cache scope; the gate above is what keeps it out.
       - uses: actions/setup-node@v5
         with:
           node-version: 22

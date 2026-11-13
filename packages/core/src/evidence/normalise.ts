@@ -30,42 +30,68 @@
  *   Surefire rerun "method[flaky]"               → method
  */
 
-/** Collapse describe chain separators (" › ", " > ") to one space. Only a separator with whitespace on both sides counts, so "-> 90" is untouched. */
+/**
+ * Collapse describe chain separators (" › ", " > ") to one space, and every whitespace run to one space. Only a
+ * separator with whitespace on both sides counts, so "-> 90" is untouched. Whitespace runs are collapsed first: the
+ * old `\s+(?:›|>)\s+` rescanned a long run of spaces from each of its positions, quadratic on a hostile test name.
+ * Both callers collapsed whitespace right after, so the result is the same.
+ */
 function collapseSeparators(s: string): string {
-  return s.replace(/\s+(?:›|>)\s+/g, ' ');
+  return s.replace(/\s+/g, ' ').replace(/ (?:›|>) /g, ' ');
 }
 
-/** Strip one trailing balanced bracket group `[...]` or `(...)`, or a `#n` / `{n}` index. Returns the input unchanged when nothing matches. */
-function stripTrailingGroup(n: string): string {
-  const m = /(?:#\d+|\{\d+\})\s*$/.exec(n);
-  if (m) return n.slice(0, m.index);
-  const t = n.replace(/\s+$/, '');
-  const close = t[t.length - 1];
-  if (close !== ']' && close !== ')') return n;
+const isSpace = (ch: string): boolean => /\s/.test(ch);
+const isDigit = (ch: string | undefined): boolean => ch !== undefined && ch >= '0' && ch <= '9';
+
+/**
+ * Start of one trailing balanced bracket group `[...]` or `(...)`, or a `#n` / `{n}` index, that ends at `end` (no
+ * trailing whitespace before `end`). Undefined when there is none.
+ */
+function trailingGroupStart(s: string, end: number): number | undefined {
+  let d = end;
+  while (isDigit(s[d - 1])) d--;
+  if (d < end && d > 0 && s[d - 1] === '#') return d - 1;
+  if (s[end - 1] === '}') {
+    d = end - 1;
+    while (isDigit(s[d - 1])) d--;
+    if (d < end - 1 && d > 0 && s[d - 1] === '{') return d - 1;
+  }
+  const close = s[end - 1];
+  if (close !== ']' && close !== ')') return undefined;
   const open = close === ']' ? '[' : '(';
   let depth = 0;
-  for (let i = t.length - 1; i >= 0; i--) {
-    const ch = t[i];
+  for (let i = end - 1; i >= 0; i--) {
+    const ch = s[i];
     if (ch === close) depth++;
     else if (ch === open) {
       depth--;
-      if (depth === 0) return t.slice(0, i);
+      if (depth === 0) return i;
     }
   }
-  return n;
+  return undefined;
+}
+
+/**
+ * Strip trailing parametrisation: one or more of [..], (..), #n, {n}, with the whitespace between them. Works on an
+ * end index: the old loop rebuilt the string and rescanned it with `\s+$` once per group, quadratic on a test name of
+ * many `[]` or long space runs (28 s for a 100 kB name).
+ */
+function stripTrailingGroups(s: string): string {
+  let end = s.length;
+  for (;;) {
+    while (end > 0 && isSpace(s[end - 1]!)) end--;
+    const cut = trailingGroupStart(s, end);
+    if (cut === undefined) break;
+    end = cut;
+  }
+  return s.slice(0, end);
 }
 
 export function nameKey(name: string): string {
-  let n = name.trim();
-  // Strip trailing parametrisation: one or more of [..], (..), #n, {n}
-  let prev: string;
-  do {
-    prev = n;
-    n = stripTrailingGroup(n).replace(/\s+$/, '');
-  } while (n !== prev && n.length > 0);
+  let n = stripTrailingGroups(name.trim());
   // JUnit 5 display name with leading index "[1] 1, 2" leaves nothing useful; keep original in that case.
   if (!n) n = name.trim();
-  return collapseSeparators(n).replace(/\s+/g, ' ').trim().toLowerCase();
+  return collapseSeparators(n).trim().toLowerCase();
 }
 
 export function classKey(classname: string): string {
@@ -77,7 +103,7 @@ export function classKey(classname: string): string {
     return c.toLowerCase();
   }
   // jest-junit with a custom ancestor separator, or mocha: a describe chain, not a dotted class.
-  if (/\s/.test(c)) return collapseSeparators(c).replace(/\s+/g, ' ').trim().toLowerCase();
+  if (/\s/.test(c)) return collapseSeparators(c).trim().toLowerCase();
   // Dotted Java or Python path: last segment. Keep `$` for nested classes.
   const last = c.split('.').pop() ?? c;
   return last.toLowerCase();

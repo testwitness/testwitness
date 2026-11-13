@@ -13,7 +13,7 @@ import { resolve } from 'node:path';
 import { check } from 'testwitness';
 import { downloadBaseHistory, HISTORY_FILE, isDefaultBranchPush, uploadHistory } from './history.js';
 import { pullRequestFromEvent, type EventPayload, type PullRequestPayload } from './pull-request.js';
-import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type Finding, type Report, type PullRequestComment } from '@testwitness/core';
+import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Finding, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
 
 function annotationLevel(f: Finding, strict: boolean): 'error' | 'warning' | 'notice' {
   if (f.severity === 'high') return strict ? 'error' : 'warning';
@@ -71,7 +71,7 @@ export async function run(): Promise<void> {
     if (baseRef) history = await downloadBaseHistory(token, historyArtifact, baseRef);
   }
 
-  const { report, config, history: updatedHistory } = await check({
+  const { report, config, history: updatedHistory, files, evidence } = await check({
     cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
     history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
   });
@@ -80,13 +80,9 @@ export async function run(): Promise<void> {
   if (pr && token) {
     try {
       const prAuthor = (pr['user'] as { login?: string } | undefined)?.login;
-      const { comments, label } = await readAcknowledgementSources(token, pr['number'] as number);
+      const { comments, label } = await readAcknowledgementSources(token, pr['number'] as number, prAuthor);
       applyAcknowledgements(report.findings, parseAckCommands(comments, prAuthor), label);
-      report.state = computeState(report.findings, config, undefined, []);
-      if (report.evidence.state === 'unreadable' && report.state === 'pass' && report.files.tests > 0) report.state = 'unreadable';
-      const counts = { high: 0, medium: 0, low: 0 };
-      for (const f of report.findings) if (!f.acknowledged) counts[f.severity]++;
-      report.summary.findings = counts;
+      recomputeAfterAcknowledgements(report, config, files, evidence);
     } catch (err) {
       core.info(`Could not read PR comments or labels for acknowledgements: ${(err as Error).message}`);
     }
@@ -145,17 +141,66 @@ export async function run(): Promise<void> {
   else if (exitCode === 3) core.setFailed('testwitness: no test results and require_evidence is set');
 }
 
-async function readAcknowledgementSources(token: string, prNumber: number): Promise<{ comments: PullRequestComment[]; label: { present: boolean; by?: string; reason?: string; at?: string } }> {
+/**
+ * State and counts after acknowledgements changed findings, from the same inputs the engine graded with: the evidence
+ * and the changed files, so a pull request that touches only runner config or a workflow and has no results stays
+ * unreadable (exit code 3 under strict with require_evidence) instead of turning into a pass.
+ */
+export function recomputeAfterAcknowledgements(report: Report, config: ResolvedConfig, files: ChangedFile[], evidence: Evidence | undefined): void {
+  report.state = computeState(report.findings, config, evidence, files);
+  const counts = { high: 0, medium: 0, low: 0 };
+  for (const f of report.findings) if (!f.acknowledged) counts[f.severity]++;
+  report.summary.findings = counts;
+}
+
+async function readAcknowledgementSources(token: string, prNumber: number, prAuthor: string | undefined): Promise<{ comments: PullRequestComment[]; label: { present: boolean; by?: string; reason?: string; at?: string } }> {
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const raw = await octokit.paginate(octokit.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
   const comments: PullRequestComment[] = raw.map((c) => ({ author: c.user?.login ?? '', association: c.author_association ?? 'NONE', body: c.body ?? '', createdAt: c.created_at }));
   const labels = await octokit.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber, per_page: 100 });
-  const present = labels.data.some((l) => l.name === 'testwitness:acknowledged');
+  const present = labels.data.some((l) => l.name === ACK_LABEL);
   if (!present) return { comments, label: { present: false } };
-  // Reason: the most recent comment by an owner, member or collaborator.
-  const trusted = [...comments].reverse().find((c) => ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(c.association.toUpperCase()));
-  return { comments, label: { present: true, ...(trusted ? { by: trusted.author, reason: trusted.body.slice(0, 200), at: trusted.createdAt } : {}) } };
+  // Who applied the label, from the issue events. Any failure to read them means the label is ignored.
+  let actor: { login: string; at: string } | undefined;
+  try {
+    const events = await octokit.paginate(octokit.rest.issues.listEvents, { owner, repo, issue_number: prNumber, per_page: 100 });
+    actor = await trustedLabelActor(events as LabelEvent[], prAuthor, async (login) => (await octokit.rest.repos.getCollaboratorPermissionLevel({ owner, repo, username: login })).data.permission);
+  } catch (err) {
+    core.info(`Could not read who applied the ${ACK_LABEL} label, so it is ignored: ${(err as Error).message}`);
+    return { comments, label: { present: false } };
+  }
+  if (!actor) {
+    core.info(`The ${ACK_LABEL} label was not applied by a maintainer other than the pull request author, so it is ignored.`);
+    return { comments, label: { present: false } };
+  }
+  // Reason: the labeller's most recent comment, else the label itself.
+  const said = [...comments].reverse().find((c) => c.author.toLowerCase() === actor!.login.toLowerCase());
+  return { comments, label: { present: true, by: actor.login, at: actor.at, ...(said ? { reason: said.body.slice(0, 200) } : {}) } };
+}
+
+export const ACK_LABEL = 'testwitness:acknowledged';
+
+export interface LabelEvent {
+  event?: string;
+  label?: { name?: string } | null;
+  actor?: { login?: string } | null;
+  created_at?: string;
+}
+
+/**
+ * The person whose application of the acknowledgement label counts: the actor of the most recent `labeled` event for
+ * it, when that actor is not the pull request author and has write or admin permission on the repository (owners,
+ * members and collaborators with write). Undefined otherwise: then the label is ignored. A failing permission lookup
+ * throws, and the caller ignores the label.
+ */
+export async function trustedLabelActor(events: LabelEvent[], prAuthor: string | undefined, permissionOf: (login: string) => Promise<string>): Promise<{ login: string; at: string } | undefined> {
+  const last = [...events].reverse().find((e) => e.event === 'labeled' && e.label?.name === ACK_LABEL);
+  const login = last?.actor?.login;
+  if (!login) return undefined;
+  if (prAuthor && login.toLowerCase() === prAuthor.toLowerCase()) return undefined;
+  const permission = await permissionOf(login);
+  return ['admin', 'write'].includes(permission) ? { login, at: last?.created_at ?? '' } : undefined;
 }
 
 async function fetchPullRequest(token: string, prNumber: number): Promise<PullRequestPayload> {

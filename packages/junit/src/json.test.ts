@@ -155,3 +155,16 @@ describe('JSON robustness', () => {
     expect(d.warnings.some((w) => /unknown status "weird"/.test(w))).toBe(true);
   });
 });
+
+describe('Playwright JSON nested past the depth cap (review regression)', () => {
+  it('reads the shallow tests, notes the cut and does not overflow the stack', async () => {
+    const depth = 20_000;
+    const leaf = '{"title":"deep","specs":[{"title":"s","tests":[{"status":"expected","results":[]}]}]}';
+    const deep = '{"title":"t","suites":['.repeat(depth) + leaf + ']}'.repeat(depth);
+    const shallow = '{"title":"top","file":"a.spec.ts","specs":[{"title":"ok","tests":[{"status":"expected","results":[{"status":"passed"}]}]}]}';
+    const text = `{"config":{},"stats":{},"suites":[${shallow},${deep}]}`;
+    const data = await readResultsString(text, 'pw.json');
+    expect(data.totals.total).toBe(1);
+    expect(data.warnings.some((w) => /nested deeper than 100 levels/.test(w))).toBe(true);
+  });
+});

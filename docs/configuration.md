@@ -14,6 +14,7 @@ paths:
     - "**/*.test.ts"
   ignore:
     - "**/generated/**"
+  followSymlinks: false # follow symbolic links in results, coverage, mutation and history paths (see below)
 results:                # test results of the head run; `junit` is the older name of this key and still works
   head: "**/junit*.xml"  # JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (docs/evidence.md)
 coverage:
@@ -46,6 +47,25 @@ comment:
   enabled: true
   collapse_low: true
 ```
+
+## Symbolic links in report paths
+
+The results, coverage, mutation and history paths do not follow symbolic links by default. A matched file that is itself a link, or that lies outside the repository through a linked directory, is skipped with a note in the report. Otherwise a pull request could commit `test-results/a.xml` as a link to any file on the runner and have the check read it. A glob that names a directory outside the repository on purpose (an absolute path such as `${{ runner.temp }}/reports/**/*.xml`, or a `../` path) may read files under that directory.
+
+Layouts that link their outputs into the checkout need the links followed. Bazel is the common case: `bazel-testlogs` is a link into the output base.
+
+```yaml
+paths:
+  followSymlinks: true
+results:
+  head: "bazel-testlogs/**/test.xml"
+```
+
+On the CLI the same switch is `--follow-symlinks`. Turn it on only where the links are made by the build, not by the pull request.
+
+## The acknowledgement label
+
+The `testwitness:acknowledged` label acknowledges every open finding except W006. The Action reads who applied it from the pull request's issue events (the most recent `labeled` event for the label) and honours it only when that person is not the pull request author and has write or admin permission on the repository: an owner, a member or a collaborator with write access. Triage access, which can add labels, is not enough. When the events or the permission cannot be read (a token without access, an API error), the label is ignored and the log says so. The reason shown is the labeller's most recent comment on the pull request.
 
 ## Assertion helpers and `assertions.extra`
 

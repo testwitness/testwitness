@@ -26,7 +26,8 @@ describe('mutation workflow template', () => {
     const script = String(gate.steps[0]!.with!['script']);
     expect(script).toContain('getCollaboratorPermissionLevel');
     expect(script).toMatch(/\['admin', 'write'\]\.includes\(level\.permission\)/);
-    expect(script).toMatch(/fork && !wanted\.sha/);
+    // A 7 character prefix is 28 bits: a fork can grind a commit that matches it and push it after the review.
+    expect(script).toMatch(/fork && \(!wanted\.sha \|\| wanted\.sha\.length < 12\)/);
     expect(script).toMatch(/!pr\.head\.sha\.startsWith\(wanted\.sha\)/);
   });
 

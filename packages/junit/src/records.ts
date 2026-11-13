@@ -27,6 +27,8 @@ export interface ResultIndexData {
   byClass: Map<string, string[]>;
   totals: { total: number; passed: number; failed: number; errored: number; skipped: number; flaky: number };
   warnings: string[];
+  /** Notes about the file and byte caps on results files, when they were hit. */
+  limits: string[];
 }
 
 const RANK: Record<TestStatus, number> = { passed: 0, flaky: 1, skipped: 2, failed: 3, error: 4 };
@@ -59,7 +61,7 @@ export function addRecord(data: ResultIndexData, rec: TestRecord): void {
 }
 
 export function emptyIndex(): ResultIndexData {
-  return { sources: [], formats: new Set(), records: new Map(), byClass: new Map(), totals: { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, flaky: 0 }, warnings: [] };
+  return { sources: [], formats: new Set(), records: new Map(), byClass: new Map(), totals: { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, flaky: 0 }, warnings: [], limits: [] };
 }
 
 export function finaliseTotals(data: ResultIndexData): void {
