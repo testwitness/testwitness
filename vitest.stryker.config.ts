@@ -9,6 +9,8 @@ export default defineConfig({
   test: {
     name: 'unit',
     include: ['packages/**/src/**/*.test.ts'],
+    // Hostile input timing tests run minutes under instrumentation; they prove linearity, not behaviour.
+    exclude: ['**/node_modules/**', '**/review-hardening.test.ts'],
     environment: 'node',
     env: { TESTWITNESS_TIMING: 'off' },
   },
