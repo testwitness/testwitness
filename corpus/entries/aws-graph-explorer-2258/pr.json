@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/graph-explorer/pull/2258",
+  "repo": "aws/graph-explorer",
+  "number": 2258,
+  "title": "Drop coverage thresholds and stop collecting coverage in CI",
+  "merged_at": "2026-09-24T21:23:38Z",
+  "stars": 492,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "C002",
+  "split": "heldout",
+  "base_sha": "ab42d7acd1dbe33affc7af963543f2de49845f1a",
+  "head_sha": "dd246f9f53bc7df223af5503c00c39a2bb0c4130",
+  "files_changed": 2,
+  "additions": 2,
+  "deletions": 11
+}

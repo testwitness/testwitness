@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".ci/integration.cloudbuild.yaml",
+    "status": "modified"
+  },
+  {
+    "path": "tests/spanner/spanner_integration_test.go",
+    "status": "modified"
+  }
+]

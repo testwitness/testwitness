@@ -1,0 +1,106 @@
+diff --git a/packages/nx-plugin/src/ts/lib/grit/vitest-pass-with-no-tests.grit b/packages/nx-plugin/src/ts/lib/grit/vitest-pass-with-no-tests.grit
+index a4ac0ef..b5f455d 100644
+--- a/packages/nx-plugin/src/ts/lib/grit/vitest-pass-with-no-tests.grit
++++ b/packages/nx-plugin/src/ts/lib/grit/vitest-pass-with-no-tests.grit
+@@ -1,7 +1,4 @@
+-`test: { $props }` => raw`test: {
+-    passWithNoTests: true,
+-    $props
+-  }` where {
++`test: { $props }` => `test: { passWithNoTests: true, $props }` where {
+   $props <: within `defineConfig($_)`,
+   $props <: not some `passWithNoTests: $_`
+ }
+diff --git a/packages/nx-plugin/src/ts/lib/vitest.spec.ts b/packages/nx-plugin/src/ts/lib/vitest.spec.ts
+index 6a4c490..de86609 100644
+--- a/packages/nx-plugin/src/ts/lib/vitest.spec.ts
++++ b/packages/nx-plugin/src/ts/lib/vitest.spec.ts
+@@ -4,9 +4,21 @@
+  */
+ import type { Tree } from '@nx/devkit';
+ import { createTreeUsingTsSolutionSetup } from '../../utils/test';
++import { expectTypeScriptToCompile } from '../../utils/test/ts.spec';
+ import tsProjectGenerator from './generator';
+ import { configureVitest } from './vitest';
+ 
++// A local defineConfig stub keeps the generated config self-contained so it can
++// be type-checked without loading the vite/vitest dependencies. The grit
++// transform only requires the test block to be within a `defineConfig(...)`
++// call, so this exercises the same code path as a real vite config.
++const wrapConfig = (testBlock: string) =>
++  `const defineConfig = (fn: () => unknown): unknown => fn();
++export default defineConfig(() => ({
++  ${testBlock}
++}));
++`;
++
+ describe('vitest utils', () => {
+   let tree: Tree;
+ 
+@@ -34,4 +46,66 @@ describe('vitest utils', () => {
+     expect(content).not.toMatch(/,\s*,/);
+     expect(content).toMatchSnapshot('vitest.config.mts');
+   });
++
++  // The grit transform splices `passWithNoTests` into the existing `test`
++  // block. Verify the result still compiles across a variety of test block
++  // shapes regardless of trailing commas — a missing comma between properties
++  // would not produce a double comma, so it could otherwise slip through.
++  it.each([
++    {
++      name: 'trailing comma on last property',
++      testBlock: `test: {
++    name: '@proj/test',
++    watch: false,
++  },`,
++    },
++    {
++      name: 'no trailing comma on last property',
++      testBlock: `test: {
++    name: '@proj/test',
++    watch: false
++  },`,
++    },
++    {
++      name: 'single line test block',
++      testBlock: `test: { globals: true },`,
++    },
++    {
++      name: 'empty test block',
++      testBlock: `test: {},`,
++    },
++  ])(
++    'should add passWithNoTests producing compilable config: $name',
++    async ({ testBlock }) => {
++      tree.write('test/vitest.config.mts', wrapConfig(testBlock));
++
++      await configureVitest(tree, {
++        dir: 'test',
++        fullyQualifiedName: 'test',
++      });
++
++      const content = tree.read('test/vitest.config.mts', 'utf8')!;
++      expect(content).toContain('passWithNoTests: true');
++      expectTypeScriptToCompile(tree, ['test/vitest.config.mts']);
++    },
++  );
++
++  it('should not add passWithNoTests when it is already present', async () => {
++    tree.write(
++      'test/vitest.config.mts',
++      wrapConfig(`test: {
++    passWithNoTests: true,
++    name: '@proj/test',
++  },`),
++    );
++
++    await configureVitest(tree, {
++      dir: 'test',
++      fullyQualifiedName: 'test',
++    });
++
++    const content = tree.read('test/vitest.config.mts', 'utf8')!;
++    expect(content.match(/passWithNoTests/g)).toHaveLength(1);
++    expectTypeScriptToCompile(tree, ['test/vitest.config.mts']);
++  });
+ });

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/vscode/pull/308346",
+  "repo": "microsoft/vscode",
+  "number": 308346,
+  "title": "Temporarily allow screenshot test failures to avoid blocking the pipeline until the screenshot test is stable.",
+  "merged_at": "2026-04-07T22:47:28Z",
+  "stars": 194558,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "W002",
+  "split": "tuning",
+  "base_sha": "fba847a2b7cc85c601439fa4efee5af73430b7fa",
+  "head_sha": "389903d431cdab7c1d192cd69ec8d027d7fd405a",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

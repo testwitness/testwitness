@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "coverage.report.fail_under",
+    "verdict": "tp",
+    "reason": "google-api-core 100 to 99"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "coverage.report.fail_under",
+    "verdict": "tp",
+    "reason": "google-cloud-ndb 100 to 99"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "coverage.report.fail_under",
+    "verdict": "tp",
+    "reason": "sqlalchemy-bigquery 100 to 98"
+  }
+]

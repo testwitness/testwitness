@@ -1,0 +1,31 @@
+diff --git a/.github/workflows/unit.yml b/.github/workflows/unit.yml
+index e1c8594..97a739e 100644
+--- a/.github/workflows/unit.yml
++++ b/.github/workflows/unit.yml
+@@ -50,5 +50,5 @@ jobs:
+       - name: Run type, lint, and format checks
+         run: pnpm checks
+ 
+-      - name: Run package tests with code coverage
+-        run: pnpm coverage
++      - name: Run package tests
++        run: pnpm test
+diff --git a/vitest.config.ts b/vitest.config.ts
+index b098365..9e51699 100644
+--- a/vitest.config.ts
++++ b/vitest.config.ts
+@@ -3,14 +3,5 @@ import { defineConfig } from "vitest/config";
+ export default defineConfig({
+   test: {
+     projects: ["packages/*"],
+-    coverage: {
+-      thresholds: {
+-        autoUpdate: (newThreshold: number) => Math.floor(newThreshold),
+-        statements: 65,
+-        branches: 44,
+-        functions: 58,
+-        lines: 73,
+-      },
+-    },
+   },
+ });

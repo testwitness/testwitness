@@ -1,0 +1,30 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": "vitest.coverage.thresholds.statements",
+    "verdict": "tp",
+    "reason": "threshold removed"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": "vitest.coverage.thresholds.branches",
+    "verdict": "tp",
+    "reason": "threshold removed"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": "vitest.coverage.thresholds.functions",
+    "verdict": "tp",
+    "reason": "threshold removed"
+  },
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": "vitest.coverage.thresholds.lines",
+    "verdict": "tp",
+    "reason": "threshold removed"
+  }
+]

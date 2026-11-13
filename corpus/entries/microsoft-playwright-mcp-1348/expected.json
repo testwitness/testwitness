@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R002",
+    "severity": "high",
+    "subject": "packages/playwright-mcp/tests/cli.spec.ts",
+    "verdict": "tp",
+    "reason": "spec file deleted, CLI unchanged"
+  }
+]

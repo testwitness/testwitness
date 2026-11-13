@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/react-native-test-app/pull/2696",
+  "repo": "microsoft/react-native-test-app",
+  "number": 2696,
+  "title": "Make Windows build jobs non-blocking (continue-on-error + warning aggregator)",
+  "merged_at": "2026-03-10T12:33:29Z",
+  "stars": 676,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "4eaa8baef79498e1820eaccf2b73e2d21d8c4c42",
+  "head_sha": "f9815b9f6e0bbffd2854239d198c95d92c7e70b1",
+  "files_changed": 1,
+  "additions": 66,
+  "deletions": 33
+}

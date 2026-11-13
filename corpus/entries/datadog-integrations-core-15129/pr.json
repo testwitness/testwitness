@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/DataDog/integrations-core/pull/15129",
+  "repo": "DataDog/integrations-core",
+  "number": 15129,
+  "title": "Lower snmp coverage to 50",
+  "merged_at": "2023-07-03T12:57:30Z",
+  "stars": 1153,
+  "license": "BSD-3-Clause",
+  "language": "python",
+  "category": "C002",
+  "split": "tuning",
+  "base_sha": "c0efb9a2c010e6328da4eaa618ec1b0134cd0532",
+  "head_sha": "001b73915ba3b9ba23dda48fa23beea926be0504",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

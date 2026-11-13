@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Azure/cosmos-explorer/pull/1084",
+  "repo": "Azure/cosmos-explorer",
+  "number": 1084,
+  "title": "Temporarily lower test coverage threshold",
+  "merged_at": "2021-09-15T23:38:51Z",
+  "stars": 131,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "C002",
+  "split": "heldout",
+  "base_sha": "665270296f6bf8de8f76a27fe5bb1ad856954624",
+  "head_sha": "68667b3c3cc4cdfc30aa88b8c3f5a6aa630bb40f",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 2
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "eng/config.json",
+    "verdict": "tp",
+    "reason": "CoverageGoal 0.16 to 0.10"
+  }
+]
