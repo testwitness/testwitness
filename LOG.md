@@ -150,4 +150,19 @@ Integrated on branch int/batch2 (stacked on PR #4, 67 commits), each part verifi
 
 Verified on int/batch2: typecheck and lint clean, 2817 tests (unit, fixtures and the corpus replay) with 2 skipped, pack:check passing, docs build clean, actionlint clean.
 
-Running: study sampler (185 of 650), trial replay on the integrated bundle.
+Integrated bundle replay: precision 0.50 on medium and high (4 of 8), high 3 of 3.
+
+## 2026-11-13 (cycle 3)
+
+Batch 2 is ready in outbox/2026-11-13-2 (67 patches); it needs PR #3 and #4 merged first. Batch 3 stacks on it (branch int/batch3, 17 commits):
+- fix/precision-3: the last three medium false positives of the replay are low now. A001: an assertion inside an exception expectation (pytest.raises, assertRaises, assertThrows, a narrowed toThrow) is not the oracle. O002: a regression claim in the PR text no longer raises a test whose checks are all does not throw checks. R001: deleting a near duplicate of a test that stays is low, only when the kept test adds checks and nothing else. Replay on the same 300 PRs: 4 of 4 medium and high findings true, every earlier true positive kept. These PRs were used to find the fixes, so this is a tuning number, not a held out one. Corpus: O002 held out false positives 3 to 0, no promoted rule changed.
+- feat(cli): plain text at a terminal (findings high first with before and after, colour unless NO_COLOR, control characters from untrusted text replaced); markdown stays the default for pipes, files and CI.
+- docs/first-screen: README first screen (one sentence, a demo GIF recorded from a real run, a one line install, measured numbers), docs/how-we-measure-precision.md.
+- docs/no-names: public prose names no repository; docs/launch moved out of the repository to ~/Project AI Builder/testwitness/launch on the Mac. Corpus data and fixture attribution stay (DECISIONS).
+- ci/mutation-shards: the weekly Stryker run never fit in 90 minutes (a local run estimated 28 hours on two cores), so it is split into eleven parallel shards over core, the junit reader and the three front ends, with a per package score.
+
+Verified on int/batch3: typecheck and lint clean, 2842 tests with 2 skipped (77 files), corpus report unchanged, docs build clean, pack:check passing, actionlint clean apart from the expected dist/index.js note.
+
+Time to first finding, CLI path: installing the packed tarball into a fresh npm prefix took 0.6 s and `testwitness check --base <base>` on a real merged PR in a cloned repository took 1.7 s, so 2.3 s plus the npm download. The Action path is not measured yet.
+
+Running: study sampler (265 of 650), study fetch for the accepted PRs.

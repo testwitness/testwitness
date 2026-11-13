@@ -26,3 +26,6 @@ packages/cli/README.md
 bench/.prof/
 bench-out/
 /stryker.shard.json
+
+# npm pack output
+*.tgz
