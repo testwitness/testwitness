@@ -1,0 +1,14 @@
+[
+  {
+    "path": "clients/src/test/java/org/apache/kafka/clients/producer/MockProducerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "clients/src/test/java/org/apache/kafka/clients/producer/ProducerRecordTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "clients/src/test/java/org/apache/kafka/clients/producer/RecordSendTest.java",
+    "status": "modified"
+  }
+]

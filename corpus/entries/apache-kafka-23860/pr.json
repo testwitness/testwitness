@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/kafka/pull/23860",
+  "repo": "apache/kafka",
+  "number": 23860,
+  "title": "MINOR: Replace try/fail/catch with assertThrows in Connect tests",
+  "merged_at": "2026-10-22T14:10:10Z",
+  "stars": 34109,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "migration",
+  "split": "heldout",
+  "base_sha": "f90822763913e10a02478c235b34a5ea9f36856e",
+  "head_sha": "9f98bd6edd246936325078b70147797fc08a2e99",
+  "files_changed": 7,
+  "additions": 27,
+  "deletions": 74
+}

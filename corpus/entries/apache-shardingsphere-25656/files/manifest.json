@@ -1,0 +1,174 @@
+[
+  {
+    "path": "agent/core/src/test/java/org/apache/shardingsphere/agent/core/plugin/PluginLifecycleServiceManagerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "agent/plugins/metrics/type/prometheus/src/test/java/org/apache/shardingsphere/agent/plugin/metrics/prometheus/PrometheusPluginLifecycleServiceTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/admin/MySQLUnsupportedCommandPacketTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/query/binary/close/MySQLComStmtClosePacketTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/payload/MySQLPacketPayloadTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "db-protocol/postgresql/src/test/java/org/apache/shardingsphere/db/protocol/postgresql/packet/handshake/PostgreSQLComStartupPacketTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterIndexStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterTableStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterViewStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateFunctionStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateIndexStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateProcedureStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateTableStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateViewStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropIndexStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropTableStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingPrepareStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingRenameTableStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingInsertStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingUpdateStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "infra/common/src/test/java/org/apache/shardingsphere/infra/database/type/dialect/PostgreSQLDatabaseTypeTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/StatementAdapterTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/invocation/MethodInvocationRecorderTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "jdbc/core/src/test/java/org/apache/shardingsphere/driver/state/circuit/connection/CircuitBreakerConnectionTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/data-pipeline/api/src/test/java/org/apache/shardingsphere/data/pipeline/api/config/TableNameSchemaNameMappingTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/QPSJobRateLimitAlgorithmTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/TPSJobRateLimitAlgorithmTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/data-pipeline/dialect/mysql/src/test/java/org/apache/shardingsphere/data/pipeline/mysql/ingest/client/PasswordEncryptionTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/single/core/src/test/java/org/apache/shardingsphere/single/route/engine/SingleStandardRouteEngineTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/BitronixRecoveryResourceTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/SingleXAResourceHolderTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/ClusterModeContextManagerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/coordinator/registry/status/storage/service/StorageNodeStatusServiceTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "mode/type/cluster/repository/provider/zookeeper/src/test/java/org/apache/shardingsphere/mode/repository/cluster/zookeeper/ZookeeperRepositoryTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/core/src/main/java/org/apache/shardingsphere/proxy/backend/connector/jdbc/connection/ResourceLock.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/database/DropDatabaseBackendHandlerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/distsql/ral/QueryableRALBackendHandlerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousDeleteStatementCheckerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousInsertStatementCheckerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousSelectStatementCheckerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousUpdateStatementCheckerTest.java",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/shardingsphere/pull/25656",
+  "repo": "apache/shardingsphere",
+  "number": 25656,
+  "title": "Fix sonar issue of Add at least one assertion to this test case",
+  "merged_at": "2023-05-14T09:18:26Z",
+  "stars": 20829,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "42acd02f05147703e3dd7d4da3b6b9ea322864ea",
+  "head_sha": "2a93efb3b1d821285c1c4ed93aab8070c66e117e",
+  "files_changed": 43,
+  "additions": 356,
+  "deletions": 200
+}

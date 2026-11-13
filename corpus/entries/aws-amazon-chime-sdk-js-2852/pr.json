@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/amazon-chime-sdk-js/pull/2852",
+  "repo": "aws/amazon-chime-sdk-js",
+  "number": 2852,
+  "title": "Properly wrap 'setSinkId' in try/catch to fix firefox integ. test failures",
+  "merged_at": "2024-03-05T23:27:15Z",
+  "stars": 765,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "871309c5c766f6e59fe0eafdc9026374a0f4bfa2",
+  "head_sha": "6b2f0f5ce8c7dff74d9412fc75dd8a2be5c12d4e",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 2
+}

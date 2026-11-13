@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/airflow/pull/42940",
+  "repo": "apache/airflow",
+  "number": 42940,
+  "title": "Increase backoff_factor and add try/catch in k8s tests",
+  "merged_at": "2024-10-11T19:03:42Z",
+  "stars": 47467,
+  "license": "Apache-2.0",
+  "language": "python",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "57aeb34eccf8b0ca1cbb50a711ab548b7dc09494",
+  "head_sha": "3cf9512c179e7095cfce458abdddbdb923f5242a",
+  "files_changed": 1,
+  "additions": 11,
+  "deletions": 4
+}

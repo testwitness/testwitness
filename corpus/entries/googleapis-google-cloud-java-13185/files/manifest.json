@@ -1,0 +1,26 @@
+[
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateFullBackupScheduleSampleIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateIncrementalBackupScheduleSampleIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/DeleteBackupScheduleSampleIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/GetBackupScheduleSampleIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/ListBackupSchedulesSampleIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "java-spanner/samples/snippets/src/test/java/com/example/spanner/UpdateBackupScheduleSampleIT.java",
+    "status": "modified"
+  }
+]

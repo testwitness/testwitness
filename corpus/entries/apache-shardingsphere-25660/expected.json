@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "IncrementalTaskTest#assertStart",
+    "verdict": "tp",
+    "reason": "new test added with @Disabled"
+  }
+]

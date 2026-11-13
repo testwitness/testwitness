@@ -1,0 +1,70 @@
+[
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-aggregate-features/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-basic-generation/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-check-dependencies-failure/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-check-dependencies/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-feature-dependencies/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-feature-use-base-version/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transfer-properties/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transitive/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-feature-use-version-range/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-include-project-artifact/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-input-file/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-recursive/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-rename-main-feature/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-repository-dependencies/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-simplify-bundles/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-transitive-as-dependency/verify.bsh",
+    "status": "modified"
+  },
+  {
+    "path": "tooling/karaf-maven-plugin/src/it/test-type-classifier/verify.bsh",
+    "status": "modified"
+  }
+]

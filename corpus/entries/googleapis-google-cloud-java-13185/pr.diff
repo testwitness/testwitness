@@ -1,0 +1,157 @@
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateFullBackupScheduleSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateFullBackupScheduleSampleIT.java
+index 15ec04fe3..82b67c4df 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateFullBackupScheduleSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateFullBackupScheduleSampleIT.java
+@@ -41,8 +41,17 @@ public class CreateFullBackupScheduleSampleIT extends SampleTestBaseV2 {
+                 CreateFullBackupScheduleSample.createFullBackupSchedule(
+                     projectId, instanceId, databaseId, backupScheduleId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out).contains(String.format("Created backup schedule: %s", backupScheduleName));
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateIncrementalBackupScheduleSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateIncrementalBackupScheduleSampleIT.java
+index 5d590a5b3..ac38150f5 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateIncrementalBackupScheduleSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/CreateIncrementalBackupScheduleSampleIT.java
+@@ -41,8 +41,17 @@ public class CreateIncrementalBackupScheduleSampleIT extends SampleTestBaseV2 {
+                 CreateIncrementalBackupScheduleSample.createIncrementalBackupSchedule(
+                     projectId, multiRegionalInstanceId, databaseId, backupScheduleId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, multiRegionalInstanceId, databaseId, backupScheduleId);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, multiRegionalInstanceId, databaseId, backupScheduleId);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out)
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/DeleteBackupScheduleSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/DeleteBackupScheduleSampleIT.java
+index 3d11bd8dc..f379c9bfe 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/DeleteBackupScheduleSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/DeleteBackupScheduleSampleIT.java
+@@ -41,8 +41,17 @@ public class DeleteBackupScheduleSampleIT extends SampleTestBaseV2 {
+                 CreateFullBackupScheduleSample.createFullBackupSchedule(
+                     projectId, instanceId, databaseId, backupScheduleId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out).contains(String.format("Deleted backup schedule: %s", backupScheduleName));
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/GetBackupScheduleSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/GetBackupScheduleSampleIT.java
+index fa006355a..366093cdd 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/GetBackupScheduleSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/GetBackupScheduleSampleIT.java
+@@ -44,8 +44,17 @@ public class GetBackupScheduleSampleIT extends SampleTestBaseV2 {
+                     projectId, instanceId,
+                     databaseId, backupScheduleId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out).contains(String.format("Backup schedule: %s", backupScheduleName));
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/ListBackupSchedulesSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/ListBackupSchedulesSampleIT.java
+index 386b9442c..97feb2d7e 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/ListBackupSchedulesSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/ListBackupSchedulesSampleIT.java
+@@ -49,10 +49,28 @@ public class ListBackupSchedulesSampleIT extends SampleTestBaseV2 {
+                     projectId, instanceId, databaseId, backupScheduleId2);
+                 ListBackupSchedulesSample.listBackupSchedules(projectId, instanceId, databaseId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId1);
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId2);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId1);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId1
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId2);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId2
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out).contains(String.format("Backup schedule: %s", backupScheduleName1));
+diff --git a/java-spanner/samples/snippets/src/test/java/com/example/spanner/UpdateBackupScheduleSampleIT.java b/java-spanner/samples/snippets/src/test/java/com/example/spanner/UpdateBackupScheduleSampleIT.java
+index ea299571f..eff037459 100644
+--- a/java-spanner/samples/snippets/src/test/java/com/example/spanner/UpdateBackupScheduleSampleIT.java
++++ b/java-spanner/samples/snippets/src/test/java/com/example/spanner/UpdateBackupScheduleSampleIT.java
+@@ -43,8 +43,17 @@ public class UpdateBackupScheduleSampleIT extends SampleTestBaseV2 {
+                 UpdateBackupScheduleSample.updateBackupSchedule(
+                     projectId, instanceId, databaseId, backupScheduleId);
+               } finally {
+-                DeleteBackupScheduleSample.deleteBackupSchedule(
+-                    projectId, instanceId, databaseId, backupScheduleId);
++                try {
++                  DeleteBackupScheduleSample.deleteBackupSchedule(
++                      projectId, instanceId, databaseId, backupScheduleId);
++                } catch (Exception e) {
++                  System.out.println(
++                      "Failed to delete backup schedule "
++                          + backupScheduleId
++                          + " due to "
++                          + e.getMessage()
++                          + ", skipping...");
++                }
+               }
+             });
+     assertThat(out).contains(String.format("Updated backup schedule: %s", backupScheduleName));

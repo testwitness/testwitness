@@ -1,0 +1,158 @@
+[
+  {
+    "path": "components/camel-activemq/src/test/java/org/apache/camel/component/activemq/AdvisoryConsumerExample.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-as2/camel-as2-component/src/test/java/org/apache/camel/component/as2/AS2ClientManagerIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-atmosphere-websocket/src/test/java/org/apache/camel/component/atmosphere/websocket/WebsocketRouteWithInitParamTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-avro-rpc/camel-avro-rpc-component/src/test/java/org/apache/camel/component/avro/AvroConsumerTestSupport.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentSpringTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ProducerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/integration/EC2ComponentIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-lambda/src/test/java/org/apache/camel/component/aws2/lambda/LambdaComponentConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-ses/src/test/java/org/apache/camel/component/aws2/ses/SesComponentConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-sns/src/test/java/org/apache/camel/component/aws2/sns/SnsComponentConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-aws/camel-aws2-sqs/src/test/java/org/apache/camel/component/aws2/sqs/SqsComponentConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-bonita/src/test/java/org/apache/camel/component/bonita/api/BonitaAuthFilterAlreadyConnectedTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-bonita/src/test/java/org/apache/camel/component/bonita/integration/BonitaProducerManualIT.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-cmis/src/test/java/org/apache/camel/component/cmis/CMISProducerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseEndpointTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseProducerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/PGPDataFormatTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatNoPassPhraseTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-cxf/src/test/java/org/apache/camel/component/cxf/CxfProducerSoapActionTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-cxf/src/test/java/org/apache/camel/component/cxf/noparam/NoParamTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-disruptor/src/test/java/org/apache/camel/component/disruptor/DisruptorNoConsumerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/FacebookMethodsTypeHelperTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/ReadingBuilderTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-ftp/src/test/java/org/apache/camel/component/file/remote/UriConfigurationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-grape/src/test/java/org/apache/camel/component/grape/GrapeComponentTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-grpc/src/test/java/org/apache/camel/component/grpc/GrpcConsumerExceptionTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-hazelcast/src/test/java/org/apache/camel/processor/aggregate/hazelcast/HazelcastAggregationRepositoryConstructorsTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosAuthenticationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosConfigurationBuilderTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-hl7/src/test/java/org/apache/camel/component/hl7/HL7MLLPNettyDecoderResourceLeakTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-http/src/test/java/org/apache/camel/component/http/HttpProducerSelectMethodTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-http/src/test/java/org/apache/camel/component/http/HttpsTwoComponentsSslContextParametersGetTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-jasypt/src/test/java/org/apache/camel/component/jasypt/MainTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-jaxb/src/test/java/org/apache/camel/converter/jaxb/NonXmlCharFiltererTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-jaxb/src/test/java/org/apache/camel/example/DataFormatConcurrentTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-jetty/src/test/java/org/apache/camel/component/jetty/HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "components/camel-jms/src/test/java/org/apache/camel/component/jms/JmsBindingTest.java",
+    "status": "modified"
+  }
+]

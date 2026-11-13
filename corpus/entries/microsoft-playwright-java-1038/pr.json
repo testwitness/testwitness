@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/microsoft/playwright-java/pull/1038",
+  "repo": "microsoft/playwright-java",
+  "number": 1038,
+  "title": "tests: use assertThrows instead of try-catch",
+  "merged_at": "2022-08-30T21:47:33Z",
+  "stars": 1570,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "migration",
+  "split": "heldout",
+  "base_sha": "4d278c391e3c50738ddea6c3e324a4bbbf719d86",
+  "head_sha": "1e2469b409c23687b3830d2a2d90d3d123c7af5b",
+  "files_changed": 51,
+  "additions": 659,
+  "deletions": 1247
+}

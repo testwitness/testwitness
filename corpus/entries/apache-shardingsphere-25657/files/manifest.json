@@ -1,0 +1,10 @@
+[
+  {
+    "path": "features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,248 @@
+diff --git a/connect/api/src/test/java/org/apache/kafka/connect/header/ConnectHeadersTest.java b/connect/api/src/test/java/org/apache/kafka/connect/header/ConnectHeadersTest.java
+index 52aeff4a..39327961 100644
+--- a/connect/api/src/test/java/org/apache/kafka/connect/header/ConnectHeadersTest.java
++++ b/connect/api/src/test/java/org/apache/kafka/connect/header/ConnectHeadersTest.java
+@@ -512,21 +512,13 @@ public class ConnectHeadersTest {
+     }
+ 
+     protected void assertSchemaDoesNotMatch(Schema schema, Object value) {
+-        try {
+-            assertSchemaMatches(schema, value);
+-            fail("Should have failed to validate value '" + value + "' and schema: " + schema);
+-        } catch (DataException e) {
+-            // expected
+-        }
++        assertThrows(DataException.class, () -> assertSchemaMatches(schema, value),
++            "Should have failed to validate value '" + value + "' and schema: " + schema);
+     }
+ 
+     protected void attemptAndFailToAddHeader(String key, Schema schema, Object value) {
+-        try {
+-            headers.add(key, value, schema);
+-            fail("Should have failed to add header with key '" + key + "', value '" + value + "', and schema: " + schema);
+-        } catch (DataException e) {
+-            // expected
+-        }
++        assertThrows(DataException.class, () -> headers.add(key, value, schema),
++            "Should have failed to add header with key '" + key + "', value '" + value + "', and schema: " + schema);
+     }
+ 
+     protected void addHeader(String key, Schema schema, Object value) {
+diff --git a/connect/runtime/src/test/java/org/apache/kafka/connect/integration/ConnectorClientPolicyIntegrationTest.java b/connect/runtime/src/test/java/org/apache/kafka/connect/integration/ConnectorClientPolicyIntegrationTest.java
+index 36a14f75..7d207940 100644
+--- a/connect/runtime/src/test/java/org/apache/kafka/connect/integration/ConnectorClientPolicyIntegrationTest.java
++++ b/connect/runtime/src/test/java/org/apache/kafka/connect/integration/ConnectorClientPolicyIntegrationTest.java
+@@ -41,6 +41,7 @@ import static org.apache.kafka.connect.runtime.ConnectorConfig.VALUE_CONVERTER_C
+ import static org.apache.kafka.connect.runtime.SinkConnectorConfig.TOPICS_CONFIG;
+ import static org.apache.kafka.connect.runtime.WorkerConfig.OFFSET_COMMIT_INTERVAL_MS_CONFIG;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.fail;
+ 
+ @Tag("integration")
+@@ -161,9 +162,8 @@ public class ConnectorClientPolicyIntegrationTest {
+     private void assertFailCreateConnector(String policy, Map<String, String> props) {
+         EmbeddedConnectCluster connect = connectClusterWithPolicy(policy);
+         try {
+-            connect.configureConnector(CONNECTOR_NAME, props);
+-            fail("Shouldn't be able to create connector");
+-        } catch (ConnectRestException e) {
++            ConnectRestException e = assertThrows(ConnectRestException.class,
++                () -> connect.configureConnector(CONNECTOR_NAME, props), "Shouldn't be able to create connector");
+             assertEquals(400, e.statusCode());
+         } finally {
+             connect.stop();
+diff --git a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/ConnectorConfigTest.java b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/ConnectorConfigTest.java
+index 6e71e37d..513572ff 100644
+--- a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/ConnectorConfigTest.java
++++ b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/ConnectorConfigTest.java
+@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+ 
+@@ -317,12 +316,8 @@ public class ConnectorConfigTest<R extends ConnectRecord<R>> {
+         props.put("predicates", "my-pred");
+         props.put("predicates.my-pred.type", TestPredicate.class.getName());
+         props.put("predicates.my-pred.int", "79");
+-        try {
+-            new ConnectorConfig(MOCK_PLUGINS, props);
+-            fail();
+-        } catch (ConfigException e) {
+-            assertTrue(e.getMessage().contains("Value must be at least 80"));
+-        }
++        ConfigException e = assertThrows(ConfigException.class, () -> new ConnectorConfig(MOCK_PLUGINS, props));
++        assertTrue(e.getMessage().contains("Value must be at least 80"));
+     }
+ 
+     @Test
+diff --git a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerSinkTaskThreadedTest.java b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerSinkTaskThreadedTest.java
+index 9edfe177..1e20c8a6 100644
+--- a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerSinkTaskThreadedTest.java
++++ b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerSinkTaskThreadedTest.java
+@@ -72,8 +72,8 @@ import java.util.function.Function;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyMap;
+ import static org.mockito.ArgumentMatchers.anyString;
+@@ -444,21 +444,13 @@ public class WorkerSinkTaskThreadedTest {
+             assertEquals(Set.of(TOPIC_PARTITION, TOPIC_PARTITION2, TOPIC_PARTITION3), sinkTaskContext.getValue().assignment());
+             return null;
+         }).doAnswer(invocation -> {
+-            try {
+-                sinkTaskContext.getValue().pause(UNASSIGNED_TOPIC_PARTITION);
+-                fail("Trying to pause unassigned partition should have thrown an Connect exception");
+-            } catch (ConnectException e) {
+-                // expected
+-            }
++            assertThrows(ConnectException.class, () -> sinkTaskContext.getValue().pause(UNASSIGNED_TOPIC_PARTITION),
++                "Trying to pause unassigned partition should have thrown an Connect exception");
+             sinkTaskContext.getValue().pause(TOPIC_PARTITION, TOPIC_PARTITION2);
+             return null;
+         }).doAnswer(invocation -> {
+-            try {
+-                sinkTaskContext.getValue().resume(UNASSIGNED_TOPIC_PARTITION);
+-                fail("Trying to resume unassigned partition should have thrown an Connect exception");
+-            } catch (ConnectException e) {
+-                // expected
+-            }
++            assertThrows(ConnectException.class, () -> sinkTaskContext.getValue().resume(UNASSIGNED_TOPIC_PARTITION),
++                "Trying to resume unassigned partition should have thrown an Connect exception");
+             sinkTaskContext.getValue().resume(TOPIC_PARTITION, TOPIC_PARTITION2);
+             return null;
+         }).when(sinkTask).put(any(Collection.class));
+diff --git a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerTest.java b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerTest.java
+index 07581fde..d6935a86 100644
+--- a/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerTest.java
++++ b/connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerTest.java
+@@ -159,7 +159,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyCollection;
+ import static org.mockito.ArgumentMatchers.anyLong;
+@@ -412,12 +411,8 @@ public class WorkerTest {
+         assertStatistics(worker, 0, 0);
+         FutureCallback<TargetState> onStart = new FutureCallback<>();
+         worker.startConnector(CONNECTOR_ID, connectorProps, ctx, connectorStatusListener, TargetState.STARTED, onStart);
+-        try {
+-            onStart.get(0, TimeUnit.MILLISECONDS);
+-            fail("Should have failed to start connector");
+-        } catch (ExecutionException e) {
+-            assertEquals(exception, e.getCause());
+-        }
++        ExecutionException e = assertThrows(ExecutionException.class, () -> onStart.get(0, TimeUnit.MILLISECONDS), "Should have failed to start connector");
++        assertEquals(exception, e.getCause());
+ 
+         assertStartupStatistics(worker, 1, 1, 0, 0);
+         assertEquals(Set.of(), worker.connectorNames());
+diff --git a/connect/runtime/src/test/java/org/apache/kafka/connect/util/ConvertingFutureCallbackTest.java b/connect/runtime/src/test/java/org/apache/kafka/connect/util/ConvertingFutureCallbackTest.java
+index 5281ecc1..e4d36dc3 100644
+--- a/connect/runtime/src/test/java/org/apache/kafka/connect/util/ConvertingFutureCallbackTest.java
++++ b/connect/runtime/src/test/java/org/apache/kafka/connect/util/ConvertingFutureCallbackTest.java
+@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
+ 
+ public class ConvertingFutureCallbackTest {
+ 
+@@ -71,12 +70,8 @@ public class ConvertingFutureCallbackTest {
+         TestConvertingFutureCallback testCallback = new TestConvertingFutureCallback();
+         testCallback.onCompletion(expectedError, null);
+         assertEquals(0, testCallback.numberOfConversions());
+-        try {
+-            testCallback.get();
+-            fail("Expected ExecutionException");
+-        } catch (ExecutionException e) {
+-            assertEquals(expectedError, e.getCause());
+-        }
++        ExecutionException e = assertThrows(ExecutionException.class, testCallback::get, "Expected ExecutionException");
++        assertEquals(expectedError, e.getCause());
+     }
+ 
+     @Test
+@@ -88,12 +83,8 @@ public class ConvertingFutureCallbackTest {
+         testCallback.cancel(true);
+         testCallback.onCompletion(null, "420");
+         assertEquals(0, testCallback.numberOfConversions());
+-        try {
+-            testCallback.get();
+-            fail("Expected ExecutionException");
+-        } catch (ExecutionException e) {
+-            assertEquals(expectedError, e.getCause());
+-        }
++        ExecutionException e = assertThrows(ExecutionException.class, testCallback::get, "Expected ExecutionException");
++        assertEquals(expectedError, e.getCause());
+     }
+   
+     @Test
+@@ -139,12 +130,8 @@ public class ConvertingFutureCallbackTest {
+             }
+         });
+         assertFalse(testCallback.isDone());
+-        try {
+-            testCallback.get();
+-            fail("Expected ExecutionException");
+-        } catch (ExecutionException e) {
+-            assertEquals(expectedError, e.getCause());
+-        }
++        ExecutionException e = assertThrows(ExecutionException.class, testCallback::get, "Expected ExecutionException");
++        assertEquals(expectedError, e.getCause());
+         assertEquals(0, testCallback.numberOfConversions());
+         assertTrue(testCallback.isDone());
+         if (testThreadException.get() != null) {
+diff --git a/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/ExtractFieldTest.java b/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/ExtractFieldTest.java
+index d39c43f9..8cfb69ab 100644
+--- a/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/ExtractFieldTest.java
++++ b/connect/transforms/src/test/java/org/apache/kafka/connect/transforms/ExtractFieldTest.java
+@@ -35,7 +35,7 @@ import java.util.stream.Stream;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+-import static org.junit.jupiter.api.Assertions.fail;
++import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ public class ExtractFieldTest {
+     private final ExtractField<SinkRecord> xformKey = new ExtractField.Key<>();
+@@ -169,12 +169,8 @@ public class ExtractFieldTest {
+         final Struct key = new Struct(keySchema).put("magic", 42);
+         final SinkRecord record = new SinkRecord("test", 0, keySchema, key, null, null, 0);
+ 
+-        try {
+-            xformKey.apply(record);
+-            fail("Expected exception wasn't raised");
+-        } catch (IllegalArgumentException iae) {
+-            assertEquals("Unknown field: nonexistent", iae.getMessage());
+-        }
++        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class, () -> xformKey.apply(record), "Expected exception wasn't raised");
++        assertEquals("Unknown field: nonexistent", iae.getMessage());
+     }
+ 
+     @Test
+@@ -189,12 +185,8 @@ public class ExtractFieldTest {
+         final Struct key = new Struct(keySchema).put("magic", new Struct(fooSchema).put("foo", 42));
+         final SinkRecord record = new SinkRecord("test", 0, keySchema, key, null, null, 0);
+ 
+-        try {
+-            xformKey.apply(record);
+-            fail("Expected exception wasn't raised");
+-        } catch (IllegalArgumentException iae) {
+-            assertEquals("Unknown field: magic.nonexistent", iae.getMessage());
+-        }
++        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class, () -> xformKey.apply(record), "Expected exception wasn't raised");
++        assertEquals("Unknown field: magic.nonexistent", iae.getMessage());
+     }
+ 
+     @Test

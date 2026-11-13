@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/camel/pull/5996",
+  "repo": "apache/camel",
+  "number": 5996,
+  "title": "(chores) tests: ensures that test code has at least one assertion",
+  "merged_at": "2021-08-26T19:33:36Z",
+  "stars": 6390,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "helper",
+  "split": "heldout",
+  "base_sha": "afeba039e43e2305ce9a6f7461f4c9a59ded2241",
+  "head_sha": "fc74847608efb2b06922ccaa2010f3ce809c7e39",
+  "files_changed": 39,
+  "additions": 310,
+  "deletions": 256
+}
