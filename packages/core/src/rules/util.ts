@@ -194,3 +194,28 @@ async function buildHeadIndex(ctx: RuleContext): Promise<HeadIndex> {
   }
   return { byHash, assertionOwners, addedByName };
 }
+
+/**
+ * Tests of a deleted (or shrunk) test file that reappear by name in a head test file with the same file name in another
+ * directory: a class moved to another package with edits, which git sees as a deletion and an addition. Same file name
+ * means the same class name in Java and the same module name in Python. Matching names in a file with another name are
+ * never a move (two classes can both have a `test` method). Returns the destination path by qualified name.
+ */
+export async function movedByName(ctx: RuleContext, path: string, tests: TestCase[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (tests.length === 0) return out;
+  const name = path.split('/').pop() ?? path;
+  const candidates = (await ctx.headTestFiles()).filter((f) => f !== path && (f.split('/').pop() ?? f) === name);
+  for (const c of candidates) {
+    const inv = await ctx.headInventoryFor(c);
+    if (!inv) continue;
+    const keys = new Set(inv.tests.map((t) => nameKey(t)));
+    for (const t of tests) if (!out.has(t.qualifiedName) && keys.has(nameKey(t))) out.set(t.qualifiedName, c);
+  }
+  return out;
+}
+
+/** Innermost class or group plus test name: survives a package move, not a rename. */
+function nameKey(t: TestCase): string {
+  return `${t.container.at(-1) ?? ''}#${t.name}`;
+}

@@ -1,6 +1,6 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
-import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, subjectRemoved, type HeadIndex } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, subjectRemoved, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -42,7 +42,7 @@ export const R001: Rule = {
   docs: {
     summary: 'A test present in the base is absent in the head and no test with the same body exists elsewhere in the head tree.',
     falsePositives:
-      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, or same name added elsewhere in the PR), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Precision over recall: a deletion is medium or high only when none of those signals is present.',
+      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Precision over recall: a deletion is medium or high only when none of those signals is present.',
     example: '-  @Test\n-  void rejectsNegativeAmount() {\n-    assertThrows(IllegalArgumentException.class, () -> svc.charge(-1));\n-  }',
     history:
       'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored or production removed are left alone, because the test still runs somewhere or only partly stopped running.',
@@ -111,6 +111,8 @@ export const R001: Rule = {
       }
       // Moved with edits: a test with the same name was added in another changed file of this PR.
       const dests = [...(index.addedByName.get(t.name) ?? [])].filter((d) => d !== pair.file.path);
+      const sameClass = dests.length ? undefined : (await movedByName(ctx, pair.file.path, [t])).get(t.qualifiedName);
+      if (sameClass) dests.push(sameClass);
       if (dests.length) {
         out.push(
           makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was moved to ${dests[0]} with edits`, {
@@ -182,11 +184,18 @@ export const R002: Rule = {
   needs: ['diff', 'ast'],
   docs: {
     summary: 'A file matching test patterns was deleted. The number of tests lost is counted from the base inventory.',
-    falsePositives: 'A file whose tests all reappear elsewhere in the head tree (same bodies) is reported low as moved. Git rename detection handles pure moves before this rule runs.',
+    falsePositives:
+      'A file whose tests all reappear elsewhere in the head tree is reported low as moved: same bodies anywhere, or the same test names in a file with the same name in another directory (a class moved to another package with edits, which git sees as a deletion and an addition). Same names in a file with another name are not a move. A file deleted while new test files the PR adds in the same directory hold at least as many tests as the PR deleted is reported low as rewritten, a narrower form of the control R001 applies. Git rename detection handles pure moves before this rule runs.',
     example: 'deleted file mode 100644 src/__tests__/billing.test.ts',
   },
   async run(ctx) {
     const out: Finding[] = [];
+    const added = new Map<string, number>();
+    let deletedTotal = 0;
+    for (const { pair, change } of allChanges(ctx.pairs)) {
+      if (change.kind === 'added') added.set(pair.file.path, (added.get(pair.file.path) ?? 0) + 1);
+      if (change.kind === 'deleted') deletedTotal++;
+    }
     for (const pair of ctx.pairs) {
       if (pair.file.status !== 'deleted') continue;
       const tests = pair.base?.tests ?? [];
@@ -196,12 +205,27 @@ export const R002: Rule = {
         continue;
       }
       const index = await headIndex(ctx, pair.file.path);
-      const movedCount = tests.filter((t) => t.statementCount > 0 && (index.byHash.has(t.bodyHash) || refactoredInto(t, index))).length;
-      if (movedCount === tests.filter((t) => t.statementCount > 0).length && movedCount > 0) {
-        const first = tests.find((t) => index.byHash.has(t.bodyHash) || refactoredInto(t, index))!;
-        const dest = index.byHash.get(first.bodyHash)?.[0]?.path ?? refactoredInto(first, index)!;
+      const byName = await movedByName(ctx, pair.file.path, tests);
+      const destOf = (t: TestCase): string | undefined => (t.statementCount > 0 ? (index.byHash.get(t.bodyHash)?.[0]?.path ?? refactoredInto(t, index)) : undefined) ?? byName.get(t.qualifiedName);
+      const counted = tests.filter((t) => t.statementCount > 0 || byName.has(t.qualifiedName));
+      const movedCount = counted.filter((t) => destOf(t) !== undefined).length;
+      if (movedCount === counted.length && movedCount > 0) {
+        const dest = destOf(counted[0]!)!;
         out.push(
           makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted; its ${tests.length} tests now live in ${dest}`, { label: 'moved' }),
+        );
+        continue;
+      }
+      // Rewritten: new test files this PR adds next to the deleted one hold at least as many tests as the PR deleted
+      // (R001's control, narrowed to new files in the same directory: tests added to an existing file about another
+      // subject are not a rewrite of this one).
+      const dir = pair.file.path.slice(0, pair.file.path.lastIndexOf('/') + 1);
+      const addedElsewhere = ctx.pairs
+        .filter((p) => p.file.status === 'added' && p.file.path.slice(0, p.file.path.lastIndexOf('/') + 1) === dir)
+        .reduce((n, p) => n + (added.get(p.file.path) ?? 0), 0);
+      if (addedElsewhere >= deletedTotal && addedElsewhere > 0) {
+        out.push(
+          makeFinding(ctx, 'R002', 'low', pair.file, pair.file.path, `Test file deleted with ${tests.length} test${tests.length === 1 ? '' : 's'} while ${addedElsewhere} new test${addedElsewhere === 1 ? ' was' : 's were'} added in other changed test files; likely rewritten`, { label: 'rewritten' }),
         );
         continue;
       }

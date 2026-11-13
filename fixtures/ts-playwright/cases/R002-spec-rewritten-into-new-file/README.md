@@ -1,0 +1,1 @@
+Negative control. A feature redesign removes the status page, so its spec file is deleted, and the scenarios are rewritten into a new spec file with three tests under new names. The PR adds at least as many tests as it deletes, so R002 reports the deletion low as rewritten, the same control R001 applies. Seen in a replay of public PRs on Playwright.
