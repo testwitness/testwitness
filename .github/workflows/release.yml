@@ -1,22 +1,38 @@
-# Release: on a v* tag, check, bundle the Action into dist/, prove the npm package
-# installs and runs on its own (pack:check), then publish `testwitness` to npm.
+# Release: on a v* tag, check, bundle the Action into dist/, commit dist on the tag and move the
+# major tag (v0), prove the npm package installs and runs on its own (pack:check), publish
+# `testwitness` to npm and create the GitHub release.
 #
-# The FIRST npm publish (0.1.0) is manual: npm cannot attach a trusted publisher to a
-# package that does not exist yet, so the maintainer runs `npm publish --access public`
-# from packages/cli (after `pnpm pack:check`), then configures this workflow as the
-# trusted publisher on npmjs.com. From then on this workflow publishes with OIDC and
-# provenance, and skips the publish step when the tagged version is already on npm.
+# The same workflow runs as a dry run on pull requests that change the release path and by hand
+# (workflow_dispatch): every step runs except the tag push, the attestation, the publish
+# (npm publish --dry-run instead) and the GitHub release, so a broken release is found before a
+# tag is pushed. The dry run uses the version in packages/cli/package.json as the tag.
+#
+# The FIRST npm publish (0.1.0) is manual: npm cannot attach a trusted publisher to a package
+# that does not exist yet. Until then the publish step says so and skips (scripts/release-npm.sh).
 name: release
 on:
   push:
     tags: ['v*']
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - scripts/release-*.sh
+      - scripts/bundle-action.mjs
+      - scripts/pack-check.mjs
+      - action.yml
+      - packages/cli/package.json
+  workflow_dispatch:
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      DRY_RUN: ${{ github.event_name == 'push' && '0' || '1' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -32,31 +48,25 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm bundle:action
-      - name: Commit dist on the tag and move the major tag
+      - name: Tag to release
+        id: tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f dist
-          git commit -m "build: dist for ${GITHUB_REF_NAME}" || true
-          git tag -f "${GITHUB_REF_NAME}"
-          MAJOR="${GITHUB_REF_NAME%%.*}"
-          git tag -f "$MAJOR"
-          git push -f origin "${GITHUB_REF_NAME}" "$MAJOR"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else echo "tag=v$(node -p "require('./packages/cli/package.json').version")" >> "$GITHUB_OUTPUT"; fi
+      - name: Commit dist on the tag and move the major tag
+        run: scripts/release-dist.sh "$TAG"
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
       - uses: actions/attest-build-provenance@v4
+        if: env.DRY_RUN == '0'
         with:
           subject-path: dist/index.js
       # Bundles packages/cli, packs it, installs the tarball with plain npm and runs a check.
       - run: pnpm pack:check
       - name: Publish npm package with provenance (trusted publishing)
-        working-directory: packages/cli
-        run: |
-          VERSION="$(node -p "require('./package.json').version")"
-          if [ "$(npm view "testwitness@${VERSION}" version 2>/dev/null)" = "${VERSION}" ]; then
-            echo "testwitness@${VERSION} already published, skipping"
-          else
-            npm publish --provenance --access public
-          fi
+        run: scripts/release-npm.sh
       - name: GitHub release
+        if: env.DRY_RUN == '0'
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
