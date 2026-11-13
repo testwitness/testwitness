@@ -46,7 +46,7 @@ export const A001: Rule = {
   docs: {
     summary: 'A modified test lost one or more assertions and gained no replacement on the same subject.',
     falsePositives:
-      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll) is reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.',
+      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.',
     example: '   expect(res.status).toBe(200);\n-  expect(res.body.total).toBe(1250);\n-  expect(ledger.entries).toHaveLength(2);',
   },
   run(ctx) {
@@ -97,7 +97,19 @@ export const A001: Rule = {
         const newHelperCalls = head.assertions.filter((a) => a.kind === 'custom' && !baseCustom.has(assertionKey(a)));
         // Helper extraction: the assertions now live in a helper the front end resolved to assertions; the oracle is intact.
         if (newHelperCalls.length > 0) continue;
-        if (allConsolidated) {
+        // Message checks folded into the exception expectation: `with pytest.raises(E) as exc_info` plus asserts on the
+        // message became `pytest.raises(E, match=...)`. The match is the message check.
+        const gainedMatch = head.assertions.some((a) => /raises/i.test(a.callee) && /\bmatch\s*=/.test(a.text)) && !base.assertions.some((a) => /raises/i.test(a.callee) && /\bmatch\s*=/.test(a.text));
+        if (allConsolidated || gainedMatch) {
+          if (gainedMatch) {
+            out.push(
+              makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${lost} assertion${lost === 1 ? '' : 's'} folded into the match= of its pytest.raises`, {
+                ...where,
+                label: 'consolidated',
+              }),
+            );
+            continue;
+          }
           out.push(
             makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${lost} assertion${lost === 1 ? '' : 's'} consolidated into an assertion on the parent expression`, {
               ...where,
@@ -275,9 +287,18 @@ const SEVERITY_ORDER: Record<Severity, number> = { high: 3, medium: 2, low: 1 };
 
 function describe(j: Judgement): string {
   const { base, head, bm, hm } = j.pair;
-  if (!j.byLattice) return `${base.callee} on ${base.subject ?? 'the subject'} became ${head.callee}`;
+  if (!j.byLattice) {
+    // Same callee on both sides (two plain asserts): name the statements, "assert became assert" says nothing.
+    if (base.callee === head.callee) return `${clip(base.text)} became ${clip(head.text)}`;
+    return `${base.callee} on ${base.subject ?? 'the subject'} became ${head.callee}`;
+  }
   const onHead = hm.subject && compactText(hm.subject) !== compactText(bm.subject) ? ` on ${hm.subject}` : '';
   return `${bm.label} (${base.callee}) on ${bm.subject || 'the subject'} became ${hm.label} (${head.callee})${onHead}`;
+}
+
+function clip(s: string): string {
+  const one = s.replace(/\s+/g, ' ').trim();
+  return one.length > 80 ? `${one.slice(0, 77)}...` : one;
 }
 
 function compactText(s: string): string {

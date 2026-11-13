@@ -663,6 +663,16 @@ function withLattice(a: Assertion, key: string): Assertion {
   return a;
 }
 
+/** `(422 if extra == "forbid" else 200)`: a conditional whose branches are both literals is still an exact value per case. */
+function literalPerCase(n: Node): boolean {
+  const e = unwrap(n);
+  if (e.type !== 'conditional_expression') return false;
+  const parts = e.namedChildren.filter((c) => c.type !== 'comment');
+  const body = parts[0];
+  const alternative = parts[2];
+  return !!body && !!alternative && (isLiteral(unwrap(body)) || literalPerCase(body)) && (isLiteral(unwrap(alternative)) || literalPerCase(alternative));
+}
+
 /** Classify a bare `assert` statement. */
 function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Set<string>): Assertion {
   const expr = stmt.namedChildren.find((c) => c.type !== 'comment');
@@ -701,7 +711,7 @@ function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Se
       case '==': {
         // The expected operand is the right one, or the left one when a literal was written first (`3 == len(x)`).
         const expectedOperand = swapped ? left : right;
-        const literalRight = !!expectedOperand && (isLiteral(expectedOperand) || (expectedOperand.type === 'identifier' && !!literalParams?.has(expectedOperand.text)));
+        const literalRight = !!expectedOperand && (isLiteral(expectedOperand) || literalPerCase(expectedOperand) || (expectedOperand.type === 'identifier' && !!literalParams?.has(expectedOperand.text)));
         return withLattice(a, literalRight ? 'assert.==.literal' : 'assert.==');
       }
       case '!=':
