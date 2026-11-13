@@ -231,6 +231,21 @@ describe('O002 smoke oracle', () => {
     const reg = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [smoke]) }], prText: { title: 'Add regression test for #9', body: '' } }), {});
     expect(reg[0]!.severity).toBe('medium');
   });
+
+  it('keeps a does not throw test low under a regression claim, and still raises other smoke tests', async () => {
+    const noThrow = t({ name: 'accepts a valid header', body: 'x', assertions: [{ callee: 'expect.not.toThrow', kind: 'smoke', family: 'exception', strength: 0, text: 'expect(() => validate(h)).not.toThrow()' }] });
+    const java = t({ name: 'acceptsValidHeader', body: 'y', assertions: [{ callee: 'assertDoesNotThrow', kind: 'smoke', text: 'assertDoesNotThrow(() -> validate(h))' }] });
+    const defined1 = t({ name: 'returns a header', body: 'z', assertions: [defined('validate(h)')] });
+    const mixed = t({ name: 'mixed', body: 'w', assertions: [defined('r'), { callee: 'expect.not.toThrow', kind: 'smoke', family: 'exception', strength: 0, text: 'expect(f).not.toThrow()' }] });
+    const prText = { title: 'Validator rework', body: 'Adds about 60 new regression tests across the suite.' };
+    const out = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [noThrow, java, defined1, mixed]) }], prText }), {});
+    expect(out.map((f) => [f.subject, f.severity])).toEqual([
+      ['accepts a valid header', 'low'],
+      ['acceptsValidHeader', 'low'],
+      ['returns a header', 'medium'],
+      ['mixed', 'medium'],
+    ]);
+  });
 });
 
 describe('O006 new test file with no tests', () => {

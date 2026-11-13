@@ -1,0 +1,1 @@
+{"title":"Fix crash on zero quantity","body":"Adds a regression test: addLine used to throw on a zero quantity line."}

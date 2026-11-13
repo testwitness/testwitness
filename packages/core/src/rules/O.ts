@@ -54,6 +54,13 @@ function onlySmoke(t: TestCase): boolean {
   return t.assertions.length > 0 && t.assertions.every((a) => a.kind === 'smoke' || a.kind === 'snapshot');
 }
 
+/** A no throw check: expect(fn).not.toThrow(), assert.doesNotThrow, assertDoesNotThrow, assertThatCode(...).doesNotThrowAnyException(). */
+const NO_THROW = /(^|\.)(assertDoesNotThrow|doesNotThrowAnyException|doesNotThrow|doesNotReject)$|\.not\.(toThrow|toThrowError|throw|throws)$/;
+
+function onlyNoThrow(t: TestCase): boolean {
+  return t.assertions.length > 0 && t.assertions.every((a) => NO_THROW.test(a.callee) || (a.family === 'exception' && a.kind === 'smoke'));
+}
+
 /** O002 New test with a smoke oracle only. */
 export const O002: Rule = {
   id: 'O002',
@@ -66,7 +73,7 @@ export const O002: Rule = {
   docs: {
     summary: 'A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.',
     falsePositives:
-      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
+      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test, unless every assertion of the test is a does not throw check (not.toThrow, assertDoesNotThrow, doesNotThrowAnyException): a crash regression is pinned by not throwing, so the claim says nothing against such a test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
     example: "+  it('computes the discount', () => {\n+    expect(computeDiscount(cart)).toBeDefined();\n+  });",
   },
   run(ctx) {
@@ -81,8 +88,11 @@ export const O002: Rule = {
       const measured = mutationOracle(ctx, pair, t);
       if (measured === 'strong') continue; // it killed a mutant on a changed line: the oracle is measured, not guessed
       const weak = measured === 'weak';
+      // A crash regression is pinned by "does not throw": for such a test the PR's regression claim is no evidence of
+      // a weak oracle, because not throwing is the whole contract (a validator that accepts its input).
+      const raised = regression && !onlyNoThrow(t);
       out.push(
-        makeFinding(ctx, 'O002', regression || weak ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})${weak ? ', and no mutant on the changed lines it exercises was killed' : ''}`, {
+        makeFinding(ctx, 'O002', raised || weak ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})${weak ? ', and no mutant on the changed lines it exercises was killed' : ''}`, {
           line: t.startLine,
           endLine: t.endLine,
           label: weak ? 'measured weak' : 'smoke',
