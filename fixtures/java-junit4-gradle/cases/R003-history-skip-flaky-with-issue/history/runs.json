@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "id": "history-1",
+      "junit": [
+        "junit/TEST-demo.RetryTest-run-1.xml"
+      ]
+    },
+    {
+      "id": "history-2",
+      "junit": [
+        "junit/TEST-demo.RetryTest-run-2.xml"
+      ]
+    },
+    {
+      "id": "history-3",
+      "junit": [
+        "junit/TEST-demo.RetryTest-run-3.xml"
+      ]
+    },
+    {
+      "id": "history-4",
+      "junit": [
+        "junit/TEST-demo.RetryTest-run-4.xml"
+      ]
+    },
+    {
+      "id": "history-5",
+      "junit": [
+        "junit/TEST-demo.RetryTest-run-5.xml"
+      ]
+    }
+  ]
+}

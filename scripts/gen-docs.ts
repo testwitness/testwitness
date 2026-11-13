@@ -11,7 +11,7 @@ const rules = builtinRules();
 // docs/rules.md
 const lines = ['# Rules reference', '', 'Generated from the rule definitions in `packages/core/src/rules`. Do not edit by hand; run `pnpm gen:docs`.', ''];
 for (const r of rules) {
-  lines.push(`## ${r.id} ${r.name}`, '', `Default severity: ${r.defaultSeverity}. Since ${r.since}. Languages: ${r.languages === 'any' ? 'all' : r.languages.join(', ')}. Needs: ${r.needs.join(', ')}.`, '', r.docs.summary, '', `**False positive controls.** ${r.docs.falsePositives}`, '', '```diff', r.docs.example, '```', '');
+  lines.push(`## ${r.id} ${r.name}`, '', `Default severity: ${r.defaultSeverity}. Since ${r.since}. Languages: ${r.languages === 'any' ? 'all' : r.languages.join(', ')}. Needs: ${r.needs.join(', ')}.`, '', r.docs.summary, '', `**False positive controls.** ${r.docs.falsePositives}`, '', ...(r.docs.history ? [`**With run history.** ${r.docs.history} See [run history](history.md).`, ''] : []), '```diff', r.docs.example, '```', '');
 }
 writeFileSync(join(root, 'docs', 'rules.md'), lines.join('\n'));
 

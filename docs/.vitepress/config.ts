@@ -8,9 +8,10 @@ export default defineConfig({
   base: '/testwitness/',
   // Working documents for the maintainer, not site pages.
   srcExclude: ['launch/**', 'ASSESSMENT-AND-ROADMAP.md'],
-  // Serve the report schema at its $id, https://testwitness.github.io/testwitness/report.schema.json.
+  // Serve the report and history schemas at their $id, https://testwitness.github.io/testwitness/<name>.schema.json.
   buildEnd(site) {
     copyFileSync(join(site.srcDir, 'report.schema.json'), join(site.outDir, 'report.schema.json'));
+    copyFileSync(join(site.srcDir, 'history.schema.json'), join(site.outDir, 'history.schema.json'));
   },
   themeConfig: {
     nav: [
@@ -23,6 +24,7 @@ export default defineConfig({
       { text: 'Quick start', link: '/' },
       { text: 'How it decides', link: '/how-it-decides' },
       { text: 'Evidence (reporters)', link: '/evidence' },
+      { text: 'Run history', link: '/history' },
       { text: 'Configuration', link: '/configuration' },
       { text: 'CLI', link: '/cli' },
       { text: 'MCP server for agents', link: '/mcp' },

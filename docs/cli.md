@@ -35,6 +35,9 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--fail-on <sev>` | `high`, `medium`, `low` | from config |
 | `--pr-title <t>`, `--pr-body-file <f>` | PR text for claim checks | |
 | `--author <login>`, `--author-type <type>` | PR author and account type, shown in provenance | |
+| `--history <file>` | run history JSON of earlier runs; R001, R003, R004 and V003 then grade by what the test did before ([run history](./history)) | none |
+| `--history-out <file>` | write the run history with this run's results merged in | none |
+| `--run-id <id>` | id of this run in the history | `GITHUB_RUN_ID`, then `local-<head sha>` |
 | `--cwd <dir>` | repository directory | current |
 | `-q, --quiet` | no progress on stderr | |
 

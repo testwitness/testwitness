@@ -174,6 +174,10 @@ reasonable); this file had 12 assertions per test and this PR brings it to 3
 when history corroborates it and down when history excuses it. All of it is
 counting, none of it is learning.
 
+Status, 4 Nov 2026: history version 1 is implemented for the first two signals
+and for V003 (docs/history.md). Relative assertion density is not in it,
+because the JUnit XML does not carry per file assertion counts.
+
 ### 4.6 Change to test mapping
 
 From coverage or, without coverage, from the import graph, know which tests

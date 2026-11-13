@@ -1,10 +1,15 @@
-# Dogfood: testwitness runs on its own pull requests in strict mode.
+# Dogfood: testwitness runs on its own pull requests in strict mode, and on every push to main to record the run
+# history that later pull requests read (docs/history.md).
 name: testwitness
 on:
   pull_request:
+  push:
+    branches: [main]
 permissions:
   contents: read
   pull-requests: write
+  # Read the testwitness-history artifact of the latest successful run on main.
+  actions: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,3 +31,6 @@ jobs:
           junit: junit.xml
           mode: strict
           fail_on: high
+          history_artifact: testwitness-history
+          # Uploads on push to main by default; pull requests only read.
+          history_write: ${{ github.event_name == 'push' }}

@@ -461,6 +461,46 @@
         }
       }
     },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "runs",
+        "tests",
+        "adjusted",
+        "notes"
+      ],
+      "description": "Run history of earlier runs that this run read for dynamic severity (see https://testwitness.github.io/testwitness/history). Absent when no history input was given.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Where the history came from: the file path given to --history, or in the Action the artifact name and the workflow run it was downloaded from."
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Earlier runs in the history that was read. 0 when it could not be read or was empty."
+        },
+        "tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Test keys tracked in the history that was read."
+        },
+        "adjusted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Findings whose severity or label the history changed (labels hides failure, flaky in history, ran before, not now)."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Why the history could not be read, and caps that were hit, as plain sentences."
+        }
+      }
+    },
     "base": {
       "type": "string",
       "description": "Commit sha of the merge base between the base ref and head. Findings compare this commit with head."
@@ -528,6 +568,8 @@
         "conditional",
         "consolidated",
         "file not in results",
+        "flaky in history",
+        "hides failure",
         "in helper",
         "maintainer only",
         "matches nothing",
@@ -539,6 +581,7 @@
         "parameterised",
         "partial results",
         "production removed",
+        "ran before, not now",
         "refactored",
         "replaced",
         "replaced by call",

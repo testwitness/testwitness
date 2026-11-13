@@ -98,6 +98,15 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
     lines.push(`- Coverage: ${c.sources.length} report${c.sources.length === 1 ? '' : 's'}, ${c.files} source file${c.files === 1 ? '' : 's'}, ${c.linesExecuted} of ${c.linesInstrumented} instrumented lines executed`);
     for (const n of c.notes) lines.push(`- ${esc(n)}`);
   }
+  const h = report.history;
+  if (h) {
+    lines.push(
+      h.runs > 0
+        ? `- History: ${h.runs} earlier run${h.runs === 1 ? '' : 's'}, ${h.tests} test${h.tests === 1 ? '' : 's'} tracked, from ${esc(h.source)}; ${h.adjusted} finding${h.adjusted === 1 ? '' : 's'} graded by history`
+        : `- History: none read from ${esc(h.source)}; severities do not use earlier runs`,
+    );
+    for (const n of h.notes) lines.push(`- ${esc(n)}`);
+  }
   lines.push('');
 
   const hi = report.helperIndex;
