@@ -41,6 +41,7 @@
     "dist/cli.js",
     "dist/assets",
     "bin",
+    "plugin",
     "README.md",
     "LICENSE"
   ],

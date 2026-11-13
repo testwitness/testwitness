@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "testwitness": {
+      "command": "npx",
+      "args": ["--no-install", "testwitness", "mcp"]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "testwitness",
+  "version": "0.1.0",
+  "description": "Blocks a commit, a push or the end of a turn when the working tree deletes, skips or loosens tests, and gives the agent the base text to restore. Bundles the testwitness hook and the read only MCP server. No model, no network, never runs your code.",
+  "author": {
+    "name": "testwitness"
+  },
+  "homepage": "https://github.com/testwitness/testwitness/blob/main/docs/agent-guard.md",
+  "repository": "https://github.com/testwitness/testwitness",
+  "license": "Apache-2.0",
+  "keywords": ["testing", "test-integrity", "hooks", "mcp"]
+}

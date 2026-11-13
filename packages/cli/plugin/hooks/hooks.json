@@ -1,0 +1,39 @@
+{
+  "description": "testwitness agent guard: checks the working tree for weakened tests on commit, push and stop",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx --no-install testwitness hook --agent claude",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx --no-install testwitness hook --agent claude",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx --no-install testwitness hook --agent claude",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
