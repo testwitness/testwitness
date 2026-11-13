@@ -1,4 +1,5 @@
 import type { ChangedFile, FileStatus, Hunk } from '../types.js';
+import { toLf } from '../eol.js';
 
 /**
  * Parse the output of `git diff --find-renames --unified=0`.
@@ -6,7 +7,9 @@ import type { ChangedFile, FileStatus, Hunk } from '../types.js';
  */
 export function parseUnifiedDiff(text: string): ChangedFile[] {
   const files: ChangedFile[] = [];
-  const lines = text.split('\n');
+  // Lines of a CRLF file arrive with their CR; drop it so a hunk line is the same text on Windows and Linux. git
+  // quotes a path that ends in CR, so no header loses a character.
+  const lines = toLf(text).split('\n');
   let i = 0;
 
   while (i < lines.length) {

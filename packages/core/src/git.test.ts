@@ -185,3 +185,45 @@ describe('commitMessages', () => {
     }
   });
 });
+
+describe('CRLF line endings', () => {
+  let repo: string;
+  let base: string;
+  let head: string;
+  const run = (...args: string[]) => execFileSync('git', args, { cwd: repo, encoding: 'utf8', env: ENV });
+  beforeAll(() => {
+    repo = mkdtempSync(join(tmpdir(), 'tw-git-eol-'));
+    run('init', '-q', '-b', 'main');
+    run('config', 'commit.gpgsign', 'false');
+    // Store the bytes as written, as a Windows repository that commits CRLF does.
+    run('config', 'core.autocrlf', 'false');
+    writeFileSync(join(repo, 'only-eol.py'), 'def test_a():\n    assert 1\n');
+    writeFileSync(join(repo, 'eol-and-edit.py'), 'def test_b():\n    assert 1 == 1\n    assert 2 == 2\n');
+    run('add', '-A');
+    run('commit', '-q', '-m', 'lf');
+    base = run('rev-parse', 'HEAD').trim();
+    writeFileSync(join(repo, 'only-eol.py'), 'def test_a():\r\n    assert 1\r\n');
+    writeFileSync(join(repo, 'eol-and-edit.py'), 'def test_b():\r\n    assert 1 == 1\r\n    assert 2\r\n');
+    run('add', '-A');
+    run('commit', '-q', '-m', 'crlf');
+    head = run('rev-parse', 'HEAD').trim();
+  });
+  afterAll(() => rmSync(repo, { recursive: true, force: true }));
+
+  it('rawDiff leaves out a file whose only change is LF to CRLF, and shows only the real edit of one converted while edited', async () => {
+    const out = await rawDiff(base, head, { cwd: repo });
+    expect(out).not.toContain('only-eol.py');
+    const hunkLines = out.split('\n').filter((l) => /^[-+](?![-+])/.test(l));
+    expect(hunkLines.map((l) => l.replace(/\r$/, ''))).toEqual(['-    assert 2 == 2', '+    assert 2']);
+  });
+
+  it('numstat counts the same lines as the diff', async () => {
+    const stats = await numstat(base, head, { cwd: repo });
+    expect(stats.has('only-eol.py')).toBe(false);
+    expect(stats.get('eol-and-edit.py')).toEqual({ added: 1, deleted: 1 });
+  });
+
+  it('showFile returns LF text for a file committed with CRLF', async () => {
+    expect(await showFile(head, 'only-eol.py', { cwd: repo })).toBe('def test_a():\n    assert 1\n');
+  });
+});

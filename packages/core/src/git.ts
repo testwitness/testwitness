@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { toLf } from './eol.js';
 
 const run = promisify(execFile);
 
@@ -38,17 +39,24 @@ export async function revParse(ref: string, opts: GitOptions): Promise<string> {
   return (await git(['rev-parse', '--verify', `${ref}^{commit}`], opts)).trim();
 }
 
+/**
+ * Diff options every diff the engine reads shares. --ignore-cr-at-eol: a line whose only change is CRLF to LF (or
+ * back) is not a change, so a PR that converts line endings shows no hunks, and one that converts a file while
+ * editing it shows only the real edits, as on LF.
+ */
+export const DIFF_FLAGS = ['--find-renames', '--ignore-cr-at-eol'] as const;
+
 /** Raw unified diff with rename detection and zero context. */
 export async function rawDiff(base: string, head: string, opts: GitOptions): Promise<string> {
   return git(
-    ['diff', '--find-renames', '--unified=0', '--no-color', '--no-ext-diff', '--src-prefix=a/', '--dst-prefix=b/', base, head, '--'],
+    ['diff', ...DIFF_FLAGS, '--unified=0', '--no-color', '--no-ext-diff', '--src-prefix=a/', '--dst-prefix=b/', base, head, '--'],
     opts,
   );
 }
 
 /** Numstat for binary detection and line counts. */
 export async function numstat(base: string, head: string, opts: GitOptions): Promise<Map<string, { added: number | null; deleted: number | null }>> {
-  const out = await git(['diff', '--find-renames', '--numstat', '-z', base, head, '--'], opts);
+  const out = await git(['diff', ...DIFF_FLAGS, '--numstat', '-z', base, head, '--'], opts);
   const result = new Map<string, { added: number | null; deleted: number | null }>();
   // -z format: "added\tdeleted\tpath\0" or for renames "added\tdeleted\t\0old\0new\0"
   const parts = out.split('\0');
@@ -71,10 +79,13 @@ export async function numstat(base: string, head: string, opts: GitOptions): Pro
   return result;
 }
 
-/** Read a file at a ref. Returns undefined when the path does not exist at that ref. */
+/**
+ * Read a file at a ref, with LF line endings (eol.ts): front ends, rules and the config parser then see the same
+ * text for a file committed with CRLF as for its LF twin. Returns undefined when the path does not exist at that ref.
+ */
 export async function showFile(ref: string, path: string, opts: GitOptions): Promise<string | undefined> {
   try {
-    return await git(['show', `${ref}:${path}`], opts);
+    return toLf(await git(['show', `${ref}:${path}`], opts));
   } catch (err) {
     if (err instanceof GitError && /does not exist|exists on disk, but not in|bad object|Path .* does not exist/i.test(err.stderr)) {
       return undefined;

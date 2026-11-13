@@ -137,3 +137,24 @@ describe('parseUnifiedDiff against real git output (property)', () => {
     }
   }, 30_000);
 });
+
+describe('CRLF files', () => {
+  it('drops the CR of every hunk line, so a line reads the same as in an LF file', () => {
+    const lf = ['diff --git a/t.py b/t.py', '--- a/t.py', '+++ b/t.py', '@@ -3 +3 @@', '-    assert x == 1', '+    assert x', ''].join('\n');
+    const crlf = ['diff --git a/t.py b/t.py', '--- a/t.py', '+++ b/t.py', '@@ -3 +3 @@', '-    assert x == 1\r', '+    assert x\r', ''].join('\n');
+    expect(parseUnifiedDiff(crlf)).toEqual(parseUnifiedDiff(lf));
+    expect(parseUnifiedDiff(crlf)[0]!.hunks[0]!.added).toEqual(['    assert x']);
+  });
+
+  it('reads a diff whose own line endings are CRLF (a diff saved on Windows)', () => {
+    const text = ['diff --git a/src/a b.ts b/src/a b.ts', 'new file mode 100644', '--- /dev/null', '+++ b/src/a b.ts', '@@ -0,0 +1,2 @@', '+one', '+two', ''].join('\r\n');
+    const [f] = parseUnifiedDiff(text);
+    expect(f).toMatchObject({ path: 'src/a b.ts', status: 'added' });
+    expect(f!.hunks[0]!.added).toEqual(['one', 'two']);
+  });
+
+  it('keeps a CR that git quoted inside a path', () => {
+    const text = ['diff --git "a/odd\\r.txt" "b/odd\\r.txt"', '--- "a/odd\\r.txt"', '+++ "b/odd\\r.txt"', '@@ -1 +1 @@', '-a', '+b', ''].join('\n');
+    expect(parseUnifiedDiff(text)[0]!.path).toBe('odd\r.txt');
+  });
+});
