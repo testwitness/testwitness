@@ -7,7 +7,7 @@ export default defineConfig({
   description: 'Did this PR weaken its tests, and did they actually run?',
   base: '/testwitness/',
   // Working documents for the maintainer, not site pages.
-  srcExclude: ['launch/**', 'ASSESSMENT-AND-ROADMAP.md'],
+  srcExclude: ['ASSESSMENT-AND-ROADMAP.md'],
   // Serve the report and history schemas at their $id, https://testwitness.github.io/testwitness/<name>.schema.json.
   buildEnd(site) {
     copyFileSync(join(site.srcDir, 'report.schema.json'), join(site.outDir, 'report.schema.json'));
