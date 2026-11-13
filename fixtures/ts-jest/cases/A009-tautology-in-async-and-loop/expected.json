@@ -1,1 +1,1 @@
-[{"ruleId":"A009","severity":"high","subject":"cart › `totals quantity ${qty}`"}]
+[{"ruleId":"A009","severity":"low","subject":"cart › `totals quantity ${qty}`"}]

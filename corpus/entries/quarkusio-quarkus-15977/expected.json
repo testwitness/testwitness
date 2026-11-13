@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "OpenshiftWithS2iTest#assertGeneratedResources",
     "verdict": "tp",
     "reason": "flaky assertion commented out"

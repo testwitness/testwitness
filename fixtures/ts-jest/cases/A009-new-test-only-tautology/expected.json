@@ -1,1 +1,1 @@
-[{"ruleId":"A009","severity":"medium","subject":"cart › ignores a zero quantity line"}]
+[{"ruleId":"A009","severity":"low","subject":"cart › ignores a zero quantity line"}]

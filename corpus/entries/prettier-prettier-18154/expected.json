@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "`printDocToString` should not manipulate docs",
     "verdict": "tp",
     "reason": "timing assertion removed"

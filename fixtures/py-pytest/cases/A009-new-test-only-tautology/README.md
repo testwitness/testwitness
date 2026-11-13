@@ -1,1 +1,1 @@
-A new test's single assertion is assert 1 == 1. For a new test whose only assertion is tautological the rule reports medium rather than high; O001 stays quiet because there is, formally, an assertion.
+A new test's single assertion is assert 1 == 1. For a new test whose only assertion is tautological the rule reports low; O001 stays quiet because there is, formally, an assertion.

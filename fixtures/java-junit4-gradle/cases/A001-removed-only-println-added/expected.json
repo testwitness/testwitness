@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "InstallerTest#createsPackageDirectory"
   }
 ]

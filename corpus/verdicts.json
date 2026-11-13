@@ -915,16 +915,16 @@
     "slug": "apache-shardingsphere-25657",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForPostgreSQL"
   },
   {
     "slug": "apache-shardingsphere-25657",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ShardingCopyStatementValidatorTest#assertPreValidateCopyWithShardingTableForOpenGauss"
   },
   {
@@ -2494,8 +2494,8 @@
     "slug": "jestjs-jest-12595",
     "split": "heldout",
     "ruleId": "A009",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "setImmediate test"
   },
   {
@@ -2763,7 +2763,15 @@
     "split": "heldout",
     "ruleId": "A001",
     "severity": "medium",
-    "verdict": "tp",
+    "verdict": "missed",
+    "subject": "`${useIntermediateMergeReport ? 'merged' : 'created'}` › should print if globalTimeout is reached"
+  },
+  {
+    "slug": "microsoft-playwright-30558",
+    "split": "heldout",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "`${useIntermediateMergeReport ? 'merged' : 'created'}` › should print if globalTimeout is reached"
   },
   {
@@ -2842,16 +2850,16 @@
     "slug": "microsoft-playwright-java-1038",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "TestBrowserContextRoute#shouldNotChainAbort"
   },
   {
     "slug": "microsoft-playwright-java-1038",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "TestPageRequestFallback#shouldNotChainAbort"
   },
   {
@@ -2876,9 +2884,8 @@
     "split": "heldout",
     "ruleId": "V004",
     "severity": "medium",
-    "verdict": "tp",
-    "subject": "added-tests",
-    "label": "unsupported"
+    "verdict": "missed",
+    "subject": "added-tests"
   },
   {
     "slug": "microsoft-semantic-kernel-10772",
@@ -2966,9 +2973,8 @@
     "split": "tuning",
     "ruleId": "V004",
     "severity": "medium",
-    "verdict": "tp",
-    "subject": "added-tests",
-    "label": "unsupported"
+    "verdict": "missed",
+    "subject": "added-tests"
   },
   {
     "slug": "microsoft-semantic-kernel-13432",
@@ -3191,7 +3197,7 @@
     "slug": "mlflow-mlflow-8415",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "test_multipart_upload_abort"
   },
@@ -3326,7 +3332,7 @@
     "slug": "openclaw-openclaw-191558",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "preserves independent stdout and stderr parser state"
   },
@@ -3342,7 +3348,7 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "A009",
-    "severity": "high",
+    "severity": "low",
     "verdict": "tp",
     "subject": "ChronicleReaderMainTest#testMainWithValidArguments"
   },
@@ -3350,8 +3356,8 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "A009",
-    "severity": "high",
-    "verdict": "missed",
+    "severity": "low",
+    "verdict": "tp",
     "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader"
   },
   {
@@ -3420,14 +3426,6 @@
     "verdict": "tp",
     "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
     "label": "smoke"
-  },
-  {
-    "slug": "openhft-chronicle-queue-1630",
-    "split": "tuning",
-    "ruleId": "A009",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
@@ -3629,88 +3627,88 @@
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_cython_agg_nothing_to_agg"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_basic"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_multi_func"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_as_index_agg"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_as_index_cython"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_empty_groups_corner"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_with_hier_columns"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_series_with_name"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_list_infer_array_like"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_groupby_2d_malformed"
   },
   {
     "slug": "pandas-dev-pandas-50749",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "test_grouper_index_level_as_string"
   },
   {
@@ -3987,14 +3985,6 @@
     "slug": "pandas-dev-pandas-61007",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_standardize_mapping"
-  },
-  {
-    "slug": "pandas-dev-pandas-61007",
-    "split": "tuning",
-    "ruleId": "A001",
     "severity": "low",
     "verdict": "expected-low",
     "subject": "test_any_none",
@@ -4008,6 +3998,14 @@
     "verdict": "expected-low",
     "subject": "test_all_not_none",
     "label": "parameterised"
+  },
+  {
+    "slug": "pandas-dev-pandas-61007",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "test_standardize_mapping"
   },
   {
     "slug": "pandas-dev-pandas-61007",
@@ -4328,18 +4326,10 @@
     "label": "smoke"
   },
   {
-    "slug": "prefecthq-prefect-20155",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "ui-v2/e2e/fixtures/auth-helpers.ts"
-  },
-  {
     "slug": "prestodb-presto-28724",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "AbstractTestNativeGeneralQueries#testTimestampWithTimeZone"
   },
@@ -4347,7 +4337,7 @@
     "slug": "prettier-prettier-18154",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "`printDocToString` should not manipulate docs"
   },
@@ -4652,7 +4642,7 @@
     "slug": "quarkusio-quarkus-15977",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "OpenshiftWithS2iTest#assertGeneratedResources"
   },
@@ -4676,7 +4666,7 @@
     "slug": "ray-project-ray-47092",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "test_fsspec_filesystem"
   },
@@ -5175,40 +5165,24 @@
     "slug": "shopify-hydrogen-3657",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "Privacy Banner - Accept Flow › should set analytics cookies and make analytics requests when user accepts consent"
-  },
-  {
-    "slug": "shopify-hydrogen-3657",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "tp",
-    "subject": "Privacy Banner - Accept Flow › should set analytics cookies and make analytics requests when user accepts consent"
-  },
-  {
-    "slug": "shopify-hydrogen-3657",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) › should set analytics cookies and fire analytics requests immediately when consent is allowed by default"
-  },
-  {
-    "slug": "shopify-hydrogen-3657",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) › should set analytics cookies and fire analytics requests immediately when consent is allowed by default"
   },
   {
     "slug": "shopify-hydrogen-3657",
     "split": "tuning",
     "ruleId": "A001",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
+    "subject": "Privacy Banner - Accept Flow › should set analytics cookies and make analytics requests when user accepts consent"
+  },
+  {
+    "slug": "shopify-hydrogen-3657",
+    "split": "tuning",
+    "ruleId": "A001",
+    "severity": "low",
+    "verdict": "tp",
     "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) › should set analytics cookies and fire analytics requests immediately when consent is allowed by default",
     "label": "consolidated"
   },
@@ -5217,7 +5191,7 @@
     "split": "tuning",
     "ruleId": "A001",
     "severity": "low",
-    "verdict": "expected-low",
+    "verdict": "tp",
     "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) › should set analytics cookies and fire analytics requests immediately when consent is allowed by default",
     "label": "consolidated"
   },
@@ -5233,7 +5207,7 @@
     "slug": "sktime-sktime-5511",
     "split": "tuning",
     "ruleId": "A009",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "TestAllNetworks::test_dummy"
   },
@@ -5241,7 +5215,7 @@
     "slug": "sktime-sktime-8824",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "test_teaser_on_unit_test_data"
   },
@@ -5307,14 +5281,6 @@
     "ruleId": "W003",
     "severity": "high",
     "verdict": "missed"
-  },
-  {
-    "slug": "tanstack-query-10624",
-    "split": "tuning",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "packages/svelte-query-devtools/tests/test-setup.ts"
   },
   {
     "slug": "tanstack-query-10679",
@@ -5617,26 +5583,18 @@
     "slug": "trinodb-trino-31228",
     "split": "tuning",
     "ruleId": "A001",
-    "severity": "medium",
-    "verdict": "missed",
-    "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect"
-  },
-  {
-    "slug": "trinodb-trino-31228",
-    "split": "tuning",
-    "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
-    "subject": "TestPostgreSqlRollbacks#testRollbackMerge"
+    "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect",
+    "label": "consolidated"
   },
   {
     "slug": "trinodb-trino-31228",
     "split": "tuning",
     "ruleId": "A001",
     "severity": "low",
-    "verdict": "expected-low",
-    "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect",
-    "label": "consolidated"
+    "verdict": "tp",
+    "subject": "TestPostgreSqlRollbacks#testRollbackMerge"
   },
   {
     "slug": "trpc-trpc-1709",
@@ -5678,46 +5636,6 @@
     "severity": "high",
     "verdict": "fp",
     "subject": "test/development/acceptance/ReactRefreshLogBoxMisc.test.ts"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-link-errors/app/invalid-href/page.js"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-link-errors/app/layout.js"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-link-errors/app/multiple-children/page.js"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-link-errors/app/no-children/page.js"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-link-errors/next.config.js"
   },
   {
     "slug": "vercel-next.js-76214",
@@ -5779,38 +5697,6 @@
     "severity": "high",
     "verdict": "fp",
     "subject": "test/integration/build-indicator/test/index.test.js"
-  },
-  {
-    "slug": "vercel-next.js-87010",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-analyze/app/page.tsx"
-  },
-  {
-    "slug": "vercel-next.js-87010",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/next-analyze/next.config.js"
-  },
-  {
-    "slug": "vercel-next.js-93323",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/lib.js"
-  },
-  {
-    "slug": "vercel-next.js-93323",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "turbopack/crates/turbopack-tests/tests/execution/turbopack/infer-module-side-effects/cross-function/input/util.js"
   },
   {
     "slug": "vercel-next.js-94196",
@@ -5957,36 +5843,12 @@
     "subject": "should update cached data used by a page fetched without a cookie after editing a file"
   },
   {
-    "slug": "vercel-next.js-96021",
-    "split": "tuning",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/app-dir/use-cache-dev/app/api/cached/route.ts"
-  },
-  {
-    "slug": "vercel-next.js-96021",
-    "split": "tuning",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/e2e/app-dir/use-cache-dev/app/cached-page/page.tsx"
-  },
-  {
     "slug": "vercel-next.js-97986",
     "split": "tuning",
     "ruleId": "R003",
     "severity": "medium",
     "verdict": "tp",
     "subject": "sync IO that blocks the root › does not hang the build and reports sync IO errors - $description › %s"
-  },
-  {
-    "slug": "vercel-next.js-99533",
-    "split": "heldout",
-    "ruleId": "O006",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test/lib/e2e-utils/deployment-test-env.ts"
   },
   {
     "slug": "vitejs-vite-15096",
@@ -6076,7 +5938,7 @@
     "slug": "xerial-snappy-java-745",
     "split": "heldout",
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "verdict": "tp",
     "subject": "SnappyOutputStreamTest#batchingOfWritesShouldNotAffectCompressedDataSize"
   }

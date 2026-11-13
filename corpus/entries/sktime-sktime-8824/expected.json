@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "test_teaser_on_unit_test_data",
     "verdict": "tp",
     "reason": "the only assertion, assert_array_equal on predicted probabilities, commented out"

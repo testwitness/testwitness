@@ -73,15 +73,14 @@ A rule shows a precision number only when the engine confirmed at least 10 true 
 | R005 | Focused test added | high | 15 | 0 | 1.00 | 1.00 |
 | A002 | Assertion loosened | medium | 27 | 1 | 0.96 | 0.93 |
 | C002 | Coverage threshold lowered or removed | medium | 10 | 1 | 0.91 | 1.00 |
-| V004 | Claim in PR text not supported by results | medium | 11 | 0 | 1.00 | 1.00 |
 
 Measured, not yet promoted (no headline number):
 
 - R001 Test function deleted: 32 true positives, 23 false positives, held out precision 0.77
 - R002 Test file deleted: 12 true positives, 3 false positives, held out precision 0.75
 - R010 Test added then skipped: 13 true positives, 0 false positives, held out precision n/a
-- A001 Assertion removed: 12 true positives, 16 false positives, held out precision 0.29
-- A009 Tautological assertion: 2 true positives, 2 false positives, held out precision 0.00
+- A001 Assertion removed: 14 true positives, 0 false positives, held out precision n/a
+- A009 Tautological assertion: 3 true positives, 0 false positives, held out precision n/a
 - O001 New test without an assertion: 5 true positives, 0 false positives, held out precision n/a
 - O002 New test with a smoke oracle only: 9 true positives, 8 false positives, held out precision 0.00
 - E001 Catch all added in a test: 3 true positives, 0 false positives, held out precision 1.00
@@ -89,6 +88,7 @@ Measured, not yet promoted (no headline number):
 - W003 Failure suppressed in the run command: 1 true positive, 0 false positives, held out precision 1.00
 - C001 Test selection narrowed in config: 7 true positives, 0 false positives, held out precision n/a
 - C003 Passing with no tests enabled: 1 true positive, 2 false positives, held out precision 0.50
+- V004 Claim in PR text not supported by results: 9 true positives, 0 false positives, held out precision 1.00
 
 10 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; O006 New test file with no tests collected; M001 Changed lines with surviving mutants; M002 New test kills nothing; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing; V008 Changed production lines not executed. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
 <!-- rules:end -->

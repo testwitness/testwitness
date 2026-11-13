@@ -1,1 +1,1 @@
-[{"ruleId":"A001","severity":"medium","subject":"checkout › loads lines before building the receipt"}]
+[{"ruleId":"A001","severity":"low","subject":"checkout › loads lines before building the receipt"}]

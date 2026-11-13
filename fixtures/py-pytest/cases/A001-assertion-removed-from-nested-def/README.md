@@ -1,1 +1,1 @@
-The PR deletes a nested function inside the test that contained an assertion. Assertions inside nested definitions count as the test's assertions, so the test's assertion count drops and A001 reports it at medium.
+The PR deletes a nested function inside the test that contained an assertion. Assertions inside nested definitions count as the test's assertions, so the test's assertion count drops and A001 reports it at low.

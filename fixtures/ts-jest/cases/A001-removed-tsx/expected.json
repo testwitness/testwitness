@@ -1,1 +1,1 @@
-[{"ruleId":"A001","severity":"medium","subject":"CartSummary › shows the item count"}]
+[{"ruleId":"A001","severity":"low","subject":"CartSummary › shows the item count"}]

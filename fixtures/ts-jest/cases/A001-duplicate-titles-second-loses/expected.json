@@ -1,1 +1,1 @@
-[{"ruleId":"A001","severity":"medium","subject":"checkout › builds a receipt"}]
+[{"ruleId":"A001","severity":"low","subject":"checkout › builds a receipt"}]

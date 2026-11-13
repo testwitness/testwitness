@@ -8,16 +8,16 @@ const eq = (subject: string, expected: string, strength = 3, family = 'equality'
 const defined = (subject: string) => ({ callee: 'expect.toBeDefined', subject, text: `expect(${subject}).toBeDefined()`, family: 'equality', strength: 1, kind: 'smoke' as const });
 
 describe('A001 assertion removed', () => {
-  it('reports lost assertions as medium, high when the subject mentions a changed production stem', async () => {
+  it('reports lost assertions as low, medium when the subject mentions a changed production stem', async () => {
     const base = t({ name: 'a', body: 'x', assertions: [eq('res.status', '200'), eq('res.body.total', '1250'), eq('ledger.entries.length', '2')] });
     const head = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')] });
     const pair = { file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) };
     const out = await A001.run(context({ pairs: [pair] }), {});
     expect(out).toHaveLength(1);
-    expect(out[0]).toMatchObject({ severity: 'medium', message: 'Test a lost 2 of 3 assertions' });
+    expect(out[0]).toMatchObject({ severity: 'low', message: 'Test a lost 2 of 3 assertions' });
     expect(out[0]!.before).toContain('res.body.total');
     const high = await A001.run(context({ pairs: [pair], changedProduction: ['src/ledger.ts'] }), {});
-    expect(high[0]!.severity).toBe('high');
+    expect(high[0]!.severity).toBe('medium');
   });
 
   it('reports consolidation onto the parent expression as low', async () => {
@@ -56,24 +56,24 @@ describe('A001 replaced by call', () => {
     expect(out).toHaveLength(1);
     expect(out[0]).toMatchObject({ severity: 'low', label: 'replaced by call' });
     expect(out[0]!.message).toContain('first did_create');
-    // Production changed: high drops one step to medium, never to low.
-    expect((await run(head, lostTwo(), ['src/res.ts']))[0]).toMatchObject({ severity: 'medium', label: 'replaced by call' });
+    // Production changed raises to medium, and the replaced by call drop brings it back to low.
+    expect((await run(head, lostTwo(), ['src/res.ts']))[0]).toMatchObject({ severity: 'low', label: 'replaced by call' });
   });
 
-  it('stays medium when the new calls are fewer than the lost assertions, are logs, or were already called in the base', async () => {
+  it('stays low when the new calls are fewer than the lost assertions, are logs, or were already called in the base', async () => {
     const one = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'res.did_create', line: 3 }] });
-    expect((await run(one))[0]).toMatchObject({ severity: 'medium' });
+    expect((await run(one))[0]).toMatchObject({ severity: 'low' });
     const logs = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'console.log', line: 3 }, { callee: 'print', line: 4 }, { callee: 'logger.info', line: 5 }] });
-    expect((await run(logs))[0]).toMatchObject({ severity: 'medium' });
+    expect((await run(logs))[0]).toMatchObject({ severity: 'low' });
     const again = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'pip', line: 3 }, { callee: 'other.pip', line: 4 }] });
-    expect((await run(again))[0]).toMatchObject({ severity: 'medium' });
+    expect((await run(again))[0]).toMatchObject({ severity: 'low' });
     const nested = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'res.did_create', line: 3, statement: false }, { callee: 'res.did_not_create', line: 4, statement: false }] });
-    expect((await run(nested))[0]).toMatchObject({ severity: 'medium' });
+    expect((await run(nested))[0]).toMatchObject({ severity: 'low' });
   });
 
   it('does not count a call on the line of a surviving assertion', async () => {
     const head = t({ name: 'a', body: 'y', assertions: [eq('res.status', '200')], calls: [{ callee: 'expect(res.status).toBe', line: 2 }, { callee: 'res.did_create', line: 5 }] });
-    expect((await run(head))[0]).toMatchObject({ severity: 'medium' });
+    expect((await run(head))[0]).toMatchObject({ severity: 'low' });
   });
 });
 
@@ -163,12 +163,12 @@ describe('A009 tautology', () => {
     const head = t({ name: 'a', body: 'y', assertions: [eq('r', '1'), eq('true', 'true'), eq('x', 'x')] });
     const out = await A009.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }] }), {});
     expect(out).toHaveLength(2);
-    expect(out.every((f) => f.severity === 'high')).toBe(true);
+    expect(out.every((f) => f.severity === 'low')).toBe(true);
   });
-  it('falls back to text patterns and reports medium for a new test with only a tautology', async () => {
+  it('falls back to text patterns and reports low for a new test with only a tautology', async () => {
     const head = t({ name: 'a', body: 'y', assertions: [{ callee: 'assertTrue', text: 'assertTrue(true)' }] });
     const out = await A009.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [head]) }] }), {});
-    expect(out[0]).toMatchObject({ severity: 'medium' });
+    expect(out[0]).toMatchObject({ severity: 'low' });
     const py = t({ name: 'b', body: 'y', assertions: [{ callee: 'assert', text: 'assert x == x' }, { callee: 'assert', text: 'assert x == y' }] });
     expect(await A009.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [py]) }] }), {})).toHaveLength(1);
   });
