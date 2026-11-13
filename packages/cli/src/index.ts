@@ -5,6 +5,7 @@ import { check, loadConfig, render, resolveBase, ConfigError } from './check.js'
 import { serveStdio } from './mcp.js';
 import { AGENTS } from './hook/events.js';
 import { runHook } from './hook/run.js';
+import { init } from './init.js';
 import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION } from '@testwitness/core';
 
 export { check, render } from './check.js';
@@ -12,6 +13,7 @@ export { allFrontEnds } from './frontends.js';
 export { createServer } from './mcp.js';
 
 export { runHook, evaluate } from './hook/run.js';
+export { init } from './init.js';
 
 /** All of stdin as text; empty when stdin is a terminal. */
 async function readStdin(timeoutMs: number): Promise<string> {
@@ -153,6 +155,24 @@ export async function main(argv: string[]): Promise<number> {
       await new Promise<void>((done) => process.stderr.write(out.stderr, () => done()));
       await new Promise<void>((done) => process.stdout.write(out.stdout, () => done()));
       process.exit(out.exitCode);
+    });
+
+  program
+    .command('init')
+    .description("Write the hook config that puts testwitness hook into a coding agent's loop (or a git pre-push hook); writes nothing else and is safe to run twice")
+    .requiredOption('--agent <name>', `${AGENTS.join(' | ')}`)
+    .option('--command <cmd>', 'how the hook starts testwitness (default: testwitness when it is on PATH, else npx --no-install testwitness)')
+    .option('--force', 'with --agent git: replace a different existing pre-push hook', false)
+    .option('--cwd <dir>', 'repository directory', process.cwd())
+    .action(async (o) => {
+      if (!(AGENTS as readonly string[]).includes(o.agent)) {
+        process.stderr.write(`testwitness: --agent must be one of ${AGENTS.join(', ')}\n`);
+        code = 2;
+        return;
+      }
+      const result = await init({ agent: o.agent, cwd: resolve(o.cwd), force: o.force, command: o.command });
+      process.stdout.write(result.lines.map((l) => `${l}\n`).join(''));
+      code = result.exitCode;
     });
 
   program

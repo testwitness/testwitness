@@ -134,6 +134,11 @@ async function baseText(f: GuardFinding, ctx: { top: string; base: string; files
     const hunk = file.hunks.find((h) => f.line! >= h.headStart && f.line! < h.headStart + Math.max(h.added.length, 1));
     if (hunk && hunk.removed.length) return { label: `${at}, the lines this change replaced`, text: hunk.removed.join('\n') };
   }
+  if (file && f.line === undefined) {
+    // A finding about the file as a whole (the gate's own config): everything this change took out of it.
+    const removed = file.hunks.flatMap((h) => h.removed);
+    if (removed.length) return { label: `${at}, the lines this change removed; the whole file: git show ${ctx.base.slice(0, 10)}:${basePath}`, text: removed.join('\n') };
+  }
   if (f.finding?.after !== undefined && f.finding.after.trim()) return { label: 'not in the base; this change added the line below, remove it', text: f.finding.after };
   return undefined;
 }
