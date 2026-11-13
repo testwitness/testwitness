@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T09:14:48.385Z",
+  "generatedAt": "2026-11-13T09:25:10.256Z",
   "machine": {
     "cores": 2,
     "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
@@ -14,7 +14,7 @@
     {
       "name": "100",
       "budgetMs": 5000,
-      "generateMs": 149,
+      "generateMs": 244,
       "gen": {
         "repo": "/tmp/testwitness-bench/100/repo",
         "junitDir": "/tmp/testwitness-bench/100/junit",
@@ -37,12 +37,12 @@
       },
       "runs": [
         {
-          "wallMs": 2600.045674,
-          "maxRssMb": 166,
-          "userCpuMs": 1700,
-          "systemCpuMs": 290,
+          "wallMs": 2397.947858,
+          "maxRssMb": 163,
+          "userCpuMs": 1609,
+          "systemCpuMs": 277,
           "exitCode": 0,
-          "loadAvg1": 4.37,
+          "loadAvg1": 3.43,
           "state": "review",
           "findings": 5,
           "byRule": {
@@ -52,20 +52,20 @@
             "R001": 1
           },
           "engine": {
-            "totalMs": 2195,
-            "parseMs": 1570,
-            "rulesMs": 101
+            "totalMs": 1969,
+            "parseMs": 1387,
+            "rulesMs": 87
           },
           "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 2568.7447669999997,
-          "maxRssMb": 162,
-          "userCpuMs": 1662,
-          "systemCpuMs": 266,
+          "wallMs": 2223.1869500000003,
+          "maxRssMb": 168,
+          "userCpuMs": 1722,
+          "systemCpuMs": 265,
           "exitCode": 0,
-          "loadAvg1": 4.37,
+          "loadAvg1": 3.64,
           "state": "review",
           "findings": 5,
           "byRule": {
@@ -75,20 +75,20 @@
             "R001": 1
           },
           "engine": {
-            "totalMs": 2224,
-            "parseMs": 1584,
-            "rulesMs": 81
+            "totalMs": 1795,
+            "parseMs": 1216,
+            "rulesMs": 65
           },
           "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 3226.020187,
-          "maxRssMb": 166,
-          "userCpuMs": 1835,
-          "systemCpuMs": 289,
+          "wallMs": 2507.7871619999996,
+          "maxRssMb": 164,
+          "userCpuMs": 1871,
+          "systemCpuMs": 287,
           "exitCode": 0,
-          "loadAvg1": 4.1,
+          "loadAvg1": 3.64,
           "state": "review",
           "findings": 5,
           "byRule": {
@@ -98,17 +98,17 @@
             "R001": 1
           },
           "engine": {
-            "totalMs": 2806,
-            "parseMs": 2153,
-            "rulesMs": 107
+            "totalMs": 2132,
+            "parseMs": 1464,
+            "rulesMs": 75
           },
           "resultsCapped": false,
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 2600.045674,
-      "bestWallMs": 2568.7447669999997,
-      "maxRssMb": 166,
+      "medianWallMs": 2397.947858,
+      "bestWallMs": 2223.1869500000003,
+      "maxRssMb": 168,
       "generateCached": false,
       "budgetRssMb": 1536,
       "overBudget": false,
@@ -118,7 +118,7 @@
     {
       "name": "1000",
       "budgetMs": 30000,
-      "generateMs": 1015,
+      "generateMs": 797,
       "gen": {
         "repo": "/tmp/testwitness-bench/1000/repo",
         "junitDir": "/tmp/testwitness-bench/1000/junit",
@@ -141,12 +141,12 @@
       },
       "runs": [
         {
-          "wallMs": 15706.396266,
-          "maxRssMb": 284,
-          "userCpuMs": 8646,
-          "systemCpuMs": 1929,
+          "wallMs": 15706.285530000001,
+          "maxRssMb": 278,
+          "userCpuMs": 8583,
+          "systemCpuMs": 1757,
           "exitCode": 0,
-          "loadAvg1": 4.25,
+          "loadAvg1": 3.59,
           "state": "review",
           "findings": 50,
           "byRule": {
@@ -156,43 +156,20 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 14782,
-            "parseMs": 9894,
-            "rulesMs": 566
+            "totalMs": 14617,
+            "parseMs": 8814,
+            "rulesMs": 521
           },
           "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 16911.013013,
-          "maxRssMb": 284,
-          "userCpuMs": 8379,
-          "systemCpuMs": 1861,
-          "exitCode": 0,
-          "loadAvg1": 4.13,
-          "state": "review",
-          "findings": 50,
-          "byRule": {
-            "A002": 10,
-            "R003": 10,
-            "O001": 20,
-            "R001": 10
-          },
-          "engine": {
-            "totalMs": 15780,
-            "parseMs": 11233,
-            "rulesMs": 525
-          },
-          "resultsCapped": false,
-          "stderrTail": ""
-        },
-        {
-          "wallMs": 18241.027819999996,
+          "wallMs": 15628.144945,
           "maxRssMb": 283,
-          "userCpuMs": 9133,
-          "systemCpuMs": 2079,
+          "userCpuMs": 8571,
+          "systemCpuMs": 2017,
           "exitCode": 0,
-          "loadAvg1": 4.42,
+          "loadAvg1": 3.52,
           "state": "review",
           "findings": 50,
           "byRule": {
@@ -202,17 +179,40 @@
             "R001": 10
           },
           "engine": {
-            "totalMs": 16456,
-            "parseMs": 9757,
-            "rulesMs": 581
+            "totalMs": 14625,
+            "parseMs": 9588,
+            "rulesMs": 557
+          },
+          "resultsCapped": false,
+          "stderrTail": ""
+        },
+        {
+          "wallMs": 15021.354306000001,
+          "maxRssMb": 285,
+          "userCpuMs": 8304,
+          "systemCpuMs": 1967,
+          "exitCode": 0,
+          "loadAvg1": 3.94,
+          "state": "review",
+          "findings": 50,
+          "byRule": {
+            "A002": 10,
+            "R003": 10,
+            "O001": 20,
+            "R001": 10
+          },
+          "engine": {
+            "totalMs": 13903,
+            "parseMs": 8416,
+            "rulesMs": 453
           },
           "resultsCapped": false,
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 16911.013013,
-      "bestWallMs": 15706.396266,
-      "maxRssMb": 284,
+      "medianWallMs": 15628.144945,
+      "bestWallMs": 15021.354306000001,
+      "maxRssMb": 285,
       "generateCached": false,
       "budgetRssMb": 1536,
       "overBudget": false,
@@ -222,7 +222,7 @@
     {
       "name": "5000",
       "budgetMs": 120000,
-      "generateMs": 4425,
+      "generateMs": 3267,
       "gen": {
         "repo": "/tmp/testwitness-bench/5000/repo",
         "junitDir": "/tmp/testwitness-bench/5000/junit",
@@ -245,12 +245,12 @@
       },
       "runs": [
         {
-          "wallMs": 97747.442847,
-          "maxRssMb": 784,
-          "userCpuMs": 36186,
-          "systemCpuMs": 14951,
+          "wallMs": 103047.63725500001,
+          "maxRssMb": 780,
+          "userCpuMs": 36741,
+          "systemCpuMs": 14344,
           "exitCode": 0,
-          "loadAvg1": 4.53,
+          "loadAvg1": 3.56,
           "state": "review",
           "findings": 250,
           "byRule": {
@@ -260,20 +260,20 @@
             "R001": 50
           },
           "engine": {
-            "totalMs": 93127,
-            "parseMs": 52623,
-            "rulesMs": 8669
+            "totalMs": 99560,
+            "parseMs": 63852,
+            "rulesMs": 7554
           },
           "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 122259.51275299999,
-          "maxRssMb": 726,
-          "userCpuMs": 34078,
-          "systemCpuMs": 15205,
+          "wallMs": 109546.74495900003,
+          "maxRssMb": 776,
+          "userCpuMs": 34658,
+          "systemCpuMs": 14728,
           "exitCode": 0,
-          "loadAvg1": 4.56,
+          "loadAvg1": 4.02,
           "state": "review",
           "findings": 250,
           "byRule": {
@@ -283,20 +283,20 @@
             "R001": 50
           },
           "engine": {
-            "totalMs": 117841,
-            "parseMs": 70032,
-            "rulesMs": 6383
+            "totalMs": 105839,
+            "parseMs": 60450,
+            "rulesMs": 6469
           },
           "resultsCapped": false,
           "stderrTail": ""
         },
         {
-          "wallMs": 124601.24325899995,
-          "maxRssMb": 723,
-          "userCpuMs": 33773,
-          "systemCpuMs": 13871,
+          "wallMs": 81785.61030600005,
+          "maxRssMb": 782,
+          "userCpuMs": 35694,
+          "systemCpuMs": 13700,
           "exitCode": 0,
-          "loadAvg1": 5.26,
+          "loadAvg1": 4.42,
           "state": "review",
           "findings": 250,
           "byRule": {
@@ -306,20 +306,20 @@
             "R001": 50
           },
           "engine": {
-            "totalMs": 120580,
-            "parseMs": 70116,
-            "rulesMs": 10181
+            "totalMs": 77978,
+            "parseMs": 44607,
+            "rulesMs": 4454
           },
           "resultsCapped": false,
           "stderrTail": ""
         }
       ],
-      "medianWallMs": 122259.51275299999,
-      "bestWallMs": 97747.442847,
-      "maxRssMb": 784,
+      "medianWallMs": 103047.63725500001,
+      "bestWallMs": 81785.61030600005,
+      "maxRssMb": 782,
       "generateCached": false,
       "budgetRssMb": 1536,
-      "overBudget": true,
+      "overBudget": false,
       "overRss": false,
       "generateSlowerThanCheck": false
     }
