@@ -46,11 +46,14 @@
   "ignorePatterns": [
     "bench/**",
     "corpus/**",
-    "docs/**",
-    "fixtures/**",
+    "docs/.vitepress/dist/**",
+    "docs/.vitepress/cache/**",
+    "fixtures/*/project/node_modules/**",
+    "fixtures/node_modules/**",
     "dist/**",
     "reports/**",
     ".stryker-tmp/**",
-    "**/*.tsbuildinfo"
+    "**/*.tsbuildinfo",
+    "study/**"
   ]
 }
