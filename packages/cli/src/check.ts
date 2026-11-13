@@ -414,8 +414,9 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     const open = report.findings.some((f) => !f.acknowledged && { low: 1, medium: 2, high: 3 }[f.severity] >= threshold);
     report.state = open ? 'review' : 'pass';
   }
-  if (report.base === report.head && report.files.changed === 0) {
+  if (!opts.worktree && report.base === report.head && report.files.changed === 0) {
     // The head is inside the base (a PR merged with a merge commit, or the default branch itself): say so, never pass.
+    // Working tree mode compares the merge base with the snapshot, so a head commit equal to the base is the normal case.
     const note = nothingToCompare(base, opts.head);
     report.state = 'unreadable';
     report.notes = [note];

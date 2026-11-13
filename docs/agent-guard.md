@@ -63,9 +63,9 @@ The working tree means staged, unstaged and untracked files that are not ignored
 
 By default the hook blocks on a small proven set of rules and treats every other rule as advice: the user sees it, the agent is not stopped. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block.
 
-* **Blocking by default:** A002 (assertion loosened, at high), R004 (test converted to expected failure), R005 (focused test), W002 and W003 (failures hidden in CI), and a changed path on the `protect` list. Each of these rules has true positives at high severity on the corpus and not one wrongful block on the corpus or on 300 real merged pull requests. W006 (the gate itself changed) also blocks; it has no measurement and is on the list because it is the gate protecting itself.
+* **Blocking by default:** A002 (assertion loosened, at high), R004 (test converted to expected failure), R005 (focused test), C001 and C002 (test selection narrowed or coverage threshold lowered in config), W003 (failures ignored in CI), and a changed path on the `protect` list. Each of these rules has true positives at high severity on the corpus and not one wrongful block on the corpus or on 300 real merged pull requests. W006 (the gate itself changed) also blocks; it has no measurement and is on the list because it is the gate protecting itself.
 * **Advice by default: every other rule.** That includes A001, A009, E001, R001 and R002, which each had at least one wrongful block, and the rules that never produced a high finding in either set. Deleted tests and deleted test files (R001, R002) are the behaviour people complain about most, and they do not block yet. Read the numbers in [precision](./precision#agent-hook-replay) before you rely on the default: the hook blocks 17 of the 82 corpus pull requests that weaken tests, and none of the 52 that do not.
-* **Widening it is your call.** List the rules that may block in `.testwitness.yml` on the default branch, for example `hook: { blocking: [A002, R004, R005, W002, W003, W006, R001, R002] }`. `hook.advice_only` takes a rule off the list again.
+* **Widening it is your call.** List the rules that may block in `.testwitness.yml` on the default branch, for example `hook: { blocking: [A002, C001, C002, R004, R005, W003, W006, R001, R002] }`. `hook.advice_only` takes a rule off the list again.
 * `medium` findings never block unless the base config sets `fail_on: medium`, and then only for rules on the blocking list.
 
 A block message looks like this:
@@ -106,7 +106,7 @@ fail_on: high          # the hook blocks at this severity and above
 hook:
   timeout: 20          # seconds before the hook gives up and allows the action
   max_blocks: 2        # how often the same finding may block in one session
-  blocking: [A002, R004, R005, W002, W003, W006]   # the rules that may block; this is the default
+  blocking: [A002, C001, C002, R004, R005, W003, W006]   # the rules that may block; this is the default
   advice_only: []      # rules taken off the blocking list again
 ```
 

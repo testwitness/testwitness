@@ -96,19 +96,19 @@ Regenerate with `pnpm corpus:report`.
 
 Measured 2026-11-13 on the same 347 pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (`testwitness hook --agent claude`) runs on it with the default settings: it blocks on open high findings only. A block is wrongful when the finding it rests on is not a true positive in the labels above.
 
-* 130 pull requests have at least one true positive finding. The hook blocks 29 of them (22%). 43 have a true positive at high severity; the others carry medium or low findings only, which the hook shows as advice.
-* 217 pull requests have no true positive finding. The hook blocks 2 of them. If every high finding blocked, it would block 10.
+* 130 pull requests have at least one true positive finding. The hook blocks 25 of them (19%). 43 have a true positive at high severity; the others carry medium or low findings only, which the hook shows as advice.
+* 217 pull requests have no true positive finding. The hook blocks 0 of them. If every high finding blocked, it would block 10.
 * Second set, the real world trial of 2026-11-13: the 15 most recent merged pull requests that touch tests in each of 20 popular open source repositories, 300 in all, every medium and high finding judged by hand. Their authors and reviewers accepted them, so nearly every block there is wrongful. If every high finding blocked, the hook would block 12 of them, 9 wrongly. At the default setting it blocks 1, 0 wrongly. These trial numbers are computed from the judged findings of the commit check, which the working tree check reproduces; the hook was not rerun on those repositories.
 * The hook blocks on a small proven set and treats every other rule as advice. A rule is on the default list when it has at least one true positive at high severity on the corpus and no wrongful block at high on either set: A002, C001, C002, R004, R005, W003. W006 is on the list without a measurement because it is the gate protecting itself. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block; rules that were wrong at least once (A001, A009, E001, R001, R002 today) and rules that were never seen at high do not block until the replay proves them. A maintainer can widen the list with `hook.blocking` in `.testwitness.yml`, or narrow it with `hook.advice_only`.
-* On the corpus, with `fail_on: medium` in the base config the hook blocks 46 of the 130 pull requests with a true positive (35%) and 3 of the 217 without one; the last two columns give that setting per rule (the blocking list stays the same, so only its rules can block).
+* On the corpus, with `fail_on: medium` in the base config the hook blocks 45 of the 130 pull requests with a true positive (35%) and 1 of the 217 without one; the last two columns give that setting per rule (the blocking list stays the same, so only its rules can block).
 
 | Rule | True positives (corpus) | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked (corpus) | High findings judged true in the trial | Wrongful blocks if every high finding blocked (trial) | Wrongful blocks at the default, both sets | In the hook | Blocked with fail_on: medium (corpus) | Wrongful blocks with fail_on: medium (corpus) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | A001 | 14 | 0 | 0 | 0% | 0 | 1 | 1 | 0 | advice only | 0 | 0 |
 | A002 | 27 | 2 | 2 | 7% | 0 | 1 | 0 | 0 | blocks on high | 27 | 1 |
 | A009 | 3 | 0 | 0 | 0% | 0 | 0 | 1 | 0 | advice only | 0 | 0 |
-| C001 | 7 | 7 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| C002 | 10 | 4 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
+| C001 | 7 | 7 | 7 | 100% | 0 | 0 | 0 | 0 | blocks on high | 7 | 0 |
+| C002 | 10 | 4 | 4 | 40% | 0 | 0 | 0 | 0 | blocks on high | 10 | 1 |
 | C003 | 1 | 1 | 0 | 0% | 2 | 0 | 0 | 0 | advice only | 0 | 0 |
 | E001 | 3 | 3 | 0 | 0% | 0 | 0 | 9 | 0 | advice only | 0 | 0 |
 | O001 | 5 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
@@ -120,7 +120,7 @@ Measured 2026-11-13 on the same 347 pull requests. Each one is applied as an unc
 | R005 | 15 | 15 | 15 | 100% | 0 | 0 | 0 | 0 | blocks on high | 15 | 0 |
 | R010 | 13 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
 | V004 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| W002 | 9 | 9 | 9 | 100% | 2 | 0 | 0 | 2 | blocks on high | 9 | 2 |
+| W002 | 9 | 9 | 0 | 0% | 2 | 0 | 0 | 0 | advice only | 0 | 0 |
 | W003 | 1 | 1 | 1 | 100% | 0 | 0 | 0 | 0 | blocks on high | 1 | 0 |
 
 In the trial, `fail_on: medium` with the default blocking list would block 2 of the 300 pull requests, 1 of them wrongly.

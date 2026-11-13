@@ -127,7 +127,7 @@ describe('agent hook config', () => {
   it('defaults: nothing protected, 20 s, two blocks, the proven blocking list', () => {
     const c = parseConfig(undefined);
     expect(c.protect).toEqual([]);
-    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, blocking: ['A002', 'R004', 'R005', 'W002', 'W003', 'W006'], adviceOnly: [] });
+    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, blocking: ['A002', 'C001', 'C002', 'R004', 'R005', 'W003', 'W006'], adviceOnly: [] });
   });
   it('reads protect, hook.timeout, hook.max_blocks, hook.blocking and hook.advice_only', () => {
     const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  blocking: [A002, R001, R002]\n  advice_only: [A002]\n', known);
