@@ -51,7 +51,7 @@ protect:                # agent hook only: paths a coding agent may not change (
 hook:                   # agent hook only
   timeout: 20           # seconds before the hook gives up and allows the action
   max_blocks: 2         # how often the same finding may block in one agent session
-  blocking: [A002, R004, R005, W002, W003, W006]   # the rules the hook may block on; the default is the set the replay has proven (docs/precision.md)
+  blocking: [A002, C001, C002, R004, R005, W003, W006]   # the rules the hook may block on; the default is the set the replay has proven (docs/precision.md)
   advice_only: []       # rules taken off the blocking list again
 ```
 

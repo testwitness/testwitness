@@ -24,7 +24,7 @@ export const HOOK_DEFAULT_MAX_BLOCKS = 2;
  * listed rule gains a wrongful block, or when another rule now qualifies (it prints which), so the list is only ever
  * widened on purpose.
  */
-export const HOOK_BLOCKING: readonly string[] = ['A002', 'R004', 'R005', 'W002', 'W003', 'W006'];
+export const HOOK_BLOCKING: readonly string[] = ['A002', 'C001', 'C002', 'R004', 'R005', 'W003', 'W006'];
 /** Rules on HOOK_BLOCKING without a replay measurement, and why: W006 is the gate protecting itself. */
 export const HOOK_BLOCKING_UNMEASURED: readonly string[] = ['W006'];
 
