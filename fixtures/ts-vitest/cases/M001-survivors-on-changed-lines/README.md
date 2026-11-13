@@ -1,0 +1,3 @@
+Positive for M001. src/shipping.ts gains a weight surcharge and an express multiplier. The only test checks that the fee for 1 kg is above zero, so every mutant on lines 3, 4, 6 and 7 survived or was not covered while line 2 had killed mutants. Four weak lines out of six mutated changed lines: medium, label measured weak. The test file is unchanged, so M002 and O001 have nothing to say.
+
+mutation/mutation.json was written by StrykerJS 10.1.1 with @stryker-mutator/vitest-runner 10.1.1 and Vitest 5.0.5 (coverageAnalysis perTest, json reporter), running the head tree with --mutate set to the changed production file, as testwitness mutate-plan plans it. It is real output, kept as written (projectRoot names the temporary run directory).

@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { check, render, ConfigError } from './check.js';
+import { check, loadConfig, render, ConfigError } from './check.js';
 import { serveStdio } from './mcp.js';
-import { builtinRules, GitError, TOOL_VERSION } from '@testwitness/core';
+import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION } from '@testwitness/core';
 
 export { check, render } from './check.js';
 export { allFrontEnds } from './frontends.js';
@@ -21,6 +21,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--head <ref>', 'head ref', 'HEAD')
     .option('--junit <globs>', 'comma separated globs of JUnit XML files (default from config)')
     .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
+    .option('--mutation <globs>', 'comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (default from config mutation.paths)')
     .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
     .option('--format <fmt>', 'json | markdown | both', 'markdown')
     .option('--out <path>', 'write the output to a file instead of stdout')
@@ -43,6 +44,7 @@ export async function main(argv: string[]): Promise<number> {
           head: o.head,
           junit: o.junit,
           coverage: o.coverage,
+          mutation: o.mutation,
           config: o.config,
           format: o.format,
           out: o.out,
@@ -61,6 +63,32 @@ export async function main(argv: string[]): Promise<number> {
         if (o.out) await writeFile(resolve(o.cwd, o.out), text);
         else process.stdout.write(text);
         code = exitCode;
+      } catch (err) {
+        if (err instanceof ConfigError || err instanceof GitError) {
+          process.stderr.write(`testwitness: ${err.message}\n`);
+          code = 2;
+        } else throw err;
+      }
+    });
+
+  program
+    .command('mutate-plan')
+    .description('Print the changed production files and the Stryker and PIT settings that mutate only them. Runs nothing.')
+    .option('--base <ref>', 'base ref (merge base is computed)', 'origin/main')
+    .option('--head <ref>', 'head ref', 'HEAD')
+    .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
+    .option('--format <fmt>', 'json | shell', 'json')
+    .option('--out <path>', 'write the plan to a file instead of stdout')
+    .option('--cwd <dir>', 'repository directory', process.cwd())
+    .action(async (o) => {
+      try {
+        if (o.format !== 'json' && o.format !== 'shell') throw new ConfigError('--format must be json or shell');
+        const cwd = resolve(o.cwd);
+        const config = await loadConfig({ cwd, base: o.base, head: o.head, config: o.config, format: 'json' });
+        const plan = await planMutation({ cwd, base: o.base, head: o.head, config });
+        const text = o.format === 'shell' ? renderMutationPlanShell(plan) : JSON.stringify(plan, null, 2) + '\n';
+        if (o.out) await writeFile(resolve(cwd, o.out), text);
+        else process.stdout.write(text);
       } catch (err) {
         if (err instanceof ConfigError || err instanceof GitError) {
           process.stderr.write(`testwitness: ${err.message}\n`);

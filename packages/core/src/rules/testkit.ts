@@ -2,7 +2,7 @@
  * Helpers for unit testing rules without tree-sitter: build inventories by hand.
  * Exported from the package so fixture and plugin authors can reuse them.
  */
-import type { Assertion, CallSite, ChangedFile, Evidence, InventoryPair, LanguageId, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
+import type { Assertion, CallSite, ChangedFile, Evidence, InventoryPair, LanguageId, MutationEvidence, RuleContext, SkipMarker, TestCase, TestInventory } from '../types.js';
 import { defaultConfig } from '../config.js';
 import { fingerprint } from '../hash.js';
 import { shortHash } from '../hash.js';
@@ -67,6 +67,9 @@ export interface ContextSpec {
   changedProduction?: string[];
   prText?: { title: string; body: string };
   evidence?: Evidence;
+  /** Changed files beyond the test files of `pairs` (production files for the coverage and mutation rules). */
+  files?: ChangedFile[];
+  mutation?: MutationEvidence;
 }
 
 export function context(spec: ContextSpec): RuleContext {
@@ -74,7 +77,7 @@ export function context(spec: ContextSpec): RuleContext {
   for (const p of spec.pairs) if (p.head) headTree[p.file.path] = p.head;
   const cfg = defaultConfig();
   return {
-    files: spec.pairs.map((p) => p.file),
+    files: [...spec.pairs.map((p) => p.file), ...(spec.files ?? [])],
     pairs: spec.pairs,
     headInventoryFor: async (path) => headTree[path],
     headTestFiles: async () => Object.keys(headTree),
@@ -82,6 +85,7 @@ export function context(spec: ContextSpec): RuleContext {
     readHead: async () => undefined,
     ...(spec.prText ? { prText: spec.prText } : {}),
     ...(spec.evidence ? { evidence: spec.evidence } : {}),
+    ...(spec.mutation ? { mutation: spec.mutation } : {}),
     profile: { frameworks: new Set(), extraAssertions: [] },
     config: cfg,
     fingerprint,

@@ -1,0 +1,3 @@
+[
+  { "ruleId": "M002", "severity": "high", "subject": "returns text for euros", "label": "measured weak" }
+]

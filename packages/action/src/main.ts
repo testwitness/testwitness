@@ -12,7 +12,8 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { check } from 'testwitness';
 import { downloadBaseHistory, HISTORY_FILE, isDefaultBranchPush, uploadHistory } from './history.js';
-import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, computeState, exitCodeFor, type Finding, type Report, type PullRequestComment } from '@testwitness/core';
+import { pullRequestFromEvent, type EventPayload, type PullRequestPayload } from './pull-request.js';
+import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type Finding, type Report, type PullRequestComment } from '@testwitness/core';
 
 function annotationLevel(f: Finding, strict: boolean): 'error' | 'warning' | 'notice' {
   if (f.severity === 'high') return strict ? 'error' : 'warning';
@@ -23,7 +24,12 @@ function annotationLevel(f: Finding, strict: boolean): 'error' | 'warning' | 'no
 export async function run(): Promise<void> {
   const cwd = process.env['GITHUB_WORKSPACE'] ?? process.cwd();
   const ctx = github.context;
-  const pr = ctx.payload.pull_request;
+  const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
+  if (ctx.eventName === 'issue_comment' && !parseMutateCommand(String((ctx.payload.comment as { body?: unknown } | undefined)?.body ?? ''))) {
+    core.info('testwitness: issue_comment event without a /testwitness mutate command; nothing to do.');
+    return;
+  }
+  const pr = await pullRequestFromEvent(ctx.eventName, ctx.payload as EventPayload, token ? (n) => fetchPullRequest(token, n) : undefined, (s) => core.info(s));
   const baseInput = core.getInput('base');
   const headInput = core.getInput('head');
   const defaultPush = isDefaultBranchPush();
@@ -32,6 +38,7 @@ export async function run(): Promise<void> {
   const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : defaultPush ? head : 'origin/main');
   const junit = core.getInput('junit') || undefined;
   const coverage = core.getInput('coverage') || undefined;
+  const mutation = core.getInput('mutation') || undefined;
   const mode = (core.getInput('mode') || undefined) as 'report' | 'require-ack' | 'strict' | undefined;
   const failOn = (core.getInput('fail_on') || undefined) as 'high' | 'medium' | 'low' | undefined;
   const configPath = core.getInput('config') || undefined;
@@ -40,7 +47,6 @@ export async function run(): Promise<void> {
   const historyInput = core.getInput('history') || undefined;
   const historyArtifact = core.getInput('history_artifact');
   const historyWrite = core.getInput('history_write') === 'true' || defaultPush;
-  const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
 
   // PR text comes from the event payload file, read as data.
   let prTitle: string | undefined;
@@ -64,7 +70,7 @@ export async function run(): Promise<void> {
   }
 
   const { report, config, history: updatedHistory } = await check({
-    cwd, base, head, junit, coverage, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
+    cwd, base, head, junit, coverage, mutation, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
     history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
   });
 
@@ -148,6 +154,13 @@ async function readAcknowledgementSources(token: string, prNumber: number): Prom
   // Reason: the most recent comment by an owner, member or collaborator.
   const trusted = [...comments].reverse().find((c) => ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(c.association.toUpperCase()));
   return { comments, label: { present: true, ...(trusted ? { by: trusted.author, reason: trusted.body.slice(0, 200), at: trusted.createdAt } : {}) } };
+}
+
+async function fetchPullRequest(token: string, prNumber: number): Promise<PullRequestPayload> {
+  const octokit = github.getOctokit(token);
+  const { owner, repo } = github.context.repo;
+  const { data } = await octokit.rest.pulls.get({ owner, repo, pull_number: prNumber });
+  return data as unknown as PullRequestPayload;
 }
 
 async function upsertComment(token: string, prNumber: number, body: string): Promise<void> {

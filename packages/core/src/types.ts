@@ -12,7 +12,7 @@ export type LanguageId = 'java' | 'typescript' | 'javascript' | 'python';
 
 export type RuleGroup = 'R' | 'A' | 'O' | 'E' | 'S' | 'M' | 'T' | 'C' | 'W' | 'X' | 'V' | 'Q';
 
-export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext' | 'coverage';
+export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext' | 'coverage' | 'mutation';
 
 /** File status in the diff. */
 export type FileStatus = 'added' | 'modified' | 'deleted' | 'renamed';
@@ -316,6 +316,63 @@ export interface CoverageSummary {
   notes: string[];
 }
 
+/** Mutants that start on one source line, by outcome. Timeout counts as killed: the tests noticed the change. */
+export interface LineMutation {
+  /** Mutants that ran to an outcome (killed, timed out, survived or not covered). Compile errors, runtime errors, ignored and pending mutants are not counted. */
+  total: number;
+  /** Killed or timed out. */
+  killed: number;
+  survived: number;
+  noCoverage: number;
+  /** Normalised test keys (`classKey::nameKey`, as the JUnit reader builds them) of the tests that killed a mutant on the line. Empty when the report names no tests. */
+  killedBy: ReadonlySet<string>;
+  /** Normalised keys of the tests that executed a mutant on the line, when the report records it (Stryker coveredBy). */
+  coveredBy: ReadonlySet<string>;
+}
+
+/** Mutation results of one production file, by 1-based line. */
+export interface FileMutation {
+  lines: ReadonlyMap<number, LineMutation>;
+}
+
+/**
+ * Mutation testing results read from Stryker JSON or PIT mutations.xml reports. The engine never runs a mutation tool;
+ * it reads what an opt in job produced (docs/mutation-on-request.md). Paths are matched like coverage paths.
+ */
+export interface MutationEvidence {
+  /** Report files that were read. */
+  sources: string[];
+  /** Tools whose reports were read: stryker, pit. */
+  tools: string[];
+  /** Production files with mutants. */
+  files: number;
+  mutants: number;
+  killed: number;
+  survived: number;
+  noCoverage: number;
+  /** True when the reports name the tests that killed mutants (Stryker killedBy with testFiles, PIT killingTest). M002 needs it. */
+  testIds: boolean;
+  /** Keys of every test the mutation run knew about, when the report lists them (Stryker testFiles). */
+  tests?: ReadonlySet<string>;
+  /** Keys of every test that killed at least one mutant anywhere in the reports. */
+  killers: ReadonlySet<string>;
+  /** Reader warnings, caps that were hit, and why a rule could not use the data. */
+  warnings: string[];
+  /** Mutation results of a repository relative path, if the reports cover it. */
+  lookup(path: string): FileMutation | undefined;
+}
+
+/** The mutation section of the report. Present only when mutation reports were attached. */
+export interface MutationSummary {
+  sources: string[];
+  files: number;
+  mutants: number;
+  killed: number;
+  survived: number;
+  noCoverage: number;
+  notes: string[];
+}
+
 export type TestStatus = 'passed' | 'failed' | 'error' | 'skipped' | 'flaky';
 
 export interface PullRequestText {
@@ -336,6 +393,8 @@ export interface RuleContext {
   evidence?: Evidence;
   /** Line coverage of the head run, when reports were attached. */
   coverage?: CoverageEvidence;
+  /** Mutation testing results of the head, when an opt in mutation job attached its reports. */
+  mutation?: MutationEvidence;
   prText?: PullRequestText;
   profile: FrameworkProfile;
   config: ResolvedConfig;
@@ -360,6 +419,8 @@ export interface ResolvedConfig {
   junit: { head: string; base: string };
   /** Globs of lcov, Cobertura or JaCoCo coverage reports of the head run. Empty: no coverage is read. */
   coverage: { paths: string[] };
+  /** Globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job. Empty: no mutation data is read. */
+  mutation: { paths: string[] };
   assertions: { extra: string[] };
   rules: Record<string, RuleConfigEntry>;
   acknowledge: Array<{ fingerprint: string; reason: string; by: string; date: string }>;
@@ -402,6 +463,8 @@ export interface Report {
   helperIndex?: HelperIndexSummary;
   /** Coverage reports read for V008. Absent when none were attached. */
   coverage?: CoverageSummary;
+  /** Mutation reports read for M001, M002 and the O001 and O002 adjustment. Absent when none were attached. */
+  mutation?: MutationSummary;
   /** Run history used for dynamic severity. Absent when no history input was given. */
   history?: HistorySummary;
   base: string;

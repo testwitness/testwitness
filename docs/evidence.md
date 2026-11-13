@@ -51,3 +51,7 @@ V008 reads line coverage of the head run when you attach it with the `coverage` 
     coverage: "coverage/lcov.info,**/coverage.xml,**/jacoco.xml"
 ```
 
+## Mutation reports (optional, opt in)
+
+M001 and M002, and the measured grades of O001 and O002, read mutation reports: StrykerJS `mutation.json` (the json reporter) and PIT `mutations.xml` (outputFormats XML), through the `mutation` input, `--mutation` or `mutation.paths`. Producing them means running the tests, which testwitness never does on its own; the separate workflow that does it, triggered by a maintainer's `/testwitness mutate` comment, is described in [mutation on request](./mutation-on-request). mutmut results are not read, because they carry no line numbers or killing tests.
+
