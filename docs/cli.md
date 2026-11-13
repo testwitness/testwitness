@@ -33,7 +33,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
 | `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
 | `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
-| `--format <fmt>` | `markdown`, `json` or `both` | `markdown` |
+| `--format <fmt>` | `text`, `markdown`, `json` or `both` | `text` when stdout is a terminal, `markdown` when it is a pipe or with `--out` |
 | `--out <path>` | write to a file instead of stdout | |
 | `--mode <mode>` | `report`, `require-ack`, `strict` | from config |
 | `--fail-on <sev>` | `high`, `medium`, `low` | from config |
@@ -45,6 +45,8 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--follow-symlinks` | follow symbolic links in the results, coverage, mutation and history paths, for Bazel style layouts ([configuration](./configuration#symbolic-links-in-report-paths)) | config `paths.followSymlinks`, off |
 | `--cwd <dir>` | repository directory | current |
 | `-q, --quiet` | no progress on stderr | |
+
+The `text` format is for a person at a terminal: findings sorted high first, each with its file and line, the message and the text before and after, then one summary line. It is coloured unless `NO_COLOR` is set or `TERM` is `dumb`, and control characters from test names or PR text are shown as a placeholder so they cannot drive the terminal. Scripts and CI logs keep getting markdown, the same text as the PR comment, because a pipe is not a terminal.
 
 `testwitness rules` lists the built in rules.
 
