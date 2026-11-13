@@ -103,11 +103,11 @@ A test new in this PR already carries a skip, todo, fixme or xfail marker. It is
 
 ## A001 Assertion removed
 
-Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
+Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A modified test lost one or more assertions and gained no replacement on the same subject.
 
-**False positive controls.** Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.
+**False positive controls.** Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.
 
 ```diff
    expect(res.status).toBe(200);
@@ -130,11 +130,11 @@ An assertion on a subject was replaced by a weaker one. Every assertion is read 
 
 ## A009 Tautological assertion
 
-Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast.
+Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 An assertion whose two operands are the same literal or the same expression (assertTrue(true), expect(x).toEqual(x), assert x == x) was added or replaced a real assertion.
 
-**False positive controls.** expect(a).toEqual(a) written on purpose to exercise a custom equality. Rare; acknowledge it with a reason.
+**False positive controls.** expect(a).toEqual(a) written on purpose to exercise a custom equality. Rare; acknowledge it with a reason. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and it produced 0 true findings in 1 in the 300 PR real world trial. Raise it per repository with rules: { A009: medium } in .testwitness.yml.
 
 ```diff
 +  expect(response).toBeDefined();
@@ -162,7 +162,7 @@ Default severity: low. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.
 
-**False positive controls.** A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change.
+**False positive controls.** A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.
 
 ```diff
 +  it('computes the discount', () => {

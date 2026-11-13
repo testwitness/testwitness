@@ -1,1 +1,1 @@
-Positive. The real assertion is replaced by assertEquals(cart.total(), cart.total()). Both operands are the same expression, so it is a tautology at high. The removed and added assertions are on the same subject, so A001 and A002 do not also fire.
+Positive. The real assertion is replaced by assertEquals(cart.total(), cart.total()). Both operands are the same expression, so it is a tautology at low. The removed and added assertions are on the same subject, so A001 and A002 do not also fire.

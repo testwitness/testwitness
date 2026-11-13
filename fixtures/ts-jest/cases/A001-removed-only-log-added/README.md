@@ -1,1 +1,1 @@
-Positive. One toContain assertion is removed and the only new line is console.log of the same value. A log call never stands in for an assertion, so the replaced by call control does not apply and the finding stays medium.
+Positive. One toContain assertion is removed and the only new line is console.log of the same value. A log call never stands in for an assertion, so the replaced by call control does not apply and the finding stays low.

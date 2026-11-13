@@ -1,14 +1,14 @@
 [
  {
   "ruleId": "A009",
-  "severity": "high",
+  "severity": "low",
   "subject": "ChronicleReaderMainTest#testMainWithValidArguments",
   "verdict": "tp",
   "reason": "assertTrue(\"Expected valid arguments to run without issues.\", true) after running main"
  },
  {
   "ruleId": "A009",
-  "severity": "high",
+  "severity": "low",
   "subject": "ChronicleHistoryReaderMainTest#testRunExecutesChronicleHistoryReader",
   "verdict": "tp",
   "reason": "assertTrue(true) inside an anonymous class is the only assertion"

@@ -1,14 +1,14 @@
 [
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "TestPostgreSqlRollbacks#testRollbackCreateTableAsSelect",
     "verdict": "tp",
     "reason": "assertThat(...).isEmpty() removed"
   },
   {
     "ruleId": "A001",
-    "severity": "medium",
+    "severity": "low",
     "subject": "TestPostgreSqlRollbacks#testRollbackMerge",
     "verdict": "tp",
     "reason": "assertThat(...).isEmpty() removed"

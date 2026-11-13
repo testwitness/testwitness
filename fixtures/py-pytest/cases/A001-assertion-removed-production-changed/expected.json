@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "A001",
-    "severity": "high",
+    "severity": "medium",
     "subject": "test_receipt_reports_lines_and_total"
   }
 ]

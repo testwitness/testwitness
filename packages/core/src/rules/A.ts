@@ -1,7 +1,7 @@
 import type { Assertion, CallSite, ChangedFile, Finding, Rule, Severity, TestCase } from '../types.js';
 import { meaningOf, RANK, relatedSubjects } from '../assertion-meaning.js';
 import type { Meaning } from '../assertion-meaning.js';
-import { allChanges, isNonOracleCall, lower } from '../inventory.js';
+import { allChanges, isNonOracleCall } from '../inventory.js';
 import { changedProductionStems, makeFinding, exercisesChangedProduction } from './util.js';
 
 const RULE_SINCE = '0.1.0';
@@ -39,14 +39,14 @@ export const A001: Rule = {
   id: 'A001',
   name: 'Assertion removed',
   group: 'A',
-  defaultSeverity: 'medium',
+  defaultSeverity: 'low',
   since: RULE_SINCE,
   languages: 'any',
   needs: ['diff', 'ast'],
   docs: {
     summary: 'A modified test lost one or more assertions and gained no replacement on the same subject.',
     falsePositives:
-      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding drops one step (medium to low, high to medium) and is labelled replaced by call with the first new callee in the message.',
+      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.',
     example: '   expect(res.status).toBe(200);\n-  expect(res.body.total).toBe(1250);\n-  expect(ledger.entries).toHaveLength(2);',
   },
   run(ctx) {
@@ -131,14 +131,14 @@ export const A001: Rule = {
           continue;
         }
         const touches = removed.some((r) => mentionsChangedProduction(r.text, stems)) || exercisesChangedProduction(pair.head, pair.file.path, ctx);
-        const sev: Severity = touches ? 'high' : 'medium';
+        const sev: Severity = touches ? 'medium' : 'low';
         // Replaced by call: at least as many new call statements as lost assertions. The helper may assert (pip's
         // result.did_create) or may not; the engine cannot tell, so the finding drops one step and stays visible.
         const added = newCallStatements(base, head);
         if (added.length >= lost) {
           const first = added[0]!.name;
           out.push(
-            makeFinding(ctx, 'A001', lower(sev), pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} assertion${lost === 1 ? '' : 's'} and gained ${added.length} new call${added.length === 1 ? '' : 's'}, first ${first}, which may assert in a helper the check cannot read`, {
+            makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} assertion${lost === 1 ? '' : 's'} and gained ${added.length} new call${added.length === 1 ? '' : 's'}, first ${first}, which may assert in a helper the check cannot read`, {
               ...where,
               label: 'replaced by call',
             }),
@@ -432,13 +432,13 @@ export const A009: Rule = {
   id: 'A009',
   name: 'Tautological assertion',
   group: 'A',
-  defaultSeverity: 'high',
+  defaultSeverity: 'low',
   since: RULE_SINCE,
   languages: 'any',
   needs: ['diff', 'ast'],
   docs: {
     summary: 'An assertion whose two operands are the same literal or the same expression (assertTrue(true), expect(x).toEqual(x), assert x == x) was added or replaced a real assertion.',
-    falsePositives: 'expect(a).toEqual(a) written on purpose to exercise a custom equality. Rare; acknowledge it with a reason.',
+    falsePositives: 'expect(a).toEqual(a) written on purpose to exercise a custom equality. Rare; acknowledge it with a reason. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and it produced 0 true findings in 1 in the 300 PR real world trial. Raise it per repository with rules: { A009: medium } in .testwitness.yml.',
     example: '+  expect(response).toBeDefined();\n+  expect(true).toBe(true);',
   },
   run(ctx) {
@@ -455,9 +455,8 @@ export const A009: Rule = {
       for (const a of head.assertions) {
         if (baseKeys.has(assertionKey(a))) continue;
         if (!isTautology(a)) continue;
-        const only = head.assertions.length === 1 && change.kind === 'added';
         out.push(
-          makeFinding(ctx, 'A009', only ? 'medium' : 'high', pair.file, head.qualifiedName, `Test ${head.qualifiedName} has a tautological assertion: ${a.text}`, {
+          makeFinding(ctx, 'A009', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} has a tautological assertion: ${a.text}`, {
             line: a.line,
             after: a.text,
             snippet: assertionKey(a),

@@ -66,7 +66,7 @@ export const O002: Rule = {
   docs: {
     summary: 'A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.',
     falsePositives:
-      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change.',
+      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change. Ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
     example: "+  it('computes the discount', () => {\n+    expect(computeDiscount(cart)).toBeDefined();\n+  });",
   },
   run(ctx) {
