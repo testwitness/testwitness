@@ -19,14 +19,15 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
     fetch-depth: 0
 - uses: testwitness/testwitness@v0
   with:
-    junit: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
+    results: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
 
 | Option | Meaning | Default |
 |---|---|---|
 | `--base <ref>` | base ref; the merge base with head is used | `origin/main` |
 | `--head <ref>` | head ref | `HEAD` |
-| `--junit <globs>` | comma separated globs of JUnit XML | from config |
+| `--results <globs>` | comma separated globs of test results: JUnit XML (recommended), TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content ([evidence](./evidence)) | from config `results.head` |
+| `--junit <globs>` | older name of `--results`, used when `--results` is not given | |
 | `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
 | `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
 | `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
@@ -61,7 +62,7 @@ testwitness:
   stage: test
   image: node:20
   script:
-    - npx testwitness check --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --head HEAD --junit "**/junit*.xml" --format markdown --out testwitness.md
+    - npx testwitness check --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --head HEAD --results "**/junit*.xml" --format markdown --out testwitness.md
   artifacts:
     paths: [testwitness.md]
   rules:

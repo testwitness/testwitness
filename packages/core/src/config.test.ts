@@ -64,6 +64,15 @@ claims:
     expect(() => parseConfig('rules:\n  R003:\n    bogus: 1', known)).toThrow(/takes no options|unknown option/);
   });
 
+  it('reads results as the preferred key and junit as its alias, results winning', () => {
+    expect(parseConfig('results:\n  head: "**/results.tap"', known).junit.head).toBe('**/results.tap');
+    expect(parseConfig('junit:\n  head: "**/junit.xml"', known).junit.head).toBe('**/junit.xml');
+    expect(parseConfig('junit:\n  head: "a.xml"\nresults:\n  head: "b.json"', known).junit.head).toBe('b.json');
+    expect(parseConfig('results:\n  head: "a.xml"\njunit:\n  head: "b.json"', known).junit.head).toBe('a.xml');
+    expect(() => parseConfig('results: "x"', known)).toThrow(/results must be a mapping/);
+    expect(() => parseConfig('results:\n  head: 1', known)).toThrow(/results.head must be a string/);
+  });
+
   it('rejects non mapping documents', () => {
     expect(() => parseConfig('- a\n- b', known)).toThrow(ConfigError);
   });

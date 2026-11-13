@@ -175,9 +175,15 @@ describe('renderMarkdown evidence', () => {
     expect(md).toContain('- Read 1 result file: 10 tests');
     expect(md).toContain('1 skipped, 2 flaky');
   });
-  it('says no JUnit XML for unreadable evidence', () => {
+  it('names the formats read unless they are JUnit XML alone', () => {
+    const md = renderMarkdown(report({ evidence: { ...report().evidence, formats: ['jest-json', 'junit-xml', 'tap'] } }));
+    expect(md).toContain('- Read 2 result files (Jest JSON, JUnit XML, TAP): 10 tests');
+    const xml = renderMarkdown(report({ evidence: { ...report().evidence, formats: ['junit-xml'] } }));
+    expect(xml).toContain('- Read 2 result files: 10 tests');
+  });
+  it('says no test results for unreadable evidence', () => {
     const md = renderMarkdown(report({ evidence: { ...report().evidence, state: 'unreadable' } }));
-    expect(md).toContain('- No JUnit XML read.');
+    expect(md).toContain('- No test results read.');
     expect(md).not.toContain('- Read ');
   });
   it('lists notes with escaping', () => {

@@ -267,6 +267,8 @@ export interface InventoryPair {
 export interface Evidence {
   /** Files that were read. */
   sources: string[];
+  /** Formats of the files that were read (junit-xml, tap, jest-json, vitest-json, pytest-json-report, playwright-json). Optional; absent means JUnit XML. */
+  formats?: string[];
   total: number;
   passed: number;
   failed: number;
@@ -416,6 +418,7 @@ export interface ResolvedConfig {
   requireEvidence: boolean;
   languages: LanguageId[] | 'auto';
   paths: { tests: string[]; ignore: string[] };
+  /** Globs of the test results of the head run (config key `results`, or its older name `junit`). Any supported format; told apart by content. */
   junit: { head: string; base: string };
   /** Globs of lcov, Cobertura or JaCoCo coverage reports of the head run. Empty: no coverage is read. */
   coverage: { paths: string[] };
@@ -448,6 +451,8 @@ export interface Report {
   evidence: {
     state: 'read' | 'unreadable' | 'partial';
     sources: string[];
+    /** Formats of the result files that were read, sorted. Empty when none were read. */
+    formats?: string[];
     total: number;
     passed: number;
     failed: number;

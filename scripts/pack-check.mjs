@@ -5,7 +5,8 @@
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
 //      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
-//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan and the run history
+//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan, the run history,
+//      and --results with real Node TAP (and --junit, its older name)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -190,6 +191,34 @@ try {
   const histDoc = JSON.parse(readFileSync(historyPath, 'utf8'));
   if (histDoc.runs?.length === 2 && histDoc.tests?.['test_math::test_negatives'] === 'FF' && h2Report?.history?.runs === 1) ok('--history-out wrote 2 runs and --history read them back');
   else fail(`run history round trip failed (exit ${h2.status}, stderr ${h2.stderr.trim()}, runs ${histDoc.runs?.length})`);
+
+  // 4h. --results reads real TAP from Node's test runner (the ts-node-test golden pair): the derived file that lacks a
+  // modified test gives V003, and the real file read through the older --junit name gives none.
+  const tapCase = (name) => join(root, 'fixtures/ts-node-test/cases', name);
+  const tapRepo = join(work, 'tap-repo');
+  mkdirSync(tapRepo);
+  const gitTap = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: tapRepo });
+  gitTap('init', '-q', '-b', 'main');
+  for (const side of ['base', 'head']) {
+    for (const f of readdirSync(join(tapCase('V003-tap-modified-test-missing'), side, 'test'))) {
+      mkdirSync(join(tapRepo, 'test'), { recursive: true });
+      writeFileSync(join(tapRepo, 'test', f), readFileSync(join(tapCase('V003-tap-modified-test-missing'), side, 'test', f)));
+    }
+    gitTap('add', '-A');
+    gitTap('commit', '-q', '-m', side);
+    if (side === 'base') gitTap('checkout', '-q', '-b', 'change');
+  }
+  const tapCheck = (flag, file) => {
+    const r = spawnSync(bin, ['check', '--cwd', tapRepo, '--base', 'main', '--format', 'json', flag, file, '--quiet'], { encoding: 'utf8', env: cleanEnv });
+    return r.status === 0 ? JSON.parse(r.stdout) : { error: `exit ${r.status}, stderr ${r.stderr.trim()}` };
+  };
+  const tapMissing = tapCheck('--results', join(tapCase('V003-tap-modified-test-missing'), 'results/results.tap'));
+  const v003 = tapMissing.findings?.find((f) => f.ruleId === 'V003');
+  if (v003?.severity === 'high' && tapMissing.evidence?.formats?.join() === 'tap' && tapMissing.evidence.total === 12) ok(`--results read Node TAP and V003 reported: ${v003.message}`);
+  else fail(`--results with TAP did not give V003 and evidence.formats [tap]: ${JSON.stringify(tapMissing.error ?? tapMissing.evidence)}`);
+  const tapAll = tapCheck('--junit', join(tapCase('V003-tap-all-changed-tests-ran'), 'results/results.tap'));
+  if (tapAll.evidence?.formats?.join() === 'tap' && tapAll.evidence.total === 13 && !tapAll.findings?.some((f) => f.ruleId === 'V003')) ok('--junit, the older name, reads the same TAP and every changed test has a record');
+  else fail(`--junit with TAP did not read 13 tests without V003: ${JSON.stringify(tapAll.error ?? tapAll.evidence)}`);
 } catch (err) {
   fail(err instanceof Error ? err.message : String(err));
 } finally {

@@ -1,0 +1,15 @@
+1..6
+ok 1 - lowercases and joins with dashes
+ok 2 - strips leading and trailing separators
+ok 3 # skip unicode is not handled yet
+not ok 4 - keeps numbers # TODO numbers are not kept yet
+#   Failed (TODO) test 'keeps numbers'
+#   at t/text.t line 23.
+#          got: 'a1-b2'
+#     expected: 'a1_b2'
+not ok 5 - fails on purpose
+# Subtest: clamp table
+    1..2
+    ok 1 - inside the range
+    ok 2 - at the edge
+ok 6 - clamp table

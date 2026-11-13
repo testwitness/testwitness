@@ -88,9 +88,10 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
   lines.push('');
   const e = report.evidence;
   if (e.state === 'unreadable') {
-    lines.push('- No JUnit XML read.');
+    lines.push('- No test results read.');
   } else {
-    lines.push(`- Read ${e.sources.length} result file${e.sources.length === 1 ? '' : 's'}: ${e.total} tests, ${e.passed} passed, ${e.failed} failed, ${e.errored} errored, ${e.skipped} skipped${e.flaky ? `, ${e.flaky} flaky` : ''}`);
+    const formats = e.formats?.length && !(e.formats.length === 1 && e.formats[0] === 'junit-xml') ? ` (${e.formats.map(formatName).join(', ')})` : '';
+    lines.push(`- Read ${e.sources.length} result file${e.sources.length === 1 ? '' : 's'}${formats}: ${e.total} tests, ${e.passed} passed, ${e.failed} failed, ${e.errored} errored, ${e.skipped} skipped${e.flaky ? `, ${e.flaky} flaky` : ''}`);
   }
   for (const n of e.notes) lines.push(`- ${esc(n)}`);
   const c = report.coverage;
@@ -141,4 +142,17 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
 
   lines.push(`<sub>testwitness ${report.tool.version}, mode ${report.mode}, ${report.files.changed} files changed (${report.files.tests} test files), ${report.timing.totalMs} ms. Findings are observations, not verdicts. Acknowledge one with a reason in \`.testwitness.yml\`.</sub>`);
   return lines.join('\n') + '\n';
+}
+
+const FORMAT_NAMES: Record<string, string> = {
+  'junit-xml': 'JUnit XML',
+  tap: 'TAP',
+  'jest-json': 'Jest JSON',
+  'vitest-json': 'Vitest JSON',
+  'pytest-json-report': 'pytest-json-report',
+  'playwright-json': 'Playwright JSON',
+};
+
+function formatName(f: string): string {
+  return FORMAT_NAMES[f] ?? f;
 }

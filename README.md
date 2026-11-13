@@ -2,7 +2,7 @@
 
 Did this PR weaken its tests, and did they actually run?
 
-testwitness is a GitHub Action and a CLI that reads a pull request's diff, the test code (tree-sitter) and the JUnit XML from the test run, and tells the reviewer whether the tests still mean anything: deleted, skipped, loosened, tautological, assertion free, mocked out, swallowed in a catch all, retried, excluded in config, suppressed in CI, or claimed but never run. Java (JUnit 4 and 5, TestNG, AssertJ, Mockito), TypeScript and JavaScript (Jest, Vitest, Mocha, Playwright Test), Python (pytest, unittest). Works on PRs from Claude Code, Codex, Copilot, Cursor, Devin and people. No model, no secrets, no network.
+testwitness is a GitHub Action and a CLI that reads a pull request's diff, the test code (tree-sitter) and the test results from the run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright), and tells the reviewer whether the tests still mean anything: deleted, skipped, loosened, tautological, assertion free, mocked out, swallowed in a catch all, retried, excluded in config, suppressed in CI, or claimed but never run. Java (JUnit 4 and 5, TestNG, AssertJ, Mockito), TypeScript and JavaScript (Jest, Vitest, Mocha, Playwright Test), Python (pytest, unittest). Works on PRs from Claude Code, Codex, Copilot, Cursor, Devin and people. No model, no secrets, no network.
 
 Why it exists: a June 2026 study of 86,156 agent authored test patches found 80.2% had weak or no explicit oracle ([arXiv 2606.18168](https://arxiv.org/abs/2606.18168)), and inaccurate self reporting is the failure mode that grows over time in real sessions ([arXiv 2605.29442](https://arxiv.org/abs/2605.29442)). CI is green either way. testwitness puts the answer on the PR.
 
@@ -24,18 +24,18 @@ jobs:
           fetch-depth: 0
       - uses: testwitness/testwitness@v0
         with:
-          junit: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
+          results: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
 
-That is the whole install when your test job already writes JUnit XML into the workspace (Surefire and Gradle do by default; pytest needs `--junitxml`, Jest needs jest-junit, Vitest `--reporter=junit`, Playwright the `junit` reporter). Without any XML the diff rules still run and the evidence section reads `unreadable`.
+That is the whole install when your test job already writes JUnit XML into the workspace (Surefire and Gradle do by default; pytest needs `--junitxml`, Jest needs jest-junit, Vitest `--reporter=junit`, Playwright the `junit` reporter). JUnit XML is the first recommendation. When a runner only gives you TAP (`node --test --test-reporter=tap`) or a JSON report (`jest --json`, `vitest --reporter=json`, `pytest --json-report`, Playwright `--reporter=json`), point `results` at that file instead; the format is told from the content ([evidence](docs/evidence.md)). `results` used to be called `junit`, and `junit` still works. Without any results the diff rules still run and the evidence section reads `unreadable`.
 
 Locally or in any CI, with Node 20 or newer, the same engine ships as one npm package with no runtime dependencies:
 
 ```bash
-npx testwitness check --base origin/main --head HEAD --junit "**/junit*.xml"
+npx testwitness check --base origin/main --head HEAD --results "**/junit*.xml"
 # or install it once
 npm i -g testwitness
-testwitness check --base origin/main --junit "**/junit*.xml"
+testwitness check --base origin/main --results "**/junit*.xml"
 ```
 
 See [docs/cli.md](docs/cli.md) for every option.
@@ -112,7 +112,7 @@ pnpm fixtures       # golden fixture cases per language and framework
 pnpm corpus:report  # precision on the public PR corpus
 ```
 
-Layout: `packages/core` (engine and rules), `packages/lang-*` (tree-sitter front ends and `.scm` queries), `packages/junit` (streaming XML reader), `packages/cli`, `packages/action`, `fixtures/` (real projects with real JUnit XML and golden cases), `corpus/` (public PR patches with hand labels).
+Layout: `packages/core` (engine and rules), `packages/lang-*` (tree-sitter front ends and `.scm` queries), `packages/junit` (test results readers: streaming JUnit XML and TAP, JSON reporters), `packages/cli`, `packages/action`, `fixtures/` (real projects with real JUnit XML, TAP and JSON results and golden cases), `corpus/` (public PR patches with hand labels).
 
 ## Licence
 

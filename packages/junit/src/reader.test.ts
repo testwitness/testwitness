@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
-import { emptyIndex, readJunitFiles, readJunitStream, readJunitString, toEvidence } from './reader.js';
+import { emptyIndex, readJunitFiles, readJunitStream, readJunitString, readResultsFiles, sniffResultsFormat, toEvidence } from './reader.js';
 
 const SUREFIRE = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="com.acme.FooTest" time="0.1" tests="4" errors="1" skipped="1" failures="1">
@@ -112,5 +112,70 @@ describe('duplicate keys across files', () => {
       '<testsuite name="s"><testcase classname="demo.T" name="a"><failure/></testcase><testcase classname="demo.T" name="a"/></testsuite>',
     );
     expect(d.records.get('t::a')?.status).toBe('failed');
+  });
+});
+
+describe('results of any format, told apart by content', () => {
+  const F = join(import.meta.dirname, '../../../fixtures');
+
+  it('sniffs XML, JSON and TAP from the first bytes, after a BOM and comment lines', () => {
+    expect(sniffResultsFormat('<?xml version="1.0"?><testsuite/>')).toBe('junit-xml');
+    expect(sniffResultsFormat('\uFEFF  <testsuites>')).toBe('junit-xml');
+    expect(sniffResultsFormat('{"numTotalTests":1')).toBe('json');
+    expect(sniffResultsFormat('TAP version 14\n1..1')).toBe('tap');
+    expect(sniffResultsFormat('# comment first\n\n1..3\nok 1')).toBe('tap');
+    expect(sniffResultsFormat('ok 1 - a')).toBe('tap');
+    expect(sniffResultsFormat('# Subtest: x')).toBe('tap');
+    expect(sniffResultsFormat('Bail out! no db')).toBe('tap');
+    expect(sniffResultsFormat('# just a comment')).toBeUndefined();
+    expect(sniffResultsFormat('# Producer\n\n- Framework: jest')).toBeUndefined();
+    expect(sniffResultsFormat('const x = 1;')).toBeUndefined();
+    expect(sniffResultsFormat('')).toBeUndefined();
+  });
+
+  it('reads a mix of real JUnit XML, TAP and JSON files in one call, whatever the file names', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tw-results-'));
+    try {
+      const copy = (from: string, as: string) => {
+        writeFileSync(join(dir, as), readFileSync(join(F, from)));
+        return join(dir, as);
+      };
+      const files = [
+        copy('ts-vitest/junit/junit.xml', 'a.out'),
+        copy('ts-node-test/results/tap/results.tap', 'b.out'),
+        copy('ts-jest/results/jest-json/results.json', 'c.out'),
+        copy('py-pytest/results/pytest-json-report/report.json', 'd.out'),
+        copy('ts-playwright/results/playwright-json/results.json', 'e.out'),
+        copy('ts-vitest/results/vitest-json/results.json', 'f.out'),
+        copy('ts-jest/results/jest-json/PRODUCER.md', 'g.out'),
+      ];
+      const d = await readResultsFiles(files);
+      expect([...d.formats].sort()).toEqual(['jest-json', 'junit-xml', 'playwright-json', 'pytest-json-report', 'tap', 'vitest-json']);
+      expect(d.sources).toEqual(files.slice(0, 6));
+      expect(d.warnings.filter((w) => w.includes('g.out'))).toEqual([`${files[6]}: not JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright; not read`]);
+      expect(toEvidence(d).formats).toEqual(['jest-json', 'junit-xml', 'playwright-json', 'pytest-json-report', 'tap', 'vitest-json']);
+      // the old entry point reads them too
+      expect((await readJunitFiles(files)).sources.length).toBe(6);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a JSON file over the cap with a note and reads the others', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tw-results-cap-'));
+    try {
+      const big = join(dir, 'big.json');
+      writeFileSync(big, readFileSync(join(F, 'ts-jest/results/jest-json/results.json')));
+      const small = join(dir, 'results.tap');
+      writeFileSync(small, readFileSync(join(F, 'ts-node-test/results/tap/results.tap')));
+      const d = await readResultsFiles([big, small], { maxJsonBytes: 1024 });
+      expect(d.sources).toEqual([small]);
+      expect(d.warnings[0]).toMatch(/big\.json: \d+ bytes, over the 0 MB cap for JSON results; not read/);
+      const missing = await readResultsFiles([join(dir, 'gone.json')]);
+      expect(missing.sources).toEqual([]);
+      expect(missing.warnings[0]).toMatch(/ENOENT/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

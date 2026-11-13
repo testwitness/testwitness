@@ -1,13 +1,14 @@
 {
   "name": "testwitness",
   "version": "0.1.0",
-  "description": "Did this PR weaken its tests, and did they actually run? Flags deleted, skipped and loosened tests and checks JUnit XML evidence.",
+  "description": "Did this PR weaken its tests, and did they actually run? Flags deleted, skipped and loosened tests and checks the test results (JUnit XML, TAP, Jest, Vitest, pytest-json-report and Playwright JSON).",
   "keywords": [
     "testing",
     "test-integrity",
     "code-review",
     "pull-request",
     "junit",
+    "tap",
     "tree-sitter",
     "ci",
     "github-action"

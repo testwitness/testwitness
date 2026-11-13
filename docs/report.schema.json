@@ -148,7 +148,7 @@
         "flaky",
         "notes"
       ],
-      "description": "What the attached JUnit XML results say about the run.",
+      "description": "What the attached test results say about the run.",
       "properties": {
         "state": {
           "type": "string",
@@ -164,7 +164,23 @@
           "items": {
             "type": "string"
           },
-          "description": "Paths of the JUnit XML files that were read."
+          "description": "Paths of the result files that were read."
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "junit-xml",
+              "tap",
+              "jest-json",
+              "vitest-json",
+              "pytest-json-report",
+              "playwright-json"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "Formats of the result files that were read, sorted, told apart by content: JUnit XML, TAP (13 and 14), and the JSON output of Jest, Vitest, pytest-json-report and Playwright. Empty when none were read. Absent in reports written before the other formats were read, which read JUnit XML only."
         },
         "total": {
           "type": "integer",
