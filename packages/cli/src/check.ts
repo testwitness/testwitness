@@ -119,6 +119,21 @@ export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
   return cfg;
 }
 
+/**
+ * The directory a glob is rooted at: its leading segments up to the first one with glob syntax, with escapes removed
+ * (`out/x\\[1\\]/*.xml` is rooted at `out/x[1]`), or `.`. Patterns use forward slashes on every platform, so this
+ * is the same on Windows and Linux; `C:/r/*.xml` gives `C:/r` and `//server/share/*.xml` gives `//server/share`.
+ */
+export function globBase(pattern: string): string {
+  const fixed: string[] = [];
+  for (const seg of pattern.split('/')) {
+    // fast-glob calls a segment with an escaped bracket dynamic; only unescaped glob syntax makes it one.
+    if (seg !== '' && fg.isDynamicPattern(seg.replace(/\\./g, 'x'))) break;
+    fixed.push(seg.replace(/\\(.)/g, '$1'));
+  }
+  return fixed.join('/') || '.';
+}
+
 /** Directories a matched report file may really live in: the repository, and the fixed base of any glob that points outside it. */
 function allowedRoots(cwd: string, patterns: string[]): string[] {
   const roots = new Set<string>();
@@ -132,12 +147,7 @@ function allowedRoots(cwd: string, patterns: string[]): string[] {
   const root = real(cwd) ?? resolve(cwd);
   roots.add(root);
   for (const pattern of patterns) {
-    const fixed: string[] = [];
-    for (const seg of pattern.split('/')) {
-      if (seg !== '' && fg.isDynamicPattern(seg)) break;
-      fixed.push(seg);
-    }
-    const base = resolve(cwd, fixed.join('/') || '.');
+    const base = resolve(cwd, globBase(pattern));
     const rel = relative(resolve(cwd), base);
     // Only a glob the workflow wrote with an absolute or `..` base reaches outside the repository on purpose.
     if (rel.startsWith('..') || isAbsolute(rel)) {
@@ -165,14 +175,11 @@ export async function matchReportFiles(cwd: string, patterns: string[], followSy
   for (const e of entries) if (e.dirent.isSymbolicLink()) skipped.push(e.path);
   // A glob whose fixed base is a link (bazel-testlogs/**) is not entered at all; say so.
   for (const pattern of patterns) {
-    const fixed: string[] = [];
-    for (const seg of pattern.split('/')) {
-      if (seg !== '' && fg.isDynamicPattern(seg)) break;
-      fixed.push(seg);
-    }
-    const base = resolve(cwd, fixed.join('/') || '.');
+    const fixedBase = globBase(pattern);
+    const base = resolve(cwd, fixedBase);
     try {
-      if (fixed.length && lstatSync(base).isSymbolicLink() && !skipped.includes(base)) skipped.push(base);
+      // fast-glob names entries with forward slashes on Windows too, so compare resolved forms.
+      if (fixedBase !== '.' && lstatSync(base).isSymbolicLink() && !skipped.some((s) => resolve(s) === base)) skipped.push(base);
     } catch {
       /* no such base: nothing matched */
     }
@@ -201,14 +208,43 @@ export async function matchReportFiles(cwd: string, patterns: string[], followSy
 /**
  * Comma separated globs as fast-glob patterns. fast-glob only understands forward slashes: on
  * Windows a pattern built with path.join arrives with backslashes, so convert those; a pattern
- * without backslashes is left alone so that glob syntax such as [abc] keeps its meaning.
+ * without backslashes is left alone so that glob syntax such as [abc] keeps its meaning. On
+ * Windows a backslash is a separator, never an escape, so in a converted pattern brackets,
+ * braces and parentheses of the path are literal. Only `platform` decides the result, not the
+ * platform this runs on, so tests run the Windows logic everywhere.
  */
 export function splitGlobs(globs: string, platform: NodeJS.Platform = process.platform): string[] {
   return globs
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((p) => (platform === 'win32' && p.includes('\\') ? fg.convertPathToPattern(p) : p));
+    .map((p) => (platform === 'win32' && p.includes('\\') ? windowsGlobToPattern(p) : p));
+}
+
+/**
+ * A Windows glob (backslashes) as a fast-glob pattern. Every backslash is a separator, and brackets, braces and
+ * parentheses are literal parts of the path, while `*` and `?` stay glob syntax. fast-glob's own
+ * convertPathToPattern reads a backslash in front of a bracket as an escape, so `C:\\app\\[id]\\*.xml` lost the
+ * separator and became the directory `app[id]`.
+ */
+export function windowsGlobToPattern(p: string): string {
+  const pattern = p
+    .split(/[\\/]/)
+    .map((seg) => seg.replace(/[()[\]{}]/g, '\\$&'))
+    .join('/');
+  return pattern.startsWith('!') ? `\\${pattern}` : pattern;
+}
+
+/**
+ * A literal file path (not a glob) as a fast-glob pattern that matches only that file: on Windows the path is
+ * converted (backslashes to slashes, glob characters escaped), elsewhere glob characters are escaped. The history
+ * path is one: on a Windows runner it is C:\\...\\history.json, and fg.escapePath kept its backslashes, which
+ * fast-glob then reads as escapes, so a history outside the repository (the Action downloads it to the temp
+ * directory) was reported as a symbolic link or outside the repository and not read.
+ */
+export function pathToPattern(p: string, platform: NodeJS.Platform = process.platform): string {
+  // Windows file names cannot hold * or ?, so the glob conversion is exact for a path.
+  return platform === 'win32' ? windowsGlobToPattern(p) : fg.posix.escapePath(p);
 }
 
 export async function loadEvidence(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<{ evidence: Evidence | undefined; notes: string[] }> {
@@ -279,7 +315,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   let history: HistoryDocument | undefined;
   const historyNotes = [...(opts.historyNotes ?? [])];
   if (opts.history) {
-    const allowed = (await matchReportFiles(opts.cwd, [fg.escapePath(opts.history)], follow)).files.length > 0 || !existsSync(resolve(opts.cwd, opts.history));
+    const allowed = (await matchReportFiles(opts.cwd, [pathToPattern(opts.history)], follow)).files.length > 0 || !existsSync(resolve(opts.cwd, opts.history));
     const read = allowed ? await readHistoryFile(resolve(opts.cwd, opts.history)) : { doc: undefined, error: `history ${opts.history} is a symbolic link or outside the repository; set paths.followSymlinks or --follow-symlinks to read it` };
     if (read.doc) history = read.doc;
     else {

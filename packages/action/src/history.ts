@@ -50,7 +50,7 @@ export async function downloadBaseHistory(token: string | undefined, artifactNam
       const client = new DefaultArtifactClient();
       const res = await client.downloadArtifact(art.id, { path: dest, findBy: { token, workflowRunId: run.id, repositoryOwner: owner, repositoryName: repo } });
       const dir = res.downloadPath ?? dest;
-      const file = existsSync(join(dir, HISTORY_FILE)) ? join(dir, HISTORY_FILE) : readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => join(dir, f))[0];
+      const file = existsSync(join(dir, HISTORY_FILE)) ? join(dir, HISTORY_FILE) : readdirSync(dir).filter((f) => f.endsWith('.json')).sort().map((f) => join(dir, f))[0];
       if (!file) {
         core.info(`History: the ${artifactName} artifact of run ${run.id} holds no JSON file. Severities do not use earlier runs.`);
         return undefined;
