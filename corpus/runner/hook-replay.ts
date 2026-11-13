@@ -13,7 +13,24 @@ import { HOOK_ADVICE_ONLY } from '@testwitness/core';
 import { judgeFindings, type CorpusEntry, type Judged } from './corpus.js';
 import { replayEntry, type ReplayResult } from './replay.js';
 
-const STOP = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/hooks/claude/stop.json'), 'utf8');
+const here = dirname(fileURLToPath(import.meta.url));
+
+/** Per rule aggregates of the 300 pull request trial (corpus/trial/hook-trial-2026-11.json): judged counts, no names. */
+export interface TrialAggregates {
+  pullRequests: number;
+  repositories: number;
+  measured: string;
+  rules: Record<string, { highTp: number; highFp: number; mediumTp: number; mediumFp: number }>;
+  pullRequestsEveryHigh: { blockedWithTruePositive: number; blockedWrongly: number };
+  pullRequestsAtDefault: { blockedWithTruePositive: number; blockedWrongly: number };
+  pullRequestsFailOnMedium: { blockedWithTruePositive: number; blockedWrongly: number };
+}
+
+export function loadTrial(): TrialAggregates {
+  return JSON.parse(readFileSync(join(here, '../trial/hook-trial-2026-11.json'), 'utf8')) as TrialAggregates;
+}
+
+const STOP = readFileSync(join(here, '../../fixtures/hooks/claude/stop.json'), 'utf8');
 
 export interface EntryReplay {
   slug: string;
@@ -73,6 +90,9 @@ export interface HookRuleRow {
   /** True positives blocked, and wrongful blocks, when the base config sets `fail_on: medium`. */
   tpBlockedMedium: number;
   wrongfulAtMedium: number;
+  /** The 300 pull request trial: high findings of the rule judged true, and judged false (each a wrongful block if it blocked). */
+  trialHighTp: number;
+  trialHighFp: number;
   adviceOnly: boolean;
 }
 
@@ -96,11 +116,11 @@ export interface HookStats {
   honestEntriesBlockedMedium: number;
 }
 
-export function hookStats(all: EntryReplay[]): HookStats {
+export function hookStats(all: EntryReplay[], trial: TrialAggregates = loadTrial()): HookStats {
   const rows = new Map<string, HookRuleRow>();
   const row = (id: string): HookRuleRow => {
     let r = rows.get(id);
-    if (!r) rows.set(id, (r = { ruleId: id, tp: 0, tpHigh: 0, tpBlocked: 0, wrongfulEveryHigh: 0, wrongfulAtDefault: 0, tpBlockedMedium: 0, wrongfulAtMedium: 0, adviceOnly: HOOK_ADVICE_ONLY.includes(id) }));
+    if (!r) rows.set(id, (r = { ruleId: id, tp: 0, tpHigh: 0, tpBlocked: 0, wrongfulEveryHigh: 0, wrongfulAtDefault: 0, tpBlockedMedium: 0, wrongfulAtMedium: 0, trialHighTp: 0, trialHighFp: 0, adviceOnly: HOOK_ADVICE_ONLY.includes(id) }));
     return r;
   };
   const stats: HookStats = { entries: all.length, rows: [], tpEntries: 0, tpEntriesBlocked: 0, tpEntriesHigh: 0, honestEntries: 0, honestEntriesBlocked: 0, honestEntriesBlockedEveryHigh: 0, tpEntriesBlockedMedium: 0, honestEntriesBlockedMedium: 0 };
@@ -138,6 +158,11 @@ export function hookStats(all: EntryReplay[]): HookStats {
       if (everyHigh.size > 0) stats.honestEntriesBlockedEveryHigh++;
     }
   }
+  for (const [id, t] of Object.entries(trial.rules)) {
+    if (t.highTp + t.highFp === 0) continue;
+    row(id).trialHighTp = t.highTp;
+    row(id).trialHighFp = t.highFp;
+  }
   stats.rows = [...rows.values()].sort((a, b) => a.ruleId.localeCompare(b.ruleId));
   return stats;
 }
@@ -146,7 +171,7 @@ export const HOOK_REPLAY_HEADING = '## Agent hook replay';
 
 const share = (n: number, of: number): string => (of === 0 ? 'n/a' : `${Math.round((100 * n) / of)}%`);
 
-export function renderHookReplayMarkdown(s: HookStats, date: string): string {
+export function renderHookReplayMarkdown(s: HookStats, date: string, trial: TrialAggregates = loadTrial()): string {
   const advice = s.rows.filter((r) => r.adviceOnly).map((r) => r.ruleId);
   const lines = [
     HOOK_REPLAY_HEADING,
@@ -155,15 +180,18 @@ export function renderHookReplayMarkdown(s: HookStats, date: string): string {
     '',
     `* ${s.tpEntries} pull requests have at least one true positive finding. The hook blocks ${s.tpEntriesBlocked} of them (${share(s.tpEntriesBlocked, s.tpEntries)}). ${s.tpEntriesHigh} have a true positive at high severity; the others carry medium or low findings only, which the hook shows as advice.`,
     `* ${s.honestEntries} pull requests have no true positive finding. The hook blocks ${s.honestEntriesBlocked} of them. If every high finding blocked, it would block ${s.honestEntriesBlockedEveryHigh}.`,
-    `* Rules with at least one wrongful block when every high finding blocks are advice only in the hook by default: ${advice.length ? advice.join(', ') : 'none'}. A maintainer can change the list with \`hook.advice_only\` in \`.testwitness.yml\`.`,
-    `* With \`fail_on: medium\` in the base config the hook blocks ${s.tpEntriesBlockedMedium} of the ${s.tpEntries} pull requests with a true positive (${share(s.tpEntriesBlockedMedium, s.tpEntries)}) and ${s.honestEntriesBlockedMedium} of the ${s.honestEntries} without one; the last two columns give that setting per rule. V004 reads the pull request text, which does not exist yet when the hook runs, so the hook never reports it.`,
+    `* Second set, the real world trial of ${trial.measured}: the ${trial.pullRequests / trial.repositories} most recent merged pull requests that touch tests in each of ${trial.repositories} popular open source repositories, ${trial.pullRequests} in all, every medium and high finding judged by hand. Their authors and reviewers accepted them, so nearly every block there is wrongful. If every high finding blocked, the hook would block ${trial.pullRequestsEveryHigh.blockedWithTruePositive + trial.pullRequestsEveryHigh.blockedWrongly} of them, ${trial.pullRequestsEveryHigh.blockedWrongly} wrongly. At the default setting it blocks ${trial.pullRequestsAtDefault.blockedWithTruePositive + trial.pullRequestsAtDefault.blockedWrongly}, ${trial.pullRequestsAtDefault.blockedWrongly} wrongly. These trial numbers are computed from the judged findings of the commit check, which the working tree check reproduces; the hook was not rerun on those repositories.`,
+    `* A rule blocks in the hook only when none of its high findings was a wrongful block on either set. Rules with a wrongful block on the corpus or in the trial are advice only by default: ${advice.length ? advice.join(', ') : 'none'}. A maintainer can change the list with \`hook.advice_only\` in \`.testwitness.yml\`.`,
+    `* Rules that produced no high finding on either set (the config, workflow and results rules without a row below, and W006) still block on high: nothing measured speaks against them, and nothing measured speaks for them either.`,
+    `* On the corpus, with \`fail_on: medium\` in the base config the hook blocks ${s.tpEntriesBlockedMedium} of the ${s.tpEntries} pull requests with a true positive (${share(s.tpEntriesBlockedMedium, s.tpEntries)}) and ${s.honestEntriesBlockedMedium} of the ${s.honestEntries} without one; the last two columns give that setting per rule. V004 reads the pull request text, which does not exist yet when the hook runs, so the hook never reports it.`,
     '',
-    '| Rule | True positives | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked | Wrongful blocks at the default | In the hook | Blocked with fail_on: medium | Wrongful blocks with fail_on: medium |',
-    '|---|---|---|---|---|---|---|---|---|---|',
+    '| Rule | True positives (corpus) | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked (corpus) | High findings judged true in the trial | Wrongful blocks if every high finding blocked (trial) | Wrongful blocks at the default, both sets | In the hook | Blocked with fail_on: medium (corpus) | Wrongful blocks with fail_on: medium (corpus) |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|',
   ];
   for (const r of s.rows) {
-    lines.push(`| ${r.ruleId} | ${r.tp} | ${r.tpHigh} | ${r.tpBlocked} | ${share(r.tpBlocked, r.tp)} | ${r.wrongfulEveryHigh} | ${r.wrongfulAtDefault} | ${r.adviceOnly ? 'advice only' : 'blocks on high'} | ${r.tpBlockedMedium} | ${r.wrongfulAtMedium} |`);
+    lines.push(`| ${r.ruleId} | ${r.tp} | ${r.tpHigh} | ${r.tpBlocked} | ${share(r.tpBlocked, r.tp)} | ${r.wrongfulEveryHigh} | ${r.trialHighTp} | ${r.trialHighFp} | ${r.wrongfulAtDefault + (r.adviceOnly ? 0 : r.trialHighFp)} | ${r.adviceOnly ? 'advice only' : 'blocks on high'} | ${r.tpBlockedMedium} | ${r.wrongfulAtMedium} |`);
   }
+  lines.push('', `In the trial, \`fail_on: medium\` would block ${trial.pullRequestsFailOnMedium.blockedWithTruePositive + trial.pullRequestsFailOnMedium.blockedWrongly} of the ${trial.pullRequests} pull requests, ${trial.pullRequestsFailOnMedium.blockedWrongly} of them wrongly, so do not lower \`fail_on\` for the hook until the medium rules are fixed.`);
   lines.push('', 'The share is low for rules whose true positives are mostly medium: the hook does not block on medium unless the base config sets `fail_on: medium`. The numbers come from `corpus/runner/replay.test.ts`, which fails when this section and the measurement disagree. Regenerate with `pnpm corpus:report`.');
   return lines.join('\n') + '\n';
 }

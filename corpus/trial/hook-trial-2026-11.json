@@ -1,0 +1,81 @@
+{
+  "description": "Aggregates of the November 2026 real world trial: testwitness 0.1.0 run commit to commit on the 15 most recent merged pull requests that touch tests in each of 20 popular open source repositories, every medium and high finding judged by hand against the diff. Per rule counts only; no repository, person or pull request is named. The hook grading is computed from these judged findings (a working tree check gives the same findings as the commit check), not from a rerun of the hook. V004 is left out of the hook columns because the hook has no pull request text.",
+  "pullRequests": 300,
+  "repositories": 20,
+  "measured": "2026-11-13",
+  "toolVersion": "0.1.0",
+  "rules": {
+    "A001": {
+      "highTp": 1,
+      "highFp": 1,
+      "mediumTp": 0,
+      "mediumFp": 3
+    },
+    "A002": {
+      "highTp": 1,
+      "highFp": 0,
+      "mediumTp": 0,
+      "mediumFp": 1
+    },
+    "A009": {
+      "highTp": 0,
+      "highFp": 1,
+      "mediumTp": 0,
+      "mediumFp": 0
+    },
+    "E001": {
+      "highTp": 0,
+      "highFp": 9,
+      "mediumTp": 0,
+      "mediumFp": 0
+    },
+    "O002": {
+      "highTp": 0,
+      "highFp": 0,
+      "mediumTp": 0,
+      "mediumFp": 2
+    },
+    "O006": {
+      "highTp": 0,
+      "highFp": 0,
+      "mediumTp": 0,
+      "mediumFp": 73
+    },
+    "R001": {
+      "highTp": 1,
+      "highFp": 7,
+      "mediumTp": 1,
+      "mediumFp": 1
+    },
+    "R002": {
+      "highTp": 1,
+      "highFp": 6,
+      "mediumTp": 0,
+      "mediumFp": 0
+    },
+    "R010": {
+      "highTp": 0,
+      "highFp": 0,
+      "mediumTp": 0,
+      "mediumFp": 1
+    },
+    "V004": {
+      "highTp": 0,
+      "highFp": 0,
+      "mediumTp": 0,
+      "mediumFp": 19
+    }
+  },
+  "pullRequestsEveryHigh": {
+    "blockedWithTruePositive": 3,
+    "blockedWrongly": 9
+  },
+  "pullRequestsAtDefault": {
+    "blockedWithTruePositive": 1,
+    "blockedWrongly": 0
+  },
+  "pullRequestsFailOnMedium": {
+    "blockedWithTruePositive": 1,
+    "blockedWrongly": 21
+  }
+}

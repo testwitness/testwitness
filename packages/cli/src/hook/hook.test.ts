@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gitAction, parseEvent, patchPaths, type Agent } from './events.js';
 import { runHook, type HookOptions, type HookResult } from './run.js';
 import { stateFile } from './state.js';
-import { makeRepo, MATH_TEST, MATH_TEST_WEAKENED, type TestRepo } from '../testing/repo.js';
+import { makeRepo, MATH_TEST, MATH_TEST_WEAKENED, OTHER_TEST_FOCUSED, type TestRepo } from '../testing/repo.js';
 import { installNetworkGuard } from '../testing/no-network.js';
 
 const network = installNetworkGuard();
@@ -36,16 +36,16 @@ function payload(agent: Agent, name: string, edit: (text: string) => string = (t
 const hook = (agent: Agent, name: string, extra: Partial<HookOptions> = {}): Promise<HookResult> => runHook({ agent, input: payload(agent, name), stateDir, ...extra });
 const out = (r: HookResult): Record<string, unknown> => JSON.parse(r.stdout) as Record<string, unknown>;
 
-/** The agent loosened one assertion and deleted a test file: two high findings (A002, R002) and one medium (R003). */
+/** The agent loosened one assertion and focused a test in another file: two high findings (A002, R005) and one medium (R003). */
 function weaken(): void {
   repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
-  repo.remove('src/other.test.ts');
+  repo.write('src/other.test.ts', OTHER_TEST_FOCUSED);
 }
 
 function expectReason(reason: string): void {
   // rule id, file and line
   expect(reason).toContain('A002 high src/math.test.ts:6');
-  expect(reason).toContain('R002 high src/other.test.ts');
+  expect(reason).toContain('R005 high src/other.test.ts:3');
   // the base text to restore
   expect(reason).toContain('Base text to restore (src/math.test.ts at ');
   expect(reason).toContain('expect(add(1, 2)).toBe(3);');
@@ -302,18 +302,18 @@ describe('what blocks', () => {
     repo.dispose();
     repo = makeRepo({ '.testwitness.yml': 'mode: report\n' });
     weaken();
-    repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R002: off\n  W006: off\nacknowledge: []\nhook:\n  advice_only: [A002, R002, W006]\n');
+    repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R005: off\n  W006: off\nacknowledge: []\nhook:\n  advice_only: [A002, R005, W006]\n');
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(true);
-    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R002', 'W006']);
+    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R005', 'W006']);
     expect(r.decision.reason).toContain('W006 high .testwitness.yml');
   });
 
   it('a .testwitness.yml the change adds is advice (no gate existed at the base), and still has no effect', async () => {
     weaken();
-    repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R002: off\n');
+    repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R005: off\n');
     const r = await hook('claude', 'stop.json');
-    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R002']);
+    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R005']);
     expect(r.evaluation!.advice.map((f) => f.ruleId)).toContain('W006');
   });
 
@@ -330,22 +330,27 @@ describe('what blocks', () => {
     expect(r.decision.block).toBe(false);
   });
 
-  it('R001 is advice only by default (measured wrongful blocks, docs/precision.md); hook.advice_only: [] makes it block', async () => {
+  it('rules with a measured wrongful block are advice only by default (docs/precision.md); hook.advice_only: [] makes them block', async () => {
     const edit = (): void => {
+      // R001 at high: a test deleted while the production file it exercises changes. R002: a test file deleted.
       repo.write('src/math.ts', 'export const add = (a: number, b: number) => a + b + 0;\n');
       repo.write('src/math.test.ts', MATH_TEST.replace(/\n {2}it\('handles negatives'[\s\S]*?\n {2}\}\);\n/, '\n'));
+      repo.remove('src/other.test.ts');
     };
     edit();
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
-    expect(r.evaluation!.advice.map((f) => `${f.ruleId} ${f.severity}`)).toEqual(['R001 high']);
+    expect(r.evaluation!.advice.map((f) => `${f.ruleId} ${f.severity}`).sort()).toEqual(['R001 high', 'R002 high']);
     expect(r.decision.note).toContain('R001 high src/math.test.ts');
+    expect(r.decision.note).toContain('R002 high src/other.test.ts');
     repo.dispose();
     repo = makeRepo({ '.testwitness.yml': 'hook:\n  advice_only: []\n' });
     edit();
     const strict = await hook('claude', 'stop.json');
     expect(strict.decision.block).toBe(true);
     expect(strict.decision.reason).toContain("it('handles negatives', () => {");
+    expect(strict.decision.reason).toContain('R002 high src/other.test.ts');
+    expect(strict.decision.reason).toContain('the whole file: git show');
   });
 });
 
@@ -365,7 +370,7 @@ describe('loop guard', () => {
     expect(b.decision.reason).toContain('Block 2 of 2 for this finding in this session.');
     expect(out(c)).toEqual({
       systemMessage:
-        'testwitness: the guard stepped aside: 2 findings were blocked 2 times in this session and are still open (A002 src/math.test.ts:6, R002 src/other.test.ts). It stops blocking so the agent is not stuck; review them before you merge. 1 finding shown as advice, not blocking: R003 medium src/math.test.ts:9.',
+        'testwitness: the guard stepped aside: 2 findings were blocked 2 times in this session and are still open (A002 src/math.test.ts:6, R005 src/other.test.ts:3). It stops blocking so the agent is not stuck; review them before you merge. 1 finding shown as advice, not blocking: R003 medium src/math.test.ts:9.',
     });
     expect(c.stderr).toContain('the guard stepped aside');
     // The state lives under the temp dir, keyed by repository and session, and the repository is untouched.
@@ -378,11 +383,11 @@ describe('loop guard', () => {
     await hook('claude', 'stop.json');
     await hook('claude', 'stop.json');
     expect((await hook('claude', 'stop.json')).decision.block).toBe(false);
-    repo.remove('src/other.test.ts');
+    repo.write('src/other.test.ts', OTHER_TEST_FOCUSED);
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(true);
     expect(r.decision.reason).toMatch(/^testwitness blocked the end of this turn: 1 test integrity finding in/);
-    expect(r.decision.reason).toContain('R002 high src/other.test.ts');
+    expect(r.decision.reason).toContain('R005 high src/other.test.ts:3');
     expect(r.decision.reason).toContain('1 other finding is still open and no longer blocking.');
   });
 

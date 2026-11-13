@@ -124,10 +124,10 @@ describe('coverage config', () => {
 });
 
 describe('agent hook config', () => {
-  it('defaults: nothing protected, 20 s, two blocks, R001 advice only', () => {
+  it('defaults: nothing protected, 20 s, two blocks, the measured advice only list', () => {
     const c = parseConfig(undefined);
     expect(c.protect).toEqual([]);
-    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, adviceOnly: ['R001'] });
+    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, adviceOnly: ['A001', 'A009', 'E001', 'R001', 'R002'] });
   });
   it('reads protect, hook.timeout, hook.max_blocks and hook.advice_only', () => {
     const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  advice_only: []\n', known);
