@@ -6,6 +6,7 @@ import { Readable } from 'node:stream';
 import { inventoryKeys } from '@testwitness/core';
 import { emptyIndex, finaliseTotals, readResultsFiles, toEvidence } from './reader.js';
 import { looksLikeFile, parseTap, readTapStream, splitDescription, TAP_MAX_LINE } from './tap.js';
+const TIMING_OFF = process.env['TESTWITNESS_TIMING'] === 'off'; // Stryker instruments the code under test, so wall clock budgets do not apply there
 
 // Every sample below is real output; fixtures/ts-node-test/results/*/PRODUCER.md has the versions and commands.
 const RESULTS = join(import.meta.dirname, '../../../fixtures/ts-node-test/results');
@@ -240,7 +241,7 @@ describe('TAP on hostile input (review regression)', () => {
     const line = `ok 1 - a${' '.repeat(100_000)}b`;
     const t0 = performance.now();
     const s = parseTap(`TAP version 14\n${line}\n${line}\n1..2\n`);
-    expect(performance.now() - t0).toBeLessThan(2000);
+    expect(performance.now() - t0).toBeLessThan(TIMING_OFF ? Number.POSITIVE_INFINITY : 2000);
     expect(s.points).toBe(2);
     expect(s.records[0]!.chain[0]).toMatch(/^a +b$/);
   });
