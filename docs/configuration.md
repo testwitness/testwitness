@@ -51,7 +51,8 @@ protect:                # agent hook only: paths a coding agent may not change (
 hook:                   # agent hook only
   timeout: 20           # seconds before the hook gives up and allows the action
   max_blocks: 2         # how often the same finding may block in one agent session
-  advice_only: [A001, A009, E001, R001, R002]   # rules the hook shows but never blocks on; the default is measured (docs/precision.md)
+  blocking: [A002, R004, R005, W002, W003, W006]   # the rules the hook may block on; the default is the set the replay has proven (docs/precision.md)
+  advice_only: []       # rules taken off the blocking list again
 ```
 
 `protect` and `hook` are read by the [agent guard](./agent-guard) only, and only from the merge base, never from the working tree. The pull request check ignores them.

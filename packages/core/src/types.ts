@@ -451,7 +451,12 @@ export interface ResolvedConfig {
     timeoutSeconds: number;
     /** How often the same finding may block in one session before the hook steps aside (config key `hook.max_blocks`). */
     maxBlocks: number;
-    /** Rules the hook shows as advice and never blocks on (config key `hook.advice_only`). */
+    /**
+     * Rules the hook may block on (config key `hook.blocking`). The default is the small set the replay has proven
+     * (HOOK_BLOCKING); every other rule is advice. A maintainer widens it by listing the rules.
+     */
+    blocking: string[];
+    /** Rules taken off the blocking list again (config key `hook.advice_only`); default none. */
     adviceOnly: string[];
   };
 }

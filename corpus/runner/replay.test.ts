@@ -6,15 +6,15 @@
 //   Criterion 12  each true positive pull request is applied as a working tree change and the hook runs on it; the
 //                 share blocked per rule is the table in docs/precision.md, which this test recomputes.
 //   Criterion 13  the false positive findings are replayed the same way, and the judged findings of the 300 pull
-//                 request trial (corpus/trial/hook-trial-2026-11.json) are graded the same way; a rule with a wrongful
-//                 block on either set must be on the hook's advice only list, and at the default no block is wrongful.
+//                 request trial (corpus/trial/hook-trial-2026-11.json) are graded the same way; the hook's blocking
+//                 list must be exactly the rules both sets qualify, and at the default no block is wrongful.
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { HOOK_ADVICE_ONLY } from '@testwitness/core';
+import { HOOK_BLOCKING, HOOK_BLOCKING_UNMEASURED } from '@testwitness/core';
 import { loadCorpus } from './corpus.js';
-import { HOOK_REPLAY_HEADING, hookStats, loadTrial, renderHookReplayMarkdown, replayWithHook, type EntryReplay, type HookStats } from './hook-replay.js';
+import { HOOK_REPLAY_HEADING, hookStats, loadTrial, qualifyingRules, renderHookReplayMarkdown, replayWithHook, type EntryReplay, type HookStats } from './hook-replay.js';
 import { findingKey, pool } from './replay.js';
 import { installNetworkGuard } from '../../packages/cli/src/testing/no-network.js';
 
@@ -60,9 +60,9 @@ describe('criterion 1: the working tree check equals the commit check', () => {
 
 describe('criteria 12 and 13: the hook on the corpus as working tree changes', () => {
   for (const e of entries) {
-    it(`${e.slug}: the hook blocks exactly on the open high findings that are not advice only`, () => {
+    it(`${e.slug}: the hook blocks exactly on the open high findings of the blocking list`, () => {
       const r = results.get(e.slug)!;
-      const expected = r.replay.commit.findings.filter((f) => f.severity === 'high' && !f.acknowledged && !HOOK_ADVICE_ONLY.includes(f.ruleId)).map((f) => f.fingerprint);
+      const expected = r.replay.commit.findings.filter((f) => f.severity === 'high' && !f.acknowledged && HOOK_BLOCKING.includes(f.ruleId)).map((f) => f.fingerprint);
       expect([...r.hook.blocking].sort()).toEqual([...expected].sort());
       expect([...r.hook.atDefault].sort()).toEqual([...expected].sort());
       expect(r.hook.blocked).toBe(expected.length > 0);
@@ -75,22 +75,31 @@ describe('criteria 12 and 13: the hook on the corpus as working tree changes', (
   }
 
   it('every true positive at high severity of a blocking rule is blocked', () => {
-    for (const row of stats.rows.filter((r) => !r.adviceOnly)) expect(row.tpBlocked, row.ruleId).toBe(row.tpHigh);
-    for (const row of stats.rows.filter((r) => r.adviceOnly)) expect(row.tpBlocked, row.ruleId).toBe(0);
+    for (const row of stats.rows.filter((r) => r.blocks)) expect(row.tpBlocked, row.ruleId).toBe(row.tpHigh);
+    for (const row of stats.rows.filter((r) => !r.blocks)) expect(row.tpBlocked, row.ruleId).toBe(0);
     expect(stats.tpEntries).toBeGreaterThan(50);
     expect(stats.tpEntriesBlocked).toBeGreaterThan(0);
   });
 
-  it('the advice only list is exactly the rules with a wrongful block on the corpus or in the 300 pull request trial, and no block is wrongful at the default', () => {
+  it('the blocking list is exactly the rules both measurements qualify (plus W006), and no block is wrongful at the default', () => {
     const trial = loadTrial();
-    const onCorpus = stats.rows.filter((r) => r.wrongfulEveryHigh > 0).map((r) => r.ruleId);
-    const inTrial = Object.entries(trial.rules).filter(([, t]) => t.highFp > 0).map(([id]) => id);
-    expect(onCorpus).toEqual(['R001']);
-    expect(inTrial.sort()).toEqual(['A001', 'A009', 'E001', 'R001', 'R002']);
-    expect([...new Set([...onCorpus, ...inTrial])].sort()).toEqual([...HOOK_ADVICE_ONLY].sort());
+    const qualified = qualifyingRules(stats);
+    const listed = HOOK_BLOCKING.filter((id) => !HOOK_BLOCKING_UNMEASURED.includes(id)).sort();
+    // A listed rule that gained a wrongful block (or lost its true positives) must come off the list.
+    const noLongerQualify = listed.filter((id) => !qualified.includes(id));
+    // A rule that now qualifies is printed, and the list is widened by hand in packages/core/src/config.ts.
+    const nowQualify = qualified.filter((id) => !listed.includes(id));
+    const report = `qualify today: ${qualified.join(', ') || 'none'}; on HOOK_BLOCKING but no longer qualifying: ${noLongerQualify.join(', ') || 'none'}; qualifying but not on HOOK_BLOCKING: ${nowQualify.join(', ') || 'none'}`;
+    console.log(`agent hook blocking list: ${report}`);
+    expect(noLongerQualify, report).toEqual([]);
+    expect(nowQualify, report).toEqual([]);
+    expect([...HOOK_BLOCKING_UNMEASURED]).toEqual(['W006']);
     for (const row of stats.rows) {
       expect(row.wrongfulAtDefault, row.ruleId).toBe(0);
-      if (!row.adviceOnly) expect(row.trialHighFp, row.ruleId).toBe(0);
+      if (row.blocks) {
+        expect(row.wrongfulEveryHigh, row.ruleId).toBe(0);
+        expect(row.trialHighFp, row.ruleId).toBe(0);
+      }
     }
     expect(stats.honestEntriesBlocked).toBe(0);
     expect(trial.pullRequests).toBe(300);

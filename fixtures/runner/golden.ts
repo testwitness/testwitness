@@ -90,7 +90,7 @@ export function toCrlf(buf: Buffer): Buffer {
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'fixture', GIT_AUTHOR_EMAIL: 'fixture@testwitness.local', GIT_COMMITTER_NAME: 'fixture', GIT_COMMITTER_EMAIL: 'fixture@testwitness.local' };
 
 function git(cwd: string, args: string[]): string {
-  return execFileSync('git', args, { cwd, encoding: 'utf8', env: ENV });
+  return execFileSync('git', ['-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8', env: ENV });
 }
 
 export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => boolean): GoldenCase[] {
