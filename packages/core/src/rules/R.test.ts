@@ -73,6 +73,21 @@ describe('R002 test file deleted', () => {
     const out = await R002.run(context({ pairs: [pair], headTree: { 'src/new.test.ts': dest } }), {});
     expect(out[0]).toMatchObject({ severity: 'low', label: 'moved' });
   });
+  it('reports low moved when the same test names reappear in a file with the same name elsewhere, not in another file', async () => {
+    const J = 'src/test/java/test/a/Test1.java';
+    const pair = { file: changedFile(J, 'deleted', 'java'), base: inventory(J, [t({ name: 'test', container: ['Test1'], body: 'x' })]) };
+    const same = inventory('src/test/java/org/x/a/Test1.java', [t({ name: 'test', container: ['Test1'], body: 'other' })]);
+    expect(await R002.run(context({ pairs: [pair], headTree: { 'src/test/java/org/x/a/Test1.java': same } }), {})).toMatchObject([{ severity: 'low', label: 'moved' }]);
+    const other = inventory('src/test/java/org/x/a/Test2.java', [t({ name: 'test', container: ['Test2'], body: 'other' })]);
+    expect(await R002.run(context({ pairs: [pair], headTree: { 'src/test/java/org/x/a/Test2.java': other } }), {})).toMatchObject([{ severity: 'high' }]);
+  });
+  it('reports low rewritten when new files in the same directory add at least as many tests', async () => {
+    const pair = { file: changedFile('tests/a.spec.ts', 'deleted'), base: inventory('tests/a.spec.ts', [t({ name: 'a', body: 'x' })]) };
+    const fresh = { file: changedFile('tests/b.spec.ts', 'added'), head: inventory('tests/b.spec.ts', [t({ name: 'b', body: 'y' })]) };
+    expect(await R002.run(context({ pairs: [pair, fresh] }), {})).toMatchObject([{ severity: 'low', label: 'rewritten' }]);
+    const elsewhere = { file: changedFile('other/b.spec.ts', 'added'), head: inventory('other/b.spec.ts', [t({ name: 'b', body: 'y' })]) };
+    expect(await R002.run(context({ pairs: [pair, elsewhere] }), {})).toMatchObject([{ severity: 'high' }]);
+  });
   it('ignores deleted files with no tests', async () => {
     const pair = { file: changedFile(P, 'deleted'), base: inventory(P, []) };
     expect(await R002.run(context({ pairs: [pair] }), {})).toEqual([]);
