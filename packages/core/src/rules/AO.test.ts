@@ -45,6 +45,29 @@ describe('A001 assertion removed', () => {
   });
 });
 
+describe('A001 inside an exception expectation', () => {
+  const raises = { callee: 'pytest.raises', kind: 'exception' as const, text: 'with pytest.raises(AttributeError):', subject: 'cfg.timeout' };
+  const touch = { callee: 'assert', kind: 'smoke' as const, text: 'assert cfg.timeout', subject: 'cfg.timeout', guarded: true };
+  const run = (base: ReturnType<typeof t>, head: ReturnType<typeof t>) =>
+    A001.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }], changedProduction: ['src/cfg.ts'] }), {});
+
+  it('reports low when only guarded assertions go and the expectation stays', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [eq('cfg.region', "'eu'"), raises, touch] });
+    const head = t({ name: 'a', body: 'y', assertions: [eq('cfg.region', "'eu'"), raises] });
+    expect(await run(base, head)).toMatchObject([{ severity: 'low', label: 'inside exception expectation' }]);
+  });
+
+  it('still reports medium when the expectation went too, or an unguarded assertion went', async () => {
+    const base = t({ name: 'a', body: 'x', assertions: [eq('cfg.region', "'eu'"), raises, touch] });
+    const noExpectation = t({ name: 'a', body: 'y', assertions: [eq('cfg.region', "'eu'")] });
+    expect((await run(base, noExpectation))[0]).toMatchObject({ severity: 'medium' });
+    const unguarded = t({ name: 'a', body: 'y', assertions: [raises, touch] });
+    const out = await run(base, unguarded);
+    expect(out[0]).toMatchObject({ severity: 'medium' });
+    expect(out[0]!.label).toBeUndefined();
+  });
+});
+
 describe('A001 replaced by call', () => {
   const lostTwo = () => t({ name: 'a', body: 'x', assertions: [eq('res.status', '200'), eq('res.created', 'a'), eq('res.deleted', 'b')], calls: [{ callee: 'pip', line: 2, statement: false }] });
   const run = async (head: ReturnType<typeof t>, base = lostTwo(), changedProduction: string[] = []) =>

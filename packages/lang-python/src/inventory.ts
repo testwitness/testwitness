@@ -759,6 +759,15 @@ function exceptionCallee(chain: string): string | undefined {
   return undefined;
 }
 
+/**
+ * An exception expectation whose block stops at the first raise: `pytest.raises(E)` or `assertRaises(E)`, not a warning
+ * check (the block runs on), and not one that expects the failure an assertion itself raises (AssertionError, Exception).
+ */
+function guardsBlock(callee: string, expected: string | undefined): boolean {
+  if (!/(^|\.)(raises|assertRaises|assertRaisesRegex)$/.test(callee)) return false;
+  return !/\b(AssertionError|Exception|BaseException)\b/.test(expected ?? '');
+}
+
 /** The single statement inside a `with` block, as the subject of an exception assertion. */
 function withBlockSubject(stmt: Node): string | undefined {
   const block = stmt.namedChildren.find((c) => c.type === 'block');
@@ -861,18 +870,30 @@ function lambdaAssertions(stmt: Node, ctx: FileContext, out: Assertion[]): void 
   visit(stmt);
 }
 
-/** All assertions in a body, descending into compound statements and nested scopes (inner def, local class, lambda). */
-function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[] = []): Assertion[] {
+/**
+ * All assertions in a body, descending into compound statements and nested scopes (inner def, local class, lambda).
+ * `guarded` is set inside the block of an exception expectation (`with pytest.raises(E):`, `with self.assertRaises(E):`):
+ * the expectation is the oracle there, and an assertion in the block only runs the code it guards. A nested def is
+ * not run where it is defined, so its body starts unguarded.
+ */
+function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[] = [], guarded = false): Assertion[] {
+  const add = (a: Assertion): void => {
+    if (guarded) a.guarded = true;
+    out.push(a);
+  };
   for (const stmt of statements(block)) {
     if (isDefinition(stmt)) {
       collectAssertions(definitionBody(stmt), ctx, out);
       continue;
     }
-    lambdaAssertions(stmt, ctx, out);
+    const inLambdas: Assertion[] = [];
+    lambdaAssertions(stmt, ctx, inLambdas);
+    inLambdas.forEach(add);
     if (stmt.type === 'assert_statement') {
-      out.push(bareAssert(stmt, ctx.aliases, ctx.literalParams));
+      add(bareAssert(stmt, ctx.aliases, ctx.literalParams));
       continue;
     }
+    let expectsException = false;
     if (stmt.type === 'with_statement') {
       const clause = stmt.namedChildren.find((c) => c.type === 'with_clause');
       for (const item of clause?.namedChildren ?? []) {
@@ -886,7 +907,8 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
         const a: Assertion = { callee, text: headerText(stmt), line: line(stmt), kind: 'exception' };
         const subject = withBlockSubject(stmt);
         if (subject) a.subject = subject;
-        out.push(a);
+        add(a);
+        if (guardsBlock(callee, parts.positional[0]?.text)) expectsException = true;
       }
     }
     if (stmt.type === 'expression_statement') {
@@ -895,19 +917,19 @@ function collectAssertions(block: Node | null, ctx: FileContext, out: Assertion[
         const u = unwrap(expr);
         if (u.type === 'call') {
           const a = callAssertion(stmt, u, ctx);
-          if (a) out.push(a);
+          if (a) add(a);
         } else if (u.type === 'assignment' || u.type === 'augmented_assignment') {
           // `msg = self.assertEmailMessageSent()`: an assertion helper used for its return value still asserts.
           const right = u.childForFieldName('right');
           const rv = right ? unwrap(right) : undefined;
           if (rv && rv.type === 'call') {
             const a = callAssertion(stmt, rv, ctx);
-            if (a) out.push(a);
+            if (a) add(a);
           }
         }
       }
     }
-    for (const b of childBlocks(stmt)) collectAssertions(b, ctx, out);
+    for (const b of childBlocks(stmt)) collectAssertions(b, ctx, out, guarded || expectsException);
   }
   return out;
 }

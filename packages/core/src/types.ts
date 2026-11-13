@@ -85,6 +85,14 @@ export interface Assertion {
   resolvedVia?: 'helper-index';
   /** The helper definition the call resolved to, when `resolvedVia` is set. */
   helper?: { name: string; path: string; line: number; className?: string };
+  /**
+   * Set when the assertion runs inside the code an exception expectation guards: the block of `with pytest.raises(E)`
+   * or `with self.assertRaises(E)`, the callable passed to assertThrows or assertThatThrownBy, the function given to
+   * `expect(fn).toThrow()`. The expectation is the oracle there; such an assertion only runs the code under test, and
+   * when that code raises as expected the assertion is never evaluated. Not set when the expected type is the failure
+   * an assertion itself raises (AssertionError, AssertionFailedError, Exception, Throwable, Error).
+   */
+  guarded?: boolean;
 }
 
 export interface SkipMarker {

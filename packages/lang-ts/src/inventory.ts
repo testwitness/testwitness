@@ -769,7 +769,9 @@ export async function buildInventory(path: string, source: string, profile: Fram
       for (const e of expectationObject(expr)) push(testEmbedded, scope.decl.node.id, e);
       continue;
     }
-    push(testAssertions, scope.decl.node.id, toAssertion(stmt, expr, analysis));
+    const a = toAssertion(stmt, expr, analysis);
+    if (guardedByThrowExpectation(stmt, scope.decl.node, helperNames)) a.guarded = true;
+    push(testAssertions, scope.decl.node.id, a);
   }
 
   // 4. Inline markers.
@@ -1007,6 +1009,29 @@ function assertionCandidates(query: Query, root: Node): Candidate[] {
     out.push({ stmt, expr });
   }
   return out;
+}
+
+/** Expected types an assertion failure itself satisfies: there the assertion inside the callback can be the oracle. */
+const ASSERTION_FAILURE_TYPES = /^(Error|\w*AssertionError)$/;
+
+/**
+ * The node sits inside a function passed to a narrowed exception expectation (`expect(() => { ... }).toThrow(TypeError)`,
+ * `assert.throws(() => { ... }, /bad/)`), below `stop`. A bare `toThrow()` or `toThrow(Error)` also passes when an
+ * assertion inside the callback fails, so there the assertion can be the oracle and is not guarded.
+ */
+function guardedByThrowExpectation(node: Node, stop: Node, helpers: Set<string>): boolean {
+  for (let cur = node.parent; cur && cur.id !== stop.id; cur = cur.parent) {
+    if (!isAnyFunction(cur)) continue;
+    const args = cur.parent;
+    const call = args?.type === 'arguments' ? args.parent : undefined;
+    if (!call || call.type !== 'call_expression') continue;
+    let top: Node = call;
+    while (top.parent && (top.parent.type === 'member_expression' || top.parent.type === 'call_expression')) top = top.parent;
+    const analysis = analyseAssertion(top, helpers);
+    if (!analysis || analysis.kind !== 'exception' || (analysis.strength ?? 0) < 2) continue;
+    return !ASSERTION_FAILURE_TYPES.test(analysis.expected ?? '');
+  }
+  return false;
 }
 
 /** `expect(() => f()).toThrow()`: the arrow body `f()` is not an assertion of its own. */

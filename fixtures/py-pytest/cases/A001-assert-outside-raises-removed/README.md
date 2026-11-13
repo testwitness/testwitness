@@ -1,0 +1,1 @@
+Medium. Counter case for A001-assert-inside-raises-removed with the same files: here the assertion that goes is `assert settings.region == "eu"`, outside the pytest.raises block, and it is a real check on a value. app/settings.py changes in the PR, so the loss is medium. The assert inside the block stays untouched.

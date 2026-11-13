@@ -1223,3 +1223,53 @@ def test_totals():
     expect(JSON.stringify(crlf.tests)).not.toContain('\\r');
   });
 });
+
+describe('assertions guarded by an exception expectation', () => {
+  it('marks assertions inside pytest.raises and assertRaises blocks, including those in a nested class method', async () => {
+    const i = await inv(`
+import pytest
+
+def test_guarded():
+    class Box:
+        def __init__(self):
+            with pytest.raises(AttributeError):
+                assert self.missing
+    Box()
+    with pytest.raises(KeyError):
+        assert lookup("x") == 1
+    assert lookup("y") == 2
+`);
+    const t = only(i);
+    const guarded = t.assertions.filter((a) => a.guarded).map((a) => a.text);
+    expect(guarded).toEqual(['assert self.missing', 'assert lookup("x") == 1']);
+    // The expectations themselves and the assertion after the block are not guarded.
+    expect(t.assertions.filter((a) => a.kind === 'exception').every((a) => !a.guarded)).toBe(true);
+    expect(t.assertions.find((a) => a.text.includes('"y"'))!.guarded).toBeUndefined();
+  });
+
+  it('does not mark assertions under warning checks or expectations an assertion failure satisfies', async () => {
+    const i = await inv(`
+import pytest
+import unittest
+
+def test_warns():
+    with pytest.warns(UserWarning):
+        assert emit() == 1
+
+def test_assertion_error():
+    with pytest.raises(AssertionError):
+        assert check(1)
+
+def test_any_exception():
+    with pytest.raises(Exception):
+        assert check(2)
+
+class T(unittest.TestCase):
+    def test_raises(self):
+        with self.assertRaises(ValueError):
+            assert parse("x")
+`);
+    for (const name of ['test_warns', 'test_assertion_error', 'test_any_exception']) expect(only(i, name).assertions.some((a) => a.guarded), name).toBe(false);
+    expect(only(i, 'T::test_raises').assertions.filter((a) => a.guarded).map((a) => a.text)).toEqual(['assert parse("x")']);
+  });
+});

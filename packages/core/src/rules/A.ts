@@ -46,7 +46,7 @@ export const A001: Rule = {
   docs: {
     summary: 'A modified test lost one or more assertions and gained no replacement on the same subject.',
     falsePositives:
-      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.',
+      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. An assertion removed from inside an exception expectation that stays (the block of pytest.raises or assertRaises, the callable of assertThrows or assertThatThrownBy, the function given to expect(fn).toThrow(TypeError)) is reported low with the label inside exception expectation: the code raises before such an assertion is evaluated, so the expectation is the oracle. This does not apply when the expected type is one an assertion failure satisfies (AssertionError, Exception, Error, Throwable, a bare toThrow()). A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: on the held out half of the corpus its precision on medium and high findings was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.',
     example: '   expect(res.status).toBe(200);\n-  expect(res.body.total).toBe(1250);\n-  expect(ledger.entries).toHaveLength(2);',
   },
   run(ctx) {
@@ -114,6 +114,18 @@ export const A001: Rule = {
             makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName}: ${lost} assertion${lost === 1 ? '' : 's'} consolidated into an assertion on the parent expression`, {
               ...where,
               label: 'consolidated',
+            }),
+          );
+          continue;
+        }
+        // Inside an exception expectation: `with pytest.raises(E): assert obj.attr` became `_ = obj.attr`. The code
+        // raises before the assertion is evaluated, so the expectation, which the head keeps, was the oracle all along.
+        const exceptionCount = (list: Assertion[]): number => list.filter((a) => a.kind === 'exception' && !a.guarded).length;
+        if (removed.every((r) => r.guarded) && exceptionCount(head.assertions) >= exceptionCount(base.assertions) && exceptionCount(head.assertions) > 0) {
+          out.push(
+            makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} assertion${lost === 1 ? '' : 's'} inside an exception expectation, which stays and is the oracle there`, {
+              ...where,
+              label: 'inside exception expectation',
             }),
           );
           continue;
