@@ -86,9 +86,20 @@ export function subjectMatches(expected: string | undefined, actual: string | un
   return actual.endsWith(`#${expected}`) || actual.endsWith(`::${expected}`) || actual.endsWith(` › ${expected}`) || actual.endsWith(`/${expected}`);
 }
 
+/** A verdict with the finding it judges; `finding` is absent for a missed one. */
+export interface Judged {
+  verdict: Verdict;
+  finding?: Finding;
+}
+
 /** Classify findings: expected ones are tp (or labelled fp when the label says so), unexpected ones on an honest entry are fp, expected but absent are missed. */
 export function judge(e: CorpusEntry, findings: Finding[]): Verdict[] {
-  const out: Verdict[] = [];
+  return judgeFindings(e, findings).map((j) => j.verdict);
+}
+
+/** judge(), keeping each verdict next to its finding (the hook replay needs the fingerprint). */
+export function judgeFindings(e: CorpusEntry, findings: Finding[]): Judged[] {
+  const out: Judged[] = [];
   // V004 is judged only on entries that carry the PR body (pr-body.md); title only entries cannot support or refute a claim.
   const hasBody = existsSync(join(e.dir, 'pr-body.md'));
   const remaining = findings.filter((f) => f.ruleId !== 'V005' && (f.ruleId !== 'V004' || hasBody));
@@ -97,17 +108,17 @@ export function judge(e: CorpusEntry, findings: Finding[]): Verdict[] {
     if (i === -1) {
       // Only real weakenings can be missed; a benign low label the tool did not emit is not an error.
       if (x.verdict === 'fp') continue;
-      out.push({ slug: e.slug, split: e.meta.split, ruleId: x.ruleId, severity: x.severity ?? '?', verdict: 'missed', ...(x.subject ? { subject: x.subject } : {}) });
+      out.push({ verdict: { slug: e.slug, split: e.meta.split, ruleId: x.ruleId, severity: x.severity ?? '?', verdict: 'missed', ...(x.subject ? { subject: x.subject } : {}) } });
     } else {
       const f = remaining[i]!;
       remaining.splice(i, 1);
-      out.push({ slug: e.slug, split: e.meta.split, ruleId: f.ruleId, severity: f.severity, verdict: x.verdict === 'fp' ? 'expected-low' : 'tp', ...(f.subject ? { subject: f.subject } : {}), ...(f.label ? { label: f.label } : {}) });
+      out.push({ finding: f, verdict: { slug: e.slug, split: e.meta.split, ruleId: f.ruleId, severity: f.severity, verdict: x.verdict === 'fp' ? 'expected-low' : 'tp', ...(f.subject ? { subject: f.subject } : {}), ...(f.label ? { label: f.label } : {}) } });
     }
   }
   for (const f of remaining) {
     // Low findings are informational by design (collapsed in the comment); on an honest entry they are benign, not false positives.
     const verdict: Verdict['verdict'] = f.severity === 'low' ? 'expected-low' : 'fp';
-    out.push({ slug: e.slug, split: e.meta.split, ruleId: f.ruleId, severity: f.severity, verdict, ...(f.subject ? { subject: f.subject } : {}), ...(f.label ? { label: f.label } : {}) });
+    out.push({ finding: f, verdict: { slug: e.slug, split: e.meta.split, ruleId: f.ruleId, severity: f.severity, verdict, ...(f.subject ? { subject: f.subject } : {}), ...(f.label ? { label: f.label } : {}) } });
   }
   return out;
 }

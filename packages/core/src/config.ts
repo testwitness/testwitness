@@ -18,7 +18,7 @@ export const HOOK_DEFAULT_MAX_BLOCKS = 2;
 /**
  * Rules the agent hook never blocks on by default. A rule is listed here when the replay of the corpus as working
  * tree changes measured at least one wrongful block for it at the default setting (docs/precision.md, "Agent hook
- * replay"); corpus/runner/hook-replay.test.ts fails when this list and the measurement disagree.
+ * replay"); corpus/runner/replay.test.ts fails when this list and the measurement disagree.
  */
 export const HOOK_ADVICE_ONLY: readonly string[] = ['R001'];
 
