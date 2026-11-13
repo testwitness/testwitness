@@ -164,13 +164,15 @@ try {
   makeWeakenedRepo(guardRepo);
   const guardGit = (dir, ...a) => run('git', ['-c', 'user.name=pack', '-c', 'user.email=pack@testwitness.local', '-c', 'commit.gpgsign=false', ...a], { cwd: dir });
   guardGit(guardRepo, 'checkout', '-q', 'main');
-  rmSync(join(guardRepo, 'tests/test_math.py'));
+  // The agent loosens an assertion: toBe(3) becomes toBeDefined(), an A002 finding at high.
+  const loosened = readFileSync(join(guardRepo, 'src/math.test.ts'), 'utf8').replace('expect(add(1, 2)).toBe(3);', 'expect(add(1, 2)).toBeDefined();');
+  writeFileSync(join(guardRepo, 'src/math.test.ts'), loosened);
   const hookTmp = join(work, 'hook-tmp');
   mkdirSync(hookTmp);
   const hookEnv = { ...cleanEnv, TMPDIR: hookTmp, TMP: hookTmp, TEMP: hookTmp };
   const before = guardGit(guardRepo, 'status', '--porcelain=v1', '-uall') + guardGit(guardRepo, 'count-objects', '-v');
   const wt = JSON.parse(cli(['check', '--worktree', '--cwd', guardRepo, '--base', 'main', '--format', 'json', '--results', '', '--quiet'], { env: hookEnv }));
-  if (wt.headTree && wt.findings.some((f) => f.ruleId === 'R002')) ok('check --worktree reports the deleted test file and carries headTree');
+  if (wt.headTree && wt.findings.some((f) => f.ruleId === 'A002' && f.severity === 'high')) ok('check --worktree reports the loosened assertion and carries headTree');
   else fail(`check --worktree: headTree ${wt.headTree}, findings ${wt.findings.map((f) => f.ruleId).join(',')}`);
   const stopEvent = JSON.stringify({ session_id: 'pack-check', cwd: guardRepo, hook_event_name: 'Stop', stop_hook_active: false });
   const stop = spawnSync(bin, [binJs, 'hook', '--agent', 'claude'], { input: stopEvent, encoding: 'utf8', env: hookEnv, timeout: 30_000 });
@@ -180,7 +182,7 @@ try {
   } catch {
     /* reported below */
   }
-  if (stop.status === 0 && stopOut.decision === 'block' && /R002 high tests\/test_math\.py/.test(stopOut.reason ?? '') && /def test_negatives\(\):/.test(stopOut.reason ?? '')) ok('hook --agent claude blocks the Stop event with the rule, the file and the base text');
+  if (stop.status === 0 && stopOut.decision === 'block' && /A002 high src\/math\.test\.ts:\d+/.test(stopOut.reason ?? '') && /expect\(add\(1, 2\)\)\.toBe\(3\);/.test(stopOut.reason ?? '')) ok('hook --agent claude blocks the Stop event with the rule, the file and the base text');
   else fail(`hook --agent claude on Stop: exit ${stop.status}, stdout ${stop.stdout.slice(0, 300)}, stderr ${stop.stderr.slice(0, 300)}`);
   const noise = spawnSync(bin, [binJs, 'hook', '--agent', 'claude'], { input: JSON.stringify({ session_id: 'pack-check', cwd: guardRepo, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' } }), encoding: 'utf8', env: hookEnv, timeout: 30_000 });
   if (noise.status === 0 && noise.stdout === '') ok('hook --agent claude says nothing on an unrelated Bash command');
@@ -196,18 +198,18 @@ try {
   const settings = JSON.parse(readFileSync(join(guardRepo, '.claude/settings.json'), 'utf8'));
   if (/^created \.claude\/settings\.json/.test(init1) && /^unchanged \.claude\/settings\.json/.test(init2) && settings.hooks?.Stop?.[0]?.hooks?.[0]?.command === 'testwitness hook --agent claude') ok('init --agent claude writes .claude/settings.json and is idempotent');
   else fail(`init --agent claude: ${init1.trim()} / ${init2.trim()}`);
-  // A real push through the installed pre-push hook: the pushed commit deletes a test file, so git must refuse it.
+  // A real push through the installed pre-push hook: the pushed commit loosens an assertion, so git must refuse it.
   const remote = join(work, 'remote.git');
   run('git', ['init', '-q', '--bare', remote]);
   guardGit(guardRepo, 'remote', 'add', 'origin', remote);
   guardGit(guardRepo, 'push', '-q', 'origin', 'main');
   cli(['init', '--agent', 'git', '--cwd', guardRepo, '--command', `"${bin}" "${binJs}"`], { env: hookEnv });
   guardGit(guardRepo, 'checkout', '-q', '-b', 'agent-work');
-  guardGit(guardRepo, 'add', '-A', 'tests');
+  guardGit(guardRepo, 'add', '-A', 'src');
   guardGit(guardRepo, 'commit', '-q', '-m', 'make the suite green');
   const push = spawnSync('git', ['push', 'origin', 'agent-work'], { cwd: guardRepo, encoding: 'utf8', env: hookEnv, timeout: 60_000 });
   const pushed = spawnSync('git', ['rev-parse', '--verify', '--quiet', 'refs/heads/agent-work'], { cwd: remote, encoding: 'utf8' }).status === 0;
-  if (push.status !== 0 && !pushed && /testwitness blocked this push/.test(push.stderr) && /R002 high tests\/test_math\.py/.test(push.stderr)) ok('git push is refused by the pre-push hook init --agent git installed');
+  if (push.status !== 0 && !pushed && /testwitness blocked this push/.test(push.stderr) && /A002 high src\/math\.test\.ts/.test(push.stderr)) ok('git push is refused by the pre-push hook init --agent git installed');
   else fail(`git push through the pre-push hook: exit ${push.status}, reached the remote ${pushed}, stderr ${push.stderr.slice(0, 400)}`);
 
   // 4e. --coverage reads an lcov report and V008 reports a changed production line it never executed

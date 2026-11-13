@@ -60,3 +60,6 @@ export function makeRepo(files: Record<string, string> = {}): TestRepo {
     dispose: () => rmSync(dir, { recursive: true, force: true }),
   };
 }
+
+/** src/other.test.ts with its only test focused: R005, high. */
+export const OTHER_TEST_FOCUSED = "import { expect, it } from 'vitest';\n\nit.only('is true', () => {\n  expect(1 + 1).toBe(2);\n});\n";
