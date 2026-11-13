@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import picomatch from 'picomatch';
 import { shortHash } from './hash.js';
+import { toLf } from './eol.js';
 import { isNonOracleCall } from './inventory.js';
 import type { Assertion, CallSite, FrameworkProfile, HelperDefinition, HelperIndexSummary, LanguageFrontEnd, TestCase, TestInventory } from './types.js';
 
@@ -161,10 +162,15 @@ interface FileDefs {
 }
 
 interface CacheFile {
-  version: 1;
-  /** Hash of the scanned file list with sizes and mtimes; equal means every entry below is current. */
+  version: 2;
+  /** Hash of the scanned file list with sizes and mtimes. */
   listHash: string;
-  files: Record<string, { size: number; mtimeMs: number } & FileDefs>;
+  /**
+   * Entries are keyed on a hash of the content, not on size and mtime: a checkout or copy that keeps mtimes (Windows
+   * cpSync, some unzip tools, a restored cache) can change a file without changing either, and the index would then
+   * serve the helpers of the old content. The content is read anyway to test it for the wanted names.
+   */
+  files: Record<string, { size: number; mtimeMs: number; hash: string } & FileDefs>;
 }
 
 export interface IndexedHelper {
@@ -231,11 +237,11 @@ export class HelperIndex {
       if (!ownDirectory(dir)) return;
       this.cachePath = join(dir, `${key}.json`);
       const parsed = JSON.parse(readFileSync(this.cachePath, 'utf8')) as CacheFile;
-      if (parsed && parsed.version === 1 && typeof parsed.files === 'object') this.cache = { ...parsed, listHash };
+      if (parsed && parsed.version === 2 && typeof parsed.files === 'object') this.cache = { ...parsed, listHash };
     } catch {
       /* no cache yet, or unreadable: start empty */
     }
-    if (this.cachePath) this.cache ??= { version: 1, listHash, files: {} };
+    if (this.cachePath) this.cache ??= { version: 2, listHash, files: {} };
   }
 
   private add(path: string, defs: FileDefs): void {
@@ -266,7 +272,8 @@ export class HelperIndex {
       let src = this.contents.get(f.path);
       if (src === undefined) {
         try {
-          src = await readFile(join(this.opts.cwd, f.path), 'utf8');
+          // LF like every other source text (eol.ts), so the engine's `known` inventory of a CRLF file is reused.
+          src = toLf(await readFile(join(this.opts.cwd, f.path), 'utf8'));
         } catch {
           src = '';
         }
@@ -274,8 +281,9 @@ export class HelperIndex {
       }
       if (!re.test(src)) continue;
       this.contents.delete(f.path);
+      const hash = shortHash(src);
       const hit = this.cache?.files[f.path];
-      if (hit && hit.size === f.size && hit.mtimeMs === f.mtimeMs) {
+      if (hit && hit.hash === hash) {
         this.cachedCount++;
         this.add(f.path, { definitions: hit.definitions, classBases: hit.classBases });
         continue;
@@ -303,7 +311,7 @@ export class HelperIndex {
       this.parsedCount++;
       this.add(f.path, defs);
       if (this.cache) {
-        this.cache.files[f.path] = { size: f.size, mtimeMs: f.mtimeMs, ...defs };
+        this.cache.files[f.path] = { size: f.size, mtimeMs: f.mtimeMs, hash, ...defs };
         this.cacheDirty = true;
       }
     }

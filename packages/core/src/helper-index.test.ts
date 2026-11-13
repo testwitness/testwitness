@@ -80,6 +80,18 @@ describe('scanSupportFiles', () => {
     expect(scan.warnings).toEqual([]);
   });
 
+  it('names files with forward slashes and filters nested locations the same way on every platform', () => {
+    put('pkg/a/tests/lib/helpers.py', 'def h():\n    assert True\n');
+    put('pkg/a/generated/tests/gen.py', 'def h():\n    assert True\n');
+    put('pkg/b/src/test/java/com/x/BaseTest.java', 'class BaseTest {}\n');
+    const scan = scanSupportFiles(dir, ['.py', '.java'], ['pkg/*/generated/**']);
+    expect(scan.files.map((f) => f.path).sort()).toEqual(['pkg/a/tests/lib/helpers.py', 'pkg/b/src/test/java/com/x/BaseTest.java']);
+    expect(scan.files.every((f) => !f.path.includes('\\'))).toBe(true);
+    // The location filter takes repository paths, never native ones: a backslash path is not a support location.
+    expect(isSupportPath('pkg/a/tests/lib/helpers.py')).toBe(true);
+    expect(isSupportPath('pkg\\a\\tests\\lib\\helpers.py')).toBe(false);
+  });
+
   it('stops at the file cap with a warning and takes helper named files first', () => {
     for (let i = 0; i < 5; i++) put(`tests/test_${i}.py`, 'x = 1\n');
     put('tests/zz_helpers.py', 'x = 1\n');
@@ -165,6 +177,35 @@ describe('cache', () => {
     const third = await resolveIn('tests/test_a.py', 'def test_a():\n    did_create(1)\n');
     expect(third.index.parsedCount).toBe(1);
     expect(third.inv.tests[0]!.assertions).toHaveLength(0);
+  });
+
+  it('never serves a stale entry when a file changes but keeps its size and mtime', async () => {
+    // A copy that keeps mtimes (cpSync on Windows, an unzip, a restored cache) can swap content of the same length.
+    const when = new Date('2026-01-02T03:04:05Z');
+    put('tests/lib.py', 'def did_create(p):\n    assert p\n');
+    utimesSync(join(dir, 'tests/lib.py'), when, when);
+    const first = await resolveIn('tests/test_a.py', 'def test_a():\n    did_create(1)\n');
+    first.index.save();
+    expect(first.inv.tests[0]!.assertions).toHaveLength(1);
+    put('tests/lib.py', 'def did_create(p):\n    print(p)\n'.padEnd('def did_create(p):\n    assert p\n'.length, ' '));
+    utimesSync(join(dir, 'tests/lib.py'), when, when);
+    const second = await resolveIn('tests/test_a.py', 'def test_a():\n    did_create(1)\n');
+    expect(second.index.cachedCount).toBe(0);
+    expect(second.index.parsedCount).toBe(1);
+    expect(second.inv.tests[0]!.assertions).toHaveLength(0);
+  });
+
+  it('serves a cached entry when only the mtime changed, and treats a CRLF checkout of the same file as the same content', async () => {
+    put('tests/lib.py', 'def did_create(p):\n    assert p\n');
+    const first = await resolveIn('tests/test_a.py', 'def test_a():\n    did_create(1)\n');
+    first.index.save();
+    const later = new Date(Date.now() + 5000);
+    put('tests/lib.py', 'def did_create(p):\r\n    assert p\r\n');
+    utimesSync(join(dir, 'tests/lib.py'), later, later);
+    const second = await resolveIn('tests/test_a.py', 'def test_a():\n    did_create(1)\n');
+    expect(second.index.parsedCount).toBe(0);
+    expect(second.index.cachedCount).toBe(1);
+    expect(second.inv.tests[0]!.assertions).toHaveLength(1);
   });
 
   it('parses only files that mention a called name', async () => {
