@@ -215,7 +215,7 @@ Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 A try block now wraps part of the test and its catch (Exception, Throwable, bare except, any JavaScript catch, or .catch(() =&gt; {})) neither rethrows, fails nor asserts. A failing subject call no longer fails the test.
 
-**False positive controls.** Cleanup wrappers with finally only are not catches. Catch blocks that assert on the exception, call fail(), or rethrow are not reported. A catch that existed in the base is not reported.
+**False positive controls.** Cleanup wrappers with finally only are not catches. Catch blocks that assert on the exception, call fail(), or rethrow are not reported. Capture then assert is not reported either: a catch that stores the error in a variable the test asserts on after the try block, and `.catch((e) =&gt; e)` whose result is stored and asserted. A promise left running on purpose (`void call().catch(() =&gt; {})` as its own statement, with assertions after it) is reported low with the label background. A catch that existed in the base is not reported.
 
 ```diff
 +  try {

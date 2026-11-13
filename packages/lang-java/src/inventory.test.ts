@@ -1057,6 +1057,20 @@ class FooTest {
     ]);
   });
 
+  it('does not count capture then assert as swallowing', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest {
+  @Test void run() {
+    Exception caught = null;
+    try { parse(""); } catch (Exception e) { caught = e; }
+    assertNotNull(caught);
+    Exception lost = null;
+    try { parse("x"); } catch (Exception e) { lost = e; }
+  }
+}`);
+    expect(t.catchAlls!.map((c) => c.swallows)).toEqual([false, true]);
+  });
+
   it('leaves catchAlls undefined when the body has no try', async () => {
     const t = await one(`${JUNIT5_HEADER}
 class FooTest { @Test void run() { assertTrue(x); } }`);

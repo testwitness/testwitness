@@ -1,0 +1,1 @@
+Low. The new test starts a call in the background on purpose with void and .catch(() => {}), because the call is expected never to finish, and then asserts on what the server sees. The empty handler keeps an expected rejection from becoming an unhandled one; it does not hide the oracle. Reported low with the label background. Seen in a replay of public PRs on Playwright.

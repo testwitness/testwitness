@@ -1,0 +1,1 @@
+Negative. Two new tests capture the error instead of swallowing it. The first catch only assigns the error to a variable that the test asserts on after the try block. The second hands the rejection to .catch((e) => e) and asserts on the result. Both are common ways to check a thrown error without toThrow. Seen in a replay of public PRs on Jest and Playwright. Nothing fires.

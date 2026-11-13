@@ -6,7 +6,7 @@
  * docs/conventions.md and the spec (sections 1.1, 1.2, 1.6, 1.7).
  */
 
-import { countParseErrors, normaliseText, shortHash, toLf } from '@testwitness/core';
+import { capturedThenAsserted, countParseErrors, normaliseText, shortHash, toLf } from '@testwitness/core';
 import type {
   Assertion,
   AssertionKind,
@@ -585,7 +585,9 @@ function collectCatchAlls(body: Node | null): CatchAll[] {
         if (!broad) continue;
         const block = clause.childForFieldName('body') ?? clause.namedChildren.find((c) => c.type === 'block');
         const text = block?.text ?? '';
-        const swallows = !/\b(raise|assert|pytest\.fail|self\.fail|fail\()/.test(text);
+        const name = typeNode ? /\s+as\s+(\w+)$/.exec(typeNode.text)?.[1] : undefined;
+        const after = body.text.split('\n').slice(node.endPosition.row - body.startPosition.row).join('\n');
+        const swallows = !/\b(raise|assert|pytest\.fail|self\.fail|fail\()/.test(text) && !capturedThenAsserted(text, name, after, /\b(assert\w*|self\.assert\w*|pytest\.fail)\b/);
         out.push({ line: line(clause), binding, swallows, snippet });
       }
     }

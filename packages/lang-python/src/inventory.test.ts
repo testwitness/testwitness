@@ -1123,6 +1123,13 @@ describe('parameterised flag and catch alls', () => {
     expect(by('test_c').catchAlls![0]!.swallows).toBe(false);
     expect(by('test_d').catchAlls![0]!).toMatchObject({ binding: 'bare except', swallows: false });
   });
+  it('does not count capture then assert as swallowing, but does when the captured error is never asserted', async () => {
+    const src = `def test_a():\n    err = None\n    try:\n        parse("")\n    except Exception as e:\n        err = e\n    assert isinstance(err, ValueError)\n\ndef test_b():\n    err = None\n    try:\n        parse("")\n    except Exception as e:\n        err = e\n    print(err)\n`;
+    const inv = await pythonFrontEnd.inventory('tests/test_x.py', src, { frameworks: new Set(), extraAssertions: [] });
+    const by = (n: string) => inv.tests.find((t) => t.name === n)!;
+    expect(by('test_a').catchAlls![0]!.swallows).toBe(false);
+    expect(by('test_b').catchAlls![0]!.swallows).toBe(true);
+  });
 });
 
 describe('assertion helper used as an assignment value', () => {

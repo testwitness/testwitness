@@ -123,3 +123,26 @@ export function reasonReferencesIssue(reason: string | undefined): boolean {
 export function lower(sev: 'high' | 'medium' | 'low'): 'high' | 'medium' | 'low' {
   return sev === 'high' ? 'medium' : 'low';
 }
+
+/**
+ * Capture then assert (E001): the catch body stores the caught error in a variable (`error = error_`, `caught = e`,
+ * `err = e`) and a line after the try statement asserts on that variable. The failure is checked later, not swallowed.
+ * `assertLine` tells an assertion line of the language.
+ */
+export function capturedThenAsserted(catchBody: string, param: string | undefined, after: string, assertLine: RegExp): boolean {
+  if (!param || !/^[A-Za-z_$][\w$]*$/.test(param)) return false;
+  const targets = new Set<string>();
+  const assign = new RegExp(`(?:^|[\\s;{(])(?:this\\.|self\\.)?([A-Za-z_$][\\w$]*)\\s*=(?!=)\\s*${param.replace(/\$/g, '\\$')}\\b`, 'g');
+  for (const m of catchBody.matchAll(assign)) if (m[1] !== param) targets.add(m[1]!);
+  if (targets.size === 0) return false;
+  return asserted(after, targets, assertLine);
+}
+
+/** Some line of `text` is an assertion that mentions one of `names` as a word. */
+export function asserted(text: string, names: Set<string>, assertLine: RegExp): boolean {
+  for (const ln of text.split(/\r?\n/)) {
+    if (!assertLine.test(ln)) continue;
+    for (const n of names) if (new RegExp(`(^|[^\\w$])${n.replace(/\$/g, '\\$')}([^\\w$]|$)`).test(ln)) return true;
+  }
+  return false;
+}

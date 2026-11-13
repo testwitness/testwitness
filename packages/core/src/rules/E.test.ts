@@ -20,4 +20,9 @@ describe('E001 catch all added', () => {
     const head = { ...t({ name: 'a', body: 'y' }), catchAlls: [swallow] };
     expect(await E001.run(context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }] }), {})).toEqual([]);
   });
+  it('reports a promise left running in the background as low', async () => {
+    const head = { ...t({ name: 'a', body: 'y' }), catchAlls: [{ ...swallow, binding: 'promise catch', background: true }] };
+    const out = await E001.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [head]) }] }), {});
+    expect(out).toMatchObject([{ severity: 'low', label: 'background' }]);
+  });
 });
