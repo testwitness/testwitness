@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { R001, R002, R003, R004, R005, R006, R010 } from './R.js';
 import { changedFile, context, inventory, test as t } from './testkit.js';
+import { definedSymbols, minimumVersionRaised } from './util.js';
+import type { ChangedFile } from '../types.js';
 
 const P = 'src/billing.test.ts';
 
@@ -194,3 +196,33 @@ describe('overrides and conditional xfail', () => {
     expect(await R004.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [over]) }] }), {})).toEqual([]);
   });
 });
+
+describe('production symbols removed and version gates', () => {
+  it('reads classes and functions per language', () => {
+    expect([...definedSymbols('class Folder:\n    def render(self):\n        pass\n\ndef build():\n    pass\n', 'python')].sort()).toEqual(['Folder', 'build']);
+    expect([...definedSymbols('public class Cart {\n  public static int total(int a) { return a; }\n}\n', 'java')].sort()).toEqual(['Cart', 'total']);
+    expect([...definedSymbols('export function price() {}\nexport class Cart {}\nfunction help() {}\n', 'typescript')].sort()).toEqual(['Cart', 'help', 'price']);
+  });
+  it('reports a deleted test of a class removed from a production file that stays as low production removed', async () => {
+    const T = 'pkg/test/test_script.py';
+    const deleted = t({ name: 'test_render', container: ['DirectoryTests'], body: 'x', line: 3 });
+    const kept = t({ name: 'test_ok', body: 'y', line: 1 });
+    const pair = { file: changedFile(T, 'modified', 'python'), base: inventory(T, [kept, deleted]), head: inventory(T, [kept]) };
+    const prod: ChangedFile = { ...changedFile('pkg/script.py', 'modified', 'python'), kind: 'production' };
+    const ctx = { ...context({ pairs: [pair], files: [prod] }) };
+    const sources: Record<string, [string, string]> = {
+      'pkg/script.py': ['class Script:\n    pass\n\nclass Directory:\n    pass\n', 'class Script:\n    pass\n'],
+      [T]: ['def test_ok():\n    assert 1\nclass DirectoryTests:\n    def test_render(self):\n        assert Directory()\n', ''],
+    };
+    ctx.readBase = async (p) => sources[p]?.[0];
+    ctx.readHead = async (p) => sources[p]?.[1];
+    expect(await R001.run(ctx, {})).toMatchObject([{ severity: 'low', label: 'production removed' }]);
+  });
+  it('sees a raised minimum version only when the number goes up', () => {
+    const cfg = (before: string, after: string): ChangedFile => ({ ...changedFile('pyproject.toml'), kind: 'runner-config', hunks: [{ baseStart: 1, baseCount: 1, headStart: 1, headCount: 1, removed: [before], added: [after] }] });
+    expect(minimumVersionRaised(context({ pairs: [], files: [cfg('requires-python = ">=3.10"', 'requires-python = ">=3.11"')] }))).toBe(true);
+    expect(minimumVersionRaised(context({ pairs: [], files: [cfg('requires-python = ">=3.11"', 'requires-python = ">=3.10"')] }))).toBe(false);
+    expect(minimumVersionRaised(context({ pairs: [], files: [cfg('    "node": ">=18"', '    "node": ">=20"')] }))).toBe(true);
+  });
+});
+

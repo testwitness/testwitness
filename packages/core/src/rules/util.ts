@@ -219,3 +219,87 @@ export async function movedByName(ctx: RuleContext, path: string, tests: TestCas
 function nameKey(t: TestCase): string {
   return `${t.container.at(-1) ?? ''}#${t.name}`;
 }
+
+/** Classes and top level functions a production source defines (Java: types and public or protected methods). */
+export function definedSymbols(src: string, language: string | undefined): Set<string> {
+  const out = new Set<string>();
+  const res: RegExp[] =
+    language === 'python'
+      ? [/^(?:async\s+)?def\s+(\w+)/gm, /^class\s+(\w+)/gm]
+      : language === 'java'
+        ? [/\b(?:class|interface|enum|record)\s+(\w+)/g, /\b(?:public|protected)\s+(?:static\s+|final\s+|synchronized\s+|abstract\s+)*(?:<[^>]*>\s*)?[\w.<>[\],?\s]+?\s+(\w+)\s*\(/g]
+        : [/^export\s+(?:default\s+)?(?:declare\s+)?(?:async\s+)?(?:function\*?|class|const|let|var|abstract\s+class)\s+(\w+)/gm, /^(?:async\s+)?function\*?\s+(\w+)/gm, /^class\s+(\w+)/gm];
+  for (const re of res) for (const m of src.matchAll(re)) if (m[1] && m[1].length >= 4) out.add(m[1]);
+  return out;
+}
+
+const removedCache = new WeakMap<RuleContext, Promise<Set<string>>>();
+
+/**
+ * Symbols this PR removed from production files that still exist: defined in the base of a modified production file,
+ * absent from its head, and defined in the head of no other changed production file (not moved).
+ */
+export function removedProductionSymbols(ctx: RuleContext): Promise<Set<string>> {
+  let p = removedCache.get(ctx);
+  if (!p) {
+    p = (async () => {
+      const removed = new Set<string>();
+      const stillDefined = new Set<string>();
+      for (const f of ctx.files) {
+        if (f.kind !== 'production' || f.status === 'deleted') continue;
+        const head = definedSymbols((await ctx.readHead(f.path)) ?? '', f.language);
+        for (const s of head) stillDefined.add(s);
+        if (f.status !== 'modified' && f.status !== 'renamed') continue;
+        const base = definedSymbols((await ctx.readBase(f.oldPath ?? f.path)) ?? '', f.language);
+        for (const s of base) if (!head.has(s)) removed.add(s);
+      }
+      for (const s of stillDefined) removed.delete(s);
+      return removed;
+    })();
+    removedCache.set(ctx, p);
+  }
+  return p;
+}
+
+/** Source lines of a base test, with the decorators or annotations directly above it. */
+export async function baseTestText(ctx: RuleContext, path: string, t: TestCase): Promise<string> {
+  const lines = ((await ctx.readBase(path)) ?? '').split(/\r?\n/);
+  let start = t.startLine - 1;
+  while (start > 0 && /^\s*@/.test(lines[start - 1] ?? '')) start--;
+  return lines.slice(start, t.endLine).join('\n');
+}
+
+/** The production symbol a deleted test exercised that this PR removed from a file that still exists, if any. */
+export async function removedSubjectOf(ctx: RuleContext, path: string, t: TestCase): Promise<string | undefined> {
+  const removed = await removedProductionSymbols(ctx);
+  if (removed.size === 0) return undefined;
+  const text = `${t.container.join(' ')}\n${await baseTestText(ctx, path, t)}`;
+  for (const s of removed) if (new RegExp(`\\b${s}\\b|\\b${s}(?=Tests?\\b)`).test(text)) return s;
+  return undefined;
+}
+
+const VERSION_GATE = /\bsys\.version_info\b|\bPY_?3\d+\b|\bpython_version\b|\bprocess\.versions?\b|@(?:Enabled|Disabled)(?:On|For)Jre|\bJRE_\d+\b/;
+const MIN_VERSION = /requires-python|python_requires|"node"\s*:|<maven\.compiler\.(?:source|release)>|sourceCompatibility|JavaVersion\.VERSION_/;
+
+/** The PR raises the minimum supported language version (requires-python, engines.node, the Java release). */
+export function minimumVersionRaised(ctx: RuleContext): boolean {
+  const num = (l: string): number[] | undefined => /(\d+)(?:\.(\d+))?/.exec(l.replace(/^[^=:>]*[=:>]/, ''))?.slice(1).map((x) => Number(x ?? 0));
+  for (const f of ctx.files) {
+    if (f.kind === 'test' || f.kind === 'production') continue;
+    for (const h of f.hunks) {
+      const before = h.removed.find((l) => MIN_VERSION.test(l));
+      const after = h.added.find((l) => MIN_VERSION.test(l));
+      if (!before || !after) continue;
+      const a = num(before);
+      const b = num(after);
+      if (a && b && (b[0]! > a[0]! || (b[0] === a[0] && b[1]! > a[1]!))) return true;
+    }
+  }
+  return false;
+}
+
+/** A deleted test gated on a language version (skipif on sys.version_info, @EnabledOnJre) in a PR that raises the minimum version. */
+export async function versionGated(ctx: RuleContext, path: string, t: TestCase): Promise<boolean> {
+  if (!minimumVersionRaised(ctx)) return false;
+  return VERSION_GATE.test(await baseTestText(ctx, path, t));
+}

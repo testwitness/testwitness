@@ -1,0 +1,1 @@
+Negative control. The PR removes the class ResourceScriptDirectory from pkg/script.py, a file that stays, and deletes the two tests of that class. The tests had nothing left to exercise, so each deletion is reported low with the label production removed, as when a whole production file is deleted. Seen in a replay of public PRs on Twisted.

@@ -8,7 +8,7 @@
  *   3. V003 on a test recorded in every one of the last 5 runs of the history: high, label `ran before, not now`.
  *
  * A finding the rule already graded low because the test survives elsewhere or only partly stops running (moved,
- * parameterised, rewritten, replaced, refactored, production removed, conditional, one case, partial results) is left
+ * parameterised, rewritten, replaced, refactored, production removed, version dropped, conditional, one case, partial results) is left
  * alone: the history says the test was failing, not that this change hides it.
  */
 
@@ -17,7 +17,7 @@ import { inventoryKeys } from '../evidence/normalise.js';
 import { HISTORY_RECENT, lookupHistory, type HistoryDocument, type HistoryStats } from '../history/history.js';
 
 /** Labels that mean the rule found the test still runs somewhere, or only some of it stopped running. */
-const EXCUSED = new Set(['moved', 'parameterised', 'rewritten', 'replaced', 'refactored', 'production removed', 'conditional', 'one case', 'partial results']);
+const EXCUSED = new Set(['moved', 'parameterised', 'rewritten', 'replaced', 'refactored', 'production removed', 'version dropped', 'conditional', 'one case', 'partial results']);
 
 export const HIDES_FAILURE_RULES = new Set(['R001', 'R003', 'R004']);
 

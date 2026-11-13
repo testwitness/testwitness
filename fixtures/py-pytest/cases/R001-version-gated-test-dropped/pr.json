@@ -1,0 +1,1 @@
+{"title":"Drop support for Python 3.10","body":"Python 3.10 reaches end of life. This raises the minimum to 3.11 and removes the code paths for older versions."}
