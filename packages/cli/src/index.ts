@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { check, loadConfig, render, resolveBase, ConfigError } from './check.js';
+import { check, defaultFormat, loadConfig, render, resolveBase, useColor, ConfigError } from './check.js';
 import { serveStdio } from './mcp.js';
 import { AGENTS } from './hook/events.js';
 import { runHook } from './hook/run.js';
@@ -46,7 +46,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
     .option('--mutation <globs>', 'comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (default from config mutation.paths)')
     .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
-    .option('--format <fmt>', 'json | markdown | both', 'markdown')
+    .option('--format <fmt>', 'text | markdown | json | both (default: text at a terminal, markdown otherwise)')
     .option('--out <path>', 'write the output to a file instead of stdout')
     .option('--mode <mode>', 'report | require-ack | strict (overrides config)')
     .option('--fail-on <sev>', 'high | medium | low (overrides config)')
@@ -62,6 +62,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('-q, --quiet', 'no progress on stderr', false)
     .action(async (o) => {
       try {
+        const format = defaultFormat({ format: o.format, out: o.out, isTTY: Boolean(process.stdout.isTTY) });
         if (o.worktree && o.head !== 'HEAD') throw new ConfigError('--worktree compares the working tree, which sits on HEAD; do not pass --head with it');
         const { report, exitCode, config } = await check({
           cwd: resolve(o.cwd),
@@ -74,7 +75,7 @@ export async function main(argv: string[]): Promise<number> {
           coverage: o.coverage,
           mutation: o.mutation,
           config: o.config,
-          format: o.format,
+          format,
           out: o.out,
           prTitle: o.prTitle,
           prBodyFile: o.prBodyFile,
@@ -88,7 +89,7 @@ export async function main(argv: string[]): Promise<number> {
           runId: o.runId,
           ...(o.followSymlinks ? { followSymlinks: true } : {}),
         });
-        const text = render(report, o.format, config.comment.collapseLow);
+        const text = render(report, format, config.comment.collapseLow, !o.out && useColor(process.env, Boolean(process.stdout.isTTY)));
         if (o.out) await writeFile(resolve(o.cwd, o.out), text);
         else process.stdout.write(text);
         code = exitCode;

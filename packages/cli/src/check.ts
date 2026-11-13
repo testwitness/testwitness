@@ -7,6 +7,7 @@ import {
   parseConfig,
   renderJson,
   renderMarkdown,
+  renderText,
   ruleMap,
   runEngine,
   showFile,
@@ -64,7 +65,7 @@ export interface CheckOptions {
   mutation?: string | undefined;
   /** Path to .testwitness.yml; default reads it from the base ref, then the working tree. */
   config?: string | undefined;
-  format: 'json' | 'markdown' | 'both';
+  format: 'json' | 'markdown' | 'both' | 'text';
   out?: string | undefined;
   prTitle?: string | undefined;
   prBodyFile?: string | undefined;
@@ -435,10 +436,28 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   return { report, exitCode: exitCodeFor(report, config), config, files, pairs, ...(evidence ? { evidence } : {}), ...(updated ? { history: updated } : {}) };
 }
 
-export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean): string {
+export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean, color = false): string {
   if (format === 'json') return renderJson(report);
+  if (format === 'text') return renderText(report, { collapseLow, color });
   if (format === 'markdown') return renderMarkdown(report, { collapseLow, marker: false });
   return renderMarkdown(report, { collapseLow, marker: false }) + '\n' + renderJson(report);
+}
+
+/**
+ * The output format when --format is not given: plain text for a person at a terminal, markdown otherwise (pipes,
+ * files and CI logs keep the format they had before the text renderer existed).
+ */
+export function defaultFormat(opts: { format?: string; out?: string; isTTY: boolean }): CheckOptions['format'] {
+  if (opts.format !== undefined) {
+    if (!['json', 'markdown', 'both', 'text'].includes(opts.format)) throw new ConfigError('--format must be text, markdown, json or both');
+    return opts.format as CheckOptions['format'];
+  }
+  return !opts.out && opts.isTTY ? 'text' : 'markdown';
+}
+
+/** Colour only for a terminal, and never when NO_COLOR is set (https://no-color.org) or TERM is dumb. */
+export function useColor(env: NodeJS.ProcessEnv, isTTY: boolean): boolean {
+  return isTTY && !env.NO_COLOR && env.TERM !== 'dumb';
 }
 
 export { ConfigError };
