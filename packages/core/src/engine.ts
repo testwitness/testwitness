@@ -2,6 +2,7 @@ import picomatch from 'picomatch';
 import type {
   ChangedFile,
   CheckState,
+  CoverageEvidence,
   Evidence,
   Finding,
   FrameworkProfile,
@@ -42,6 +43,8 @@ export interface EngineOptions {
   config: ResolvedConfig;
   rules?: Rule[];
   evidence?: Evidence | undefined;
+  /** Line coverage of the head run, read from lcov, Cobertura or JaCoCo reports. */
+  coverage?: CoverageEvidence | undefined;
   /** Why evidence is missing or partial, for the report. */
   evidenceNotes?: string[];
   prText?: PullRequestText | undefined;
@@ -216,6 +219,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     readBase: (p) => read(baseSha, p),
     readHead: (p) => read(headSha, p),
     ...(opts.evidence ? { evidence: opts.evidence } : {}),
+    ...(opts.coverage ? { coverage: opts.coverage } : {}),
     ...(opts.prText ? { prText: opts.prText } : {}),
     profile,
     config: opts.config,
@@ -231,6 +235,7 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     const configured = effectiveSeverity(rule, opts.config);
     if (configured === 'off') continue;
     if (rule.needs.includes('junit') && !opts.evidence) continue;
+    if (rule.needs.includes('coverage') && !opts.coverage) continue;
     const options = { ...(rule.defaultOptions ?? {}), ...(opts.config.rules[rule.id]?.options ?? {}) };
     let result: Finding[];
     try {
@@ -304,6 +309,9 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     },
     timing: { totalMs: Math.round(performance.now() - t0), parseMs: Math.round(parseMs), rulesMs: Math.round(rulesMs), evidenceMs: 0, ...(helperIndex ? { helperIndexMs: Math.round(helperIndexMs) } : {}) },
     ...(helperIndex ? { helperIndex } : {}),
+    ...(opts.coverage
+      ? { coverage: { sources: opts.coverage.sources, files: opts.coverage.files, linesInstrumented: opts.coverage.linesInstrumented, linesExecuted: opts.coverage.linesExecuted, notes: opts.coverage.warnings.slice(0, 10) } }
+      : {}),
     base: baseSha,
     head: headSha,
   };

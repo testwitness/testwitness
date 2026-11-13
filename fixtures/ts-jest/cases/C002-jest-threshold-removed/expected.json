@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "high",
+    "subject": "jest.coverageThreshold.global.statements"
+  }
+]

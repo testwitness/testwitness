@@ -12,7 +12,7 @@ export type LanguageId = 'java' | 'typescript' | 'javascript' | 'python';
 
 export type RuleGroup = 'R' | 'A' | 'O' | 'E' | 'S' | 'M' | 'T' | 'C' | 'W' | 'X' | 'V' | 'Q';
 
-export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext';
+export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext' | 'coverage';
 
 /** File status in the diff. */
 export type FileStatus = 'added' | 'modified' | 'deleted' | 'renamed';
@@ -280,6 +280,38 @@ export interface Evidence {
   keys(): Iterable<string>;
 }
 
+/** Line coverage of one source file: lines the tool instrumented and the subset some test executed. */
+export interface FileCoverage {
+  instrumented: ReadonlySet<number>;
+  executed: ReadonlySet<number>;
+}
+
+/**
+ * Line coverage read from lcov, Cobertura or JaCoCo reports of the head run. Paths are matched against repository
+ * relative paths: exactly when the report path could be made relative to the root, otherwise by path suffix.
+ */
+export interface CoverageEvidence {
+  /** Report files that were read. */
+  sources: string[];
+  /** Source files with coverage data. */
+  files: number;
+  linesInstrumented: number;
+  linesExecuted: number;
+  /** Reader warnings and caps that were hit. */
+  warnings: string[];
+  /** Coverage of a repository relative path, if the reports cover it. */
+  lookup(path: string): FileCoverage | undefined;
+}
+
+/** The coverage section of the report. Present only when coverage reports were attached. */
+export interface CoverageSummary {
+  sources: string[];
+  files: number;
+  linesInstrumented: number;
+  linesExecuted: number;
+  notes: string[];
+}
+
 export type TestStatus = 'passed' | 'failed' | 'error' | 'skipped' | 'flaky';
 
 export interface PullRequestText {
@@ -298,6 +330,8 @@ export interface RuleContext {
   readBase(path: string): Promise<string | undefined>;
   readHead(path: string): Promise<string | undefined>;
   evidence?: Evidence;
+  /** Line coverage of the head run, when reports were attached. */
+  coverage?: CoverageEvidence;
   prText?: PullRequestText;
   profile: FrameworkProfile;
   config: ResolvedConfig;
@@ -320,6 +354,8 @@ export interface ResolvedConfig {
   languages: LanguageId[] | 'auto';
   paths: { tests: string[]; ignore: string[] };
   junit: { head: string; base: string };
+  /** Globs of lcov, Cobertura or JaCoCo coverage reports of the head run. Empty: no coverage is read. */
+  coverage: { paths: string[] };
   assertions: { extra: string[] };
   rules: Record<string, RuleConfigEntry>;
   acknowledge: Array<{ fingerprint: string; reason: string; by: string; date: string }>;
@@ -360,6 +396,8 @@ export interface Report {
   timing: { totalMs: number; parseMs: number; rulesMs: number; evidenceMs: number; helperIndexMs?: number };
   /** The helper index, when a changed test called a function the file could not resolve. Absent when it was not needed. */
   helperIndex?: HelperIndexSummary;
+  /** Coverage reports read for V008. Absent when none were attached. */
+  coverage?: CoverageSummary;
   base: string;
   head: string;
 }

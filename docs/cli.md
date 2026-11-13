@@ -27,6 +27,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--base <ref>` | base ref; the merge base with head is used | `origin/main` |
 | `--head <ref>` | head ref | `HEAD` |
 | `--junit <globs>` | comma separated globs of JUnit XML | from config |
+| `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
 | `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
 | `--format <fmt>` | `markdown`, `json` or `both` | `markdown` |
 | `--out <path>` | write to a file instead of stdout | |

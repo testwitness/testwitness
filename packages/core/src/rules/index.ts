@@ -5,6 +5,7 @@ import { rulesA } from './A.js';
 import { rulesV } from './V.js';
 import { rulesW } from './W.js';
 import { rulesE } from './E.js';
+import { rulesC } from './C.js';
 
 export * from './R.js';
 export * from './O.js';
@@ -12,11 +13,12 @@ export * from './A.js';
 export * from './V.js';
 export * from './W.js';
 export * from './E.js';
+export * from './C.js';
 export * from './util.js';
 
 /** Built in rules in catalogue order. */
 export function builtinRules(): Rule[] {
-  return [...rulesR(), ...rulesA(), ...rulesO(), ...rulesE(), ...rulesW(), ...rulesV()];
+  return [...rulesR(), ...rulesA(), ...rulesO(), ...rulesE(), ...rulesW(), ...rulesC(), ...rulesV()];
 }
 
 export function ruleMap(rules: Rule[] = builtinRules()): Map<string, Rule> {

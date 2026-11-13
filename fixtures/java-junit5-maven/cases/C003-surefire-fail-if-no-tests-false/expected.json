@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "C003",
+    "severity": "high",
+    "subject": "<failIfNoTests>false"
+  }
+]

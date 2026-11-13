@@ -28,6 +28,7 @@ export async function run(): Promise<void> {
   const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : 'origin/main');
   const head = headInput || (pr ? (pr['head'] as { sha: string }).sha : 'HEAD');
   const junit = core.getInput('junit') || undefined;
+  const coverage = core.getInput('coverage') || undefined;
   const mode = (core.getInput('mode') || undefined) as 'report' | 'require-ack' | 'strict' | undefined;
   const failOn = (core.getInput('fail_on') || undefined) as 'high' | 'medium' | 'low' | undefined;
   const configPath = core.getInput('config') || undefined;
@@ -48,7 +49,7 @@ export async function run(): Promise<void> {
   const author = typeof user?.login === 'string' && user.login ? user.login : undefined;
   const authorType = typeof user?.type === 'string' ? user.type : undefined;
 
-  const { report, config } = await check({ cwd, base, head, junit, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false });
+  const { report, config } = await check({ cwd, base, head, junit, coverage, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false });
 
   // Acknowledgements from PR comments and the label. Comments are readable on fork PRs with the read only token.
   const token = core.getInput('token') || process.env['GITHUB_TOKEN'];

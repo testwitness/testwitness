@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "V008",
+    "severity": "low",
+    "label": "uncovered change",
+    "subject": "src/cart.ts"
+  }
+]

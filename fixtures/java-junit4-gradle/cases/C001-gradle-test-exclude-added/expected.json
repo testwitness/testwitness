@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "C001",
+    "severity": "high",
+    "subject": "gradle.test.exclude **/LegacyQueueTest*"
+  }
+]

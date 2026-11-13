@@ -39,3 +39,15 @@ jobs:
 ## What is read
 
 Only the elements every producer agrees on: `testsuite/@name`, `testcase/@name`, `@classname`, `@file`, and the children `skipped`, `failure`, `error`, `flakyFailure`, `flakyError`, `rerunFailure`, `rerunError`. Producer quirks (Surefire reruns, pytest parametrised ids, jest-junit title modes, Playwright project names, Mocha's inverted attributes, pytest reruns as duplicate testcases) are handled by the normaliser and each has a fixture produced by running the real framework.
+
+## Coverage reports (optional)
+
+V008 reads line coverage of the head run when you attach it with the `coverage` input of the Action, `--coverage` on the CLI or `coverage.paths` in `.testwitness.yml`. Three formats are read, told apart by their first bytes: lcov (`lcov.info` from Istanbul, c8, Vitest, Jest or `coverage lcov`), Cobertura XML (`coverage.xml` from coverage.py and pytest cov, and the Cobertura writers of other tools) and JaCoCo XML (`jacoco.xml`). Only line hits are read. Paths are made relative to the repository root when the report holds an absolute path under it or a Cobertura source root under it; otherwise they are matched by suffix, so a report written on a CI runner with another checkout path, or a JaCoCo report that names `com/acme/Refund.java`, still finds `src/main/java/com/acme/Refund.java`. The readers stream, stop after 200 report files or 50 MB, never fetch a DTD and never run anything. The report gains a `coverage` section and the comment a Coverage line under Evidence.
+
+```yaml
+- uses: testwitness/testwitness@v0
+  with:
+    junit: "**/junit*.xml"
+    coverage: "coverage/lcov.info,**/coverage.xml,**/jacoco.xml"
+```
+

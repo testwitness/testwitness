@@ -1,0 +1,8 @@
+[
+  {
+    "ruleId": "C001",
+    "severity": "low",
+    "label": "matches nothing",
+    "subject": "surefire.excludes **/RemovedLongAgoTest.java"
+  }
+]
