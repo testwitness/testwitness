@@ -1,0 +1,46 @@
+[
+  {
+    "path": "packages/jest/migrations.json",
+    "status": "modified"
+  },
+  {
+    "path": "packages/jest/src/migrations/update-8-3-0/update-8-3-0.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/jest/src/migrations/update-8-3-0/update-8-3-0.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/jest/src/migrations/update-9-0-1/test-files/jest.config.js",
+    "status": "added"
+  },
+  {
+    "path": "packages/jest/src/migrations/update-9-0-1/update-9-0-1.spec.ts",
+    "status": "added"
+  },
+  {
+    "path": "packages/jest/src/migrations/update-9-0-1/update-9-0-1.ts",
+    "status": "added"
+  },
+  {
+    "path": "packages/jest/src/schematics/init/init.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/jest/src/schematics/jest-project/jest-project.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/jest/src/schematics/jest-project/jest-project.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/node/src/schematics/library/library.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/nx-plugin/src/schematics/plugin/plugin.spec.ts",
+    "status": "modified"
+  }
+]

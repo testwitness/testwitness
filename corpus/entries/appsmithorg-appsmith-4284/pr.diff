@@ -1,0 +1,13 @@
+diff --git a/.github/workflows/client-test.yml b/.github/workflows/client-test.yml
+index e55457c5..f75b3a71 100644
+--- a/.github/workflows/client-test.yml
++++ b/.github/workflows/client-test.yml
+@@ -296,7 +296,7 @@ jobs:
+       - run: echo "All ui-test matrices completed"
+ 
+   package:
+-    needs: ui-test
++    needs: build
+     runs-on: ubuntu-latest
+     defaults:
+       run:

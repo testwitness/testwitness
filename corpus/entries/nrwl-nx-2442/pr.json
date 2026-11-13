@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/nrwl/nx/pull/2442",
+  "repo": "nrwl/nx",
+  "number": 2442,
+  "title": "fix(testing): invalid jest config --passWithNoTests",
+  "merged_at": "2020-02-16T15:56:01Z",
+  "stars": 29467,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "cc5130d5f289416fe8e64503ba51efbb92901d54",
+  "head_sha": "28438ff19fd3f5165b59779251f8660bed1432a5",
+  "files_changed": 11,
+  "additions": 262,
+  "deletions": 12
+}

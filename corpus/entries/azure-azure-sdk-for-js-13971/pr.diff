@@ -1,0 +1,12 @@
+diff --git a/eng/pipelines/aggregate-reports.yml b/eng/pipelines/aggregate-reports.yml
+index 14336e20..e70e7ee3 100644
+--- a/eng/pipelines/aggregate-reports.yml
++++ b/eng/pipelines/aggregate-reports.yml
+@@ -70,6 +70,7 @@ jobs:
+       # Used for generating baseline file.
+       # GdnBreakOutputBaselineFile: js
+       # GdnBreakOutputBaseline: baseline
++    continueOnError: true
+   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
+     displayName: 'Publish Security Analysis Logs'
+     condition: succeededOrFailed()

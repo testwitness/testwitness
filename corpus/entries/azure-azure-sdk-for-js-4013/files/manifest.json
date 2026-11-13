@@ -1,0 +1,10 @@
+[
+  {
+    "path": "sdk/eventhub/event-hubs/tests.yml",
+    "status": "modified"
+  },
+  {
+    "path": "sdk/eventhub/event-processor-host/tests.yml",
+    "status": "modified"
+  }
+]
