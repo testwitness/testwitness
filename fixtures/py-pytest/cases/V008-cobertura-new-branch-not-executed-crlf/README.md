@@ -1,0 +1,1 @@
+The LF case V008-cobertura-new-branch-not-executed with every base and head file, the PR body and the result, coverage, mutation and history inputs written with CRLF line endings. The findings must equal the LF case exactly, line numbers, messages and fingerprints included.
