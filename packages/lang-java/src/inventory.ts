@@ -7,6 +7,7 @@
  */
 
 import {
+  capturedThenAsserted,
   parseSource,
   countParseErrors,
   normaliseText,
@@ -1014,7 +1015,9 @@ export function collectCatchAlls(body: Node): CatchAll[] {
           const binding = normaliseText(typeNode?.text ?? '');
           if (!binding || !isCatchAllType(binding)) continue;
           const catchBody = clause.childForFieldName('body') ?? clause.namedChildren.find((c) => c.type === 'block');
-          const swallows = !CATCH_ESCAPES.test(catchBody?.text ?? '');
+          const name = param?.childForFieldName('name')?.text ?? param?.namedChildren.filter((c) => c.type === 'identifier').pop()?.text;
+          const after = body.text.split('\n').slice(child.endPosition.row - body.startPosition.row).join('\n');
+          const swallows = !CATCH_ESCAPES.test(catchBody?.text ?? '') && !capturedThenAsserted(catchBody?.text ?? '', name, after, CATCH_ESCAPES);
           out.push({ line: line(clause), binding, swallows, snippet });
         }
       }

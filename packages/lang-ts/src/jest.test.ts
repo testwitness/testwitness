@@ -512,6 +512,31 @@ describe('jest catch alls', () => {
     ]);
   });
 
+  it('does not count capture then assert as swallowing, and marks a voided background promise', async () => {
+    const inventory = await inv(src(`
+      test('captures', async () => {
+        let error: any = null;
+        try { validate('a.json', 'css'); } catch (error_) { error = error_; }
+        expect(error).toBeInstanceOf(TypeError);
+        const rejected = await evaluate(deep).catch((e) => e);
+        expect(rejected.message).toMatch(/deep/);
+      });
+      test('captures and forgets', async () => {
+        let error: any = null;
+        try { validate('a.json', 'css'); } catch (error_) { error = error_; }
+        const rejected = await evaluate(deep).catch((e) => e);
+        console.log(error, rejected);
+      });
+      test('background', async () => {
+        void client.openTab('Beta').catch(() => {});
+        await expect.poll(() => server.pending()).toBe(1);
+      });
+    `));
+    expect(byName(inventory, 'captures').catchAlls!.map((c) => c.swallows)).toEqual([false, false]);
+    expect(byName(inventory, 'captures and forgets').catchAlls!.map((c) => c.swallows)).toEqual([true, true]);
+    expect(byName(inventory, 'background').catchAlls).toMatchObject([{ swallows: true, background: true }]);
+  });
+
   it('records promise .catch handlers that swallow', async () => {
     const inventory = await inv(src(`
       test('promise catches', async () => {

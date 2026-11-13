@@ -8,7 +8,7 @@
  * docs/conventions.md.
  */
 
-import { countParseErrors, normaliseText, parseSource, shortHash, toLf } from '@testwitness/core';
+import { asserted, capturedThenAsserted, countParseErrors, normaliseText, parseSource, shortHash, toLf } from '@testwitness/core';
 import type { Assertion, AssertionKind, CallSite, CatchAll, FrameworkProfile, HelperDefinition, Node, SkipMarker, TestCase, TestInventory } from '@testwitness/core';
 import type { Query } from '@testwitness/core';
 import { grammarFor, grammarForPath } from './grammar.js';
@@ -1075,10 +1075,11 @@ export function collectCatchAlls(body: Node | undefined): CatchAll[] {
         const param = clause.childForFieldName('parameter');
         const binding = param ? squash(param.text) : 'any';
         const text = clause.childForFieldName('body')?.text ?? '';
-        out.push({ line: line(clause), binding, swallows: !CATCH_HANDLES.test(text), snippet });
+        const swallows = !CATCH_HANDLES.test(text) && !capturedThenAsserted(text, param?.type === 'identifier' ? param.text : undefined, textAfter(start, node), ASSERT_LINE);
+        out.push({ line: line(clause), binding, swallows, snippet });
       }
     } else if (node.type === 'call_expression') {
-      const handler = promiseCatchHandler(node);
+      const handler = promiseCatchHandler(node, start);
       if (handler) out.push(handler);
     }
     for (let i = node.namedChildren.length - 1; i >= 0; i--) {
@@ -1089,8 +1090,52 @@ export function collectCatchAlls(body: Node | undefined): CatchAll[] {
   return out.sort((a, b) => a.line - b.line);
 }
 
+/** A line that asserts: expect(...), expect.poll(...), assert(...), assert.x(...), t.is(...) style calls excluded. */
+const ASSERT_LINE = /\b(expect|assert)\w*\s*[(.]/;
+
+/** The text of `scope` from the end of `node` on: what the test does after a try statement or a call. */
+function textAfter(scope: Node, node: Node): string {
+  return scope.text.split('\n').slice(node.endPosition.row - scope.startPosition.row).join('\n');
+}
+
+/** `(e) => e` or `function (e) { return e; }`: a handler that turns the rejection into the resolved value. */
+function isIdentityHandler(handler: Node): boolean {
+  if (!isFunctionNode(handler)) return false;
+  const params = handler.childForFieldName('parameters') ?? handler.childForFieldName('parameter');
+  const name = params?.type === 'identifier' ? params.text : params?.namedChildren.filter((c): c is Node => c !== null).map((c) => c.text.replace(/:.*$/s, '').trim())[0];
+  if (!name || !/^[A-Za-z_$][\w$]*$/.test(name)) return false;
+  const body = handler.childForFieldName('body');
+  const text = (body?.text ?? '').replace(/\s+/g, '');
+  return text === name || text === `{return${name}}` || text === `{return${name};}` || text === `(${name})`;
+}
+
+/** The variable a call's result is stored in: `const error = await p.catch(e => e)`, `error = p.catch(...)`. */
+function resultBinding(call: Node): string | undefined {
+  let cur: Node = call;
+  while (cur.parent && (cur.parent.type === 'await_expression' || cur.parent.type === 'parenthesized_expression')) cur = cur.parent;
+  const parent = cur.parent;
+  if (parent?.type === 'variable_declarator' && parent.childForFieldName('value')?.id === cur.id) {
+    const name = parent.childForFieldName('name');
+    return name?.type === 'identifier' ? name.text : undefined;
+  }
+  if (parent?.type === 'assignment_expression' && parent.childForFieldName('right')?.id === cur.id) {
+    const left = parent.childForFieldName('left');
+    return left?.type === 'identifier' ? left.text : undefined;
+  }
+  return undefined;
+}
+
+/** `void call().catch(() => {})` as a statement of its own: a promise left running on purpose. */
+function isVoidedStatement(call: Node): Node | undefined {
+  let cur: Node = call;
+  while (cur.parent && cur.parent.type === 'parenthesized_expression') cur = cur.parent;
+  const unary = cur.parent;
+  if (unary?.type !== 'unary_expression' || !unary.text.startsWith('void')) return undefined;
+  return unary.parent?.type === 'expression_statement' ? unary.parent : undefined;
+}
+
 /** `promise.catch(() => {})` or `.catch(noop)`: a swallowing handler on the promise left of `.catch`. */
-function promiseCatchHandler(call: Node): CatchAll | undefined {
+function promiseCatchHandler(call: Node, scope?: Node): CatchAll | undefined {
   const fn = call.childForFieldName('function');
   if (!fn || fn.type !== 'member_expression') return undefined;
   const prop = fn.childForFieldName('property');
@@ -1108,7 +1153,16 @@ function promiseCatchHandler(call: Node): CatchAll | undefined {
   } else {
     return undefined;
   }
-  return { line: line(prop), binding: 'promise catch', swallows, snippet: normaliseText(obj.text).slice(0, 120) };
+  const out: CatchAll = { line: line(prop), binding: 'promise catch', swallows, snippet: normaliseText(obj.text).slice(0, 120) };
+  if (swallows && scope) {
+    // Capture then assert: `const error = await p.catch(e => e); expect(error.message)...`.
+    const bound = isIdentityHandler(handler) ? resultBinding(call) : undefined;
+    if (bound && asserted(textAfter(scope, call), new Set([bound]), ASSERT_LINE)) out.swallows = false;
+    // A promise left running on purpose, with the test's assertions after it.
+    const statement = isVoidedStatement(call);
+    if (out.swallows && statement && ASSERT_LINE.test(textAfter(scope, statement))) out.background = true;
+  }
+  return out;
 }
 
 function containerAncestors(node: Node, containers: Map<NodeId, Declaration>): Declaration[] {

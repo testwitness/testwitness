@@ -638,6 +638,7 @@
       "type": "string",
       "enum": [
         "assertions moved",
+        "background",
         "conditional",
         "consolidated",
         "file not in results",

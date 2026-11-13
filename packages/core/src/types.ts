@@ -107,6 +107,11 @@ export interface CatchAll {
   swallows: boolean;
   /** Normalised text of the try block's first statement, for the fingerprint. */
   snippet: string;
+  /**
+   * A promise deliberately left running in the background (`void call().catch(() => {})`) with assertions after it in
+   * the test: the handler keeps an expected rejection from going unhandled, it does not hide the oracle. Optional.
+   */
+  background?: boolean;
 }
 
 export interface TestCase {
