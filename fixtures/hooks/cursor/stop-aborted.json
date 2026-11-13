@@ -1,0 +1,14 @@
+{
+  "conversation_id": "conv-668320d2",
+  "generation_id": "gen-490b90b7",
+  "model": "claude-sonnet",
+  "cursor_version": "1.7.2",
+  "workspace_roots": [
+    "__REPO__"
+  ],
+  "user_email": null,
+  "transcript_path": null,
+  "hook_event_name": "stop",
+  "status": "aborted",
+  "loop_count": 0
+}

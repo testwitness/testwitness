@@ -1,0 +1,15 @@
+{
+  "session_id": "abc123",
+  "transcript_path": "/home/user/.claude/projects/my-project/abc123.jsonl",
+  "cwd": "__REPO__",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "__REPO__/src/math.test.ts",
+    "old_string": "toBe(3)",
+    "new_string": "toBeDefined()",
+    "replace_all": false
+  },
+  "tool_use_id": "toolu_01ABC126"
+}

@@ -1,3 +1,4 @@
+import picomatch from 'picomatch';
 import { parse as parseYaml } from 'yaml';
 import type { LanguageId, Mode, ResolvedConfig, Rule, RuleConfigEntry, Severity, SeveritySetting } from './types.js';
 
@@ -9,6 +10,17 @@ export class ConfigError extends Error {
 }
 
 export const DEFAULT_JUNIT_GLOB = '**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml';
+
+/** Seconds the agent hook may take before it allows the action and says so. */
+export const HOOK_DEFAULT_TIMEOUT_SECONDS = 20;
+/** How often the same finding blocks in one agent session before the hook steps aside. */
+export const HOOK_DEFAULT_MAX_BLOCKS = 2;
+/**
+ * Rules the agent hook never blocks on by default. A rule is listed here when the replay of the corpus as working
+ * tree changes measured at least one wrongful block for it at the default setting (docs/precision.md, "Agent hook
+ * replay"); corpus/runner/hook-replay.test.ts fails when this list and the measurement disagree.
+ */
+export const HOOK_ADVICE_ONLY: readonly string[] = ['R001'];
 
 export function defaultConfig(): ResolvedConfig {
   return {
@@ -27,6 +39,8 @@ export function defaultConfig(): ResolvedConfig {
     provenance: { show: true, stricterForAgents: false },
     claims: { enabled: true, phrasesExtra: [] },
     comment: { enabled: true, collapseLow: true },
+    protect: [],
+    hook: { timeoutSeconds: HOOK_DEFAULT_TIMEOUT_SECONDS, maxBlocks: HOOK_DEFAULT_MAX_BLOCKS, adviceOnly: [...HOOK_ADVICE_ONLY] },
   };
 }
 
@@ -173,6 +187,28 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
     if (typeof doc['comment']['enabled'] === 'boolean') cfg.comment.enabled = doc['comment']['enabled'];
     if (typeof doc['comment']['collapse_low'] === 'boolean') cfg.comment.collapseLow = doc['comment']['collapse_low'];
   }
+  if (doc['protect'] !== undefined) cfg.protect = stringList(doc['protect'], 'protect');
+  if (doc['hook'] !== undefined) {
+    if (!isRecord(doc['hook'])) throw new ConfigError('hook must be a mapping');
+    const h = doc['hook'];
+    for (const k of Object.keys(h)) if (!['timeout', 'max_blocks', 'advice_only'].includes(k)) throw new ConfigError(`hook: unknown key ${k}`);
+    if (h['timeout'] !== undefined) {
+      if (typeof h['timeout'] !== 'number' || !(h['timeout'] > 0) || h['timeout'] > 600) throw new ConfigError('hook.timeout must be a number of seconds between 0 and 600');
+      cfg.hook.timeoutSeconds = h['timeout'];
+    }
+    if (h['max_blocks'] !== undefined) {
+      if (typeof h['max_blocks'] !== 'number' || !Number.isInteger(h['max_blocks']) || h['max_blocks'] < 1 || h['max_blocks'] > 10) throw new ConfigError('hook.max_blocks must be a whole number from 1 to 10');
+      cfg.hook.maxBlocks = h['max_blocks'];
+    }
+    if (h['advice_only'] !== undefined) {
+      const ids = stringList(h['advice_only'], 'hook.advice_only');
+      for (const id of ids) {
+        if (!/^[A-Z]\d{3}$/.test(id)) throw new ConfigError(`hook.advice_only: invalid rule id ${id}`);
+        if (knownRules && !knownRules.has(id)) throw new ConfigError(`hook.advice_only: unknown rule ${id}`);
+      }
+      cfg.hook.adviceOnly = ids;
+    }
+  }
   return cfg;
 }
 
@@ -191,4 +227,11 @@ export function applyConfiguredSeverity(found: Severity, configured: SeveritySet
   const delta = SEVERITY_RANK[configured] - SEVERITY_RANK[ruleDefault];
   const rank = Math.min(3, Math.max(1, SEVERITY_RANK[found] + delta));
   return (Object.keys(SEVERITY_RANK) as Severity[]).find((s) => SEVERITY_RANK[s] === rank)!;
+}
+
+/** A matcher for repository relative paths against config globs such as `protect` (dot files included). */
+export function pathMatcher(globs: string[]): (path: string) => boolean {
+  if (!globs.length) return () => false;
+  const m = picomatch(globs, { dot: true });
+  return (path) => m(path);
 }

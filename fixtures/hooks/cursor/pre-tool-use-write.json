@@ -1,0 +1,19 @@
+{
+  "conversation_id": "conv-668320d2",
+  "generation_id": "gen-490b90b7",
+  "model": "claude-sonnet",
+  "cursor_version": "1.7.2",
+  "workspace_roots": [
+    "__REPO__"
+  ],
+  "user_email": null,
+  "transcript_path": null,
+  "hook_event_name": "preToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "__REPO__/src/math.test.ts",
+    "content": "// emptied\n"
+  },
+  "tool_use_id": "tool-1",
+  "cwd": "__REPO__"
+}

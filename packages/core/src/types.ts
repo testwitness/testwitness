@@ -440,6 +440,20 @@ export interface ResolvedConfig {
   provenance: { show: boolean; stricterForAgents: boolean };
   claims: { enabled: boolean; phrasesExtra: string[] };
   comment: { enabled: boolean; collapseLow: boolean };
+  /**
+   * Globs of paths a coding agent must not change (config key `protect`). Only the agent hook reads it: an edit to a
+   * listed path is denied, and a changed listed path blocks a commit, push or stop. Empty by default.
+   */
+  protect: string[];
+  /** Settings of the agent hook (`testwitness hook`); docs/agent-guard.md. */
+  hook: {
+    /** Seconds after which the hook gives up and allows the action (config key `hook.timeout`). */
+    timeoutSeconds: number;
+    /** How often the same finding may block in one session before the hook steps aside (config key `hook.max_blocks`). */
+    maxBlocks: number;
+    /** Rules the hook shows as advice and never blocks on (config key `hook.advice_only`). */
+    adviceOnly: string[];
+  };
 }
 
 export interface Report {
