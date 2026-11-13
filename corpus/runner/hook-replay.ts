@@ -68,7 +68,7 @@ export async function replayWithHook(e: CorpusEntry): Promise<EntryReplay> {
         note: r.decision.note,
       };
     } finally {
-      rmSync(stateDir, { recursive: true, force: true });
+      rmSync(stateDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
   return { slug: e.slug, replay, judged: judgeFindings(e, replay.commit.findings), hook: replay.extra as EntryReplay['hook'] };

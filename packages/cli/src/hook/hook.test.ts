@@ -1,13 +1,13 @@
 // The agent guard, end to end on recorded hook payloads (fixtures/hooks, one directory per agent): each payload goes
 // to the hook as stdin and the answer is asserted in that agent's documented blocking format.
 // The whole file runs with the network guard installed: any socket, DNS lookup or fetch fails the run.
-import { chmodSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gitAction, parseEvent, patchPaths, type Agent } from './events.js';
-import { runHook, type HookOptions, type HookResult } from './run.js';
+import { realPathOf, runHook, type HookOptions, type HookResult } from './run.js';
 import { stateFile } from './state.js';
 import { makeRepo, MATH_TEST, MATH_TEST_WEAKENED, OTHER_TEST_FOCUSED, type TestRepo } from '../testing/repo.js';
 import { installNetworkGuard } from '../testing/no-network.js';
@@ -505,5 +505,23 @@ describe('a hook that fails allows the action and says so', () => {
     } finally {
       rmSync(outside, { recursive: true, force: true });
     }
+  });
+});
+
+describe('protect list through a symbolic link', () => {
+  it('denies an edit named through a linked path to the repository', async () => {
+    repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
+    const link = join(stateDir, 'linked-repo');
+    symlinkSync(repo.dir, link, process.platform === 'win32' ? 'junction' : 'dir');
+    const input = payload('claude', 'pretooluse-edit.json').replaceAll(repo.dir, link);
+    const o = out(await runHook({ agent: 'claude', input, stateDir })) as { hookSpecificOutput: { permissionDecision: string } };
+    expect(o.hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('realPathOf resolves the nearest existing ancestor of a file that does not exist yet', () => {
+    const link = join(stateDir, 'linked');
+    mkdirSync(join(stateDir, 'real'));
+    symlinkSync(join(stateDir, 'real'), link, process.platform === 'win32' ? 'junction' : 'dir');
+    expect(realPathOf(join(link, 'new', 'file.ts'))).toBe(join(realpathSync(stateDir), 'real', 'new', 'file.ts'));
   });
 });

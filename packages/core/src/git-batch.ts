@@ -97,9 +97,25 @@ export class BlobReader {
     }
   }
 
-  close(): void {
+  /**
+   * Ends the git process and waits for it to exit (at most two seconds, then it is killed). On Windows a directory
+   * cannot be removed while a process still has it as its working directory, so callers that delete the checkout
+   * next must await this.
+   */
+  async close(): Promise<void> {
     const p = this.proc;
     this.proc = undefined;
-    if (p) p.stdin.end();
+    if (!p || p.exitCode !== null || p.signalCode !== null) return;
+    await new Promise<void>((done) => {
+      const timer = setTimeout(() => {
+        p.kill();
+        done();
+      }, 2000);
+      p.once('close', () => {
+        clearTimeout(timer);
+        done();
+      });
+      p.stdin.end();
+    });
   }
 }

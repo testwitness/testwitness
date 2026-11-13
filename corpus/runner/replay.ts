@@ -64,7 +64,7 @@ export async function replayEntry(e: CorpusEntry, inWorktree?: (repo: string, re
     const committed = await check({ ...common, base: baseSha, head: git(repo, ['rev-parse', 'HEAD']).trim() });
     return { worktree: wt.report, commit: committed.report, untouched, ...(extra !== undefined ? { extra } : {}) };
   } finally {
-    rmSync(repo, { recursive: true, force: true });
+    rmSync(repo, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 }
 

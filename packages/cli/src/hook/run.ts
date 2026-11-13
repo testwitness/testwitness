@@ -8,7 +8,8 @@
 //     working tree, so the change being judged cannot relax its own judge.
 //   * Never leaves the agent stuck: the same finding blocks at most `hook.max_blocks` times per session, and a crash or
 //     a timeout allows the action and says so.
-import { isAbsolute, relative, resolve } from 'node:path';
+import { realpathSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { git, GitError, isHookConfigPath, pathMatcher, SEVERITY_RANK, showFile, HOOK_DEFAULT_TIMEOUT_SECONDS, type ChangedFile, type Finding, type InventoryPair, type ResolvedConfig, type Severity } from '@testwitness/core';
 import { check, ConfigError, defaultBase, loadConfig, type CheckResult } from '../check.js';
 import { fallbackEvent, parseEvent, renderDecision, type Agent, type Decision, type HookEvent, type HookOutput } from './events.js';
@@ -235,6 +236,22 @@ export async function runHook(opts: HookOptions): Promise<HookResult> {
 
 const allow: { decision: Decision } = { decision: { block: false } };
 
+/** The path with symbolic links resolved, for a file that may not exist yet: the nearest existing ancestor is resolved. */
+export function realPathOf(path: string): string {
+  let dir = path;
+  const rest: string[] = [];
+  for (;;) {
+    try {
+      return join(realpathSync.native(dir), ...rest.reverse());
+    } catch {
+      const parent = dirname(dir);
+      if (parent === dir) return path;
+      rest.push(basename(dir));
+      dir = parent;
+    }
+  }
+}
+
 async function decide(event: HookEvent, opts: HookOptions, deadline: Deadline): Promise<{ decision: Decision; evaluation?: Evaluation }> {
   if (event.kind === 'other') return allow;
   if (event.kind === 'push' && event.agent === 'git' && !(event.pushes ?? []).some((p) => !/^0+$/.test(p.localSha))) return allow;
@@ -255,7 +272,9 @@ async function decide(event: HookEvent, opts: HookOptions, deadline: Deadline): 
     const isProtected = pathMatcher(config.protect);
     const hits: string[] = [];
     for (const p of event.paths ?? []) {
-      const abs = resolve(start, p.replace(/\\/g, '/'));
+      // Real paths on both sides: an agent may name the file through a symbolic link (macOS /var is /private/var),
+      // and git reports the top level with links resolved.
+      const abs = realPathOf(resolve(start, p.replace(/\\/g, '/')));
       const rel = relative(top, abs).replace(/\\/g, '/');
       if (rel && !rel.startsWith('..') && !isAbsolute(rel) && isProtected(rel)) hits.push(rel);
     }
