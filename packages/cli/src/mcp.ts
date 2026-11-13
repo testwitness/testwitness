@@ -8,7 +8,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { builtinRules, git, GitError, ruleMap, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, TOOL_VERSION, type Finding, type Report } from '@testwitness/core';
-import { check, ConfigError } from './check.js';
+import { check, ConfigError, defaultBase } from './check.js';
 
 /** A git ref as an agent may pass it: no leading dash (it would read as a flag), no whitespace, no control characters. */
 const ref = z
@@ -24,24 +24,7 @@ const CHECK_DESCRIPTION = [
   'Run it before pushing; fix every medium or high finding, or acknowledge it with a reason.',
 ].join(' ');
 
-/** Base ref when the caller gives none: origin's default branch, then origin/main, origin/master, main, master. */
-export async function defaultBase(cwd: string): Promise<string> {
-  try {
-    const head = (await git(['symbolic-ref', '--quiet', 'refs/remotes/origin/HEAD'], { cwd })).trim();
-    if (head.startsWith('refs/remotes/')) return head.slice('refs/remotes/'.length);
-  } catch {
-    /* no origin/HEAD: try the usual names */
-  }
-  for (const candidate of ['origin/main', 'origin/master', 'main', 'master']) {
-    try {
-      await git(['rev-parse', '--verify', '--quiet', `${candidate}^{commit}`], { cwd });
-      return candidate;
-    } catch {
-      /* next */
-    }
-  }
-  return 'origin/main';
-}
+export { defaultBase } from './check.js';
 
 /** Short plain text summary for the agent: state, counts, first five findings. */
 export function summarise(report: Report): string {

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { check, loadConfig, render, ConfigError } from './check.js';
+import { check, loadConfig, render, resolveBase, ConfigError } from './check.js';
 import { serveStdio } from './mcp.js';
 import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION } from '@testwitness/core';
 
@@ -17,7 +17,7 @@ export async function main(argv: string[]): Promise<number> {
   program
     .command('check')
     .description('Compare base and head, read the test results, report findings')
-    .option('--base <ref>', 'base ref (merge base is computed)', 'origin/main')
+    .option('--base <ref>', "base ref (merge base is computed; default: origin's default branch, from origin/HEAD)")
     .option('--head <ref>', 'head ref', 'HEAD')
     .option('--results <globs>', 'comma separated globs of test results: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (default from config)')
     .option('--junit <globs>', 'older name of --results; used when --results is not given')
@@ -78,7 +78,7 @@ export async function main(argv: string[]): Promise<number> {
   program
     .command('mutate-plan')
     .description('Print the changed production files and the Stryker and PIT settings that mutate only them. Runs nothing.')
-    .option('--base <ref>', 'base ref (merge base is computed)', 'origin/main')
+    .option('--base <ref>', "base ref (merge base is computed; default: origin's default branch, from origin/HEAD)")
     .option('--head <ref>', 'head ref', 'HEAD')
     .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
     .option('--format <fmt>', 'json | shell', 'json')
@@ -88,8 +88,9 @@ export async function main(argv: string[]): Promise<number> {
       try {
         if (o.format !== 'json' && o.format !== 'shell') throw new ConfigError('--format must be json or shell');
         const cwd = resolve(o.cwd);
-        const config = await loadConfig({ cwd, base: o.base, head: o.head, config: o.config, format: 'json' });
-        const plan = await planMutation({ cwd, base: o.base, head: o.head, config });
+        const base = await resolveBase(cwd, o.base);
+        const config = await loadConfig({ cwd, base, head: o.head, config: o.config, format: 'json' });
+        const plan = await planMutation({ cwd, base, head: o.head, config });
         const text = o.format === 'shell' ? renderMutationPlanShell(plan) : JSON.stringify(plan, null, 2) + '\n';
         if (o.out) await writeFile(resolve(cwd, o.out), text);
         else process.stdout.write(text);

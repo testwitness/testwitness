@@ -10,6 +10,8 @@ import {
   ruleMap,
   runEngine,
   showFile,
+  git,
+  GitError,
   mergeBase,
   revParse,
   ConfigError,
@@ -33,7 +35,8 @@ import { allFrontEnds } from './frontends.js';
 
 export interface CheckOptions {
   cwd: string;
-  base: string;
+  /** Base ref; the merge base with head is compared. Default: the default branch (origin/HEAD's target). */
+  base?: string;
   head: string;
   /**
    * Comma separated globs of test results: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or
@@ -103,7 +106,7 @@ export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
   } else {
     // Config is read from the base ref in PR mode so a PR cannot relax its own check.
     try {
-      const baseSha = await mergeBase(opts.base, await revParse(opts.head, { cwd: opts.cwd }), { cwd: opts.cwd });
+      const baseSha = await mergeBase(opts.base ?? (await defaultBase(opts.cwd)), await revParse(opts.head, { cwd: opts.cwd }), { cwd: opts.cwd });
       source = await showFile(baseSha, '.testwitness.yml', { cwd: opts.cwd });
     } catch {
       source = undefined;
@@ -300,8 +303,50 @@ export async function loadMutation(cwd: string, globs: string, log: (s: string) 
   return toMutationEvidence(data);
 }
 
+/** Base ref when the caller gives none: origin's default branch, then origin/main, origin/master, main, master. */
+export async function defaultBase(cwd: string): Promise<string> {
+  try {
+    const head = (await git(['symbolic-ref', '--quiet', 'refs/remotes/origin/HEAD'], { cwd })).trim();
+    if (head.startsWith('refs/remotes/')) return head.slice('refs/remotes/'.length);
+  } catch {
+    /* no origin/HEAD: try the usual names */
+  }
+  for (const candidate of ['origin/main', 'origin/master', 'main', 'master']) {
+    if (await resolves(cwd, candidate)) return candidate;
+  }
+  return 'origin/main';
+}
+
+async function resolves(cwd: string, ref: string): Promise<boolean> {
+  try {
+    await git(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], { cwd });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The base ref to compare against: the one given, or the default branch (origin/HEAD's target). A ref that does not
+ * name a commit fails with a message naming the default branch, instead of git's raw "Not a valid object name".
+ */
+export async function resolveBase(cwd: string, base: string | undefined): Promise<string> {
+  const ref = base ?? (await defaultBase(cwd));
+  if (await resolves(cwd, ref)) return ref;
+  const fallback = await defaultBase(cwd);
+  const hint = fallback !== ref && (await resolves(cwd, fallback)) ? ` The default branch is ${fallback}; pass --base ${fallback}, or the branch the pull request targets.` : ' Fetch the branch the pull request targets (git fetch origin) and pass it with --base.';
+  throw new GitError(`base ref ${ref} does not name a commit in this repository.${hint}`, ['rev-parse', ref], '');
+}
+
+/** Note for a comparison with nothing in it: the merge base is the head itself. */
+export function nothingToCompare(base: string, head: string): string {
+  return `Nothing to compare: ${head} is already contained in ${base}, so the merge base is the head itself and no change was checked. To check a pull request before it merges, use the branch it targets as --base and its branch as --head; once it is merged with a merge commit, use the first parent of that merge commit as --base.`;
+}
+
 export async function check(opts: CheckOptions): Promise<CheckResult> {
   const log = opts.log ?? ((s: string) => { if (!opts.quiet) process.stderr.write(`testwitness: ${s}\n`); });
+  const base = await resolveBase(opts.cwd, opts.base);
+  opts = { ...opts, base };
   const config = await loadConfig(opts);
   const follow = opts.followSymlinks ?? config.paths.followSymlinks;
   const { evidence, notes } = await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log, follow);
@@ -327,7 +372,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   const runId = opts.runId ?? (process.env['GITHUB_RUN_ID'] ? `${process.env['GITHUB_RUN_ID']}${runAttempt && runAttempt !== '1' ? `.${runAttempt}` : ''}` : undefined);
   const { report, files, history: updated } = await runEngine({
     cwd: opts.cwd,
-    base: opts.base,
+    base,
     head: opts.head,
     frontEnds: allFrontEnds(),
     config,
@@ -345,6 +390,13 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     recordHistory: opts.recordHistory === true || opts.historyOut !== undefined,
     log,
   });
+  if (report.base === report.head && report.files.changed === 0) {
+    // The head is inside the base (a PR merged with a merge commit, or the default branch itself): say so, never pass.
+    const note = nothingToCompare(base, opts.head);
+    report.state = 'unreadable';
+    report.notes = [note];
+    log(note);
+  }
   if (opts.historyOut && updated) {
     const out = resolve(opts.cwd, opts.historyOut);
     await mkdir(dirname(out), { recursive: true });
