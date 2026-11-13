@@ -13,7 +13,8 @@ import type { Finding, Report } from '@testwitness/core';
 import type { CorpusEntry } from './corpus.js';
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'corpus', GIT_AUTHOR_EMAIL: 'corpus@testwitness.local', GIT_COMMITTER_NAME: 'corpus', GIT_COMMITTER_EMAIL: 'corpus@testwitness.local' };
-const git = (cwd: string, args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8', env: ENV });
+// Signing is off: these throwaway commits must not depend on the machine's signing setup.
+const git = (cwd: string, args: string[]) => execFileSync('git', ['-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8', env: ENV });
 
 export interface ReplayResult {
   /** `check --worktree` on the uncommitted change. */

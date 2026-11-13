@@ -46,7 +46,15 @@ claims:
 comment:
   enabled: true
   collapse_low: true
+protect:                # agent hook only: paths a coding agent may not change (docs/agent-guard.md); default none
+  - "tests/golden/**"
+hook:                   # agent hook only
+  timeout: 20           # seconds before the hook gives up and allows the action
+  max_blocks: 2         # how often the same finding may block in one agent session
+  advice_only: [A001, A009, E001, R001, R002]   # rules the hook shows but never blocks on; the default is measured (docs/precision.md)
 ```
+
+`protect` and `hook` are read by the [agent guard](./agent-guard) only, and only from the merge base, never from the working tree. The pull request check ignores them.
 
 ## Symbolic links in report paths
 

@@ -26,6 +26,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 |---|---|---|
 | `--base <ref>` | base ref; the merge base with head is used. A ref that does not name a commit fails with exit 2 and names the default branch. When the head is already contained in the base (the default branch itself, or a PR merged with a merge commit) there is nothing to compare: the state is `unreadable` and the report says so in `notes` | the default branch, from `origin/HEAD` (then `origin/main`, `origin/master`, `main`, `master`) |
 | `--head <ref>` | head ref | `HEAD` |
+| `--worktree` | compare the merge base with the working tree (staged, unstaged and untracked files that are not ignored) instead of the head commit; the findings and fingerprints are the ones the commit check gives once the change is committed, and nothing is written into the repository | off |
 | `--results <globs>` | comma separated globs of test results: JUnit XML (recommended), TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content ([evidence](./evidence)) | from config `results.head` |
 | `--junit <globs>` | older name of `--results`, used when `--results` is not given | |
 | `--diff-only` | check the diff and the PR text only: read no test results, skip V005, and grade the state on the diff and claim rules alone (`pass` or `review`) | off |
@@ -65,7 +66,11 @@ Use the branch the pull request targets as `--base` (a backport or release branc
 
 `testwitness mutate-plan --base <ref> --head <ref> [--format json|shell] [--out <file>] [--cwd <dir>]` prints the production files the PR changed and the settings that mutate only them: StrykerJS `--mutate` line ranges with `--incremental`, and PIT `targetClasses` and `targetTests`. It reads git and runs nothing. The shell format is single quoted variable assignments for a workflow to source. See [mutation on request](./mutation-on-request).
 
-`testwitness mcp` starts a read only MCP server on stdio so coding agents can run the check before pushing; see [MCP server for agents](./mcp).
+`testwitness hook --agent claude|cursor|codex|git [--base <ref>] [--timeout <seconds>] [--results <globs>] [--cwd <dir>]` is the [agent guard](./agent-guard). It reads the agent's hook event JSON on stdin (for `git`, the pre-push lines), checks the working tree when the event is a `git commit`, a `git push` or the end of a turn, and answers in that agent's blocking format. It blocks on open high findings of rules that are not advice only, at most twice per finding and session, and allows the action with a note when it crashes or runs past the timeout (20 seconds, or `hook.timeout` in the base config). Configuration is read from the merge base only. Exit code 0, except `--agent git`, which exits 1 to refuse a push.
+
+`testwitness init --agent claude|cursor|codex|git [--command <cmd>] [--force] [--cwd <dir>]` writes the hook config for that agent and nothing else: `.claude/settings.json`, `.cursor/hooks.json`, `.codex/hooks.json`, or `pre-push` in the git hooks directory. It merges into an existing file, prints what it wrote and changes nothing on a second run. `--force` replaces a different existing pre-push hook. Exit codes: `0` written or unchanged, `1` refused (a different pre-push hook exists), `2` the existing config could not be read.
+
+`testwitness mcp` starts a read only MCP server on stdio so coding agents can run the check and look up rules; see [MCP server for agents](./mcp).
 
 The JSON report (`--format json`) follows the JSON Schema in [`docs/report.schema.json`](https://github.com/testwitness/testwitness/blob/main/docs/report.schema.json), published at `https://testwitness.github.io/testwitness/report.schema.json`, and carries `schemaVersion: "1"`.
 
