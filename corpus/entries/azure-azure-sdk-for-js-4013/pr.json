@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Azure/azure-sdk-for-js/pull/4013",
+  "repo": "Azure/azure-sdk-for-js",
+  "number": 4013,
+  "title": "[Event Hubs] Remove no-op browser tests from CI",
+  "merged_at": "2019-06-21T23:10:52Z",
+  "stars": 2303,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "d6259dd0f6e81a00036f5f67ee56ad42f869d13e",
+  "head_sha": "aac382b87753e08af17ef2221184b5e41a787ed5",
+  "files_changed": 2,
+  "additions": 22,
+  "deletions": 0
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/langflow-ai/langflow/pull/5730",
+  "repo": "langflow-ai/langflow",
+  "number": 5730,
+  "title": "ci: limit test duration update to unit tests and allow to continue on error",
+  "merged_at": "2025-01-16T16:26:26Z",
+  "stars": 156591,
+  "license": "MIT",
+  "language": "python",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "1932f9a83688e7b26d36e609f90c5ab31a5f1147",
+  "head_sha": "ba55d636af5f73b26eeb1ffc0c23f8bff773a27e",
+  "files_changed": 2,
+  "additions": 974,
+  "deletions": 747
+}

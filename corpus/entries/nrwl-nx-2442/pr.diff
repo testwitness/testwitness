@@ -1,0 +1,397 @@
+diff --git a/packages/jest/migrations.json b/packages/jest/migrations.json
+index a2f119a5..19615c19 100644
+--- a/packages/jest/migrations.json
++++ b/packages/jest/migrations.json
+@@ -14,6 +14,11 @@
+       "version": "9.0.0-beta.1",
+       "description": "Upgrades jest-preset-angular to 8.0.0",
+       "factory": "./src/migrations/update-9-0-0/update-9-0-0"
++    },
++    "update-9.0.1": {
++      "version": "9.0.1-beta.1",
++      "description": "Correctly sets passWithNoTests option",
++      "factory": "./src/migrations/update-9-0-1/update-9-0-1"
+     }
+   },
+   "packageJsonUpdates": {
+diff --git a/packages/jest/src/migrations/update-8-3-0/update-8-3-0.spec.ts b/packages/jest/src/migrations/update-8-3-0/update-8-3-0.spec.ts
+index f0416892..db0c7fe1 100644
+--- a/packages/jest/src/migrations/update-8-3-0/update-8-3-0.spec.ts
++++ b/packages/jest/src/migrations/update-8-3-0/update-8-3-0.spec.ts
+@@ -31,5 +31,10 @@ describe('Update 8.3.0', () => {
+     const updatedJestConfigFile = result.readContent('jest.config.js');
+ 
+     expect(updatedJestConfigFile).not.toContain('collectCoverage: true');
++
++    //check if the file is still valid
++    expect(updatedJestConfigFile.match(/,/g) || []).toHaveLength(6);
++    expect(updatedJestConfigFile).toContain('}');
++    expect(updatedJestConfigFile).toContain('{');
+   });
+ });
+diff --git a/packages/jest/src/migrations/update-8-3-0/update-8-3-0.ts b/packages/jest/src/migrations/update-8-3-0/update-8-3-0.ts
+index 2de5fd22..70bf76c4 100644
+--- a/packages/jest/src/migrations/update-8-3-0/update-8-3-0.ts
++++ b/packages/jest/src/migrations/update-8-3-0/update-8-3-0.ts
+@@ -1,5 +1,5 @@
+-import { Rule, Tree } from '@angular-devkit/schematics';
+-import { insert } from '@nrwl/workspace';
++import { Rule, Tree, chain } from '@angular-devkit/schematics';
++import { insert, formatFiles } from '@nrwl/workspace';
+ import * as ts from 'typescript';
+ import {
+   getSourceNodes,
+@@ -15,18 +15,23 @@ function updateJestConfig(host: Tree) {
+       ts.ScriptTarget.Latest
+     );
+     const changes: RemoveChange[] = [];
+-
+-    getSourceNodes(sourceFile).forEach(node => {
++    const sourceNodes = getSourceNodes(sourceFile);
++    sourceNodes.forEach((node, index) => {
+       if (
+         ts.isPropertyAssignment(node) &&
+         ts.isIdentifier(node.name) &&
+         node.name.text === 'collectCoverage'
+       ) {
++        const expectedCommaNode = sourceNodes[index + 4];
++        const isFollowedByComma =
++          expectedCommaNode.kind === ts.SyntaxKind.CommaToken;
+         changes.push(
+           new RemoveChange(
+             'jest.config.js',
+             node.getStart(sourceFile),
+-            node.getFullText(sourceFile)
++            isFollowedByComma
++              ? node.getFullText(sourceFile)
++              : node.getText(sourceFile)
+           )
+         );
+       }
+@@ -36,5 +41,5 @@ function updateJestConfig(host: Tree) {
+ }
+ 
+ export default function(): Rule {
+-  return updateJestConfig;
++  return chain([updateJestConfig, formatFiles()]);
+ }
+diff --git a/packages/jest/src/migrations/update-9-0-1/test-files/jest.config.js b/packages/jest/src/migrations/update-9-0-1/test-files/jest.config.js
+new file mode 100644
+index 00000000..ffd5ba20
+--- /dev/null
++++ b/packages/jest/src/migrations/update-9-0-1/test-files/jest.config.js
+@@ -0,0 +1,10 @@
++module.exports = {
++  testMatch: ['**/+(*.)+(spec|test).+(ts|js)?(x)'],
++  transform: {
++    '^.+\\.(ts|js|html)$': 'ts-jest'
++  },
++  resolver: '@nrwl/jest/plugins/resolver',
++  moduleFileExtensions: ['ts', 'js', 'html'],
++  coverageReporters: ['html'],
++  passWithNoTests: true
++};
+diff --git a/packages/jest/src/migrations/update-9-0-1/update-9-0-1.spec.ts b/packages/jest/src/migrations/update-9-0-1/update-9-0-1.spec.ts
+new file mode 100644
+index 00000000..1d2f85f0
+--- /dev/null
++++ b/packages/jest/src/migrations/update-9-0-1/update-9-0-1.spec.ts
+@@ -0,0 +1,158 @@
++import { Tree } from '@angular-devkit/schematics';
++import { readJsonInTree } from '@nrwl/workspace/src/utils/ast-utils';
++import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
++import * as path from 'path';
++import { createEmptyWorkspace } from '@nrwl/workspace/testing';
++import { serializeJson } from '@nrwl/workspace';
++import { readFileSync } from 'fs';
++
++describe('Update 9.0.1', () => {
++  let initialTree: Tree;
++  let schematicRunner: SchematicTestRunner;
++
++  beforeEach(async () => {
++    initialTree = createEmptyWorkspace(Tree.empty());
++
++    schematicRunner = new SchematicTestRunner(
++      '@nrwl/jest',
++      path.join(__dirname, '../../../migrations.json')
++    );
++  });
++  it('should remove passWithNoTests in jest.config.js', async () => {
++    initialTree.create(
++      'jest.config.js',
++      readFileSync(
++        path.join(__dirname, './test-files/jest.config.js')
++      ).toString()
++    );
++    const initialJestConfigFile = initialTree.read('jest.config.js').toString();
++    expect(initialJestConfigFile).toContain('passWithNoTests: true');
++
++    const result = await schematicRunner
++      .runSchematicAsync('update-9.0.1', {}, initialTree)
++      .toPromise();
++
++    const updatedJestConfigFile = result.readContent('jest.config.js');
++    expect(updatedJestConfigFile).not.toContain('passWithNoTests: true');
++
++    //check if the file is still valid
++    expect(updatedJestConfigFile.match(/,/g) || []).toHaveLength(6);
++    expect(updatedJestConfigFile).toContain('}');
++    expect(updatedJestConfigFile).toContain('{');
++  });
++
++  it('should add passWithNoTests to workspace.json where it does not exist', async () => {
++    initialTree.overwrite(
++      'workspace.json',
++      serializeJson({
++        version: 1,
++        projects: {
++          'angular-one': {
++            architect: {
++              test: {
++                builder: '@nrwl/jest:jest',
++                options: {
++                  jestConfig: 'apps/angular-one/jest.config.js'
++                }
++              }
++            }
++          },
++          'angular-two': {
++            architect: {
++              test: {
++                builder: '@nrwl/jest:jest',
++                options: {
++                  passWithNoTests: false
++                }
++              }
++            }
++          },
++          other1: {
++            architect: {
++              'other-architect': {
++                builder: 'other',
++                options: {
++                  foo: 'bar'
++                }
++              },
++              test: {
++                builder: '@nrwl/jest:jest',
++                options: {}
++              }
++            }
++          }
++        }
++      })
++    );
++
++    await schematicRunner
++      .runSchematicAsync('update-9.0.1', {}, initialTree)
++      .toPromise();
++
++    const workspaceJson = readJsonInTree(initialTree, 'workspace.json');
++    expect(
++      workspaceJson.projects['angular-one'].architect.test.options
++        .passWithNoTests
++    ).toBeTruthy();
++    expect(
++      workspaceJson.projects['angular-two'].architect.test.options
++        .passWithNoTests
++    ).toBeFalsy();
++    expect(
++      workspaceJson.projects.other1.architect['other-architect'].options
++        .passWithNoTests
++    ).toBeUndefined();
++    expect(
++      workspaceJson.projects.other1.architect.test.options.passWithNoTests
++    ).toBeTruthy();
++  });
++
++  it('should add passWithNoTests to angular.json where it does not exist', async () => {
++    initialTree.create(
++      'angular.json',
++      JSON.stringify({
++        version: 1,
++        projects: {
++          frontend: {
++            architect: {
++              jest1: {
++                builder: '@nrwl/jest:jest',
++                options: {
++                  foo: 'bar'
++                }
++              },
++              jest2: {
++                builder: '@nrwl/jest:jest',
++                options: {
++                  foo: 'bar',
++                  passWithNoTests: false
++                }
++              },
++              other1: {
++                options: {
++                  foo: 'bar'
++                }
++              }
++            }
++          }
++        }
++      })
++    );
++
++    await schematicRunner
++      .runSchematicAsync('update-9.0.1', {}, initialTree)
++      .toPromise();
++
++    const angularJson = readJsonInTree(initialTree, 'angular.json');
++
++    expect(
++      angularJson.projects.frontend.architect.jest1.options.passWithNoTests
++    ).toBeTruthy();
++    expect(
++      angularJson.projects.frontend.architect.jest2.options.passWithNoTests
++    ).toBeFalsy();
++    expect(
++      angularJson.projects.frontend.architect.other1.options.passWithNoTests
++    ).toBeUndefined();
++  });
++});
+diff --git a/packages/jest/src/migrations/update-9-0-1/update-9-0-1.ts b/packages/jest/src/migrations/update-9-0-1/update-9-0-1.ts
+new file mode 100644
+index 00000000..95aab677
+--- /dev/null
++++ b/packages/jest/src/migrations/update-9-0-1/update-9-0-1.ts
+@@ -0,0 +1,64 @@
++import { chain, Rule, Tree } from '@angular-devkit/schematics';
++import { formatFiles, insert } from '@nrwl/workspace';
++import * as ts from 'typescript';
++import {
++  getSourceNodes,
++  RemoveChange
++} from '@nrwl/workspace/src/utils/ast-utils';
++import { updateWorkspace } from '@nrwl/workspace/src/utils/workspace';
++
++export default function update(): Rule {
++  return chain([
++    addPassWithNoTestsToWorkspace,
++    removePassWithNoTestsFromJestConfig,
++    formatFiles()
++  ]);
++}
++
++const addPassWithNoTestsToWorkspace = updateWorkspace(workspace => {
++  workspace.projects.forEach(project => {
++    project.targets.forEach(target => {
++      if (
++        target.builder === '@nrwl/jest:jest' &&
++        target.options &&
++        target.options.passWithNoTests === undefined
++      ) {
++        target.options.passWithNoTests = true;
++      }
++    });
++  });
++});
++
++function removePassWithNoTestsFromJestConfig(host: Tree) {
++  if (host.exists('jest.config.js')) {
++    const contents = host.read('jest.config.js').toString();
++    const sourceFile = ts.createSourceFile(
++      'jest.config.js',
++      contents,
++      ts.ScriptTarget.Latest
++    );
++    const changes: RemoveChange[] = [];
++    const sourceNodes = getSourceNodes(sourceFile);
++    sourceNodes.forEach((node, index) => {
++      if (
++        ts.isPropertyAssignment(node) &&
++        ts.isIdentifier(node.name) &&
++        node.name.text === 'passWithNoTests'
++      ) {
++        const expectedCommaNode = sourceNodes[index + 4];
++        const isFollowedByComma =
++          expectedCommaNode.kind === ts.SyntaxKind.CommaToken;
++        changes.push(
++          new RemoveChange(
++            'jest.config.js',
++            node.getStart(sourceFile),
++            isFollowedByComma
++              ? node.getFullText(sourceFile)
++              : node.getText(sourceFile)
++          )
++        );
++      }
++    });
++    insert(host, 'jest.config.js', changes);
++  }
++}
+diff --git a/packages/jest/src/schematics/init/init.ts b/packages/jest/src/schematics/init/init.ts
+index a843f960..2b66f6f5 100644
+--- a/packages/jest/src/schematics/init/init.ts
++++ b/packages/jest/src/schematics/init/init.ts
+@@ -44,8 +44,7 @@ const createJestConfig = (host: Tree) => {
+     },
+     resolver: '@nrwl/jest/plugins/resolver',
+     moduleFileExtensions: ['ts', 'js', 'html'],
+-    coverageReporters: ['html'],
+-    passWithNoTests: true
++    coverageReporters: ['html']
+   };`
+     );
+   }
+diff --git a/packages/jest/src/schematics/jest-project/jest-project.spec.ts b/packages/jest/src/schematics/jest-project/jest-project.spec.ts
+index cbed157c..ccc8707d 100644
+--- a/packages/jest/src/schematics/jest-project/jest-project.spec.ts
++++ b/packages/jest/src/schematics/jest-project/jest-project.spec.ts
+@@ -67,7 +67,8 @@ describe('jestProject', () => {
+       options: {
+         jestConfig: 'libs/lib1/jest.config.js',
+         setupFile: 'libs/lib1/src/test-setup.ts',
+-        tsConfig: 'libs/lib1/tsconfig.spec.json'
++        tsConfig: 'libs/lib1/tsconfig.spec.json',
++        passWithNoTests: true
+       }
+     });
+     expect(
+diff --git a/packages/jest/src/schematics/jest-project/jest-project.ts b/packages/jest/src/schematics/jest-project/jest-project.ts
+index abb404f0..818fbc40 100644
+--- a/packages/jest/src/schematics/jest-project/jest-project.ts
++++ b/packages/jest/src/schematics/jest-project/jest-project.ts
+@@ -81,7 +81,8 @@ function updateWorkspaceJson(options: JestProjectSchema): Rule {
+       builder: '@nrwl/jest:jest',
+       options: {
+         jestConfig: join(normalize(projectConfig.root), 'jest.config.js'),
+-        tsConfig: join(normalize(projectConfig.root), 'tsconfig.spec.json')
++        tsConfig: join(normalize(projectConfig.root), 'tsconfig.spec.json'),
++        passWithNoTests: true
+       }
+     };
+     if (options.setupFile !== 'none') {
+diff --git a/packages/node/src/schematics/library/library.spec.ts b/packages/node/src/schematics/library/library.spec.ts
+index b26047ec..561f1794 100644
+--- a/packages/node/src/schematics/library/library.spec.ts
++++ b/packages/node/src/schematics/library/library.spec.ts
+@@ -32,7 +32,8 @@ describe('lib', () => {
+         builder: '@nrwl/jest:jest',
+         options: {
+           jestConfig: 'libs/my-lib/jest.config.js',
+-          tsConfig: 'libs/my-lib/tsconfig.spec.json'
++          tsConfig: 'libs/my-lib/tsconfig.spec.json',
++          passWithNoTests: true
+         }
+       });
+     });
+diff --git a/packages/nx-plugin/src/schematics/plugin/plugin.spec.ts b/packages/nx-plugin/src/schematics/plugin/plugin.spec.ts
+index 97df0986..db93b9c8 100644
+--- a/packages/nx-plugin/src/schematics/plugin/plugin.spec.ts
++++ b/packages/nx-plugin/src/schematics/plugin/plugin.spec.ts
+@@ -55,7 +55,8 @@ describe('NxPlugin plugin', () => {
+       builder: '@nrwl/jest:jest',
+       options: {
+         jestConfig: 'libs/my-plugin/jest.config.js',
+-        tsConfig: 'libs/my-plugin/tsconfig.spec.json'
++        tsConfig: 'libs/my-plugin/tsconfig.spec.json',
++        passWithNoTests: true
+       }
+     });
+   });

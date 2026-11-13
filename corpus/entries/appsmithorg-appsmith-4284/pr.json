@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/appsmithorg/appsmith/pull/4284",
+  "repo": "appsmithorg/appsmith",
+  "number": 4284,
+  "title": "No tests",
+  "merged_at": "2021-05-04T10:19:47Z",
+  "stars": 41249,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "config",
+  "split": "heldout",
+  "base_sha": "99c302e018539332fb1a83b33380ec1fe4a3d9eb",
+  "head_sha": "2f7dd46d02f68147a6dfccf0c4efa4ae9ba170ec",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 1
+}

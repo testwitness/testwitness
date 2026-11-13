@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/Azure/azure-sdk-for-js/pull/13971",
+  "repo": "Azure/azure-sdk-for-js",
+  "number": 13971,
+  "title": "Continue On Error to unblock people fixing other issues.",
+  "merged_at": "2021-02-25T17:17:38Z",
+  "stars": 2303,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "config",
+  "split": "tuning",
+  "base_sha": "7d9c3dd89019d83e941a56ddcb0f824be0ef3a38",
+  "head_sha": "d1396668ea42223355ebe71bdaee2f7136002048",
+  "files_changed": 1,
+  "additions": 1,
+  "deletions": 0
+}

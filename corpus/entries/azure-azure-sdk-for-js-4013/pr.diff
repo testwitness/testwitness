@@ -1,0 +1,44 @@
+diff --git a/sdk/eventhub/event-hubs/tests.yml b/sdk/eventhub/event-hubs/tests.yml
+index cc4a3ee4..c658ee31 100644
+--- a/sdk/eventhub/event-hubs/tests.yml
++++ b/sdk/eventhub/event-hubs/tests.yml
+@@ -4,6 +4,17 @@ jobs:
+   - template: ../../../eng/pipelines/templates/jobs/archetype-sdk-tests.yml
+     parameters:
+       PackageName: "@azure/event-hubs"
++      # Remove Browser tests from matrix since they are currently a no-op
++      Matrix:
++        Linux_Node10X:
++          OSVmImage: "ubuntu-16.04"
++          TestType: "node"
++        Windows_Node10X:
++          OSVmImage: "vs2017-win2016"
++          TestType: "node"
++        Mac_Node10X:
++          OSVmImage: "macOS-10.13"
++          TestType: "node"
+       EnvVars:
+         EVENTHUB_CONNECTION_STRING: $(js-event-hubs-test-connection-string)
+         EVENTHUB_NAME: $(js-event-hubs-test-name)
+diff --git a/sdk/eventhub/event-processor-host/tests.yml b/sdk/eventhub/event-processor-host/tests.yml
+index f694703b..6754a4ad 100644
+--- a/sdk/eventhub/event-processor-host/tests.yml
++++ b/sdk/eventhub/event-processor-host/tests.yml
+@@ -4,6 +4,17 @@ jobs:
+   - template: ../../../eng/pipelines/templates/jobs/archetype-sdk-tests.yml
+     parameters:
+       PackageName: "@azure/event-processor-host"
++      # Remove Browser tests from matrix since they are currently a no-op
++      Matrix:
++        Linux_Node10X:
++          OSVmImage: "ubuntu-16.04"
++          TestType: "node"
++        Windows_Node10X:
++          OSVmImage: "vs2017-win2016"
++          TestType: "node"
++        Mac_Node10X:
++          OSVmImage: "macOS-10.13"
++          TestType: "node"
+       EnvVars:
+         EVENTHUB_CONNECTION_STRING: $(js-event-hubs-test-connection-string)
+         EVENTHUB_NAME: $(js-event-hubs-test-name)
