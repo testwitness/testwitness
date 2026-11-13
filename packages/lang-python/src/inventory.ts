@@ -11,6 +11,7 @@ import type {
   Assertion,
   AssertionKind,
   CallSite,
+  HelperDefinition,
   FrameworkProfile,
   Node,
   Query,
@@ -945,7 +946,7 @@ function collectCalls(block: Node | null): CallSite[] {
           const callee = chainText(fn).replace(/\s+/g, '');
           let up = child.parent;
           while (up && (up.type === 'await' || up.type === 'parenthesized_expression')) up = up.parent;
-          out.push({ callee, name: callee.split('.').pop() ?? callee, line: line(child), statement: up?.type === 'expression_statement' && up.namedChildCount === 1 });
+          out.push({ callee, name: callee.split('.').pop() ?? callee, line: line(child), statement: up?.type === 'expression_statement' && up.namedChildCount === 1, text: child.text.trim() });
         }
       }
       visit(child);
@@ -1128,6 +1129,7 @@ export async function buildInventory(path: string, source: string, profile: Fram
   const helperCtx: FileContext = { aliases, helpers: new Set(), framework };
   const helpers = new Set<string>();
   const helperAssertions: Record<string, Assertion[]> = {};
+  const definitions: HelperDefinition[] = [];
   for (const c of candidates) {
     if (TEST_NAME.test(c.name)) continue;
     const found = collectAssertions(c.body, helperCtx);
@@ -1136,6 +1138,27 @@ export async function buildInventory(path: string, source: string, profile: Fram
       // Two helpers with one name (methods of different classes) are compared as one list in source order.
       (helperAssertions[c.name] ??= []).push(...found);
     }
+    const cls = c.classes[c.classes.length - 1];
+    const def: HelperDefinition = {
+      name: c.name,
+      line: line(c.def),
+      assertions: found,
+      calls: collectCalls(c.body)
+        .filter((x) => x.statement)
+        .map((x) => x.name),
+    };
+    if (cls) def.className = classInfo(cls, aliases, classCache).name;
+    definitions.push(def);
+  }
+  const classBases: Record<string, string[]> = {};
+  for (const cls of root.descendantsOfType('class_definition')) {
+    const name = cls.childForFieldName('name')?.text;
+    if (!name) continue;
+    const bases = (cls.childForFieldName('superclasses')?.namedChildren ?? [])
+      .filter((b) => b.type !== 'keyword_argument' && b.type !== 'comment')
+      .map((b) => chainText(b).replace(/\[.*$/s, '').split('.').pop() ?? '')
+      .filter(Boolean);
+    if (bases.length) (classBases[name] ??= []).push(...bases);
   }
   for (const name of profile.extraAssertions) helpers.add(name);
   const ctx: FileContext = { aliases, helpers, framework };
@@ -1205,6 +1228,8 @@ export async function buildInventory(path: string, source: string, profile: Fram
     imports,
     fileMarkers,
     parseErrors: countParseErrors(root),
+    definitions,
+    classBases,
   };
   tree.delete();
   return inventory;

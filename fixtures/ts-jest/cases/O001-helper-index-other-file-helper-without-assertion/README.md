@@ -1,0 +1,1 @@
+Positive. The new test lists two lines calls logCart from src/__tests__/helpers.ts, which this PR does not touch. The helper index finds logCart and follows its call to describeCart one level down; neither contains an assertion. The call is not counted and O001 still reports the test low.

@@ -319,6 +319,102 @@
           "type": "integer",
           "minimum": 0,
           "description": "Time spent reading results inside the engine. Results are read before the engine starts, so this is usually 0."
+        },
+        "helperIndexMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time spent building the helper index and resolving calls through it. Absent when the index was not needed."
+        }
+      }
+    },
+    "helperIndex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "parsed",
+        "cached",
+        "helpers",
+        "capped",
+        "warnings",
+        "resolved"
+      ],
+      "description": "The index of assertion helpers defined in test support files of the checkout. Present only when a changed test called a function its own file could not resolve.",
+      "properties": {
+        "files": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Support files considered after the location filter and the caps."
+        },
+        "parsed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Support files parsed in this run."
+        },
+        "cached": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Support files whose definitions came from the cache, or from a changed test file the run had already parsed."
+        },
+        "helpers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Helpers with at least one assertion that a changed test called."
+        },
+        "capped": {
+          "type": "boolean",
+          "description": "True when the file count or byte cap stopped the scan."
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Why the index is incomplete, when it is."
+        },
+        "resolved": {
+          "type": "array",
+          "description": "Calls counted as assertions through the index.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "test",
+              "line",
+              "helper",
+              "definedIn",
+              "definedLine"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Test file of the call."
+              },
+              "test": {
+                "type": "string",
+                "description": "Qualified name of the calling test."
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Line of the call."
+              },
+              "helper": {
+                "type": "string",
+                "description": "Helper name, with its class when it is a method."
+              },
+              "definedIn": {
+                "type": "string",
+                "description": "File that defines the helper, relative to the repository root."
+              },
+              "definedLine": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Line of the helper definition."
+              }
+            }
+          }
         }
       }
     },

@@ -78,6 +78,13 @@ export interface Assertion {
    * terminal name of the callee otherwise. See assertion-meaning.ts.
    */
   matcher?: string;
+  /**
+   * Set when the assertion is a call to a project helper defined in another file of the checkout, found through the
+   * helper index (see docs/design.md, Helpers in other files). The call counts as a custom assertion.
+   */
+  resolvedVia?: 'helper-index';
+  /** The helper definition the call resolved to, when `resolvedVia` is set. */
+  helper?: { name: string; path: string; line: number; className?: string };
 }
 
 export interface SkipMarker {
@@ -156,6 +163,23 @@ export interface CallSite {
   line: number;
   /** True when the call is the whole expression of an expression statement, possibly awaited. */
   statement: boolean;
+  /** Source text of the call, trimmed. Optional; the helper index uses it as the assertion text of a resolved call. */
+  text?: string;
+}
+
+/**
+ * A function or method defined outside any test, as the helper index sees it: where it is, which class it belongs to,
+ * the assertions written directly in its body and the names of the calls it makes as statements.
+ */
+export interface HelperDefinition {
+  name: string;
+  /** Enclosing class, when the definition is a method. */
+  className?: string;
+  line: number;
+  /** Assertions directly in the body: framework assertions, name based assertions and calls to assertions.extra. */
+  assertions: Assertion[];
+  /** Names of the calls the body makes as whole statements, in source order, for resolution one level further. */
+  calls: string[];
 }
 
 export interface TestInventory {
@@ -171,6 +195,10 @@ export interface TestInventory {
   /** Module level skip markers (for example `pytestmark = pytest.mark.skip`). */
   fileMarkers: SkipMarker[];
   parseErrors: number;
+  /** Functions and methods defined outside tests, for the helper index. Optional. */
+  definitions?: HelperDefinition[];
+  /** Direct superclasses of each class declared in the file, by class name (simple names, generics dropped). Optional. */
+  classBases?: Record<string, string[]>;
 }
 
 export interface FrameworkProfile {
@@ -329,9 +357,27 @@ export interface Report {
   };
   provenance: ProvenanceInfo;
   files: { changed: number; tests: number; production: number; config: number; workflows: number; snapshots: number };
-  timing: { totalMs: number; parseMs: number; rulesMs: number; evidenceMs: number };
+  timing: { totalMs: number; parseMs: number; rulesMs: number; evidenceMs: number; helperIndexMs?: number };
+  /** The helper index, when a changed test called a function the file could not resolve. Absent when it was not needed. */
+  helperIndex?: HelperIndexSummary;
   base: string;
   head: string;
+}
+
+export interface HelperIndexSummary {
+  /** Support files considered (after the location filter and the caps). */
+  files: number;
+  /** Files parsed in this run (the rest were served from the cache or did not mention a called name). */
+  parsed: number;
+  /** Files whose definitions came from the cache, or from a changed test file the run had already parsed. */
+  cached: number;
+  /** Helpers with at least one assertion that a changed test called. */
+  helpers: number;
+  /** True when the file or byte cap stopped the scan. */
+  capped: boolean;
+  warnings: string[];
+  /** Calls counted as assertions through the index. */
+  resolved: Array<{ path: string; test: string; line: number; helper: string; definedIn: string; definedLine: number }>;
 }
 
 export interface ProvenanceInfo {
