@@ -1,0 +1,18 @@
+[
+  {
+    "path": ".size-snapshot.json",
+    "status": "modified"
+  },
+  {
+    "path": "src/middleware.ts",
+    "status": "modified"
+  },
+  {
+    "path": "tests/persist.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "tests/persistSync.test.tsx",
+    "status": "added"
+  }
+]

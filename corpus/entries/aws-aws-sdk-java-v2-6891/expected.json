@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "MultipartClientChecksumTest#multipartUpload_withChecksumAlgorithmAndNoChecksumValueProvided_shouldNotAddChecksumType",
+    "verdict": "tp",
+    "reason": "parameterized test commented out"
+  }
+]

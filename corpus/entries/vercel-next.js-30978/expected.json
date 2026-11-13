@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "should handle basePath like pathname",
+    "verdict": "tp",
+    "reason": "it.only added and merged"
+  }
+]

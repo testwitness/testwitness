@@ -1,0 +1,30 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "utils \u203a getWidget() \u203a should fail if widget has incorrect type",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  },
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "utils \u203a getWidget() \u203a should fail if widget has no type property",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  },
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "utils \u203a getWidget() \u203a should not fail on forwarded ref component",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  },
+  {
+    "ruleId": "R010",
+    "severity": "low",
+    "subject": "utils \u203a getWidget() \u203a should not fail on forwarded ref component",
+    "verdict": "tp",
+    "reason": "new test added with it.skip"
+  }
+]

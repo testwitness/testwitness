@@ -1,0 +1,184 @@
+diff --git a/.eslintrc.js b/.eslintrc.js
+index aa3c4f4..b3d3af9 100644
+--- a/.eslintrc.js
++++ b/.eslintrc.js
+@@ -433,7 +433,7 @@ module.exports = {
+     },
+     {
+       files: ['e2e/**/*.ts', 'e2e/**/*.js', 'e2e/**/*.jsx'],
+-      rules: { 'import/no-extraneous-dependencies': 'off' },
++      rules: { 'import/no-extraneous-dependencies': 'off', 'no-unused-expressions': 'off' },
+     },
+   ],
+ }
+diff --git a/e2e/cypress.json b/e2e/cypress.json
+index 72796c6..e758cc3 100644
+--- a/e2e/cypress.json
++++ b/e2e/cypress.json
+@@ -1,4 +1,4 @@
+ {
+   "baseUrl": "http://localhost:1234",
+-  "defaultCommandTimeout": 8000
++  "defaultCommandTimeout": 16000
+ }
+diff --git a/e2e/cypress/integration/dashboard-compressor.spec.ts b/e2e/cypress/integration/dashboard-compressor.spec.ts
+index 8ebfff5..0cc63fb 100644
+--- a/e2e/cypress/integration/dashboard-compressor.spec.ts
++++ b/e2e/cypress/integration/dashboard-compressor.spec.ts
+@@ -14,7 +14,9 @@ function uglierBytes (text) {
+     return Number(text.slice(0, -2))
+   }
+ 
+-  throw new Error(`Not what the computer thinks a human-readable size string look like:  ${text}`)
++  throw new Error(
++    `Not what the computer thinks a human-readable size string look like:  ${text}`,
++  )
+ }
+ 
+ describe('dashboard-compressor', () => {
+@@ -33,27 +35,23 @@ describe('dashboard-compressor', () => {
+       sizeBeforeCompression.push(uglierBytes(text))
+     })
+ 
+-    cy.get('.uppy-StatusBar-actionBtn--upload').click()
+-
+-    cy.get('.uppy-Informer p[role="alert"]', {
+-      timeout: 12000,
+-    }).should('be.visible')
+-
+     cy.window().then(({ uppy }) => {
+-      for (const file of uppy.getFiles()) {
++      uppy.on('preprocess-complete', (file) => {
+         expect(file.extension).to.equal('webp')
+         expect(file.type).to.equal('image/webp')
+-      }
+-    })
+ 
+-    cy.get('.uppy-Dashboard-Item-statusSize').should((elements) => {
+-      expect(elements).to.have.length(sizeBeforeCompression.length)
++        cy.get('.uppy-Dashboard-Item-statusSize').should((elements) => {
++          expect(elements).to.have.length(sizeBeforeCompression.length)
++
++          for (let i = 0; i < elements.length; i++) {
++            expect(sizeBeforeCompression[i]).to.be.greaterThan(
++              uglierBytes(elements[i].textContent),
++            )
++          }
++        })
++      })
+ 
+-      for (let i = 0; i < elements.length; i++) {
+-        expect(sizeBeforeCompression[i]).to.be.greaterThan(
+-          uglierBytes(elements[i].textContent),
+-        )
+-      }
++      cy.get('.uppy-StatusBar-actionBtn--upload').click()
+     })
+   })
+ })
+diff --git a/e2e/cypress/integration/dashboard-tus.spec.ts b/e2e/cypress/integration/dashboard-tus.spec.ts
+index 8bbd16a..6b561aa 100644
+--- a/e2e/cypress/integration/dashboard-tus.spec.ts
++++ b/e2e/cypress/integration/dashboard-tus.spec.ts
+@@ -4,6 +4,9 @@ type Tus = BaseTus & {
+   requests: { isPaused: boolean }
+ }
+ 
++// NOTE: we have to use different files to upload per test
++// because we are uploading to https://tusd.tusdemo.net,
++// constantly uploading the same images gives a different cached result (or something).
+ describe('Dashboard with Tus', () => {
+   beforeEach(() => {
+     cy.visit('/dashboard-tus')
+@@ -13,6 +16,29 @@ describe('Dashboard with Tus', () => {
+     cy.intercept('http://localhost:3020/search/unsplash/*').as('unsplash')
+   })
+ 
++  it.only('should emit `error` and `upload-error` events on failed POST request', () => {
++    cy.get('@file-input').attachFile(['images/traffic.jpg'])
++
++    const error = cy.spy()
++    const uploadError = cy.spy()
++    cy.window().then(({ uppy }) => {
++      uppy.on('upload-error', uploadError)
++      uppy.on('error', error)
++    })
++
++    cy.get('.uppy-StatusBar-actionBtn--upload').click()
++
++    cy.intercept(
++      { method: 'POST', url: 'https://tusd.tusdemo.net/*', times: 1 },
++      { statusCode: 401, body: { code: 401, message: 'Expired JWT Token' } },
++    ).as('post')
++
++    cy.wait('@post').then(() =>  {
++      expect(error).to.be.called
++      expect(uploadError).to.be.called
++    })
++  })
++
+   it('should upload cat image successfully', () => {
+     cy.get('@file-input').attachFile('images/cat.jpg')
+     cy.get('.uppy-StatusBar-actionBtn--upload').click()
+@@ -23,7 +49,7 @@ describe('Dashboard with Tus', () => {
+   })
+ 
+   it('should start exponential backoff when receiving HTTP 429', () => {
+-    cy.get('@file-input').attachFile(['images/cat.jpg', 'images/traffic.jpg'])
++    cy.get('@file-input').attachFile(['images/baboon.png'])
+     cy.get('.uppy-StatusBar-actionBtn--upload').click()
+ 
+     cy.intercept(
+diff --git a/packages/@uppy/core/types/index.d.ts b/packages/@uppy/core/types/index.d.ts
+index 71bcf15..f34b200 100644
+--- a/packages/@uppy/core/types/index.d.ts
++++ b/packages/@uppy/core/types/index.d.ts
+@@ -210,6 +210,7 @@ export type FilesAddedCallback<TMeta> = (files: UppyFile<TMeta>[]) => void;
+ export type FileRemovedCallback<TMeta> = (file: UppyFile<TMeta>, reason: FileRemoveReason) => void;
+ export type UploadCallback = (data: { id: string, fileIDs: string[] }) => void;
+ export type ProgressCallback = (progress: number) => void;
++export type PreProcessCompleteCallback<TMeta> = (file: UppyFile<TMeta>) => void;
+ export type UploadProgressCallback<TMeta> = (file: UppyFile<TMeta>, progress: FileProgress) => void;
+ export type UploadSuccessCallback<TMeta> = (file: UppyFile<TMeta>, response: SuccessResponse) => void
+ export type UploadCompleteCallback<TMeta> = (result: UploadResult<TMeta>) => void
+@@ -225,6 +226,7 @@ export interface UppyEventMap<TMeta = Record<string, unknown>> {
+   'file-removed': FileRemovedCallback<TMeta>
+   'upload': UploadCallback
+   'progress': ProgressCallback
++  'preprocess-complete': PreProcessCompleteCallback<TMeta>
+   'upload-progress': UploadProgressCallback<TMeta>
+   'upload-success': UploadSuccessCallback<TMeta>
+   'complete': UploadCompleteCallback<TMeta>
+diff --git a/yarn.lock b/yarn.lock
+index 20b8a77..7b4f564 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -16643,8 +16643,8 @@ __metadata:
+   linkType: hard
+ 
+ "cypress@npm:^9.0.0":
+-  version: 9.5.2
+-  resolution: "cypress@npm:9.5.2"
++  version: 9.6.0
++  resolution: "cypress@npm:9.6.0"
+   dependencies:
+     "@cypress/request": ^2.88.10
+     "@cypress/xvfb": ^1.2.4
+@@ -16678,7 +16678,7 @@ __metadata:
+     listr2: ^3.8.3
+     lodash: ^4.17.21
+     log-symbols: ^4.0.0
+-    minimist: ^1.2.5
++    minimist: ^1.2.6
+     ospath: ^1.2.2
+     pretty-bytes: ^5.6.0
+     proxy-from-env: 1.0.0
+@@ -16690,7 +16690,7 @@ __metadata:
+     yauzl: ^2.10.0
+   bin:
+     cypress: bin/cypress
+-  checksum: d19a183df25adcb87ba4914fb177a2b8bf2f004c8364fa21abb6bf66f2462d6f586bf09b58480e804f6b499281d931712a3e262f09880859e3170d513c5c9227
++  checksum: 1e5142885a3fb54db6ef7477e3b11b363f1f610ff008982af014e6df3261ac3899f4cad407c598fb690f93029634adb4ad4605929d10776f92175a3eebb471c4
+   languageName: node
+   linkType: hard
+ 

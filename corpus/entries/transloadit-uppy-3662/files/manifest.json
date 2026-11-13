@@ -1,0 +1,26 @@
+[
+  {
+    "path": ".eslintrc.js",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/cypress.json",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/cypress/integration/dashboard-compressor.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/cypress/integration/dashboard-tus.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/@uppy/core/types/index.d.ts",
+    "status": "modified"
+  },
+  {
+    "path": "yarn.lock",
+    "status": "modified"
+  }
+]

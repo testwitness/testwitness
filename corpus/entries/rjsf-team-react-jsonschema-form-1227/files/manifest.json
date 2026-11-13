@@ -1,0 +1,18 @@
+[
+  {
+    "path": "package-lock.json",
+    "status": "modified"
+  },
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "src/utils.js",
+    "status": "modified"
+  },
+  {
+    "path": "test/utils_test.js",
+    "status": "modified"
+  }
+]

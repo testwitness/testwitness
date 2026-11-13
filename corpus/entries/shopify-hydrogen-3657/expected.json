@@ -1,0 +1,30 @@
+[
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "Privacy Banner - Accept Flow \u203a should set analytics cookies and make analytics requests when user accepts consent",
+    "verdict": "tp",
+    "reason": "verifyPerfKitRequests commented out"
+  },
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "Privacy Banner - Accept Flow \u203a should set analytics cookies and make analytics requests when user accepts consent",
+    "verdict": "tp",
+    "reason": "verifyPerfKitRequests commented out"
+  },
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) \u203a should set analytics cookies and fire analytics requests immediately when consent is allowed by default",
+    "verdict": "tp",
+    "reason": "verifyPerfKitRequests commented out"
+  },
+  {
+    "ruleId": "A001",
+    "severity": "medium",
+    "subject": "Consent Tracking - Auto-Allowed (Consent Allowed by Default) \u203a should set analytics cookies and fire analytics requests immediately when consent is allowed by default",
+    "verdict": "tp",
+    "reason": "verifyPerfKitRequests commented out"
+  }
+]

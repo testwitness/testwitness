@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apollographql/apollo-client/pull/4992",
+  "repo": "apollographql/apollo-client",
+  "number": 4992,
+  "title": "Make ObservableQuery.lastResult keep track of errors",
+  "merged_at": "2019-08-10T15:12:36Z",
+  "stars": 19779,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "heldout",
+  "base_sha": "c2139b9ca1fda005afeeb25ed5d646c4f1e4b521",
+  "head_sha": "7d2e3720db10d7450e6464ed989d4ec5177f058a",
+  "files_changed": 3,
+  "additions": 128,
+  "deletions": 1
+}

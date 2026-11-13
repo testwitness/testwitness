@@ -1,0 +1,18 @@
+[
+  {
+    "path": "e2e/specs/new-cookies/consent-tracking-accept.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/specs/new-cookies/privacy-banner-accept.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/specs/old-cookies/consent-tracking-accept.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "e2e/specs/old-cookies/privacy-banner-accept.spec.ts",
+    "status": "modified"
+  }
+]

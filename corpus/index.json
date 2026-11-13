@@ -918,6 +918,23 @@
     "deletions": 14
   },
   {
+    "url": "https://github.com/apollographql/apollo-client/pull/4992",
+    "repo": "apollographql/apollo-client",
+    "number": 4992,
+    "title": "Make ObservableQuery.lastResult keep track of errors",
+    "merged_at": "2019-08-10T15:12:36Z",
+    "stars": 19779,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "heldout",
+    "base_sha": "c2139b9ca1fda005afeeb25ed5d646c4f1e4b521",
+    "head_sha": "7d2e3720db10d7450e6464ed989d4ec5177f058a",
+    "files_changed": 3,
+    "additions": 128,
+    "deletions": 1
+  },
+  {
     "url": "https://github.com/assertj/assertj/pull/1729",
     "repo": "assertj/assertj",
     "number": 1729,
@@ -981,6 +998,23 @@
     "split": "tuning",
     "base_sha": "c6cc83d4afa69881c1011f931f22cb3e2258dabb",
     "head_sha": "bb595071093f9d428653818058364b4624dcf622",
+    "files_changed": 1,
+    "additions": 3,
+    "deletions": 2
+  },
+  {
+    "url": "https://github.com/aws/aws-sdk-java-v2/pull/6891",
+    "repo": "aws/aws-sdk-java-v2",
+    "number": 6891,
+    "title": "Comment out S3 test",
+    "merged_at": "2026-04-22T20:29:49Z",
+    "stars": 2630,
+    "license": "Apache-2.0",
+    "language": "java",
+    "category": "R001",
+    "split": "heldout",
+    "base_sha": "1e12b162161b3bd2187a17126022603008808ac6",
+    "head_sha": "e10a9d5a322d019a12cde2f23496a9eecf0b873e",
     "files_changed": 1,
     "additions": 3,
     "deletions": 2
@@ -3400,6 +3434,23 @@
     "deletions": 0
   },
   {
+    "url": "https://github.com/pmndrs/zustand/pull/403",
+    "repo": "pmndrs/zustand",
+    "number": 403,
+    "title": "Migrating Async/Await to Promise",
+    "merged_at": "2021-06-05T09:04:53Z",
+    "stars": 58931,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "heldout",
+    "base_sha": "26aaf954872773c97ba7b0e2fb452c6d5006f631",
+    "head_sha": "473c16a8bdea40d815d6808e6aaccf5c673c4386",
+    "files_changed": 4,
+    "additions": 299,
+    "deletions": 30
+  },
+  {
     "url": "https://github.com/pola-rs/polars/pull/29530",
     "repo": "pola-rs/polars",
     "number": 29530,
@@ -3978,6 +4029,23 @@
     "deletions": 3
   },
   {
+    "url": "https://github.com/react-hook-form/react-hook-form/pull/6614",
+    "repo": "react-hook-form/react-hook-form",
+    "number": 6614,
+    "title": "refactor subscription logic into useSubscribe ",
+    "merged_at": "2021-09-25T00:46:00Z",
+    "stars": 44921,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "tuning",
+    "base_sha": "bfa02de4c4c95bd6b3927f0d6d53d7ac2f812853",
+    "head_sha": "824437fbccba971623310d3d7fa74f9ca5b0a517",
+    "files_changed": 30,
+    "additions": 831,
+    "deletions": 548
+  },
+  {
     "url": "https://github.com/ReactiveX/RxJava/pull/8253",
     "repo": "ReactiveX/RxJava",
     "number": 8253,
@@ -3993,6 +4061,23 @@
     "files_changed": 12,
     "additions": 470,
     "deletions": 298
+  },
+  {
+    "url": "https://github.com/rjsf-team/react-jsonschema-form/pull/1227",
+    "repo": "rjsf-team/react-jsonschema-form",
+    "number": 1227,
+    "title": "#1209 | allow widget to be wrapped as React.ForwardedRef",
+    "merged_at": "2019-06-02T03:57:51Z",
+    "stars": 15943,
+    "license": "Apache-2.0",
+    "language": "javascript",
+    "category": "R005",
+    "split": "tuning",
+    "base_sha": "16510665e85404e01dbc60766e26df228cd34027",
+    "head_sha": "02701fec0db84fe453ca6d96ce270134b12a466e",
+    "files_changed": 4,
+    "additions": 72,
+    "deletions": 37
   },
   {
     "url": "https://github.com/run-llama/llama_index/pull/19078",
@@ -4146,6 +4231,23 @@
     "files_changed": 1,
     "additions": 3,
     "deletions": 7
+  },
+  {
+    "url": "https://github.com/Shopify/hydrogen/pull/3657",
+    "repo": "Shopify/hydrogen",
+    "number": 3657,
+    "title": "test(e2e): comment out perf-kit assertions blocked by bot detection",
+    "merged_at": "2026-04-01T21:28:06Z",
+    "stars": 2177,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "A001",
+    "split": "tuning",
+    "base_sha": "351d55d152f25a1ce7375664498a63d80988efae",
+    "head_sha": "56067968ca1ea553efd9a467c5b87a890e3fc030",
+    "files_changed": 4,
+    "additions": 36,
+    "deletions": 28
   },
   {
     "url": "https://github.com/sktime/sktime/pull/11669",
@@ -4607,6 +4709,23 @@
     "deletions": 331
   },
   {
+    "url": "https://github.com/transloadit/uppy/pull/3662",
+    "repo": "transloadit/uppy",
+    "number": 3662,
+    "title": "Make Cypress more stable & add e2e test for error events when upload fails",
+    "merged_at": "2022-05-04T10:05:21Z",
+    "stars": 31068,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "tuning",
+    "base_sha": "447cd92d8588617c130e48bc70e647e04560ebc8",
+    "head_sha": "1452644b78584c26a56bcba22f0a4d46ab1ee4fb",
+    "files_changed": 6,
+    "additions": 50,
+    "deletions": 24
+  },
+  {
     "url": "https://github.com/trinodb/trino/pull/31228",
     "repo": "trinodb/trino",
     "number": 31228,
@@ -4724,6 +4843,23 @@
     "files_changed": 3,
     "additions": 3,
     "deletions": 3
+  },
+  {
+    "url": "https://github.com/vercel/next.js/pull/30978",
+    "repo": "vercel/next.js",
+    "number": 30978,
+    "title": "Fix basePath replacing server-side and `normalizeLocalePath()` when path is empty string",
+    "merged_at": "2021-11-15T17:33:21Z",
+    "stars": 143460,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "tuning",
+    "base_sha": "2d9ac399c145fc201bce9ebcef5edd4e996d9243",
+    "head_sha": "ed9de3e9698fc8de48d77d957d876003cfca5547",
+    "files_changed": 9,
+    "additions": 55,
+    "deletions": 19
   },
   {
     "url": "https://github.com/vercel/next.js/pull/52007",
@@ -5064,6 +5200,23 @@
     "files_changed": 8,
     "additions": 3,
     "deletions": 4
+  },
+  {
+    "url": "https://github.com/vuejs/core/pull/4873",
+    "repo": "vuejs/core",
+    "number": 4873,
+    "title": "fix(compat): don't bind function from globalProperties to the current istance if it has additional properties",
+    "merged_at": "2022-04-13T09:53:07Z",
+    "stars": 55014,
+    "license": "MIT",
+    "language": "typescript",
+    "category": "R005",
+    "split": "heldout",
+    "base_sha": "1149e825de17351c76913df3850f949b4126d8f8",
+    "head_sha": "0ff055c81e38867423399361a216961694350507",
+    "files_changed": 2,
+    "additions": 25,
+    "deletions": 1
   },
   {
     "url": "https://github.com/weaviate/typescript-client/pull/305",

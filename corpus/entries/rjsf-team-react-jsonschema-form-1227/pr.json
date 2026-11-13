@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/rjsf-team/react-jsonschema-form/pull/1227",
+  "repo": "rjsf-team/react-jsonschema-form",
+  "number": 1227,
+  "title": "#1209 | allow widget to be wrapped as React.ForwardedRef",
+  "merged_at": "2019-06-02T03:57:51Z",
+  "stars": 15943,
+  "license": "Apache-2.0",
+  "language": "javascript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "16510665e85404e01dbc60766e26df228cd34027",
+  "head_sha": "02701fec0db84fe453ca6d96ce270134b12a466e",
+  "files_changed": 4,
+  "additions": 72,
+  "deletions": 37
+}

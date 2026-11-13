@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/aws/aws-sdk-java-v2/pull/6891",
+  "repo": "aws/aws-sdk-java-v2",
+  "number": 6891,
+  "title": "Comment out S3 test",
+  "merged_at": "2026-04-22T20:29:49Z",
+  "stars": 2630,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "R001",
+  "split": "heldout",
+  "base_sha": "1e12b162161b3bd2187a17126022603008808ac6",
+  "head_sha": "e10a9d5a322d019a12cde2f23496a9eecf0b873e",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 2
+}

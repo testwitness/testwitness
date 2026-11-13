@@ -1,0 +1,14 @@
+[
+  {
+    "path": "CHANGELOG.md",
+    "status": "modified"
+  },
+  {
+    "path": "packages/apollo-client/src/__tests__/client.ts",
+    "status": "modified"
+  },
+  {
+    "path": "packages/apollo-client/src/core/ObservableQuery.ts",
+    "status": "modified"
+  }
+]

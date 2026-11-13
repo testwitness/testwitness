@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "GLOBAL_PROTOTYPE \u203a functions keeps additional properties",
+    "verdict": "tp",
+    "reason": "test.only added and merged"
+  }
+]

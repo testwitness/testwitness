@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/30978",
+  "repo": "vercel/next.js",
+  "number": 30978,
+  "title": "Fix basePath replacing server-side and `normalizeLocalePath()` when path is empty string",
+  "merged_at": "2021-11-15T17:33:21Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "tuning",
+  "base_sha": "2d9ac399c145fc201bce9ebcef5edd4e996d9243",
+  "head_sha": "ed9de3e9698fc8de48d77d957d876003cfca5547",
+  "files_changed": 9,
+  "additions": 55,
+  "deletions": 19
+}

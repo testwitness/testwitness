@@ -1,0 +1,6 @@
+[
+  {
+    "path": "services/s3/src/test/java/software/amazon/awssdk/services/s3/internal/multipart/MultipartClientChecksumTest.java",
+    "status": "modified"
+  }
+]

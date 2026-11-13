@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R005",
+    "severity": "high",
+    "subject": "Dashboard with Tus \u203a should emit `error` and `upload-error` events on failed POST request",
+    "verdict": "tp",
+    "reason": "focus marker added and merged"
+  }
+]

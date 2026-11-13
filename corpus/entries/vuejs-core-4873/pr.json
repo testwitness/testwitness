@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vuejs/core/pull/4873",
+  "repo": "vuejs/core",
+  "number": 4873,
+  "title": "fix(compat): don't bind function from globalProperties to the current istance if it has additional properties",
+  "merged_at": "2022-04-13T09:53:07Z",
+  "stars": 55014,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R005",
+  "split": "heldout",
+  "base_sha": "1149e825de17351c76913df3850f949b4126d8f8",
+  "head_sha": "0ff055c81e38867423399361a216961694350507",
+  "files_changed": 2,
+  "additions": 25,
+  "deletions": 1
+}

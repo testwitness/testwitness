@@ -1,0 +1,122 @@
+[
+  {
+    "path": "package.json",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/__snapshots__/useFieldArray.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useController.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/append.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/insert.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/move.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/prepend.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/remove.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/replace.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/swap.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/__snapshots__/update.test.tsx.snap",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFieldArray/remove.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/formState.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/register.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/reset.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/setValue.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/trigger.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useForm/watch.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useFormState.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/__tests__/useWatch.test.tsx",
+    "status": "modified"
+  },
+  {
+    "path": "src/useController.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/useFieldArray.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/useForm.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/useFormState.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/useSubscribe.ts",
+    "status": "added"
+  },
+  {
+    "path": "src/useWatch.ts",
+    "status": "modified"
+  },
+  {
+    "path": "src/utils/Subject.ts",
+    "status": "modified"
+  },
+  {
+    "path": "yarn.lock",
+    "status": "modified"
+  }
+]
