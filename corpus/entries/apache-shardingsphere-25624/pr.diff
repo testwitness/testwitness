@@ -1,0 +1,43 @@
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingLoadXMLStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingLoadXMLStatementValidatorTest.java
+index ab8f07c31..071f59157 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingLoadXMLStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingLoadXMLStatementValidatorTest.java
+@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -51,7 +52,8 @@ class ShardingLoadXMLStatementValidatorTest {
+     @Test
+     void assertPreValidateLoadXMLWithSingleTable() {
+         MySQLLoadXMLStatement sqlStatement = new MySQLLoadXMLStatement(new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("t_order"))));
+-        new ShardingLoadXMLStatementValidator().preValidate(shardingRule, new LoadXMLStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingLoadXMLStatementValidator().preValidate(
++                shardingRule, new LoadXMLStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/infra/common/src/test/java/org/apache/shardingsphere/infra/datasource/pool/destroyer/DataSourcePoolDestroyerTest.java b/infra/common/src/test/java/org/apache/shardingsphere/infra/datasource/pool/destroyer/DataSourcePoolDestroyerTest.java
+index 5afd0e07d..3e879bbbc 100644
+--- a/infra/common/src/test/java/org/apache/shardingsphere/infra/datasource/pool/destroyer/DataSourcePoolDestroyerTest.java
++++ b/infra/common/src/test/java/org/apache/shardingsphere/infra/datasource/pool/destroyer/DataSourcePoolDestroyerTest.java
+@@ -26,6 +26,7 @@ import java.sql.Connection;
+ import java.sql.SQLException;
+ import java.util.concurrent.TimeUnit;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ import static org.mockito.Mockito.mock;
+@@ -34,7 +35,7 @@ class DataSourcePoolDestroyerTest {
+     
+     @Test
+     void assertAsyncDestroyWithoutAutoCloseableDataSource() {
+-        new DataSourcePoolDestroyer(mock(DataSource.class)).asyncDestroy();
++        assertDoesNotThrow(() -> new DataSourcePoolDestroyer(mock(DataSource.class)).asyncDestroy());
+     }
+     
+     @Test

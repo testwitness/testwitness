@@ -1,0 +1,282 @@
+diff --git a/tooling/karaf-maven-plugin/src/it/test-aggregate-features/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-aggregate-features/verify.bsh
+index 38c7ae1..8f1100b 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-aggregate-features/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-aggregate-features/verify.bsh
+@@ -26,9 +26,7 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "aggregate-features/target/feature/feature.xml");
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-basic-generation/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-basic-generation/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-basic-generation/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-basic-generation/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-check-dependencies-failure/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-check-dependencies-failure/verify.bsh
+index c551535..b02c83f 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-check-dependencies-failure/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-check-dependencies-failure/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "dependencies-features/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-check-dependencies/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-check-dependencies/verify.bsh
+index c551535..b02c83f 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-check-dependencies/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-check-dependencies/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "dependencies-features/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-feature-dependencies/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-feature-dependencies/verify.bsh
+index c551535..b02c83f 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-feature-dependencies/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-feature-dependencies/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "dependencies-features/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-feature-use-base-version/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-feature-use-base-version/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-feature-use-base-version/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-feature-use-base-version/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transfer-properties/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transfer-properties/verify.bsh
+index 1400502..5a4f9d1 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transfer-properties/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transfer-properties/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "feature/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transitive/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transitive/verify.bsh
+index 1400502..5a4f9d1 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transitive/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range-transitive/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "feature/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-feature-use-version-range/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-include-project-artifact/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-include-project-artifact/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-include-project-artifact/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-include-project-artifact/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-input-file/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-input-file/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-input-file/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-input-file/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-recursive/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-recursive/verify.bsh
+index c2b765a..eea2fae 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-recursive/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-recursive/verify.bsh
+@@ -21,6 +21,7 @@ import org.custommonkey.xmlunit.*;
+ import java.io.*;
+ import java.lang.*;
+ 
++// TODO fix this testcase
+ //String control = "<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\" name=\"test-basic-generation\"/>";
+ //
+ //File generated = new File( basedir, "target/feature/feature.xml" );
+diff --git a/tooling/karaf-maven-plugin/src/it/test-rename-main-feature/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-rename-main-feature/verify.bsh
+index 6af1a7c..cf7508a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-rename-main-feature/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-rename-main-feature/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-repository-dependencies/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-repository-dependencies/verify.bsh
+index 97f7ccc..d0cf5bf 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-repository-dependencies/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-repository-dependencies/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "dependency-feature-a/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-simplify-bundles/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-simplify-bundles/verify.bsh
+index 78f37fd..a6398ae 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-simplify-bundles/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-simplify-bundles/verify.bsh
+@@ -26,9 +26,7 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "simplify-features/target/feature/feature.xml");
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-transitive-as-dependency/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-transitive-as-dependency/verify.bsh
+index 78e7571..a31e48a 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-transitive-as-dependency/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-transitive-as-dependency/verify.bsh
+@@ -26,10 +26,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // load the features file pushed to the repository
+ File generated = new File(basedir, "transitive-as-dependency-feature/target/feature/feature.xml" );
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;
+diff --git a/tooling/karaf-maven-plugin/src/it/test-type-classifier/verify.bsh b/tooling/karaf-maven-plugin/src/it/test-type-classifier/verify.bsh
+index d82e6ff..7d15027 100644
+--- a/tooling/karaf-maven-plugin/src/it/test-type-classifier/verify.bsh
++++ b/tooling/karaf-maven-plugin/src/it/test-type-classifier/verify.bsh
+@@ -29,10 +29,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
+ // TODO: repository and build offline (see KARAF-2927) 
+ File generated = new File(basedir, "target/feature/feature.xml");
+ if (generated.exists()) {
+-    try {
+-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
+-        return true;
+-    } catch (Throwable ignored) { }
++    XMLAssert.assertXMLEqual(r, new FileReader(generated));
++    return true;
+ }
+ 
+ return false;

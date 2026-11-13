@@ -1,0 +1,1547 @@
+diff --git a/components/camel-activemq/src/test/java/org/apache/camel/component/activemq/AdvisoryConsumerExample.java b/components/camel-activemq/src/test/java/org/apache/camel/component/activemq/AdvisoryConsumerExample.java
+index 08e50a166a..99aa6b5edb 100644
+--- a/components/camel-activemq/src/test/java/org/apache/camel/component/activemq/AdvisoryConsumerExample.java
++++ b/components/camel-activemq/src/test/java/org/apache/camel/component/activemq/AdvisoryConsumerExample.java
+@@ -30,6 +30,7 @@ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+ import static org.apache.camel.component.activemq.ActiveMQComponent.activeMQComponent;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ 
+ /**
+  * 
+@@ -37,10 +38,11 @@ import static org.apache.camel.component.activemq.ActiveMQComponent.activeMQComp
+ public class AdvisoryConsumerExample extends ActiveMQTestSupport {
+     private static final Logger LOG = LoggerFactory.getLogger(AdvisoryConsumerExample.class);
+ 
+-    @Test
++    @Test()
+     public void testWorks() throws Exception {
+         // lets create a new queue
+-        template.sendBody("activemq:NewQueue." + System.currentTimeMillis(), "<hello>world!</hello>");
++        assertDoesNotThrow(
++                () -> template.sendBody("activemq:NewQueue." + System.currentTimeMillis(), "<hello>world!</hello>"));
+ 
+         Thread.sleep(10000);
+     }
+diff --git a/components/camel-as2/camel-as2-component/src/test/java/org/apache/camel/component/as2/AS2ClientManagerIT.java b/components/camel-as2/camel-as2-component/src/test/java/org/apache/camel/component/as2/AS2ClientManagerIT.java
+index c9d97cb644..9a07ba6a27 100644
+--- a/components/camel-as2/camel-as2-component/src/test/java/org/apache/camel/component/as2/AS2ClientManagerIT.java
++++ b/components/camel-as2/camel-as2-component/src/test/java/org/apache/camel/component/as2/AS2ClientManagerIT.java
+@@ -28,6 +28,7 @@ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ 
++import org.apache.camel.CamelException;
+ import org.apache.camel.Processor;
+ import org.apache.camel.builder.RouteBuilder;
+ import org.apache.camel.component.as2.api.AS2AsynchronousMDNManager;
+@@ -97,6 +98,7 @@ import org.junit.jupiter.api.Test;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+@@ -609,7 +611,12 @@ public class AS2ClientManagerIT extends AbstractAS2ITSupport {
+     }
+ 
+     @Test
+-    public void asyncMDNTest() throws Exception {
++    public void asyncMDNTest() {
++        assertDoesNotThrow(() -> runAsyncMDNTest());
++
++    }
++
++    private void runAsyncMDNTest() throws CamelException, HttpException {
+         AS2AsynchronousMDNManager mdnManager = new AS2AsynchronousMDNManager(
+                 AS2_VERSION, ORIGIN_SERVER_NAME, SERVER_FQDN,
+                 certList.toArray(new X509Certificate[0]), signingKP.getPrivate());
+@@ -651,7 +658,6 @@ public class AS2ClientManagerIT extends AbstractAS2ITSupport {
+         // Send MDN
+         @SuppressWarnings("unused")
+         HttpCoreContext httpContext = mdnManager.send(mdn, RECIPIENT_DELIVERY_ADDRESS);
+-
+     }
+ 
+     @BeforeAll
+diff --git a/components/camel-atmosphere-websocket/src/test/java/org/apache/camel/component/atmosphere/websocket/WebsocketRouteWithInitParamTest.java b/components/camel-atmosphere-websocket/src/test/java/org/apache/camel/component/atmosphere/websocket/WebsocketRouteWithInitParamTest.java
+index f6b7fcdc00..dae20e990a 100644
+--- a/components/camel-atmosphere-websocket/src/test/java/org/apache/camel/component/atmosphere/websocket/WebsocketRouteWithInitParamTest.java
++++ b/components/camel-atmosphere-websocket/src/test/java/org/apache/camel/component/atmosphere/websocket/WebsocketRouteWithInitParamTest.java
+@@ -16,16 +16,19 @@
+  */
+ package org.apache.camel.component.atmosphere.websocket;
+ 
++import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
++import java.util.concurrent.ExecutionException;
+ 
+ import org.apache.camel.Exchange;
+ import org.apache.camel.Processor;
+ import org.apache.camel.builder.RouteBuilder;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+@@ -36,18 +39,21 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
+     private static String[] broadcastMessageTo = {};
+     private static Map<String, String> connectionKeyUserMap = new HashMap<>();
+ 
+-    @Test
+-    void testWebsocketEventsResendingEnabled() throws Exception {
+-        TestClient wsclient = new TestClient("ws://localhost:" + PORT + "/hola");
++    private void runtTest(String s) throws InterruptedException, ExecutionException, IOException {
++        TestClient wsclient = new TestClient("ws://localhost:" + PORT + s);
+         wsclient.connect();
+         wsclient.close();
+     }
+ 
+     @Test
+-    void testPassParametersWebsocketOnOpen() throws Exception {
+-        TestClient wsclient = new TestClient("ws://localhost:" + PORT + "/hola1?param1=value1&param2=value2");
+-        wsclient.connect();
+-        wsclient.close();
++    void testWebsocketEventsResendingEnabled() {
++        assertDoesNotThrow(() -> runtTest("/hola"));
++
++    }
++
++    @Test
++    void testPassParametersWebsocketOnOpen() {
++        assertDoesNotThrow(() -> runtTest("/hola1?param1=value1&param2=value2"));
+     }
+ 
+     @Test
+diff --git a/components/camel-avro-rpc/camel-avro-rpc-component/src/test/java/org/apache/camel/component/avro/AvroConsumerTestSupport.java b/components/camel-avro-rpc/camel-avro-rpc-component/src/test/java/org/apache/camel/component/avro/AvroConsumerTestSupport.java
+index fe99af2b22..b127455ba7 100644
+--- a/components/camel-avro-rpc/camel-avro-rpc-component/src/test/java/org/apache/camel/component/avro/AvroConsumerTestSupport.java
++++ b/components/camel-avro-rpc/camel-avro-rpc-component/src/test/java/org/apache/camel/component/avro/AvroConsumerTestSupport.java
+@@ -30,6 +30,7 @@ import org.apache.camel.avro.test.TestReflectionImpl;
+ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+@@ -80,21 +81,21 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
+     }
+ 
+     @Test
+-    public void testInOnly() throws Exception {
++    public void testInOnly() throws IOException {
+         initializeTranceiver();
+         Key key = Key.newBuilder().setKey("1").build();
+         Value value = Value.newBuilder().setValue("test value").build();
+         Object[] request = { key, value };
+-        requestor.request("put", request);
++        assertDoesNotThrow(() -> requestor.request("put", request));
+     }
+ 
+     @Test
+-    public void testInOnlyMessageInRoute() throws Exception {
++    public void testInOnlyMessageInRoute() throws IOException {
+         initializeTranceiver();
+         Key key = Key.newBuilder().setKey("1").build();
+         Value value = Value.newBuilder().setValue("test value").build();
+         Object[] request = { key, value };
+-        requestorMessageInRoute.request("put", request);
++        assertDoesNotThrow(() -> requestorMessageInRoute.request("put", request));
+     }
+ 
+     @Test
+diff --git a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentConfigurationTest.java b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentConfigurationTest.java
+index 092657bcfd..55834803a9 100644
+--- a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentConfigurationTest.java
++++ b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentConfigurationTest.java
+@@ -16,6 +16,7 @@
+  */
+ package org.apache.camel.component.aws2.ec2;
+ 
++import org.apache.camel.Endpoint;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.core.Protocol;
+@@ -91,7 +92,8 @@ public class EC2ComponentConfigurationTest extends CamelTestSupport {
+         Ec2Client amazonEc2Client = new AmazonEC2ClientMock();
+         context.getRegistry().bind("amazonEc2Client", amazonEc2Client);
+         AWS2EC2Component component = context.getComponent("aws2-ec2", AWS2EC2Component.class);
+-        component.createEndpoint("aws2-ec2://TestDomain?amazonEc2Client=#amazonEc2Client");
++        Endpoint ep = component.createEndpoint("aws2-ec2://TestDomain?amazonEc2Client=#amazonEc2Client");
++        assertNotNull(ep, "Could not create the endpoint");
+     }
+ 
+     @Test
+diff --git a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentSpringTest.java b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentSpringTest.java
+index 17a4e782dd..4826ad2aad 100644
+--- a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentSpringTest.java
++++ b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ComponentSpringTest.java
+@@ -37,6 +37,7 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
+ import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+ import software.amazon.awssdk.services.ec2.model.UnmonitorInstancesResponse;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ public class EC2ComponentSpringTest extends CamelSpringTestSupport {
+@@ -177,16 +178,15 @@ public class EC2ComponentSpringTest extends CamelSpringTestSupport {
+     }
+ 
+     @Test
+-    public void ec2RebootInstancesTest() throws Exception {
+-
+-        template.request("direct:reboot", new Processor() {
++    public void ec2RebootInstancesTest() {
++        assertDoesNotThrow(() -> issueReboot());
++    }
+ 
+-            @Override
+-            public void process(Exchange exchange) throws Exception {
+-                Collection<String> l = new ArrayList<>();
+-                l.add("test-1");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_IDS, l);
+-            }
++    private void issueReboot() {
++        template.request("direct:reboot", exchange -> {
++            Collection<String> l = new ArrayList<>();
++            l.add("test-1");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_IDS, l);
+         });
+     }
+ 
+diff --git a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ProducerTest.java b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ProducerTest.java
+index 576a4f6022..478ea5ca0b 100644
+--- a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ProducerTest.java
++++ b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/EC2ProducerTest.java
+@@ -40,6 +40,7 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
+ import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+ import software.amazon.awssdk.services.ec2.model.UnmonitorInstancesResponse;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ public class EC2ProducerTest extends CamelTestSupport {
+@@ -203,16 +204,15 @@ public class EC2ProducerTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void ec2RebootInstancesTest() throws Exception {
+-
+-        template.request("direct:reboot", new Processor() {
++    public void ec2RebootInstancesTest() {
++        assertDoesNotThrow(() -> issueReboot());
++    }
+ 
+-            @Override
+-            public void process(Exchange exchange) throws Exception {
+-                Collection<String> l = new ArrayList<>();
+-                l.add("test-1");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_IDS, l);
+-            }
++    private void issueReboot() {
++        template.request("direct:reboot", exchange -> {
++            Collection<String> l = new ArrayList<>();
++            l.add("test-1");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_IDS, l);
+         });
+     }
+ 
+diff --git a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/integration/EC2ComponentIT.java b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/integration/EC2ComponentIT.java
+index 7f0feca38a..cde370687d 100644
+--- a/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/integration/EC2ComponentIT.java
++++ b/components/camel-aws/camel-aws2-ec2/src/test/java/org/apache/camel/component/aws2/ec2/integration/EC2ComponentIT.java
+@@ -19,59 +19,61 @@ package org.apache.camel.component.aws2.ec2.integration;
+ import java.util.ArrayList;
+ import java.util.Collection;
+ 
+-import org.apache.camel.Exchange;
+-import org.apache.camel.Processor;
+ import org.apache.camel.builder.RouteBuilder;
+ import org.apache.camel.component.aws2.ec2.AWS2EC2Constants;
+ import org.apache.camel.component.aws2.ec2.AWS2EC2Operations;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.services.ec2.model.InstanceType;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class EC2ComponentIT extends Aws2EC2Base {
+ 
+     @Test
+     public void createAndRunInstancesTest() {
++        assertDoesNotThrow(() -> execCreateAndRun());
++    }
+ 
+-        template.send("direct:createAndRun", new Processor() {
+-            public void process(Exchange exchange) throws Exception {
+-                exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
+-            }
++    private void execCreateAndRun() {
++        template.send("direct:createAndRun", exchange -> {
++            exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
+         });
+     }
+ 
+     @Test
+     public void createAndRunInstancesWithSecurityGroupsTest() {
++        assertDoesNotThrow(() -> execCreateAndRunWithSecurityGroups());
++    }
+ 
+-        template.send("direct:createAndRun", new Processor() {
+-            public void process(Exchange exchange) throws Exception {
+-                exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
+-                Collection<String> secGroups = new ArrayList<>();
+-                secGroups.add("secgroup-1");
+-                secGroups.add("secgroup-2");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_SECURITY_GROUPS, secGroups);
+-            }
++    private void execCreateAndRunWithSecurityGroups() {
++        template.send("direct:createAndRun", exchange -> {
++            exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
++            Collection<String> secGroups = new ArrayList<>();
++            secGroups.add("secgroup-1");
++            secGroups.add("secgroup-2");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_SECURITY_GROUPS, secGroups);
+         });
+     }
+ 
+     @Test
+-    public void ec2CreateAndRunTestWithKeyPair() throws Exception {
++    public void ec2CreateAndRunTestWithKeyPair() {
++        assertDoesNotThrow(() -> execCreateAndRunWithKeyPair());
++    }
+ 
+-        template.request("direct:createAndRun", new Processor() {
+-            @Override
+-            public void process(Exchange exchange) throws Exception {
+-                exchange.getIn().setHeader(AWS2EC2Constants.OPERATION, AWS2EC2Operations.createAndRunInstances);
+-                exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
+-                exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_KEY_PAIR, "keypair-1");
+-            }
++    private void execCreateAndRunWithKeyPair() {
++        template.request("direct:createAndRun", exchange -> {
++            exchange.getIn().setHeader(AWS2EC2Constants.OPERATION, AWS2EC2Operations.createAndRunInstances);
++            exchange.getIn().setHeader(AWS2EC2Constants.IMAGE_ID, "ami-fd65ba94");
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_TYPE, InstanceType.T2_MICRO);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MIN_COUNT, 1);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCE_MAX_COUNT, 1);
++            exchange.getIn().setHeader(AWS2EC2Constants.INSTANCES_KEY_PAIR, "keypair-1");
+         });
+     }
+ 
+diff --git a/components/camel-aws/camel-aws2-lambda/src/test/java/org/apache/camel/component/aws2/lambda/LambdaComponentConfigurationTest.java b/components/camel-aws/camel-aws2-lambda/src/test/java/org/apache/camel/component/aws2/lambda/LambdaComponentConfigurationTest.java
+index d6ed33a32f..55c8b8821f 100644
+--- a/components/camel-aws/camel-aws2-lambda/src/test/java/org/apache/camel/component/aws2/lambda/LambdaComponentConfigurationTest.java
++++ b/components/camel-aws/camel-aws2-lambda/src/test/java/org/apache/camel/component/aws2/lambda/LambdaComponentConfigurationTest.java
+@@ -16,6 +16,7 @@
+  */
+ package org.apache.camel.component.aws2.lambda;
+ 
++import org.apache.camel.Endpoint;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.core.Protocol;
+@@ -68,7 +69,7 @@ public class LambdaComponentConfigurationTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void createEndpointWithoutSecretKeyConfiguration() throws Exception {
++    public void createEndpointWithoutSecretKeyConfiguration() {
+         Lambda2Component component = context.getComponent("aws2-lambda", Lambda2Component.class);
+         assertThrows(IllegalArgumentException.class, () -> {
+             component.createEndpoint("aws2-lambda://myFunction?operation=getFunction&accessKey=xxx");
+@@ -80,7 +81,10 @@ public class LambdaComponentConfigurationTest extends CamelTestSupport {
+         LambdaClient awsLambdaClient = new AmazonLambdaClientMock();
+         context.getRegistry().bind("awsLambdaClient", awsLambdaClient);
+         Lambda2Component component = context.getComponent("aws2-lambda", Lambda2Component.class);
+-        component.createEndpoint("aws2-lambda://myFunction?operation=getFunction&awsLambdaClient=#awsLambdaClient");
++        Endpoint ep
++                = component.createEndpoint("aws2-lambda://myFunction?operation=getFunction&awsLambdaClient=#awsLambdaClient");
++
++        assertNotNull(ep, "The endpoint could not be created");
+     }
+ 
+     @Test
+diff --git a/components/camel-aws/camel-aws2-ses/src/test/java/org/apache/camel/component/aws2/ses/SesComponentConfigurationTest.java b/components/camel-aws/camel-aws2-ses/src/test/java/org/apache/camel/component/aws2/ses/SesComponentConfigurationTest.java
+index 98a86c7ae1..6229815468 100644
+--- a/components/camel-aws/camel-aws2-ses/src/test/java/org/apache/camel/component/aws2/ses/SesComponentConfigurationTest.java
++++ b/components/camel-aws/camel-aws2-ses/src/test/java/org/apache/camel/component/aws2/ses/SesComponentConfigurationTest.java
+@@ -19,6 +19,7 @@ package org.apache.camel.component.aws2.ses;
+ import java.util.ArrayList;
+ import java.util.List;
+ 
++import org.apache.camel.Endpoint;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.core.Protocol;
+@@ -206,7 +207,8 @@ public class SesComponentConfigurationTest extends CamelTestSupport {
+         context.getRegistry().bind("amazonSESClient", mock);
+ 
+         Ses2Component component = context.getComponent("aws2-ses", Ses2Component.class);
+-        component.createEndpoint("aws2-ses://from@example.com?amazonSESClient=#amazonSESClient");
++        Endpoint ep = component.createEndpoint("aws2-ses://from@example.com?amazonSESClient=#amazonSESClient");
++        assertNotNull(ep, "Could not create the endpoint");
+     }
+ 
+     @Test
+diff --git a/components/camel-aws/camel-aws2-sns/src/test/java/org/apache/camel/component/aws2/sns/SnsComponentConfigurationTest.java b/components/camel-aws/camel-aws2-sns/src/test/java/org/apache/camel/component/aws2/sns/SnsComponentConfigurationTest.java
+index db1af3c800..894461262c 100644
+--- a/components/camel-aws/camel-aws2-sns/src/test/java/org/apache/camel/component/aws2/sns/SnsComponentConfigurationTest.java
++++ b/components/camel-aws/camel-aws2-sns/src/test/java/org/apache/camel/component/aws2/sns/SnsComponentConfigurationTest.java
+@@ -16,6 +16,7 @@
+  */
+ package org.apache.camel.component.aws2.sns;
+ 
++import org.apache.camel.Endpoint;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.core.Protocol;
+@@ -227,7 +228,8 @@ public class SnsComponentConfigurationTest extends CamelTestSupport {
+         context.getRegistry().bind("amazonSNSClient", mock);
+ 
+         Sns2Component component = context.getComponent("aws2-sns", Sns2Component.class);
+-        component.createEndpoint("aws2-sns://MyTopic?amazonSNSClient=#amazonSNSClient");
++        Endpoint ep = component.createEndpoint("aws2-sns://MyTopic?amazonSNSClient=#amazonSNSClient");
++        assertNotNull(ep, "Could not create the endpoint");
+     }
+ 
+     @Test
+diff --git a/components/camel-aws/camel-aws2-sqs/src/test/java/org/apache/camel/component/aws2/sqs/SqsComponentConfigurationTest.java b/components/camel-aws/camel-aws2-sqs/src/test/java/org/apache/camel/component/aws2/sqs/SqsComponentConfigurationTest.java
+index c549e3e4e1..f7b7c6c48e 100644
+--- a/components/camel-aws/camel-aws2-sqs/src/test/java/org/apache/camel/component/aws2/sqs/SqsComponentConfigurationTest.java
++++ b/components/camel-aws/camel-aws2-sqs/src/test/java/org/apache/camel/component/aws2/sqs/SqsComponentConfigurationTest.java
+@@ -16,6 +16,7 @@
+  */
+ package org.apache.camel.component.aws2.sqs;
+ 
++import org.apache.camel.Endpoint;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ import software.amazon.awssdk.core.Protocol;
+@@ -263,7 +264,8 @@ public class SqsComponentConfigurationTest extends CamelTestSupport {
+         context.getRegistry().bind("amazonSQSClient", mock);
+ 
+         Sqs2Component component = context.getComponent("aws2-sqs", Sqs2Component.class);
+-        component.createEndpoint("aws2-sqs://MyQueue?amazonSQSClient=#amazonSQSClient");
++        Endpoint ep = component.createEndpoint("aws2-sqs://MyQueue?amazonSQSClient=#amazonSQSClient");
++        assertNotNull(ep, "Could not create the endpoint");
+     }
+ 
+     @Test
+diff --git a/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/api/BonitaAuthFilterAlreadyConnectedTest.java b/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/api/BonitaAuthFilterAlreadyConnectedTest.java
+index d00a4552cf..b2a75f5f58 100644
+--- a/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/api/BonitaAuthFilterAlreadyConnectedTest.java
++++ b/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/api/BonitaAuthFilterAlreadyConnectedTest.java
+@@ -16,6 +16,7 @@
+  */
+ package org.apache.camel.component.bonita.api;
+ 
++import java.io.IOException;
+ import java.util.HashMap;
+ import java.util.Map;
+ 
+@@ -30,6 +31,8 @@ import org.mockito.Mock;
+ import org.mockito.Mockito;
+ import org.mockito.MockitoAnnotations;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class BonitaAuthFilterAlreadyConnectedTest {
+ 
+     @Mock
+@@ -45,7 +48,11 @@ public class BonitaAuthFilterAlreadyConnectedTest {
+     }
+ 
+     @Test
+-    public void testAlreadyConnected() throws Exception {
++    public void testAlreadyConnected() {
++        assertDoesNotThrow(() -> runAlreadyConnectedTest());
++    }
++
++    private void runAlreadyConnectedTest() throws IOException {
+         BonitaAPIConfig bonitaApiConfig = new BonitaAPIConfig("hostname", "port", "username", "password");
+         BonitaAuthFilter bonitaAuthFilter = new BonitaAuthFilter(bonitaApiConfig);
+         bonitaAuthFilter.filter(requestContext);
+diff --git a/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/integration/BonitaProducerManualIT.java b/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/integration/BonitaProducerManualIT.java
+index c70d9440c9..0209090511 100644
+--- a/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/integration/BonitaProducerManualIT.java
++++ b/components/camel-bonita/src/test/java/org/apache/camel/component/bonita/integration/BonitaProducerManualIT.java
+@@ -25,6 +25,8 @@ import org.apache.camel.builder.RouteBuilder;
+ import org.junit.jupiter.api.Disabled;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ /**
+  * Bonita producer integration tests. Requires a running Bonita instance.
+  *
+@@ -34,7 +36,11 @@ import org.junit.jupiter.api.Test;
+ public class BonitaProducerManualIT extends BonitaIntegrationTestSupport {
+ 
+     @Test
+-    public void testStartCase() throws Exception {
++    public void testStartCase() {
++        assertDoesNotThrow(() -> runTest());
++    }
++
++    private void runTest() {
+         Map<String, Serializable> map = new HashMap<>();
+         map.put("vacationRequestIdContract", "1");
+ 
+diff --git a/components/camel-cmis/src/test/java/org/apache/camel/component/cmis/CMISProducerTest.java b/components/camel-cmis/src/test/java/org/apache/camel/component/cmis/CMISProducerTest.java
+index 593967651c..bf4089277b 100644
+--- a/components/camel-cmis/src/test/java/org/apache/camel/component/cmis/CMISProducerTest.java
++++ b/components/camel-cmis/src/test/java/org/apache/camel/component/cmis/CMISProducerTest.java
+@@ -285,7 +285,8 @@ public class CMISProducerTest extends CMISTestSupport {
+ 
+         template.send(exchange);
+ 
+-        createSession().getObject(document.getId());
++        CmisObject obj = createSession().getObject(document.getId());
++        assertNotNull(obj, "Could not get the object");
+     }
+ 
+     @Test
+diff --git a/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseEndpointTest.java b/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseEndpointTest.java
+index 33c8a4cdd4..7bb07a583d 100644
+--- a/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseEndpointTest.java
++++ b/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseEndpointTest.java
+@@ -23,6 +23,7 @@ import org.apache.camel.Processor;
+ import org.junit.jupiter.api.Test;
+ 
+ import static org.apache.camel.component.couchbase.CouchbaseConstants.DEFAULT_COUCHBASE_PORT;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+@@ -65,7 +66,7 @@ public class CouchbaseEndpointTest {
+ 
+     @Test
+     public void testCouchbaseEndpoint() {
+-        new CouchbaseEndpoint();
++        assertDoesNotThrow(() -> new CouchbaseEndpoint());
+     }
+ 
+     @Test
+@@ -80,7 +81,7 @@ public class CouchbaseEndpointTest {
+ 
+     @Test
+     public void testCouchbaseEndpointUri() {
+-        new CouchbaseEndpoint("couchbase:localhost:80/bucket", new CouchbaseComponent());
++        assertDoesNotThrow(() -> new CouchbaseEndpoint("couchbase:localhost:80/bucket", new CouchbaseComponent()));
+     }
+ 
+     @Test
+diff --git a/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseProducerTest.java b/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseProducerTest.java
+index 3d4ff6dbf2..bbc47106ad 100644
+--- a/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseProducerTest.java
++++ b/components/camel-couchbase/src/test/java/org/apache/camel/component/couchbase/CouchbaseProducerTest.java
+@@ -34,6 +34,8 @@ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import static org.apache.camel.component.couchbase.CouchbaseConstants.HEADER_TTL;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyString;
+@@ -113,8 +115,9 @@ public class CouchbaseProducerTest {
+     }
+ 
+     @Test
+-    public void testMaximumValuesForPersistToAndRepicateTo() throws Exception {
+-        producer = new CouchbaseProducer(endpoint, client, 4, 3);
++    public void testMaximumValuesForPersistToAndReplicateTo() {
++        assertDoesNotThrow(() -> producer = new CouchbaseProducer(endpoint, client, 4, 3));
++        assertNotNull(producer);
+     }
+ 
+     //
+diff --git a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/PGPDataFormatTest.java b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/PGPDataFormatTest.java
+index 8725e9bf7c..20b22361a3 100644
+--- a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/PGPDataFormatTest.java
++++ b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/PGPDataFormatTest.java
+@@ -68,6 +68,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodG
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.fail;
+@@ -147,48 +148,48 @@ public class PGPDataFormatTest extends AbstractPGPDataFormatTest {
+     }
+ 
+     @Test
+-    void testEncryption() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline");
++    void testEncryption() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline"));
+     }
+ 
+     @Test
+-    void testEncryption2() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline2");
++    void testEncryption2() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline2"));
+     }
+ 
+     @Test
+-    void testEncryptionArmor() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline-armor");
++    void testEncryptionArmor() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline-armor"));
+     }
+ 
+     @Test
+-    void testEncryptionSigned() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline-sign");
++    void testEncryptionSigned() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline-sign"));
+     }
+ 
+     @Test
+-    void testEncryptionKeyRingByteArray() throws Exception {
+-        doRoundTripEncryptionTests("direct:key-ring-byte-array");
++    void testEncryptionKeyRingByteArray() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:key-ring-byte-array"));
+     }
+ 
+     @Test
+-    void testEncryptionSignedKeyRingByteArray() throws Exception {
+-        doRoundTripEncryptionTests("direct:sign-key-ring-byte-array");
++    void testEncryptionSignedKeyRingByteArray() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:sign-key-ring-byte-array"));
+     }
+ 
+     @Test
+-    void testSeveralSignerKeys() throws Exception {
+-        doRoundTripEncryptionTests("direct:several-signer-keys");
++    void testSeveralSignerKeys() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:several-signer-keys"));
+     }
+ 
+     @Test
+-    void testOneUserIdWithServeralKeys() throws Exception {
+-        doRoundTripEncryptionTests("direct:one-userid-several-keys");
++    void testOneUserIdWithSeveralKeys() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:one-userid-several-keys"));
+     }
+ 
+     @Test
+-    void testKeyAccess() throws Exception {
+-        doRoundTripEncryptionTests("direct:key_access");
++    void testKeyAccess() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:key_access"));
+     }
+ 
+     @Test
+@@ -300,8 +301,7 @@ public class PGPDataFormatTest extends AbstractPGPDataFormatTest {
+ 
+     @Test
+     void testEncryptSignWithoutCompressedDataPacket() throws Exception {
+-
+-        doRoundTripEncryptionTests("direct:encrypt-sign-without-compressed-data-packet");
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:encrypt-sign-without-compressed-data-packet"));
+         //        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         //
+         ////        createEncryptedNonCompressedData(bos, PUB_KEY_RING_SUBKEYS_FILE_NAME);
+diff --git a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatNoPassPhraseTest.java b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatNoPassPhraseTest.java
+index 924da376af..7967fb7ed0 100644
+--- a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatNoPassPhraseTest.java
++++ b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatNoPassPhraseTest.java
+@@ -21,6 +21,8 @@ import org.apache.camel.spring.SpringCamelContext;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.context.support.ClassPathXmlApplicationContext;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class SpringPGPDataFormatNoPassPhraseTest extends AbstractPGPDataFormatTest {
+ 
+     @Override
+@@ -30,13 +32,13 @@ public class SpringPGPDataFormatNoPassPhraseTest extends AbstractPGPDataFormatTe
+     }
+ 
+     @Test
+-    void testEncryption() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline");
++    void testEncryption() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline"));
+     }
+ 
+     @Test
+-    void testEncryptionWithKeyRingByteArray() throws Exception {
+-        doRoundTripEncryptionTests("direct:pgp-key-ring-byte-array");
++    void testEncryptionWithKeyRingByteArray() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:pgp-key-ring-byte-array"));
+     }
+ 
+ }
+diff --git a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatTest.java b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatTest.java
+index a83a5c7b6d..782dce2ca5 100644
+--- a/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatTest.java
++++ b/components/camel-crypto/src/test/java/org/apache/camel/converter/crypto/SpringPGPDataFormatTest.java
+@@ -21,6 +21,8 @@ import org.apache.camel.spring.SpringCamelContext;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.context.support.ClassPathXmlApplicationContext;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class SpringPGPDataFormatTest extends AbstractPGPDataFormatTest {
+ 
+     @Override
+@@ -30,8 +32,8 @@ public class SpringPGPDataFormatTest extends AbstractPGPDataFormatTest {
+     }
+ 
+     @Test
+-    void testEncryption() throws Exception {
+-        doRoundTripEncryptionTests("direct:inline");
++    void testEncryption() {
++        assertDoesNotThrow(() -> doRoundTripEncryptionTests("direct:inline"));
+     }
+ 
+ }
+diff --git a/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/CxfProducerSoapActionTest.java b/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/CxfProducerSoapActionTest.java
+index 4ffe5445fe..a0bcfbde5b 100644
+--- a/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/CxfProducerSoapActionTest.java
++++ b/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/CxfProducerSoapActionTest.java
+@@ -28,6 +28,7 @@ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.apache.cxf.binding.soap.SoapBindingConstants;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ public class CxfProducerSoapActionTest extends CamelTestSupport {
+@@ -44,7 +45,7 @@ public class CxfProducerSoapActionTest extends CamelTestSupport {
+ 
+     @Test
+     public void testSendSoapRequestWithoutSoapActionSet() {
+-        template.requestBody(DIRECT_START, REQUEST_MESSAGE, String.class);
++        assertDoesNotThrow(() -> template.requestBody(DIRECT_START, REQUEST_MESSAGE, String.class));
+     }
+ 
+     @Override
+diff --git a/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/noparam/NoParamTest.java b/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/noparam/NoParamTest.java
+index c333d7a9e3..24f0e45b20 100644
+--- a/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/noparam/NoParamTest.java
++++ b/components/camel-cxf/src/test/java/org/apache/camel/component/cxf/noparam/NoParamTest.java
+@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
+ import org.springframework.context.support.AbstractApplicationContext;
+ import org.springframework.context.support.ClassPathXmlApplicationContext;
+ 
++import static org.junit.jupiter.api.Assertions.assertNotNull;
++
+ public class NoParamTest extends CamelSpringTestSupport {
+ 
+     private static final Logger LOGGER = LoggerFactory.getLogger(NoParamTest.class);
+@@ -42,8 +44,9 @@ public class NoParamTest extends CamelSpringTestSupport {
+     }
+ 
+     @Test
+-    public void testNullBodoy() throws Exception {
++    public void testNullBody() throws Exception {
+         Object body = template.sendBody("direct:noParam", ExchangePattern.InOut, null);
++        assertNotNull(body);
+         LOGGER.error(body.toString());
+     }
+ 
+diff --git a/components/camel-disruptor/src/test/java/org/apache/camel/component/disruptor/DisruptorNoConsumerTest.java b/components/camel-disruptor/src/test/java/org/apache/camel/component/disruptor/DisruptorNoConsumerTest.java
+index a0659a97cf..8fb9ac8e87 100644
+--- a/components/camel-disruptor/src/test/java/org/apache/camel/component/disruptor/DisruptorNoConsumerTest.java
++++ b/components/camel-disruptor/src/test/java/org/apache/camel/component/disruptor/DisruptorNoConsumerTest.java
+@@ -23,13 +23,14 @@ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ 
+ import static org.apache.camel.test.junit5.TestSupport.assertIsInstanceOf;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.fail;
+ 
+ public class DisruptorNoConsumerTest extends CamelTestSupport {
+     @Test
+     void testInOnly() throws Exception {
+         // no problem for in only as we do not expect a reply
+-        template.sendBody("direct:start", "Hello World");
++        assertDoesNotThrow(() -> template.sendBody("direct:start", "Hello World"));
+     }
+ 
+     @Test
+diff --git a/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/FacebookMethodsTypeHelperTest.java b/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/FacebookMethodsTypeHelperTest.java
+index 8c212b6e56..80567005c4 100644
+--- a/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/FacebookMethodsTypeHelperTest.java
++++ b/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/FacebookMethodsTypeHelperTest.java
+@@ -72,7 +72,7 @@ public class FacebookMethodsTypeHelperTest {
+     }
+ 
+     @Test
+-    public void testFilterMethods() throws Exception {
++    public void testfiltermethods() throws Exception {
+         // TODO
+     }
+ 
+diff --git a/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/ReadingBuilderTest.java b/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/ReadingBuilderTest.java
+index e287d3567d..8e884494d2 100644
+--- a/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/ReadingBuilderTest.java
++++ b/components/camel-facebook/src/test/java/org/apache/camel/component/facebook/data/ReadingBuilderTest.java
+@@ -26,6 +26,7 @@ import facebook4j.Reading;
+ import org.apache.camel.component.facebook.FacebookConstants;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertNotEquals;
+@@ -61,7 +62,11 @@ public class ReadingBuilderTest {
+     }
+ 
+     @Test
+-    public void testSetProperties() throws Exception {
++    public void testSetProperties() {
++        assertDoesNotThrow(() -> setProperties());
++    }
++
++    private void setProperties() {
+         final Reading reading = new Reading();
+ 
+         Map<String, Object> properties = new HashMap<>();
+diff --git a/components/camel-ftp/src/test/java/org/apache/camel/component/file/remote/UriConfigurationTest.java b/components/camel-ftp/src/test/java/org/apache/camel/component/file/remote/UriConfigurationTest.java
+index 1f53e852d4..9dc683c611 100644
+--- a/components/camel-ftp/src/test/java/org/apache/camel/component/file/remote/UriConfigurationTest.java
++++ b/components/camel-ftp/src/test/java/org/apache/camel/component/file/remote/UriConfigurationTest.java
+@@ -16,8 +16,6 @@
+  */
+ package org.apache.camel.component.file.remote;
+ 
+-import org.apache.camel.Exchange;
+-import org.apache.camel.Processor;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.apache.camel.test.junit5.TestSupport;
+ import org.junit.jupiter.api.Test;
+@@ -210,11 +208,11 @@ public class UriConfigurationTest extends CamelTestSupport {
+         FtpConfiguration config = endpoint.getConfiguration();
+         config.setHost("somewhere");
+         config.setDirectory("temp.dir");
+-        endpoint.createConsumer(new Processor() {
+-            public void process(Exchange exchange) throws Exception {
+-                // do nothing
+-            }
++        RemoteFileConsumer<?> consumer = endpoint.createConsumer(exchange -> {
++            // do nothing
+         });
++
++        assertNotNull(consumer, "Could not create the consumer");
+     }
+ 
+     @Test
+diff --git a/components/camel-grape/src/test/java/org/apache/camel/component/grape/GrapeComponentTest.java b/components/camel-grape/src/test/java/org/apache/camel/component/grape/GrapeComponentTest.java
+index aff308be23..7c842055cd 100644
+--- a/components/camel-grape/src/test/java/org/apache/camel/component/grape/GrapeComponentTest.java
++++ b/components/camel-grape/src/test/java/org/apache/camel/component/grape/GrapeComponentTest.java
+@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
+ import static org.apache.camel.ServiceStatus.Started;
+ import static org.apache.camel.component.grape.GrapeComponent.grapeCamelContext;
+ import static org.apache.camel.component.grape.GrapeEndpoint.loadPatches;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ public class GrapeComponentTest {
+@@ -45,19 +46,21 @@ public class GrapeComponentTest {
+ 
+     @Test
+     public void shouldLoadStreamComponent() {
+-        pathesRepository.clear();
+-        camelContext.start();
+-        camelContext.createProducerTemplate().sendBody("grape:org.apache.camel/camel-stream/" + camelContext.getVersion(),
+-                "msg");
+-        camelContext.createProducerTemplate().sendBody("stream:out", "msg");
++        assertDoesNotThrow(
++                () -> runShouldLoadStreamTest("grape:org.apache.camel/camel-stream/" + camelContext.getVersion(), "msg"));
+     }
+ 
+     @Test
+     public void shouldLoadStreamComponentViaBodyRequest() {
++        assertDoesNotThrow(
++                () -> runShouldLoadStreamTest("grape:grape", "org.apache.camel/camel-stream/" + camelContext.getVersion()));
++    }
++
++    private void runShouldLoadStreamTest(String s, String s2) {
+         pathesRepository.clear();
+         camelContext.start();
+-        camelContext.createProducerTemplate().sendBody("grape:grape",
+-                "org.apache.camel/camel-stream/" + camelContext.getVersion());
++        camelContext.createProducerTemplate().sendBody(s,
++                s2);
+         camelContext.createProducerTemplate().sendBody("stream:out", "msg");
+     }
+ 
+diff --git a/components/camel-grpc/src/test/java/org/apache/camel/component/grpc/GrpcConsumerExceptionTest.java b/components/camel-grpc/src/test/java/org/apache/camel/component/grpc/GrpcConsumerExceptionTest.java
+index db8dcb74a4..734f1f7db3 100644
+--- a/components/camel-grpc/src/test/java/org/apache/camel/component/grpc/GrpcConsumerExceptionTest.java
++++ b/components/camel-grpc/src/test/java/org/apache/camel/component/grpc/GrpcConsumerExceptionTest.java
+@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+@@ -61,7 +62,7 @@ public class GrpcConsumerExceptionTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void testExceptionExpected() throws Exception {
++    public void testExceptionExpected() {
+         LOG.info("gRPC expected exception test start");
+         PingRequest pingRequest
+                 = PingRequest.newBuilder().setPingName(GRPC_TEST_PING_VALUE).setPingId(GRPC_TEST_PING_ID).build();
+@@ -69,8 +70,12 @@ public class GrpcConsumerExceptionTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void testExchangeExceptionHandling() throws Exception {
++    public void testExchangeExceptionHandling() {
+         LOG.info("gRPC exchange exception handling test start");
++        assertDoesNotThrow(() -> runExchangeExceptionHandlingTest());
++    }
++
++    private void runExchangeExceptionHandlingTest() throws InterruptedException {
+         final CountDownLatch latch = new CountDownLatch(1);
+         PingRequest pingRequest
+                 = PingRequest.newBuilder().setPingName(GRPC_TEST_PING_VALUE).setPingId(GRPC_TEST_PING_ID).build();
+diff --git a/components/camel-hazelcast/src/test/java/org/apache/camel/processor/aggregate/hazelcast/HazelcastAggregationRepositoryConstructorsTest.java b/components/camel-hazelcast/src/test/java/org/apache/camel/processor/aggregate/hazelcast/HazelcastAggregationRepositoryConstructorsTest.java
+index 7d9c96e254..67e86821fe 100644
+--- a/components/camel-hazelcast/src/test/java/org/apache/camel/processor/aggregate/hazelcast/HazelcastAggregationRepositoryConstructorsTest.java
++++ b/components/camel-hazelcast/src/test/java/org/apache/camel/processor/aggregate/hazelcast/HazelcastAggregationRepositoryConstructorsTest.java
+@@ -23,6 +23,7 @@ import org.apache.camel.support.DefaultExchange;
+ import org.apache.camel.test.junit5.CamelTestSupport;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ public class HazelcastAggregationRepositoryConstructorsTest extends CamelTestSupport {
+@@ -72,14 +73,16 @@ public class HazelcastAggregationRepositoryConstructorsTest extends CamelTestSup
+     }
+ 
+     @Test
+-    public void locallyInitializedHazelcastInstanceAdd() throws Exception {
++    public void locallyInitializedHazelcastInstanceAdd() {
++        assertDoesNotThrow(() -> runLocallyInitializedHazelcastInstanceAdd());
++    }
++
++    private void runLocallyInitializedHazelcastInstanceAdd() throws Exception {
+         HazelcastAggregationRepository repo = new HazelcastAggregationRepository("hzRepoMap");
+         try {
+             repo.doStart();
+             Exchange ex = new DefaultExchange(context());
+             repo.add(context(), "somedefaultkey", ex);
+-            //} catch (Throwable e) {
+-            //fail(e.getMessage());
+         } finally {
+             repo.doStop();
+         }
+diff --git a/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosAuthenticationTest.java b/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosAuthenticationTest.java
+index bf2eca57c5..7374b103c7 100644
+--- a/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosAuthenticationTest.java
++++ b/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosAuthenticationTest.java
+@@ -17,44 +17,43 @@
+ package org.apache.camel.component.hdfs.kerberos;
+ 
+ import java.io.FileNotFoundException;
+-import java.io.IOException;
+ 
+ import org.apache.hadoop.conf.Configuration;
+ import org.junit.jupiter.api.Test;
+ 
+ import static org.apache.camel.component.hdfs.HdfsTestSupport.CWD;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ public class KerberosAuthenticationTest {
+ 
+     private KerberosAuthentication underTest;
+ 
+-    @Test
+-    public void loginWithKeytabFile() throws IOException {
+-        // given
++    private void doLogin(String s) {
+         Configuration configuration = new Configuration();
+ 
+         String username = "test_user";
+-        String keyTabFileLocation = CWD.getAbsolutePath() + "/src/test/resources/kerberos/test-keytab.bin";
++        String keyTabFileLocation = CWD.getAbsolutePath() + s;
+ 
+         underTest = new KerberosAuthentication(configuration, username, keyTabFileLocation);
++    }
++
++    @Test
++    public void loginWithKeytabFile() {
++        // given
++        doLogin("/src/test/resources/kerberos/test-keytab.bin");
+ 
+         // when
+-        underTest.loginWithKeytab();
++        assertDoesNotThrow(() -> underTest.loginWithKeytab());
+ 
+         // then
+         /* message is printed in the logs */
+     }
+ 
+     @Test
+-    public void loginWithMissingKeytabFile() throws IOException {
++    public void loginWithMissingKeytabFile() {
+         // given
+-        Configuration configuration = new Configuration();
+-
+-        String username = "test_user";
+-        String keyTabFileLocation = CWD.getAbsolutePath() + "/src/test/resources/kerberos/missing.bin";
+-
+-        underTest = new KerberosAuthentication(configuration, username, keyTabFileLocation);
++        doLogin("/src/test/resources/kerberos/missing.bin");
+ 
+         // when
+         assertThrows(FileNotFoundException.class,
+diff --git a/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosConfigurationBuilderTest.java b/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosConfigurationBuilderTest.java
+index 4d118d7135..1d7a90af4d 100644
+--- a/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosConfigurationBuilderTest.java
++++ b/components/camel-hdfs/src/test/java/org/apache/camel/component/hdfs/kerberos/KerberosConfigurationBuilderTest.java
+@@ -19,6 +19,7 @@ package org.apache.camel.component.hdfs.kerberos;
+ import org.junit.jupiter.api.Test;
+ 
+ import static org.apache.camel.component.hdfs.HdfsTestSupport.CWD;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+@@ -27,14 +28,12 @@ public class KerberosConfigurationBuilderTest {
+ 
+     @Test
+     public void withKerberosConfiguration() {
+-        // given
+-        String kerberosConfigFileLocation = CWD.getAbsolutePath() + "/src/test/resources/kerberos/test-kerb5.conf";
++        assertDoesNotThrow(() -> prepareKerberosConfiguration());
++    }
+ 
+-        // when
++    private void prepareKerberosConfiguration() {
++        String kerberosConfigFileLocation = CWD.getAbsolutePath() + "/src/test/resources/kerberos/test-kerb5.conf";
+         KerberosConfigurationBuilder.setKerberosConfigFile(kerberosConfigFileLocation);
+-
+-        // then
+-
+     }
+ 
+     @Test
+diff --git a/components/camel-hl7/src/test/java/org/apache/camel/component/hl7/HL7MLLPNettyDecoderResourceLeakTest.java b/components/camel-hl7/src/test/java/org/apache/camel/component/hl7/HL7MLLPNettyDecoderResourceLeakTest.java
+index ce29fecf11..299af69962 100644
+--- a/components/camel-hl7/src/test/java/org/apache/camel/component/hl7/HL7MLLPNettyDecoderResourceLeakTest.java
++++ b/components/camel-hl7/src/test/java/org/apache/camel/component/hl7/HL7MLLPNettyDecoderResourceLeakTest.java
+@@ -25,6 +25,8 @@ import org.apache.camel.builder.RouteBuilder;
+ import org.junit.jupiter.api.BeforeAll;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class HL7MLLPNettyDecoderResourceLeakTest extends HL7TestSupport {
+ 
+     @BindToRegistry("hl7decoder")
+@@ -57,6 +59,10 @@ public class HL7MLLPNettyDecoderResourceLeakTest extends HL7TestSupport {
+ 
+     @Test
+     public void testSendHL7Message() throws Exception {
++        assertDoesNotThrow(() -> sendHL7Message());
++    }
++
++    private void sendHL7Message() {
+         String message = "MSH|^~\\&|MYSENDER|MYRECEIVER|MYAPPLICATION||200612211200||QRY^A19|1234|P|2.4";
+ 
+         for (int i = 0; i < 10; i++) {
+diff --git a/components/camel-http/src/test/java/org/apache/camel/component/http/HttpProducerSelectMethodTest.java b/components/camel-http/src/test/java/org/apache/camel/component/http/HttpProducerSelectMethodTest.java
+index 91b5ba54e3..fa6bccfffd 100644
+--- a/components/camel-http/src/test/java/org/apache/camel/component/http/HttpProducerSelectMethodTest.java
++++ b/components/camel-http/src/test/java/org/apache/camel/component/http/HttpProducerSelectMethodTest.java
+@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.apache.camel.component.http.HttpMethods.GET;
+ import static org.apache.camel.component.http.HttpMethods.POST;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ 
+ /**
+  * Unit test to verify the algorithm for selecting either GET or POST.
+@@ -68,136 +69,104 @@ public class HttpProducerSelectMethodTest extends BaseHttpTest {
+ 
+     @Test
+     public void noDataDefaultIsGet() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget");
+         exchange = producer.createExchange();
+         exchange.getIn().setBody(null);
++        assertDoesNotThrow(() -> runProducer(producer));
++
++        assertExchange(exchange);
++    }
++
++    private void runProducer(HttpProducer producer) throws Exception {
+         producer.start();
+         producer.process(exchange);
+         producer.stop();
+-
+-        assertExchange(exchange);
+     }
+ 
+     @Test
+     public void dataDefaultIsPost() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/mypost");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/mypost");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("This is some data to post");
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+ 
+         assertExchange(exchange);
+     }
+ 
+     @Test
+     public void withMethodPostInHeader() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/mypost");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/mypost");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_METHOD, POST);
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+     @Test
+     public void withMethodGetInHeader() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_METHOD, GET);
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+-    @Test
+-    public void withMethodCommonHttpGetInHeader() throws Exception {
++    private HttpProducer createProducer(String path) throws Exception {
+         HttpComponent component = context.getComponent("http", HttpComponent.class);
+ 
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + path);
++        return new HttpProducer(endpoint);
++    }
++
++    @Test
++    public void withMethodCommonHttpGetInHeader() throws Exception {
++        HttpProducer producer = createProducer("/myget");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_METHOD, org.apache.camel.http.common.HttpMethods.GET);
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+     @Test
+     public void withEndpointQuery() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget2?q=Camel");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget2?q=Camel");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+     @Test
+     public void withQueryInHeader() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget2");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget2");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_QUERY, "q=Camel");
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+     @Test
+     public void withHttpURIInHeader() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget2");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget2");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_URI, baseUrl + "/myget2?q=Camel");
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ 
+     @Test
+     public void withQueryInHeaderOverrideEndpoint() throws Exception {
+-        HttpComponent component = context.getComponent("http", HttpComponent.class);
+-
+-        HttpEndpoint endpoint = (HttpEndpoint) component.createEndpoint(baseUrl + "/myget2?q=Donkey");
+-        HttpProducer producer = new HttpProducer(endpoint);
++        HttpProducer producer = createProducer("/myget2?q=Donkey");
+ 
+         exchange = producer.createExchange();
+         exchange.getIn().setBody("");
+         exchange.getIn().setHeader(Exchange.HTTP_QUERY, "q=Camel");
+-        producer.start();
+-        producer.process(exchange);
+-        producer.stop();
++        assertDoesNotThrow(() -> runProducer(producer));
+     }
+ }
+diff --git a/components/camel-http/src/test/java/org/apache/camel/component/http/HttpsTwoComponentsSslContextParametersGetTest.java b/components/camel-http/src/test/java/org/apache/camel/component/http/HttpsTwoComponentsSslContextParametersGetTest.java
+index 23db6b10c1..21f082203a 100644
+--- a/components/camel-http/src/test/java/org/apache/camel/component/http/HttpsTwoComponentsSslContextParametersGetTest.java
++++ b/components/camel-http/src/test/java/org/apache/camel/component/http/HttpsTwoComponentsSslContextParametersGetTest.java
+@@ -27,6 +27,8 @@ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class HttpsTwoComponentsSslContextParametersGetTest extends BaseHttpsTest {
+ 
+     private int port2;
+@@ -74,7 +76,11 @@ public class HttpsTwoComponentsSslContextParametersGetTest extends BaseHttpsTest
+     }
+ 
+     @Test
+-    public void httpsTwoDifferentSSLContextNotSupported() throws Exception {
++    public void httpsTwoDifferentSSLContextNotSupported() {
++        assertDoesNotThrow(() -> runTest());
++    }
++
++    private void runTest() throws Exception {
+         context.addRoutes(new RouteBuilder() {
+             @Override
+             public void configure() throws Exception {
+diff --git a/components/camel-jasypt/src/test/java/org/apache/camel/component/jasypt/MainTest.java b/components/camel-jasypt/src/test/java/org/apache/camel/component/jasypt/MainTest.java
+index d1f6da801d..589f0a6db8 100644
+--- a/components/camel-jasypt/src/test/java/org/apache/camel/component/jasypt/MainTest.java
++++ b/components/camel-jasypt/src/test/java/org/apache/camel/component/jasypt/MainTest.java
+@@ -18,41 +18,43 @@ package org.apache.camel.component.jasypt;
+ 
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class MainTest {
+ 
+     @Test
+-    public void testMainShowOptions() throws Exception {
+-        Main.main(new String[] {});
++    public void testMainShowOptions() {
++        assertDoesNotThrow(() -> Main.main(new String[] {}));
+     }
+ 
+     @Test
+-    public void testMainEncrypt() throws Exception {
++    public void testMainEncrypt() {
+         Main main = new Main();
+-        main.run("-c encrypt -p secret -i tiger".split(" "));
++        assertDoesNotThrow(() -> main.run("-c encrypt -p secret -i tiger".split(" ")));
+     }
+ 
+     @Test
+-    public void testMainDecrypt() throws Exception {
++    public void testMainDecrypt() {
+         Main main = new Main();
+-        main.run("-c decrypt -p secret -i bsW9uV37gQ0QHFu7KO03Ww==".split(" "));
++        assertDoesNotThrow(() -> main.run("-c decrypt -p secret -i bsW9uV37gQ0QHFu7KO03Ww==".split(" ")));
+     }
+ 
+     @Test
+-    public void testUnknownOption() throws Exception {
++    public void testUnknownOption() {
+         Main main = new Main();
+-        main.run("-c encrypt -xxx foo".split(" "));
++        assertDoesNotThrow(() -> main.run("-c encrypt -xxx foo".split(" ")));
+     }
+ 
+     @Test
+-    public void testMissingPassword() throws Exception {
++    public void testMissingPassword() {
+         Main main = new Main();
+-        main.run("-c encrypt -i tiger".split(" "));
++        assertDoesNotThrow(() -> main.run("-c encrypt -i tiger".split(" ")));
+     }
+ 
+     @Test
+-    public void testMissingInput() throws Exception {
++    public void testMissingInput() {
+         Main main = new Main();
+-        main.run("-c encrypt -p secret".split(" "));
++        assertDoesNotThrow(() -> main.run("-c encrypt -p secret".split(" ")));
+     }
+ 
+ }
+diff --git a/components/camel-jaxb/src/test/java/org/apache/camel/converter/jaxb/NonXmlCharFiltererTest.java b/components/camel-jaxb/src/test/java/org/apache/camel/converter/jaxb/NonXmlCharFiltererTest.java
+index b223f22740..7384829716 100644
+--- a/components/camel-jaxb/src/test/java/org/apache/camel/converter/jaxb/NonXmlCharFiltererTest.java
++++ b/components/camel-jaxb/src/test/java/org/apache/camel/converter/jaxb/NonXmlCharFiltererTest.java
+@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ import org.mockito.stubbing.Answer;
+ 
+ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertSame;
+ import static org.junit.jupiter.api.Assertions.fail;
+@@ -131,7 +132,7 @@ public class NonXmlCharFiltererTest {
+ 
+     @Test
+     public void testFilter3ArgsNullArg() {
+-        nonXmlCharFilterer.filter(null, 2, 3);
++        assertDoesNotThrow(() -> nonXmlCharFilterer.filter(null, 2, 3));
+     }
+ 
+     private void checkSingleValid(int charCode) {
+diff --git a/components/camel-jaxb/src/test/java/org/apache/camel/example/DataFormatConcurrentTest.java b/components/camel-jaxb/src/test/java/org/apache/camel/example/DataFormatConcurrentTest.java
+index 6bb1b862ad..c44ef508ac 100644
+--- a/components/camel-jaxb/src/test/java/org/apache/camel/example/DataFormatConcurrentTest.java
++++ b/components/camel-jaxb/src/test/java/org/apache/camel/example/DataFormatConcurrentTest.java
+@@ -25,8 +25,6 @@ import java.util.concurrent.Executors;
+ import javax.xml.bind.JAXBContext;
+ import javax.xml.bind.Marshaller;
+ 
+-import org.apache.camel.Exchange;
+-import org.apache.camel.Processor;
+ import org.apache.camel.builder.RouteBuilder;
+ import org.apache.camel.component.mock.MockEndpoint;
+ import org.apache.camel.converter.jaxb.JaxbDataFormat;
+@@ -36,6 +34,8 @@ import org.junit.jupiter.api.Test;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ public class DataFormatConcurrentTest extends CamelTestSupport {
+ 
+     private static final Logger LOG = LoggerFactory.getLogger(DataFormatConcurrentTest.class);
+@@ -46,21 +46,20 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
+     private int fooBarSize = 50;
+ 
+     @Test
+-    public void testUnmarshalConcurrent() throws Exception {
++    public void testUnmarshalConcurrent() {
++        assertDoesNotThrow(() -> runUnmarshalConcurrent());
++    }
++
++    private void runUnmarshalConcurrent() throws Exception {
+         template.setDefaultEndpointUri("direct:unmarshal");
+         final CountDownLatch latch = new CountDownLatch(warmupCount + testCycleCount);
+ 
+         context.addRoutes(new RouteBuilder() {
+             @Override
+-            public void configure() throws Exception {
++            public void configure() {
+                 from("direct:unmarshal")
+                         .unmarshal(new JaxbDataFormat("org.apache.camel.example"))
+-                        .process(new Processor() {
+-                            @Override
+-                            public void process(Exchange exchange) throws Exception {
+-                                latch.countDown();
+-                            }
+-                        });
++                        .process(exchange -> latch.countDown());
+             }
+         });
+ 
+@@ -68,21 +67,20 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void testUnmarshalFallbackConcurrent() throws Exception {
++    public void testUnmarshalFallbackConcurrent() {
++        assertDoesNotThrow(() -> runUnmarshallFallbackConcurrent());
++    }
++
++    private void runUnmarshallFallbackConcurrent() throws Exception {
+         template.setDefaultEndpointUri("direct:unmarshalFallback");
+         final CountDownLatch latch = new CountDownLatch(warmupCount + testCycleCount);
+ 
+         context.addRoutes(new RouteBuilder() {
+             @Override
+-            public void configure() throws Exception {
++            public void configure() {
+                 from("direct:unmarshalFallback")
+                         .convertBodyTo(Foo.class)
+-                        .process(new Processor() {
+-                            @Override
+-                            public void process(Exchange exchange) throws Exception {
+-                                latch.countDown();
+-                            }
+-                        });
++                        .process(exchange -> latch.countDown());
+             }
+         });
+ 
+@@ -90,7 +88,11 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void testMarshallConcurrent() throws Exception {
++    public void testMarshallConcurrent() {
++        assertDoesNotThrow(() -> runMarshallConcurrent());
++    }
++
++    private void runMarshallConcurrent() throws Exception {
+         template.setDefaultEndpointUri("direct:marshal");
+         final CountDownLatch latch = new CountDownLatch(warmupCount + testCycleCount);
+ 
+@@ -99,12 +101,7 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
+             public void configure() throws Exception {
+                 from("direct:marshal")
+                         .marshal(new JaxbDataFormat("org.apache.camel.example"))
+-                        .process(new Processor() {
+-                            @Override
+-                            public void process(Exchange exchange) throws Exception {
+-                                latch.countDown();
+-                            }
+-                        });
++                        .process(exchange -> latch.countDown());
+             }
+         });
+ 
+@@ -112,21 +109,20 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
+     }
+ 
+     @Test
+-    public void testMarshallFallbackConcurrent() throws Exception {
++    public void testMarshallFallbackConcurrent() {
++        assertDoesNotThrow(() -> runMarshallFallbackConcurrent());
++    }
++
++    private void runMarshallFallbackConcurrent() throws Exception {
+         template.setDefaultEndpointUri("direct:marshalFallback");
+         final CountDownLatch latch = new CountDownLatch(warmupCount + testCycleCount);
+ 
+         context.addRoutes(new RouteBuilder() {
+             @Override
+-            public void configure() throws Exception {
++            public void configure() {
+                 from("direct:marshalFallback")
+                         .convertBodyTo(String.class)
+-                        .process(new Processor() {
+-                            @Override
+-                            public void process(Exchange exchange) throws Exception {
+-                                latch.countDown();
+-                            }
+-                        });
++                        .process(exchange -> latch.countDown());
+             }
+         });
+ 
+diff --git a/components/camel-jetty/src/test/java/org/apache/camel/component/jetty/HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest.java b/components/camel-jetty/src/test/java/org/apache/camel/component/jetty/HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest.java
+index 04ef44fc94..e0286d135f 100644
+--- a/components/camel-jetty/src/test/java/org/apache/camel/component/jetty/HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest.java
++++ b/components/camel-jetty/src/test/java/org/apache/camel/component/jetty/HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest.java
+@@ -25,13 +25,18 @@ import org.apache.camel.builder.RouteBuilder;
+ import org.apache.camel.component.http.HttpMethods;
+ import org.junit.jupiter.api.Test;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNotEquals;
+ 
+ public class HttpBindingMapHttpMessageFormUrlEncodedFalseBodyTest extends BaseJettyTest {
+ 
+     @Test
+-    public void testSendToJetty() throws Exception {
++    public void testSendToJetty() {
++        assertDoesNotThrow(() -> doSendToJetty());
++    }
++
++    private void doSendToJetty() {
+         Map<String, Object> map = new HashMap<>();
+         map.put("content-type", "application/x-www-form-urlencoded");
+         map.put(Exchange.HTTP_METHOD, HttpMethods.POST);
+diff --git a/components/camel-jms/src/test/java/org/apache/camel/component/jms/JmsBindingTest.java b/components/camel-jms/src/test/java/org/apache/camel/component/jms/JmsBindingTest.java
+index cf0d774437..8f57fa43bf 100644
+--- a/components/camel-jms/src/test/java/org/apache/camel/component/jms/JmsBindingTest.java
++++ b/components/camel-jms/src/test/java/org/apache/camel/component/jms/JmsBindingTest.java
+@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
+ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+@@ -66,7 +67,7 @@ public class JmsBindingTest {
+         Exchange exchange = camelContext.getEndpoint("jms:queue:foo").createExchange();
+         exchange.getIn().setBody("test");
+         exchange.getIn().setHeader("JMSCorrelationID", null);
+-        testBindingWithoutEndpoint.appendJmsProperties(message, exchange);
++        assertDoesNotThrow(() -> testBindingWithoutEndpoint.appendJmsProperties(message, exchange));
+     }
+ 
+     @Test

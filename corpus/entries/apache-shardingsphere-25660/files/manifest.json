@@ -1,0 +1,14 @@
+[
+  {
+    "path": "test/e2e/driver/src/test/java/org/apache/shardingsphere/test/e2e/driver/statement/ShardingPreparedStatementTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "test/it/pipeline/src/test/java/org/apache/shardingsphere/test/it/data/pipeline/core/prepare/InventoryTaskSplitterTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "test/it/pipeline/src/test/java/org/apache/shardingsphere/test/it/data/pipeline/core/task/IncrementalTaskTest.java",
+    "status": "modified"
+  }
+]

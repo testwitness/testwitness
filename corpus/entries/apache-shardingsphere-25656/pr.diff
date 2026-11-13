@@ -1,0 +1,1906 @@
+diff --git a/agent/core/src/test/java/org/apache/shardingsphere/agent/core/plugin/PluginLifecycleServiceManagerTest.java b/agent/core/src/test/java/org/apache/shardingsphere/agent/core/plugin/PluginLifecycleServiceManagerTest.java
+index d803a650f..9bb43f150 100644
+--- a/agent/core/src/test/java/org/apache/shardingsphere/agent/core/plugin/PluginLifecycleServiceManagerTest.java
++++ b/agent/core/src/test/java/org/apache/shardingsphere/agent/core/plugin/PluginLifecycleServiceManagerTest.java
+@@ -30,6 +30,7 @@ import java.util.Collections;
+ import java.util.Map;
+ import java.util.Properties;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.ArgumentMatchers.anyString;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.verify;
+@@ -38,13 +39,13 @@ class PluginLifecycleServiceManagerTest {
+     
+     @Test
+     void assertInitPluginLifecycleService() {
+-        PluginLifecycleServiceManager.init(Collections.emptyMap(), Collections.emptyList(), new MultipleParentClassLoader(Collections.emptyList()), true);
++        assertDoesNotThrow(() -> PluginLifecycleServiceManager.init(Collections.emptyMap(), Collections.emptyList(), new MultipleParentClassLoader(Collections.emptyList()), true));
+     }
+     
+     @Test
+     void assertInitPluginLifecycleServiceWithMap() {
+         Map<String, PluginConfiguration> pluginConfigs = Collections.singletonMap("Key", new PluginConfiguration("localhost", 8080, "random", new Properties()));
+-        PluginLifecycleServiceManager.init(pluginConfigs, Collections.emptyList(), new MultipleParentClassLoader(Collections.emptyList()), true);
++        assertDoesNotThrow(() -> PluginLifecycleServiceManager.init(pluginConfigs, Collections.emptyList(), new MultipleParentClassLoader(Collections.emptyList()), true));
+     }
+     
+     @Test
+diff --git a/agent/plugins/metrics/type/prometheus/src/test/java/org/apache/shardingsphere/agent/plugin/metrics/prometheus/PrometheusPluginLifecycleServiceTest.java b/agent/plugins/metrics/type/prometheus/src/test/java/org/apache/shardingsphere/agent/plugin/metrics/prometheus/PrometheusPluginLifecycleServiceTest.java
+index 84428f93a..f13577583 100644
+--- a/agent/plugins/metrics/type/prometheus/src/test/java/org/apache/shardingsphere/agent/plugin/metrics/prometheus/PrometheusPluginLifecycleServiceTest.java
++++ b/agent/plugins/metrics/type/prometheus/src/test/java/org/apache/shardingsphere/agent/plugin/metrics/prometheus/PrometheusPluginLifecycleServiceTest.java
+@@ -43,6 +43,7 @@ import java.io.IOException;
+ import java.net.InetSocketAddress;
+ import java.net.Socket;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+ 
+@@ -63,7 +64,7 @@ class PrometheusPluginLifecycleServiceTest {
+         when(ProxyContext.getInstance().getContextManager()).thenReturn(contextManager);
+         pluginLifecycleService.start(new PluginConfiguration("localhost", 8090, "", PropertiesBuilder.build(new Property("JVM_INFORMATION_COLLECTOR_ENABLED", Boolean.TRUE.toString()))), true);
+         try (Socket socket = new Socket()) {
+-            socket.connect(new InetSocketAddress("localhost", 8090));
++            assertDoesNotThrow(() -> socket.connect(new InetSocketAddress("localhost", 8090)));
+         }
+     }
+     
+diff --git a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/admin/MySQLUnsupportedCommandPacketTest.java b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/admin/MySQLUnsupportedCommandPacketTest.java
+index bbd429c76..91bc446d5 100644
+--- a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/admin/MySQLUnsupportedCommandPacketTest.java
++++ b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/admin/MySQLUnsupportedCommandPacketTest.java
+@@ -24,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
+ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
++
+ @ExtendWith(MockitoExtension.class)
+ class MySQLUnsupportedCommandPacketTest {
+     
+@@ -32,7 +34,6 @@ class MySQLUnsupportedCommandPacketTest {
+     
+     @Test
+     void assertWrite() {
+-        MySQLUnsupportedCommandPacket actual = new MySQLUnsupportedCommandPacket(MySQLCommandPacketType.COM_DEBUG);
+-        actual.write(payload);
++        assertDoesNotThrow(() -> new MySQLUnsupportedCommandPacket(MySQLCommandPacketType.COM_DEBUG).write(payload));
+     }
+ }
+diff --git a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/query/binary/close/MySQLComStmtClosePacketTest.java b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/query/binary/close/MySQLComStmtClosePacketTest.java
+index 47281736a..bda105dd9 100644
+--- a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/query/binary/close/MySQLComStmtClosePacketTest.java
++++ b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/packet/command/query/binary/close/MySQLComStmtClosePacketTest.java
+@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.Mockito.when;
+ 
+ @ExtendWith(MockitoExtension.class)
+@@ -43,7 +44,6 @@ class MySQLComStmtClosePacketTest {
+     @Test
+     void assertWrite() {
+         when(payload.readInt4()).thenReturn(1);
+-        MySQLComStmtClosePacket actual = new MySQLComStmtClosePacket(payload);
+-        actual.write(payload);
++        assertDoesNotThrow(() -> new MySQLComStmtClosePacket(payload).write(payload));
+     }
+ }
+diff --git a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/payload/MySQLPacketPayloadTest.java b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/payload/MySQLPacketPayloadTest.java
+index 18e288dee..fe461922f 100644
+--- a/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/payload/MySQLPacketPayloadTest.java
++++ b/db-protocol/mysql/src/test/java/org/apache/shardingsphere/db/protocol/mysql/payload/MySQLPacketPayloadTest.java
+@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.Mockito.verify;
+ import static org.mockito.Mockito.when;
+ 
+@@ -39,132 +40,176 @@ class MySQLPacketPayloadTest {
+     @Test
+     void assertReadInt1() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 1);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt1(), is(1));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt1(), is(1));
++        }
+     }
+     
+     @Test
+     void assertWriteInt1() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt1(1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeInt1(1);
++        }
+         verify(byteBuf).writeByte(1);
+     }
+     
+     @Test
+     void assertReadInt2() {
+         when(byteBuf.readUnsignedShortLE()).thenReturn(1);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt2(), is(1));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt2(), is(1));
++        }
+     }
+     
+     @Test
+     void assertWriteInt2() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt2(1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeInt2(1);
++        }
+         verify(byteBuf).writeShortLE(1);
+     }
+     
+     @Test
+     void assertReadInt3() {
+         when(byteBuf.readUnsignedMediumLE()).thenReturn(1);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt3(), is(1));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt3(), is(1));
++        }
+     }
+     
+     @Test
+     void assertWriteInt3() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt3(1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeInt3(1);
++        }
+         verify(byteBuf).writeMediumLE(1);
+     }
+     
+     @Test
+     void assertReadInt4() {
+         when(byteBuf.readIntLE()).thenReturn(1);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt4(), is(1));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt4(), is(1));
++        }
+     }
+     
+     @Test
+     void assertWriteInt4() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt4(1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeInt4(1);
++        }
+         verify(byteBuf).writeIntLE(1);
+     }
+     
+     @Test
+     void assertReadInt6() {
+         when(byteBuf.readByte()).thenReturn((byte) 0x01, (byte) 0x00);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt6(), is(1L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt6(), is(1L));
++        }
+         when(byteBuf.readByte()).thenReturn((byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x80);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt6(), is(0x800000000000L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt6(), is(0x800000000000L));
++        }
+     }
+     
+     @Test
+     void assertWriteInt6() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt6(1L);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertDoesNotThrow(() -> actual.writeInt6(1L));
++        }
+     }
+     
+     @Test
+     void assertReadInt8() {
+         when(byteBuf.readLongLE()).thenReturn(1L);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readInt8(), is(1L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readInt8(), is(1L));
++        }
+     }
+     
+     @Test
+     void assertWriteInt8() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeInt8(1L);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeInt8(1L);
++        }
+         verify(byteBuf).writeLongLE(1L);
+     }
+     
+     @Test
+     void assertReadIntLenencWithOneByte() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 1);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readIntLenenc(), is(1L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readIntLenenc(), is(1L));
++        }
+     }
+     
+     @Test
+     void assertReadIntLenencWithZero() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0xfb);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readIntLenenc(), is(0L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readIntLenenc(), is(0L));
++        }
+     }
+     
+     @Test
+     void assertReadIntLenencWithTwoBytes() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0xfc);
+         when(byteBuf.readUnsignedShortLE()).thenReturn(100);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readIntLenenc(), is(100L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readIntLenenc(), is(100L));
++        }
+     }
+     
+     @Test
+     void assertReadIntLenencWithThreeBytes() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0xfd);
+         when(byteBuf.readUnsignedMediumLE()).thenReturn(99999);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readIntLenenc(), is(99999L));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readIntLenenc(), is(99999L));
++        }
+     }
+     
+     @Test
+     void assertReadIntLenencWithFourBytes() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0xff);
+         when(byteBuf.readLongLE()).thenReturn(Long.MAX_VALUE);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readIntLenenc(), is(Long.MAX_VALUE));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readIntLenenc(), is(Long.MAX_VALUE));
++        }
+     }
+     
+     @Test
+     void assertWriteIntLenencWithOneByte() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeIntLenenc(1L);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeIntLenenc(1L);
++        }
+         verify(byteBuf).writeByte(1);
+     }
+     
+     @Test
+     void assertWriteIntLenencWithTwoBytes() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeIntLenenc(Double.valueOf(Math.pow(2, 16)).longValue() - 1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeIntLenenc(Double.valueOf(Math.pow(2, 16)).longValue() - 1);
++        }
+         verify(byteBuf).writeByte(0xfc);
+         verify(byteBuf).writeShortLE(Double.valueOf(Math.pow(2, 16)).intValue() - 1);
+     }
+     
+     @Test
+     void assertWriteIntLenencWithThreeBytes() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeIntLenenc(Double.valueOf(Math.pow(2, 24)).longValue() - 1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeIntLenenc(Double.valueOf(Math.pow(2, 24)).longValue() - 1);
++        }
+         verify(byteBuf).writeByte(0xfd);
+         verify(byteBuf).writeMediumLE(Double.valueOf(Math.pow(2, 24)).intValue() - 1);
+     }
+     
+     @Test
+     void assertWriteIntLenencWithFourBytes() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeIntLenenc(Double.valueOf(Math.pow(2, 25)).longValue() - 1);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeIntLenenc(Double.valueOf(Math.pow(2, 25)).longValue() - 1);
++        }
+         verify(byteBuf).writeByte(0xfe);
+         verify(byteBuf).writeLongLE(Double.valueOf(Math.pow(2, 25)).intValue() - 1);
+     }
+@@ -172,90 +217,120 @@ class MySQLPacketPayloadTest {
+     @Test
+     void assertReadStringLenenc() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringLenenc(), is(""));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringLenenc(), is(""));
++        }
+     }
+     
+     @Test
+     void assertReadStringLenencByBytes() {
+         when(byteBuf.readUnsignedByte()).thenReturn((short) 0);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringLenencByBytes(), is(new byte[]{}));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringLenencByBytes(), is(new byte[]{}));
++        }
+     }
+     
+     @Test
+     void assertWriteStringLenencWithEmpty() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringLenenc("");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeStringLenenc("");
++        }
+         verify(byteBuf).writeByte(0);
+     }
+     
+     @Test
+     void assertWriteBytesLenenc() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeBytesLenenc("value".getBytes());
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeBytesLenenc("value".getBytes());
++        }
+         verify(byteBuf).writeByte(5);
+         verify(byteBuf).writeBytes("value".getBytes());
+     }
+     
+     @Test
+     void assertWriteBytesLenencWithEmpty() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeBytesLenenc("".getBytes());
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeBytesLenenc("".getBytes());
++        }
+         verify(byteBuf).writeByte(0);
+     }
+     
+     @Test
+     void assertWriteStringLenenc() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringLenenc("value");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeStringLenenc("value");
++        }
+         verify(byteBuf).writeByte(5);
+         verify(byteBuf).writeBytes("value".getBytes());
+     }
+     
+     @Test
+     void assertReadStringFix() {
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringFix(0), is(""));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringFix(0), is(""));
++        }
+     }
+     
+     @Test
+     void assertReadStringFixByBytes() {
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringFixByBytes(0), is(new byte[]{}));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringFixByBytes(0), is(new byte[]{}));
++        }
+     }
+     
+     @Test
+     void assertWriteStringFix() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringFix("value");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeStringFix("value");
++        }
+         verify(byteBuf).writeBytes("value".getBytes());
+     }
+     
+     @Test
+     void assertWriteBytes() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeBytes("value".getBytes());
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeBytes("value".getBytes());
++        }
+         verify(byteBuf).writeBytes("value".getBytes());
+     }
+     
+     @Test
+     void assertReadStringVar() {
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringVar(), is(""));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringVar(), is(""));
++        }
+     }
+     
+     @Test
+     void assertWriteStringVar() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringVar("");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertDoesNotThrow(() -> actual.writeStringVar(""));
++        }
+     }
+     
+     @Test
+     void assertReadStringNul() {
+         when(byteBuf.bytesBefore((byte) 0)).thenReturn(0);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringNul(), is(""));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringNul(), is(""));
++        }
+         verify(byteBuf).skipBytes(1);
+     }
+     
+     @Test
+     void assertReadStringNulByBytes() {
+         when(byteBuf.bytesBefore((byte) 0)).thenReturn(0);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringNulByBytes(), is(new byte[]{}));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringNulByBytes(), is(new byte[]{}));
++        }
+         verify(byteBuf).skipBytes(1);
+     }
+     
+     @Test
+     void assertWriteStringNul() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringNul("value");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeStringNul("value");
++        }
+         verify(byteBuf).writeBytes("value".getBytes());
+         verify(byteBuf).writeByte(0);
+     }
+@@ -263,24 +338,32 @@ class MySQLPacketPayloadTest {
+     @Test
+     void assertReadStringEOF() {
+         when(byteBuf.readableBytes()).thenReturn(0);
+-        assertThat(new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).readStringEOF(), is(""));
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            assertThat(actual.readStringEOF(), is(""));
++        }
+     }
+     
+     @Test
+     void assertWriteStringEOF() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeStringEOF("value");
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeStringEOF("value");
++        }
+         verify(byteBuf).writeBytes("value".getBytes());
+     }
+     
+     @Test
+     void assertSkipReserved() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).skipReserved(10);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.skipReserved(10);
++        }
+         verify(byteBuf).skipBytes(10);
+     }
+     
+     @Test
+     void assertWriteReserved() {
+-        new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8).writeReserved(10);
++        try (MySQLPacketPayload actual = new MySQLPacketPayload(byteBuf, StandardCharsets.UTF_8)) {
++            actual.writeReserved(10);
++        }
+         verify(byteBuf).writeZero(10);
+     }
+     
+diff --git a/db-protocol/postgresql/src/test/java/org/apache/shardingsphere/db/protocol/postgresql/packet/handshake/PostgreSQLComStartupPacketTest.java b/db-protocol/postgresql/src/test/java/org/apache/shardingsphere/db/protocol/postgresql/packet/handshake/PostgreSQLComStartupPacketTest.java
+index 3aa0bc765..9274b12b3 100644
+--- a/db-protocol/postgresql/src/test/java/org/apache/shardingsphere/db/protocol/postgresql/packet/handshake/PostgreSQLComStartupPacketTest.java
++++ b/db-protocol/postgresql/src/test/java/org/apache/shardingsphere/db/protocol/postgresql/packet/handshake/PostgreSQLComStartupPacketTest.java
+@@ -29,6 +29,7 @@ import java.util.Map.Entry;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.Mockito.mock;
+ 
+ class PostgreSQLComStartupPacketTest {
+@@ -76,6 +77,6 @@ class PostgreSQLComStartupPacketTest {
+     
+     @Test
+     void assertWrite() {
+-        new PostgreSQLComStartupPacket(mock(PostgreSQLPacketPayload.class)).write(mock(PostgreSQLPacketPayload.class));
++        assertDoesNotThrow(() -> new PostgreSQLComStartupPacket(mock(PostgreSQLPacketPayload.class)).write(mock(PostgreSQLPacketPayload.class)));
+     }
+ }
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterIndexStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterIndexStatementValidatorTest.java
+index 6a2283388..67492f3b1 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterIndexStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterIndexStatementValidatorTest.java
+@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -60,7 +61,8 @@ class ShardingAlterIndexStatementValidatorTest {
+         when(database.getSchema("public").getTable("t_order")).thenReturn(table);
+         when(table.containsIndex("t_order_index")).thenReturn(true);
+         when(table.containsIndex("t_order_index_new")).thenReturn(false);
+-        new ShardingAlterIndexStatementValidator().preValidate(shardingRule, new AlterIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingAlterIndexStatementValidator().preValidate(
++                shardingRule, new AlterIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterTableStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterTableStatementValidatorTest.java
+index f009991c7..edc695456 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterTableStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterTableStatementValidatorTest.java
+@@ -46,6 +46,7 @@ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.LinkedList;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -95,8 +96,8 @@ class ShardingAlterTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingAlterTableStatementValidator().postValidate(shardingRule, new AlterTableStatementContext(sqlStatement),
+-                new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingAlterTableStatementValidator().postValidate(
++                shardingRule, new AlterTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+@@ -123,8 +124,8 @@ class ShardingAlterTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingAlterTableStatementValidator().postValidate(shardingRule, new AlterTableStatementContext(sqlStatement),
+-                new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingAlterTableStatementValidator().postValidate(
++                shardingRule, new AlterTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterViewStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterViewStatementValidatorTest.java
+index 953835fc0..e90701ee9 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterViewStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingAlterViewStatementValidatorTest.java
+@@ -39,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -58,7 +59,7 @@ class ShardingAlterViewStatementValidatorTest {
+         SQLStatementContext<AlterViewStatement> sqlStatementContext = new CommonSQLStatementContext<>(sqlStatement);
+         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class);
+         when(shardingRule.isShardingTable("t_order")).thenReturn(false);
+-        new ShardingAlterViewStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingAlterViewStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -83,7 +84,7 @@ class ShardingAlterViewStatementValidatorTest {
+         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class);
+         when(shardingRule.isBroadcastTable("t_order")).thenReturn(true);
+         when(shardingRule.isBroadcastTable("t_order_new")).thenReturn(true);
+-        new ShardingAlterViewStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingAlterViewStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateFunctionStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateFunctionStatementValidatorTest.java
+index abd310482..648744464 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateFunctionStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateFunctionStatementValidatorTest.java
+@@ -42,6 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -72,7 +73,8 @@ class ShardingCreateFunctionStatementValidatorTest {
+         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
+         when(database.getName()).thenReturn(DefaultDatabase.LOGIC_NAME);
+         when(database.getSchema(DefaultDatabase.LOGIC_NAME).containsTable("t_order_item")).thenReturn(true);
+-        new ShardingCreateFunctionStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCreateFunctionStatementValidator().preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateIndexStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateIndexStatementValidatorTest.java
+index d8a2964af..993b01b0f 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateIndexStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateIndexStatementValidatorTest.java
+@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -61,7 +62,8 @@ class ShardingCreateIndexStatementValidatorTest {
+         when(database.getSchema("public").containsTable("t_order")).thenReturn(true);
+         ShardingSphereTable table = mock(ShardingSphereTable.class);
+         when(database.getSchema("public").getTable("t_order")).thenReturn(table);
+-        new ShardingCreateIndexStatementValidator().preValidate(shardingRule, new CreateIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCreateIndexStatementValidator().preValidate(
++                shardingRule, new CreateIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -98,7 +100,8 @@ class ShardingCreateIndexStatementValidatorTest {
+         when(database.getSchema("public").containsTable("t_order")).thenReturn(true);
+         ShardingSphereTable table = mock(ShardingSphereTable.class);
+         when(database.getSchema("public").getTable("t_order")).thenReturn(table);
+-        new ShardingCreateIndexStatementValidator().preValidate(shardingRule, new CreateIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCreateIndexStatementValidator().preValidate(
++                shardingRule, new CreateIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateProcedureStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateProcedureStatementValidatorTest.java
+index 45f10f074..affe5288c 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateProcedureStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateProcedureStatementValidatorTest.java
+@@ -42,6 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -73,7 +74,8 @@ class ShardingCreateProcedureStatementValidatorTest {
+         when(database.getSchema(DefaultDatabase.LOGIC_NAME).containsTable("t_order_item")).thenReturn(true);
+         when(shardingRule.isShardingTable("t_order_item")).thenReturn(false);
+         SQLStatementContext<CreateProcedureStatement> sqlStatementContext = new CommonSQLStatementContext<>(sqlStatement);
+-        new ShardingCreateProcedureStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCreateProcedureStatementValidator().preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateTableStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateTableStatementValidatorTest.java
+index 03dca76a6..bba694222 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateTableStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateTableStatementValidatorTest.java
+@@ -50,6 +50,7 @@ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.LinkedList;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -140,8 +141,8 @@ class ShardingCreateTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingCreateTableStatementValidator().postValidate(shardingRule,
+-                new CreateTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingCreateTableStatementValidator().postValidate(
++                shardingRule, new CreateTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+@@ -167,8 +168,8 @@ class ShardingCreateTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingCreateTableStatementValidator().postValidate(shardingRule,
+-                new CreateTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingCreateTableStatementValidator().postValidate(
++                shardingRule, new CreateTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateViewStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateViewStatementValidatorTest.java
+index 9d2cb921b..1b0c0becf 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateViewStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingCreateViewStatementValidatorTest.java
+@@ -44,6 +44,7 @@ import org.mockito.quality.Strictness;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.Mockito.mock;
+@@ -79,8 +80,8 @@ class ShardingCreateViewStatementValidatorTest {
+     
+     @Test
+     void assertPreValidateCreateView() {
+-        new ShardingCreateViewStatementValidator().preValidate(shardingRule, createViewStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class),
+-                mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCreateViewStatementValidator().preValidate(
++                shardingRule, createViewStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -97,8 +98,8 @@ class ShardingCreateViewStatementValidatorTest {
+     void assertPostValidateCreateView() {
+         ProjectionsSegment projectionsSegment = mock(ProjectionsSegment.class);
+         when(selectStatement.getProjections()).thenReturn(projectionsSegment);
+-        new ShardingCreateViewStatementValidator().postValidate(shardingRule, createViewStatementContext, new HintValueContext(), Collections.emptyList(), mock(ShardingSphereDatabase.class),
+-                mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingCreateViewStatementValidator().postValidate(
++                shardingRule, createViewStatementContext, new HintValueContext(), Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropIndexStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropIndexStatementValidatorTest.java
+index cce168bde..66fe76183 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropIndexStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropIndexStatementValidatorTest.java
+@@ -45,6 +45,7 @@ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.LinkedList;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -71,7 +72,8 @@ class ShardingDropIndexStatementValidatorTest {
+         when(database.getSchema("public").getTable("t_order")).thenReturn(table);
+         when(table.containsIndex("t_order_index")).thenReturn(true);
+         when(table.containsIndex("t_order_index_new")).thenReturn(true);
+-        new ShardingDropIndexStatementValidator().preValidate(shardingRule, new DropIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingDropIndexStatementValidator().preValidate(
++                shardingRule, new DropIndexStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -103,8 +105,8 @@ class ShardingDropIndexStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingDropIndexStatementValidator().postValidate(shardingRule, new DropIndexStatementContext(sqlStatement), new HintValueContext(),
+-                Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingDropIndexStatementValidator().postValidate(
++                shardingRule, new DropIndexStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+@@ -140,8 +142,8 @@ class ShardingDropIndexStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingDropIndexStatementValidator().postValidate(shardingRule, new DropIndexStatementContext(sqlStatement), new HintValueContext(),
+-                Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingDropIndexStatementValidator().postValidate(
++                shardingRule, new DropIndexStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropTableStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropTableStatementValidatorTest.java
+index bb4c12d85..6831eef4a 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropTableStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingDropTableStatementValidatorTest.java
+@@ -55,6 +55,7 @@ import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Map;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -130,8 +131,9 @@ class ShardingDropTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_order", "t_order_0"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingDropTableStatementValidator().postValidate(shardingRule, new DropTableStatementContext(sqlStatement), new HintValueContext(),
+-                Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingDropTableStatementValidator().postValidate(
++                shardingRule, new DropTableStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(),
++                mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+@@ -158,8 +160,9 @@ class ShardingDropTableStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_1", "ds_1"), Collections.singletonList(new RouteMapper("t_config", "t_config"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingDropTableStatementValidator().postValidate(shardingRule, new DropTableStatementContext(sqlStatement), new HintValueContext(),
+-                Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingDropTableStatementValidator().postValidate(
++                shardingRule, new DropTableStatementContext(sqlStatement), new HintValueContext(),
++                Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingPrepareStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingPrepareStatementValidatorTest.java
+index 524a35fc7..2bcd3a79a 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingPrepareStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingPrepareStatementValidatorTest.java
+@@ -40,6 +40,7 @@ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.LinkedList;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -72,8 +73,8 @@ class ShardingPrepareStatementValidatorTest {
+         routeUnits.add(new RouteUnit(new RouteMapper("ds_0", "ds_0"),
+                 Arrays.asList(new RouteMapper("t_order", "t_order_0"), new RouteMapper("t_order_item", "t_order_item_0"))));
+         when(routeContext.getRouteUnits()).thenReturn(routeUnits);
+-        new ShardingPrepareStatementValidator().postValidate(shardingRule, new PrepareStatementContext(sqlStatement), new HintValueContext(),
+-                Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingPrepareStatementValidator().postValidate(
++                shardingRule, new PrepareStatementContext(sqlStatement), new HintValueContext(), Collections.emptyList(), database, mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingRenameTableStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingRenameTableStatementValidatorTest.java
+index e2f8a5414..c7b595c49 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingRenameTableStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/ddl/ShardingRenameTableStatementValidatorTest.java
+@@ -44,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ import java.util.Arrays;
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.ArgumentMatchers.argThat;
+ import static org.mockito.ArgumentMatchers.eq;
+@@ -78,7 +79,7 @@ class ShardingRenameTableStatementValidatorTest {
+     void assertPreValidateNormalCase() {
+         SQLStatementContext<RenameTableStatement> sqlStatementContext = createRenameTableStatementContext("t_not_sharding_table", "t_not_sharding_table_new");
+         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class);
+-        new ShardingRenameTableStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingRenameTableStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -107,7 +108,8 @@ class ShardingRenameTableStatementValidatorTest {
+         SQLStatementContext<RenameTableStatement> sqlStatementContext = createRenameTableStatementContext("t_order", "t_user_order");
+         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class);
+         ConfigurationProperties props = mock(ConfigurationProperties.class);
+-        new ShardingRenameTableStatementValidator().postValidate(shardingRule, sqlStatementContext, new HintValueContext(), Collections.emptyList(), database, props, routeContext);
++        assertDoesNotThrow(() -> new ShardingRenameTableStatementValidator().postValidate(
++                shardingRule, sqlStatementContext, new HintValueContext(), Collections.emptyList(), database, props, routeContext));
+     }
+     
+     private SQLStatementContext<RenameTableStatement> createRenameTableStatementContext(final String originTableName, final String newTableName) {
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
+index 2d847ba2e..20c8be87b 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
+@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ 
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -54,14 +55,16 @@ class ShardingCopyStatementValidatorTest {
+     void assertPreValidateWhenTableSegmentForPostgreSQL() {
+         PostgreSQLCopyStatement sqlStatement = new PostgreSQLCopyStatement();
+         sqlStatement.setTableSegment(new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("t_order"))));
+-        new ShardingCopyStatementValidator().preValidate(shardingRule, new CopyStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCopyStatementValidator().preValidate(
++                shardingRule, new CopyStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+     void assertPreValidateWhenTableSegmentForOpenGauss() {
+         OpenGaussCopyStatement sqlStatement = new OpenGaussCopyStatement();
+         sqlStatement.setTableSegment(new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("t_order"))));
+-        new ShardingCopyStatementValidator().preValidate(shardingRule, new CopyStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCopyStatementValidator().preValidate(
++                shardingRule, new CopyStatementContext(sqlStatement), Collections.emptyList(), database, mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -79,6 +82,7 @@ class ShardingCopyStatementValidatorTest {
+         CopyStatementContext sqlStatementContext = new CopyStatementContext(sqlStatement);
+         String tableName = "t_order";
+         when(shardingRule.isShardingTable(tableName)).thenReturn(true);
+-        new ShardingCopyStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingCopyStatementValidator().preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class)));
+     }
+ }
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingInsertStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingInsertStatementValidatorTest.java
+index fcf117982..715d9f829 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingInsertStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingInsertStatementValidatorTest.java
+@@ -73,6 +73,7 @@ import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Optional;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -124,8 +125,8 @@ class ShardingInsertStatementValidatorTest {
+         when(shardingRule.isGenerateKeyColumn("id", "user")).thenReturn(true);
+         SQLStatementContext<InsertStatement> sqlStatementContext = createInsertStatementContext(Collections.singletonList(1), createInsertSelectStatement());
+         sqlStatementContext.getTablesContext().getTableNames().addAll(createSingleTablesContext().getTableNames());
+-        new ShardingInsertStatementValidator(shardingConditions).preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS),
+-                mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingInsertStatementValidator(shardingConditions).preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -148,8 +149,8 @@ class ShardingInsertStatementValidatorTest {
+         TablesContext multiTablesContext = createMultiTablesContext();
+         SQLStatementContext<InsertStatement> sqlStatementContext = createInsertStatementContext(Collections.singletonList(1), createInsertSelectStatement());
+         sqlStatementContext.getTablesContext().getTableNames().addAll(multiTablesContext.getTableNames());
+-        new ShardingInsertStatementValidator(shardingConditions).preValidate(shardingRule,
+-                sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingInsertStatementValidator(shardingConditions).preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -195,8 +196,8 @@ class ShardingInsertStatementValidatorTest {
+         RouteContext routeContext = mock(RouteContext.class);
+         when(routeContext.isSingleRouting()).thenReturn(true);
+         InsertStatementContext insertStatementContext = createInsertStatementContext(params, createInsertStatement());
+-        new ShardingInsertStatementValidator(mock(ShardingConditions.class)).postValidate(shardingRule,
+-                insertStatementContext, new HintValueContext(), params, mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext);
++        assertDoesNotThrow(() -> new ShardingInsertStatementValidator(mock(ShardingConditions.class)).postValidate(
++                shardingRule, insertStatementContext, new HintValueContext(), params, mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), routeContext));
+     }
+     
+     @Test
+@@ -204,8 +205,8 @@ class ShardingInsertStatementValidatorTest {
+         mockShardingRuleForUpdateShardingColumn();
+         List<Object> params = Collections.singletonList(1);
+         InsertStatementContext insertStatementContext = createInsertStatementContext(params, createInsertStatement());
+-        new ShardingInsertStatementValidator(mock(ShardingConditions.class)).postValidate(shardingRule,
+-                insertStatementContext, new HintValueContext(), params, mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), createSingleRouteContext());
++        assertDoesNotThrow(() -> new ShardingInsertStatementValidator(mock(ShardingConditions.class)).postValidate(shardingRule,
++                insertStatementContext, new HintValueContext(), params, mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS), mock(ConfigurationProperties.class), createSingleRouteContext()));
+     }
+     
+     @Test
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingUpdateStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingUpdateStatementValidatorTest.java
+index 69123b8e1..45e623289 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingUpdateStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingUpdateStatementValidatorTest.java
+@@ -59,6 +59,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -77,7 +78,8 @@ class ShardingUpdateStatementValidatorTest {
+         Collection<String> tableNames = sqlStatementContext.getTablesContext().getTableNames();
+         when(shardingRule.isAllShardingTables(tableNames)).thenReturn(true);
+         when(shardingRule.tableRuleExists(tableNames)).thenReturn(true);
+-        new ShardingUpdateStatementValidator().preValidate(shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class));
++        assertDoesNotThrow(() -> new ShardingUpdateStatementValidator().preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class)));
+     }
+     
+     @Test
+@@ -98,23 +100,23 @@ class ShardingUpdateStatementValidatorTest {
+     @Test
+     void assertPostValidateWhenNotUpdateShardingColumn() {
+         UpdateStatementContext sqlStatementContext = new UpdateStatementContext(createUpdateStatement());
+-        new ShardingUpdateStatementValidator().postValidate(shardingRule, sqlStatementContext, new HintValueContext(), Collections.emptyList(),
+-                mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), mock(RouteContext.class));
++        assertDoesNotThrow(() -> new ShardingUpdateStatementValidator().postValidate(shardingRule,
++                sqlStatementContext, new HintValueContext(), Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), mock(RouteContext.class)));
+     }
+     
+     @Test
+     void assertPostValidateWhenUpdateShardingColumnWithSameRouteContext() {
+         mockShardingRuleForUpdateShardingColumn();
+-        new ShardingUpdateStatementValidator().postValidate(shardingRule, new UpdateStatementContext(createUpdateStatement()), new HintValueContext(),
+-                Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), createSingleRouteContext());
++        assertDoesNotThrow(() -> new ShardingUpdateStatementValidator().postValidate(shardingRule, new UpdateStatementContext(createUpdateStatement()),
++                new HintValueContext(), Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), createSingleRouteContext()));
+     }
+     
+     @Test
+     void assertPostValidateWhenTableNameIsBroadcastTable() {
+         mockShardingRuleForUpdateShardingColumn();
+         when(shardingRule.isBroadcastTable("user")).thenReturn(true);
+-        new ShardingUpdateStatementValidator().postValidate(shardingRule, new UpdateStatementContext(createUpdateStatement()), new HintValueContext(),
+-                Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), createSingleRouteContext());
++        assertDoesNotThrow(() -> new ShardingUpdateStatementValidator().postValidate(shardingRule, new UpdateStatementContext(createUpdateStatement()),
++                new HintValueContext(), Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class), createSingleRouteContext()));
+     }
+     
+     @Test
+diff --git a/infra/common/src/test/java/org/apache/shardingsphere/infra/database/type/dialect/PostgreSQLDatabaseTypeTest.java b/infra/common/src/test/java/org/apache/shardingsphere/infra/database/type/dialect/PostgreSQLDatabaseTypeTest.java
+index bdfb8ba10..03df4deb3 100644
+--- a/infra/common/src/test/java/org/apache/shardingsphere/infra/database/type/dialect/PostgreSQLDatabaseTypeTest.java
++++ b/infra/common/src/test/java/org/apache/shardingsphere/infra/database/type/dialect/PostgreSQLDatabaseTypeTest.java
+@@ -24,7 +24,6 @@ import org.apache.shardingsphere.sql.parser.sql.common.statement.tcl.CommitState
+ import org.apache.shardingsphere.sql.parser.sql.common.statement.tcl.RollbackStatement;
+ import org.junit.jupiter.api.Test;
+ 
+-import java.sql.SQLException;
+ import java.sql.SQLFeatureNotSupportedException;
+ import java.util.Arrays;
+ import java.util.Collections;
+@@ -33,6 +32,7 @@ import java.util.HashSet;
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ import static org.mockito.Mockito.mock;
+@@ -55,18 +55,18 @@ class PostgreSQLDatabaseTypeTest {
+     }
+     
+     @Test
+-    void assertHandleRollbackOnlyForNotRollbackOnly() throws SQLException {
+-        new PostgreSQLDatabaseType().handleRollbackOnly(false, mock(CommitStatement.class));
++    void assertHandleRollbackOnlyForNotRollbackOnly() {
++        assertDoesNotThrow(() -> new PostgreSQLDatabaseType().handleRollbackOnly(false, mock(CommitStatement.class)));
+     }
+     
+     @Test
+-    void assertHandleRollbackOnlyForRollbackOnlyAndCommitStatement() throws SQLException {
+-        new PostgreSQLDatabaseType().handleRollbackOnly(true, mock(CommitStatement.class));
++    void assertHandleRollbackOnlyForRollbackOnlyAndCommitStatement() {
++        assertDoesNotThrow(() -> new PostgreSQLDatabaseType().handleRollbackOnly(true, mock(CommitStatement.class)));
+     }
+     
+     @Test
+-    void assertHandleRollbackOnlyForRollbackOnlyAndRollbackStatement() throws SQLException {
+-        new PostgreSQLDatabaseType().handleRollbackOnly(true, mock(RollbackStatement.class));
++    void assertHandleRollbackOnlyForRollbackOnlyAndRollbackStatement() {
++        assertDoesNotThrow(() -> new PostgreSQLDatabaseType().handleRollbackOnly(true, mock(RollbackStatement.class)));
+     }
+     
+     @Test
+diff --git a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
+index b6c28e3b4..d160eb7cc 100644
+--- a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
++++ b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
+@@ -36,6 +36,7 @@ import java.util.Arrays;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -50,43 +51,57 @@ class ConnectionAdapterTest {
+     
+     @Test
+     void assertGetWarnings() throws SQLException {
+-        assertNull(createConnectionAdaptor().getWarnings());
++        try (Connection actual = createConnectionAdaptor()) {
++            assertNull(actual.getWarnings());
++        }
+     }
+     
+     @Test
+     void assertClearWarnings() throws SQLException {
+-        createConnectionAdaptor().clearWarnings();
++        try (Connection actual = createConnectionAdaptor()) {
++            assertDoesNotThrow(actual::clearWarnings);
++        }
+     }
+     
+     @Test
+     void assertGetHoldability() throws SQLException {
+-        assertThat(createConnectionAdaptor().getHoldability(), is(ResultSet.CLOSE_CURSORS_AT_COMMIT));
++        try (Connection actual = createConnectionAdaptor()) {
++            assertThat(actual.getHoldability(), is(ResultSet.CLOSE_CURSORS_AT_COMMIT));
++        }
+     }
+     
+     @Test
+     void assertSetHoldability() throws SQLException {
+-        createConnectionAdaptor().setHoldability(ResultSet.CONCUR_READ_ONLY);
+-        assertThat(createConnectionAdaptor().getHoldability(), is(ResultSet.CLOSE_CURSORS_AT_COMMIT));
++        try (Connection actual = createConnectionAdaptor()) {
++            actual.setHoldability(ResultSet.CONCUR_READ_ONLY);
++        }
++        try (Connection actual = createConnectionAdaptor()) {
++            assertThat(actual.getHoldability(), is(ResultSet.CLOSE_CURSORS_AT_COMMIT));
++        }
+     }
+     
+     @Test
+     void assertGetCatalog() throws SQLException {
+-        assertNull(createConnectionAdaptor().getCatalog());
++        try (Connection actual = createConnectionAdaptor()) {
++            assertNull(actual.getCatalog());
++        }
+     }
+     
+     @Test
+     void assertSetCatalog() throws SQLException {
+-        Connection actual = createConnectionAdaptor();
+-        actual.setCatalog("");
+-        assertNull(actual.getCatalog());
++        try (Connection actual = createConnectionAdaptor()) {
++            actual.setCatalog("");
++            assertNull(actual.getCatalog());
++        }
+     }
+     
+     @Test
+     void assertSetSchema() throws SQLException {
+-        Connection actual = createConnectionAdaptor();
+-        String originalSchema = actual.getSchema();
+-        actual.setSchema("");
+-        assertThat(actual.getSchema(), is(originalSchema));
++        try (Connection actual = createConnectionAdaptor()) {
++            String originalSchema = actual.getSchema();
++            actual.setSchema("");
++            assertThat(actual.getSchema(), is(originalSchema));    
++        }
+     }
+     
+     private Connection createConnectionAdaptor() {
+diff --git a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/StatementAdapterTest.java b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/StatementAdapterTest.java
+index d57cd3134..e8a623763 100644
+--- a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/StatementAdapterTest.java
++++ b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/StatementAdapterTest.java
+@@ -43,6 +43,7 @@ import java.util.Properties;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+@@ -142,13 +143,17 @@ class StatementAdapterTest {
+     }
+     
+     @Test
+-    void assertGetWarnings() {
+-        assertNull(mockShardingSphereStatement().getWarnings());
++    void assertGetWarnings() throws SQLException {
++        try (ShardingSphereStatement actual = mockShardingSphereStatement()) {
++            assertNull(actual.getWarnings());
++        }
+     }
+     
+     @Test
+-    void assertClearWarnings() {
+-        mockShardingSphereStatement().clearWarnings();
++    void assertClearWarnings() throws SQLException {
++        try (ShardingSphereStatement actual = mockShardingSphereStatement()) {
++            assertDoesNotThrow(actual::clearWarnings);
++        }
+     }
+     
+     @Test
+diff --git a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/invocation/MethodInvocationRecorderTest.java b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/invocation/MethodInvocationRecorderTest.java
+index 9c79d7356..0341f63cc 100644
+--- a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/invocation/MethodInvocationRecorderTest.java
++++ b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/invocation/MethodInvocationRecorderTest.java
+@@ -26,14 +26,15 @@ import java.util.List;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ 
+ class MethodInvocationRecorderTest {
+     
+     @Test
+-    void assertRecordMethodInvocationSuccess() throws SQLException {
++    void assertRecordMethodInvocationSuccess() {
+         MethodInvocationRecorder<List<?>> methodInvocationRecorder = new MethodInvocationRecorder<>();
+         methodInvocationRecorder.record("isEmpty", List::isEmpty);
+-        methodInvocationRecorder.replay(Collections.emptyList());
++        assertDoesNotThrow(() -> methodInvocationRecorder.replay(Collections.emptyList()));
+     }
+     
+     @Test
+diff --git a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/state/circuit/connection/CircuitBreakerConnectionTest.java b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/state/circuit/connection/CircuitBreakerConnectionTest.java
+index a6a4fd663..cb041b9d2 100644
+--- a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/state/circuit/connection/CircuitBreakerConnectionTest.java
++++ b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/state/circuit/connection/CircuitBreakerConnectionTest.java
+@@ -28,6 +28,7 @@ import java.sql.Statement;
+ 
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.hamcrest.CoreMatchers.is;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.hamcrest.MatcherAssert.assertThat;
+@@ -70,7 +71,7 @@ class CircuitBreakerConnectionTest {
+     
+     @Test
+     void assertClearWarnings() {
+-        connection.clearWarnings();
++        assertDoesNotThrow(connection::clearWarnings);
+     }
+     
+     @Test
+@@ -86,12 +87,12 @@ class CircuitBreakerConnectionTest {
+     
+     @Test
+     void assertCommit() {
+-        connection.commit();
++        assertDoesNotThrow(connection::commit);
+     }
+     
+     @Test
+     void assertRollback() {
+-        connection.rollback();
++        assertDoesNotThrow(() -> connection.rollback());
+     }
+     
+     @Test
+@@ -125,7 +126,7 @@ class CircuitBreakerConnectionTest {
+     
+     @Test
+     void assertClose() {
+-        connection.close();
++        assertDoesNotThrow(connection::close);
+     }
+     
+     @Test
+diff --git a/kernel/data-pipeline/api/src/test/java/org/apache/shardingsphere/data/pipeline/api/config/TableNameSchemaNameMappingTest.java b/kernel/data-pipeline/api/src/test/java/org/apache/shardingsphere/data/pipeline/api/config/TableNameSchemaNameMappingTest.java
+index 471740c53..5e5e41ca3 100644
+--- a/kernel/data-pipeline/api/src/test/java/org/apache/shardingsphere/data/pipeline/api/config/TableNameSchemaNameMappingTest.java
++++ b/kernel/data-pipeline/api/src/test/java/org/apache/shardingsphere/data/pipeline/api/config/TableNameSchemaNameMappingTest.java
+@@ -24,13 +24,14 @@ import java.util.Map;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ 
+ class TableNameSchemaNameMappingTest {
+     
+     @Test
+     void assertConstructFromNull() {
+-        new TableNameSchemaNameMapping(null);
++        assertDoesNotThrow(() -> new TableNameSchemaNameMapping(null));
+     }
+     
+     @Test
+diff --git a/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/QPSJobRateLimitAlgorithmTest.java b/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/QPSJobRateLimitAlgorithmTest.java
+index 3bd832199..96c8fa93d 100644
+--- a/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/QPSJobRateLimitAlgorithmTest.java
++++ b/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/QPSJobRateLimitAlgorithmTest.java
+@@ -29,6 +29,7 @@ import java.util.Properties;
+ 
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ class QPSJobRateLimitAlgorithmTest {
+@@ -54,6 +55,6 @@ class QPSJobRateLimitAlgorithmTest {
+     
+     @Test
+     void assertIntercept() {
+-        qpsJobRateLimitAlgorithm.intercept(JobOperationType.UPDATE, 1);
++        assertDoesNotThrow(() -> qpsJobRateLimitAlgorithm.intercept(JobOperationType.UPDATE, 1));
+     }
+ }
+diff --git a/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/TPSJobRateLimitAlgorithmTest.java b/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/TPSJobRateLimitAlgorithmTest.java
+index e521c0b46..6a2b83dbc 100644
+--- a/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/TPSJobRateLimitAlgorithmTest.java
++++ b/kernel/data-pipeline/core/src/test/java/org/apache/shardingsphere/data/pipeline/core/ratelimit/TPSJobRateLimitAlgorithmTest.java
+@@ -29,6 +29,7 @@ import java.util.Properties;
+ 
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ class TPSJobRateLimitAlgorithmTest {
+@@ -54,6 +55,6 @@ class TPSJobRateLimitAlgorithmTest {
+     
+     @Test
+     void assertIntercept() {
+-        tpsJobRateLimitAlgorithm.intercept(JobOperationType.UPDATE, 1);
++        assertDoesNotThrow(() -> tpsJobRateLimitAlgorithm.intercept(JobOperationType.UPDATE, 1));
+     }
+ }
+diff --git a/kernel/data-pipeline/dialect/mysql/src/test/java/org/apache/shardingsphere/data/pipeline/mysql/ingest/client/PasswordEncryptionTest.java b/kernel/data-pipeline/dialect/mysql/src/test/java/org/apache/shardingsphere/data/pipeline/mysql/ingest/client/PasswordEncryptionTest.java
+index d5d6063aa..f42ecfb8a 100644
+--- a/kernel/data-pipeline/dialect/mysql/src/test/java/org/apache/shardingsphere/data/pipeline/mysql/ingest/client/PasswordEncryptionTest.java
++++ b/kernel/data-pipeline/dialect/mysql/src/test/java/org/apache/shardingsphere/data/pipeline/mysql/ingest/client/PasswordEncryptionTest.java
+@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ 
+ class PasswordEncryptionTest {
+     
+@@ -58,9 +59,7 @@ class PasswordEncryptionTest {
+     
+     @Test
+     void assertEncryptWithRSAPublicKey() {
+-        PasswordEncryption.encryptWithRSAPublicKey("123456", getRandomSeed(),
+-                "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
+-                mockPublicKey());
++        assertDoesNotThrow(() -> PasswordEncryption.encryptWithRSAPublicKey("123456", getRandomSeed(), "RSA/ECB/OAEPWithSHA-1AndMGF1Padding", mockPublicKey()));
+     }
+     
+     private String mockPublicKey() {
+diff --git a/kernel/single/core/src/test/java/org/apache/shardingsphere/single/route/engine/SingleStandardRouteEngineTest.java b/kernel/single/core/src/test/java/org/apache/shardingsphere/single/route/engine/SingleStandardRouteEngineTest.java
+index d78441c38..84a430ddd 100644
+--- a/kernel/single/core/src/test/java/org/apache/shardingsphere/single/route/engine/SingleStandardRouteEngineTest.java
++++ b/kernel/single/core/src/test/java/org/apache/shardingsphere/single/route/engine/SingleStandardRouteEngineTest.java
+@@ -49,6 +49,7 @@ import java.util.Optional;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -136,7 +137,7 @@ class SingleStandardRouteEngineTest {
+     @Test
+     void assertRouteIfNotExistsDuplicateSingleTable() {
+         SingleStandardRouteEngine engine = new SingleStandardRouteEngine(Collections.singletonList(new QualifiedTable(DefaultDatabase.LOGIC_NAME, "t_order")), mockStatement(true));
+-        engine.route(new RouteContext(), mockSingleRule());
++        assertDoesNotThrow(() -> engine.route(new RouteContext(), mockSingleRule()));
+     }
+     
+     private SQLStatement mockStatement(final boolean ifNotExists) {
+diff --git a/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/BitronixRecoveryResourceTest.java b/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/BitronixRecoveryResourceTest.java
+index fae237c6a..9c9b41079 100644
+--- a/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/BitronixRecoveryResourceTest.java
++++ b/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/BitronixRecoveryResourceTest.java
+@@ -35,6 +35,7 @@ import java.sql.SQLException;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+@@ -107,10 +108,17 @@ class BitronixRecoveryResourceTest {
+     }
+     
+     @Test
+-    void assertEmptyMethods() {
+-        bitronixRecoveryResource.init();
+-        bitronixRecoveryResource.setFailed(true);
+-        bitronixRecoveryResource.setFailed(false);
+-        bitronixRecoveryResource.close();
++    void assertInit() {
++        assertDoesNotThrow(() -> bitronixRecoveryResource.init());
++    }
++    
++    @Test
++    void assertSetFailed() {
++        assertDoesNotThrow(() -> bitronixRecoveryResource.setFailed(true));
++    }
++    
++    @Test
++    void assertClose() {
++        assertDoesNotThrow(() -> bitronixRecoveryResource.close());
+     }
+ }
+diff --git a/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/SingleXAResourceHolderTest.java b/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/SingleXAResourceHolderTest.java
+index 27f045acf..abfa6a80d 100644
+--- a/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/SingleXAResourceHolderTest.java
++++ b/kernel/transaction/type/xa/provider/bitronix/src/test/java/org/apache/shardingsphere/transaction/xa/bitronix/manager/SingleXAResourceHolderTest.java
+@@ -28,6 +28,7 @@ import javax.transaction.xa.XAResource;
+ 
+ import static org.hamcrest.MatcherAssert.assertThat;
+ import static org.hamcrest.Matchers.is;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ 
+@@ -74,6 +75,6 @@ class SingleXAResourceHolderTest {
+     
+     @Test
+     void assertClose() {
+-        singleXAResourceHolder.close();
++        assertDoesNotThrow(() -> singleXAResourceHolder.close());
+     }
+ }
+diff --git a/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/ClusterModeContextManagerTest.java b/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/ClusterModeContextManagerTest.java
+index 69bf76c71..058df5040 100644
+--- a/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/ClusterModeContextManagerTest.java
++++ b/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/ClusterModeContextManagerTest.java
+@@ -51,6 +51,7 @@ import java.util.Properties;
+ import java.util.TreeMap;
+ import java.util.Collections;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ import static org.mockito.Mockito.mock;
+ 
+@@ -69,7 +70,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.createDatabase("db");
++        assertDoesNotThrow(() -> clusterModeContextManager.createDatabase("db"));
+     }
+     
+     @Test
+@@ -85,7 +86,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.dropDatabase("db");
++        assertDoesNotThrow(() -> clusterModeContextManager.dropDatabase("db"));
+     }
+     
+     @Test
+@@ -101,7 +102,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.createSchema("db", "Schema Name");
++        assertDoesNotThrow(() -> clusterModeContextManager.createSchema("db", "Schema Name"));
+     }
+     
+     @Test
+@@ -120,8 +121,7 @@ class ClusterModeContextManagerTest {
+         contextManager.addSchema("db", "Schema Name");
+         ClusterModeContextManager clusterModeContextManager = new ClusterModeContextManager();
+         clusterModeContextManager.setContextManagerAware(contextManager);
+-        clusterModeContextManager
+-                .alterSchema(new AlterSchemaPOJO("db", "Schema Name", "Rename Schema Name", new LinkedList<>()));
++        assertDoesNotThrow(() -> clusterModeContextManager.alterSchema(new AlterSchemaPOJO("db", "Schema Name", "Rename Schema Name", new LinkedList<>())));
+     }
+     
+     @Test
+@@ -134,10 +134,9 @@ class ClusterModeContextManagerTest {
+         ModeConfiguration modeConfiguration = new ModeConfiguration("Type",
+                 new ClusterPersistRepositoryConfiguration("Type", "Namespace", "Server Lists", new Properties()));
+         ClusterModeContextManager modeContextManager = new ClusterModeContextManager();
+-        clusterModeContextManager
+-                .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+-                        modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.dropSchema("db", new LinkedList<>());
++        clusterModeContextManager.setContextManagerAware(
++                new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator, modeConfiguration, modeContextManager, null, new EventBusContext())));
++        assertDoesNotThrow(() -> clusterModeContextManager.dropSchema("db", new LinkedList<>()));
+     }
+     
+     @Test
+@@ -155,7 +154,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Collection<String> stringList = new LinkedList<>();
+         stringList.add("foo");
+-        clusterModeContextManager.dropSchema("db", stringList);
++        assertDoesNotThrow(() -> clusterModeContextManager.dropSchema("db", stringList));
+     }
+     
+     @Test
+@@ -174,7 +173,7 @@ class ClusterModeContextManagerTest {
+         Collection<String> stringList = new LinkedList<>();
+         stringList.add("/");
+         stringList.add("foo");
+-        clusterModeContextManager.dropSchema("db", stringList);
++        assertDoesNotThrow(() -> clusterModeContextManager.dropSchema("db", stringList));
+     }
+     
+     @Test
+@@ -208,7 +207,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.registerStorageUnits("db", new TreeMap<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.registerStorageUnits("db", new TreeMap<>()));
+     }
+     
+     @Test
+@@ -224,7 +223,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterStorageUnits("db", new TreeMap<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", new TreeMap<>()));
+     }
+     
+     @Test
+@@ -241,7 +240,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterStorageUnits("db", new TreeMap<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", new TreeMap<>()));
+     }
+     
+     @Test
+@@ -259,7 +258,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Map<String, DataSourceProperties> stringDataSourcePropertiesMap = new HashMap<>();
+         stringDataSourcePropertiesMap.put("active_version", new DataSourceProperties("active_version", new HashMap<>()));
+-        clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap));
+     }
+     
+     @Test
+@@ -278,7 +277,7 @@ class ClusterModeContextManagerTest {
+         Map<String, DataSourceProperties> stringDataSourcePropertiesMap = new HashMap<>();
+         stringDataSourcePropertiesMap.put("\n", new DataSourceProperties("\n", new HashMap<>()));
+         stringDataSourcePropertiesMap.put("active_version", new DataSourceProperties("active_version", new HashMap<>()));
+-        clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap));
+     }
+     
+     @Test
+@@ -298,7 +297,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterStorageUnits("db", new TreeMap<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", new TreeMap<>()));
+     }
+     
+     @Test
+@@ -316,7 +315,7 @@ class ClusterModeContextManagerTest {
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Map<String, DataSourceProperties> stringDataSourcePropertiesMap = new HashMap<>(new TreeMap<>());
+-        clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap));
+     }
+     
+     @Test
+@@ -335,7 +334,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Map<String, DataSourceProperties> stringDataSourcePropertiesMap = new HashMap<>();
+         stringDataSourcePropertiesMap.put("42", new DataSourceProperties("active_version", new HashMap<>()));
+-        clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterStorageUnits("db", stringDataSourcePropertiesMap));
+     }
+     
+     @Test
+@@ -351,7 +350,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.unregisterStorageUnits("db", new LinkedList<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.unregisterStorageUnits("db", new LinkedList<>()));
+     }
+     
+     @Test
+@@ -368,7 +367,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.unregisterStorageUnits("db", new LinkedList<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.unregisterStorageUnits("db", new LinkedList<>()));
+     }
+     
+     @Test
+@@ -381,10 +380,9 @@ class ClusterModeContextManagerTest {
+         ModeConfiguration modeConfiguration = new ModeConfiguration("Type",
+                 new ClusterPersistRepositoryConfiguration("Type", "Namespace", "Server Lists", new Properties()));
+         ClusterModeContextManager modeContextManager = new ClusterModeContextManager();
+-        clusterModeContextManager
+-                .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+-                        modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterRuleConfiguration("db", new LinkedList<>());
++        clusterModeContextManager.setContextManagerAware(
++                new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator, modeConfiguration, modeContextManager, null, new EventBusContext())));
++        assertDoesNotThrow(() -> clusterModeContextManager.alterRuleConfiguration("db", new LinkedList<>()));
+     }
+     
+     @Test
+@@ -402,7 +400,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Collection<RuleConfiguration> ruleConfigurationList = new LinkedList<>();
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+-        clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList));
+     }
+     
+     private ShardingSphereMetaData createShardingSphereMetaData() {
+@@ -427,7 +425,7 @@ class ClusterModeContextManagerTest {
+         Collection<RuleConfiguration> ruleConfigurationList = new LinkedList<>();
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+-        clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList));
+     }
+     
+     @Test
+@@ -446,7 +444,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Collection<RuleConfiguration> ruleConfigurationList = new LinkedList<>();
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+-        clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterRuleConfiguration("db", ruleConfigurationList));
+     }
+     
+     @Test
+@@ -462,7 +460,7 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterGlobalRuleConfiguration(new LinkedList<>());
++        assertDoesNotThrow(() -> clusterModeContextManager.alterGlobalRuleConfiguration(new LinkedList<>()));
+     }
+     
+     @Test
+@@ -480,7 +478,7 @@ class ClusterModeContextManagerTest {
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+         Collection<RuleConfiguration> ruleConfigurationList = new LinkedList<>();
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+-        clusterModeContextManager.alterGlobalRuleConfiguration(ruleConfigurationList);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterGlobalRuleConfiguration(ruleConfigurationList));
+     }
+     
+     @Test
+@@ -499,7 +497,7 @@ class ClusterModeContextManagerTest {
+         Collection<RuleConfiguration> ruleConfigurationList = new LinkedList<>();
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+         ruleConfigurationList.add(new RuleConfigurationFixture());
+-        clusterModeContextManager.alterGlobalRuleConfiguration(ruleConfigurationList);
++        assertDoesNotThrow(() -> clusterModeContextManager.alterGlobalRuleConfiguration(ruleConfigurationList));
+     }
+     
+     @Test
+@@ -515,21 +513,21 @@ class ClusterModeContextManagerTest {
+         clusterModeContextManager
+                 .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+                         modeConfiguration, modeContextManager, null, new EventBusContext())));
+-        clusterModeContextManager.alterProperties(new Properties());
++        assertDoesNotThrow(() -> clusterModeContextManager.alterProperties(new Properties()));
+     }
+     
+     @Test
+     void assertConstructor() {
+         ClusterModeContextManager actualClusterModeContextManager = new ClusterModeContextManager();
+         MetaDataPersistService persistService = new MetaDataPersistService(new ClusterPersistRepositoryFixture());
+-        MetaDataContexts metaDataContexts = new MetaDataContexts(persistService, new ShardingSphereMetaData());
+-        ComputeNodeInstance instance = new ComputeNodeInstance(new JDBCInstanceMetaData("42"));
+-        WorkerIdGenerator workerIdGenerator = mock(WorkerIdGenerator.class);
+-        ModeConfiguration modeConfiguration = new ModeConfiguration("Type",
+-                new ClusterPersistRepositoryConfiguration("Type", "Namespace", "Server Lists", new Properties()));
+-        ClusterModeContextManager modeContextManager = new ClusterModeContextManager();
+-        actualClusterModeContextManager
+-                .setContextManagerAware(new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator,
+-                        modeConfiguration, modeContextManager, null, new EventBusContext())));
++        try (MetaDataContexts metaDataContexts = new MetaDataContexts(persistService, new ShardingSphereMetaData())) {
++            ComputeNodeInstance instance = new ComputeNodeInstance(new JDBCInstanceMetaData("42"));
++            WorkerIdGenerator workerIdGenerator = mock(WorkerIdGenerator.class);
++            ModeConfiguration modeConfiguration = new ModeConfiguration("Type",
++                    new ClusterPersistRepositoryConfiguration("Type", "Namespace", "Server Lists", new Properties()));
++            ClusterModeContextManager modeContextManager = new ClusterModeContextManager();
++            assertDoesNotThrow(() -> actualClusterModeContextManager.setContextManagerAware(
++                    new ContextManager(metaDataContexts, new InstanceContext(instance, workerIdGenerator, modeConfiguration, modeContextManager, null, new EventBusContext()))));
++        }
+     }
+ }
+diff --git a/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/coordinator/registry/status/storage/service/StorageNodeStatusServiceTest.java b/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/coordinator/registry/status/storage/service/StorageNodeStatusServiceTest.java
+index 7d82d4cfd..8950a8025 100644
+--- a/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/coordinator/registry/status/storage/service/StorageNodeStatusServiceTest.java
++++ b/mode/type/cluster/core/src/test/java/org/apache/shardingsphere/mode/manager/cluster/coordinator/registry/status/storage/service/StorageNodeStatusServiceTest.java
+@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ import java.util.Arrays;
+ import java.util.List;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.ArgumentMatchers.anyString;
+ import static org.mockito.Mockito.when;
+ 
+@@ -39,6 +40,6 @@ class StorageNodeStatusServiceTest {
+     void assertLoadDisabledDataSources() {
+         List<String> disabledDataSources = Arrays.asList("replica_query_db.readwrite_ds.replica_ds_0", "other_schema.other_ds.other_ds0");
+         when(repository.getChildrenKeys(anyString())).thenReturn(disabledDataSources);
+-        new StorageNodeStatusService(repository).loadStorageNodes();
++        assertDoesNotThrow(() -> new StorageNodeStatusService(repository).loadStorageNodes());
+     }
+ }
+diff --git a/mode/type/cluster/repository/provider/zookeeper/src/test/java/org/apache/shardingsphere/mode/repository/cluster/zookeeper/ZookeeperRepositoryTest.java b/mode/type/cluster/repository/provider/zookeeper/src/test/java/org/apache/shardingsphere/mode/repository/cluster/zookeeper/ZookeeperRepositoryTest.java
+index 9a18c603b..cc40c71aa 100644
+--- a/mode/type/cluster/repository/provider/zookeeper/src/test/java/org/apache/shardingsphere/mode/repository/cluster/zookeeper/ZookeeperRepositoryTest.java
++++ b/mode/type/cluster/repository/provider/zookeeper/src/test/java/org/apache/shardingsphere/mode/repository/cluster/zookeeper/ZookeeperRepositoryTest.java
+@@ -68,6 +68,7 @@ import java.util.concurrent.TimeUnit;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyBoolean;
+ import static org.mockito.ArgumentMatchers.anyInt;
+@@ -259,19 +260,19 @@ class ZookeeperRepositoryTest {
+                 new Property(ZookeeperPropertyKey.MAX_RETRIES.getKey(), "1"),
+                 new Property(ZookeeperPropertyKey.TIME_TO_LIVE_SECONDS.getKey(), "1000"),
+                 new Property(ZookeeperPropertyKey.OPERATION_TIMEOUT_MILLISECONDS.getKey(), "2000"));
+-        REPOSITORY.init(new ClusterPersistRepositoryConfiguration(REPOSITORY.getType(), "governance", SERVER_LISTS, props));
++        assertDoesNotThrow(() -> REPOSITORY.init(new ClusterPersistRepositoryConfiguration(REPOSITORY.getType(), "governance", SERVER_LISTS, props)));
+     }
+     
+     @Test
+     void assertBuildCuratorClientWithTimeToLiveSecondsEqualsZero() {
+-        REPOSITORY.init(new ClusterPersistRepositoryConfiguration(REPOSITORY.getType(), "governance", SERVER_LISTS,
+-                PropertiesBuilder.build(new Property(ZookeeperPropertyKey.TIME_TO_LIVE_SECONDS.getKey(), "0"))));
++        assertDoesNotThrow(() -> REPOSITORY.init(new ClusterPersistRepositoryConfiguration(
++                REPOSITORY.getType(), "governance", SERVER_LISTS, PropertiesBuilder.build(new Property(ZookeeperPropertyKey.TIME_TO_LIVE_SECONDS.getKey(), "0")))));
+     }
+     
+     @Test
+     void assertBuildCuratorClientWithOperationTimeoutMillisecondsEqualsZero() {
+-        REPOSITORY.init(new ClusterPersistRepositoryConfiguration(REPOSITORY.getType(), "governance", SERVER_LISTS,
+-                PropertiesBuilder.build(new Property(ZookeeperPropertyKey.OPERATION_TIMEOUT_MILLISECONDS.getKey(), "0"))));
++        assertDoesNotThrow(() -> REPOSITORY.init(new ClusterPersistRepositoryConfiguration(
++                REPOSITORY.getType(), "governance", SERVER_LISTS, PropertiesBuilder.build(new Property(ZookeeperPropertyKey.OPERATION_TIMEOUT_MILLISECONDS.getKey(), "0")))));
+     }
+     
+     @Test
+diff --git a/proxy/backend/core/src/main/java/org/apache/shardingsphere/proxy/backend/connector/jdbc/connection/ResourceLock.java b/proxy/backend/core/src/main/java/org/apache/shardingsphere/proxy/backend/connector/jdbc/connection/ResourceLock.java
+index 90643ce9e..aa78570d1 100644
+--- a/proxy/backend/core/src/main/java/org/apache/shardingsphere/proxy/backend/connector/jdbc/connection/ResourceLock.java
++++ b/proxy/backend/core/src/main/java/org/apache/shardingsphere/proxy/backend/connector/jdbc/connection/ResourceLock.java
+@@ -38,6 +38,7 @@ public final class ResourceLock {
+     /**
+      * Await.
+      */
++    @SuppressWarnings("ResultOfMethodCallIgnored")
+     @SneakyThrows(InterruptedException.class)
+     public void doAwait() {
+         lock.lock();
+diff --git a/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/database/DropDatabaseBackendHandlerTest.java b/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/database/DropDatabaseBackendHandlerTest.java
+index 5b9583b76..965faddec 100644
+--- a/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/database/DropDatabaseBackendHandlerTest.java
++++ b/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/database/DropDatabaseBackendHandlerTest.java
+@@ -43,6 +43,7 @@ import java.util.Map;
+ 
+ import static org.hamcrest.CoreMatchers.instanceOf;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -99,7 +100,7 @@ class DropDatabaseBackendHandlerTest {
+     void assertExecuteDropNotExistDatabaseWithIfExists() {
+         when(sqlStatement.getDatabaseName()).thenReturn("test_not_exist_db");
+         when(sqlStatement.isIfExists()).thenReturn(true);
+-        handler.execute();
++        assertDoesNotThrow(() -> handler.execute());
+     }
+     
+     @Test
+diff --git a/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/distsql/ral/QueryableRALBackendHandlerTest.java b/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/distsql/ral/QueryableRALBackendHandlerTest.java
+index ccf852264..c831e22f2 100644
+--- a/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/distsql/ral/QueryableRALBackendHandlerTest.java
++++ b/proxy/backend/core/src/test/java/org/apache/shardingsphere/proxy/backend/handler/distsql/ral/QueryableRALBackendHandlerTest.java
+@@ -47,6 +47,7 @@ import java.util.Collections;
+ import java.util.HashMap;
+ import java.util.Map;
+ 
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+ import static org.mockito.Mockito.mock;
+@@ -91,7 +92,7 @@ class QueryableRALBackendHandlerTest {
+         when(ProxyContext.getInstance().getDatabase("db_name")).thenReturn(database);
+         ConnectionSession connectionSession = mock(ConnectionSession.class, RETURNS_DEEP_STUBS);
+         when(connectionSession.getDatabaseName()).thenReturn("db_name");
+-        new QueryableRALBackendHandler<>(createSqlStatement(), connectionSession).execute();
++        assertDoesNotThrow(() -> new QueryableRALBackendHandler<>(createSqlStatement(), connectionSession).execute());
+     }
+     
+     private Map<String, ShardingSphereTable> createTableMap() {
+diff --git a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousDeleteStatementCheckerTest.java b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousDeleteStatementCheckerTest.java
+index 02f0d8c69..944d1e282 100644
+--- a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousDeleteStatementCheckerTest.java
++++ b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousDeleteStatementCheckerTest.java
+@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ class HeterogeneousDeleteStatementCheckerTest {
+@@ -30,7 +31,7 @@ class HeterogeneousDeleteStatementCheckerTest {
+     @Test
+     void assertExecuteDeleteStatement() {
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(HBaseSupportedSQLStatement.getDeleteStatement());
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+diff --git a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousInsertStatementCheckerTest.java b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousInsertStatementCheckerTest.java
+index 635711d6c..60671f081 100644
+--- a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousInsertStatementCheckerTest.java
++++ b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousInsertStatementCheckerTest.java
+@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ class HeterogeneousInsertStatementCheckerTest {
+@@ -30,7 +31,7 @@ class HeterogeneousInsertStatementCheckerTest {
+     @Test
+     void assertExecuteInsertStatement() {
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(HBaseSupportedSQLStatement.getInsertStatement());
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+@@ -77,7 +78,7 @@ class HeterogeneousInsertStatementCheckerTest {
+     void assertInsertWithLiteralAndParameterMarker() {
+         String sql = "INSERT /*+ HBase */ INTO t_order_item(rowKey, order_id, user_id, status, creation_date) VALUES (?, ?, ?, 'insert', '2017-08-08')";
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(sql);
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+diff --git a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousSelectStatementCheckerTest.java b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousSelectStatementCheckerTest.java
+index 84e0f348a..45267d63d 100644
+--- a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousSelectStatementCheckerTest.java
++++ b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousSelectStatementCheckerTest.java
+@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -43,7 +44,7 @@ class HeterogeneousSelectStatementCheckerTest {
+     @Test
+     void assertSelectStatement() {
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(HBaseSupportedSQLStatement.getSelectStatement());
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+@@ -95,7 +96,7 @@ class HeterogeneousSelectStatementCheckerTest {
+     void assertSelectStatementWithInExpression() {
+         String sql = "SELECT /*+ HBase */ * from t_order where rowKey in (1, 2, 3)";
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(sql);
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+@@ -118,14 +119,14 @@ class HeterogeneousSelectStatementCheckerTest {
+     void assertExecuteSelectWithParameterMarker() {
+         String sql = "SELECT /*+ HBase */ * from t_order where rowKey in (?, ?, ?)";
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(sql);
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+     void assertSelectStatementUseCrc32() {
+         String sql = "SELECT /*+ HBase */ crc32(concat_ws('#',rowKey)) from t_order where rowKey in (1, 2, 3)";
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(sql);
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+@@ -140,7 +141,7 @@ class HeterogeneousSelectStatementCheckerTest {
+     void assertExecuteSelectWithBetween() {
+         String sql = "SELECT /*+ HBase */ * from t_order where rowKey between 1 and 2";
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(sql);
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test
+diff --git a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousUpdateStatementCheckerTest.java b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousUpdateStatementCheckerTest.java
+index a95944863..ecc058a10 100644
+--- a/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousUpdateStatementCheckerTest.java
++++ b/proxy/backend/type/hbase/src/test/java/org/apache/shardingsphere/proxy/backend/hbase/checker/HeterogeneousUpdateStatementCheckerTest.java
+@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.hamcrest.MatcherAssert.assertThat;
++import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ class HeterogeneousUpdateStatementCheckerTest {
+@@ -30,7 +31,7 @@ class HeterogeneousUpdateStatementCheckerTest {
+     @Test
+     void assertExecuteUpdateStatement() {
+         SQLStatement sqlStatement = HBaseSupportedSQLStatement.parseSQLStatement(HBaseSupportedSQLStatement.getUpdateStatement());
+-        HBaseCheckerFactory.newInstance(sqlStatement).execute();
++        assertDoesNotThrow(() -> HBaseCheckerFactory.newInstance(sqlStatement).execute());
+     }
+     
+     @Test

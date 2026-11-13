@@ -1,0 +1,27 @@
+diff --git a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
+index 20c8be87b..d4f097171 100644
+--- a/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
++++ b/features/sharding/core/src/test/java/org/apache/shardingsphere/sharding/route/engine/validator/dml/ShardingCopyStatementValidatorTest.java
+@@ -82,7 +82,7 @@ class ShardingCopyStatementValidatorTest {
+         CopyStatementContext sqlStatementContext = new CopyStatementContext(sqlStatement);
+         String tableName = "t_order";
+         when(shardingRule.isShardingTable(tableName)).thenReturn(true);
+-        assertDoesNotThrow(() -> new ShardingCopyStatementValidator().preValidate(
+-                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class)));
++        new ShardingCopyStatementValidator().preValidate(
++                shardingRule, sqlStatementContext, Collections.emptyList(), mock(ShardingSphereDatabase.class), mock(ConfigurationProperties.class));
+     }
+ }
+diff --git a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
+index d160eb7cc..c28375753 100644
+--- a/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
++++ b/jdbc/core/src/test/java/org/apache/shardingsphere/driver/jdbc/adapter/ConnectionAdapterTest.java
+@@ -100,7 +100,7 @@ class ConnectionAdapterTest {
+         try (Connection actual = createConnectionAdaptor()) {
+             String originalSchema = actual.getSchema();
+             actual.setSchema("");
+-            assertThat(actual.getSchema(), is(originalSchema));    
++            assertThat(actual.getSchema(), is(originalSchema));
+         }
+     }
+     

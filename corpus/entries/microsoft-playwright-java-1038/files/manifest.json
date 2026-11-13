@@ -1,0 +1,206 @@
+[
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextAddCookies.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextBasic.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextExposeFunction.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextFetch.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextHar.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextProxy.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextRoute.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserContextStrict.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeBasic.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeConnect.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestChromiumTracing.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestClick.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestDefaultBrowserContext2.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestDownload.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestElementHandleConvenience.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestElementHandleSelectText.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestElementHandleWaitForElementState.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestEvalOnSelector.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestFirefoxLauncher.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestGlobalFetch.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestLocatorAssertions.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestLocatorConvenience.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestLocatorFrame.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestLocatorMisc.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestNetworkResponse.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageAssertions.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageEvaluate.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageExposeFunction.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageFill.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageKeyboard.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageLocatorQuery.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageNavigate.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageRequestContinue.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageRequestFallback.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageRoute.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageSelectOption.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageSetContent.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageSetExtraHttpHeaders.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageSetInputFiles.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageStrict.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageWaitForNavigation.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageWaitForRequest.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageWaitForResponse.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPageWaitForUrl.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPdf.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestPlaywrightCreate.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestQuerySelector.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestSelectorsMisc.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestSelectorsRegister.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestWaitForFunction.java",
+    "status": "modified"
+  },
+  {
+    "path": "playwright/src/test/java/com/microsoft/playwright/TestWebSocket.java",
+    "status": "modified"
+  }
+]

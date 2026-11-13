@@ -1,0 +1,3559 @@
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextAddCookies.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextAddCookies.java
+index 06d51a0..057202c 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextAddCookies.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextAddCookies.java
+@@ -248,27 +248,19 @@ public class TestBrowserContextAddCookies extends TestBase {
+ 
+   @Test
+   void shouldNotSetACookieWithBlankPageURL() {
+-    try {
+-      context.addCookies(asList(
+-        new Cookie("example-cookie", "best").setUrl(server.EMPTY_PAGE),
+-        new Cookie("example-cookie-blank", "best").setUrl("about:blank")
+-      ));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Blank page can not have cookie \"example-cookie-blank\""));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () ->  context.addCookies(asList(
++      new Cookie("example-cookie", "best").setUrl(server.EMPTY_PAGE),
++      new Cookie("example-cookie-blank", "best").setUrl("about:blank")
++    )));
++    assertTrue(e.getMessage().contains("Blank page can not have cookie \"example-cookie-blank\""));
+   }
+ 
+   @Test
+   void shouldNotSetACookieOnADataURLPage() {
+-    try {
+-      context.addCookies(asList(
+-        new Cookie("example-cookie", "best").setUrl("data:,Hello%2C%20World!")
+-      ));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Data URL page can not have cookie \"example-cookie\""));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.addCookies(asList(
++      new Cookie("example-cookie", "best").setUrl("data:,Hello%2C%20World!")
++    )));
++    assertTrue(e.getMessage().contains("Data URL page can not have cookie \"example-cookie\""));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextBasic.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextBasic.java
+index f212b52..9e8bf49 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextBasic.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextBasic.java
+@@ -116,22 +116,18 @@ public class TestBrowserContextBasic extends TestBase {
+ 
+   @Test
+   void shouldNotAllowDeviceScaleFactorWithNullViewport() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       browser.newContext(new Browser.NewContextOptions().setDeviceScaleFactor(1.0).setViewportSize(null));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"deviceScaleFactor\" option is not supported with null \"viewport\""));
+-    }
++    });
++    assertTrue(e.getMessage().contains("\"deviceScaleFactor\" option is not supported with null \"viewport\""));
+   }
+ 
+   @Test
+   void shouldNotAllowIsMobileWithNullViewport() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       browser.newContext(new Browser.NewContextOptions().setIsMobile(true).setViewportSize(null));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"isMobile\" option is not supported with null \"viewport\""));
+-    }
++    });
++    assertTrue(e.getMessage().contains("\"isMobile\" option is not supported with null \"viewport\""));
+   }
+ 
+   @Test
+@@ -143,12 +139,10 @@ public class TestBrowserContextBasic extends TestBase {
+   @Test
+   void closeShouldAbortFutureEvent() {
+     BrowserContext context = browser.newContext();
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       context.waitForPage(() -> context.close());
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Context closed"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Context closed"));
+   }
+ 
+   @Test
+@@ -211,15 +205,11 @@ public class TestBrowserContextBasic extends TestBase {
+       BrowserContext context = browser.newContext(new Browser.NewContextOptions().setJavaScriptEnabled(false));
+       Page page = context.newPage();
+       page.navigate("data:text/html, <script>var something = 'forbidden'</script>");
+-      try {
+-        page.evaluate("something");
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-        if (isWebKit())
+-          assertTrue(e.getMessage().contains("Can\'t find variable: something"));
+-        else
+-          assertTrue(e.getMessage().contains("something is not defined"));
+-      }
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("something"));
++      if (isWebKit())
++        assertTrue(e.getMessage().contains("Can\'t find variable: something"));
++      else
++        assertTrue(e.getMessage().contains("something is not defined"));
+       context.close();
+     }
+ 
+@@ -244,11 +234,7 @@ public class TestBrowserContextBasic extends TestBase {
+   void shouldWorkWithOfflineOption() {
+     BrowserContext context = browser.newContext(new Browser.NewContextOptions().setOffline(true));
+     Page page = context.newPage();
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
+ 
+     context.setOffline(false);
+     Response response = page.navigate(server.EMPTY_PAGE);
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextExposeFunction.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextExposeFunction.java
+index 33334e6..3d522bc 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextExposeFunction.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextExposeFunction.java
+@@ -58,28 +58,16 @@ public class TestBrowserContextExposeFunction extends TestBase {
+   void shouldThrowForDuplicateRegistrations() {
+     context.exposeFunction("foo", args -> null);
+     context.exposeFunction("bar", args -> null);
+-    try {
+-      context.exposeFunction("foo", args -> null);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Function \"foo\" has been already registered"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.exposeFunction("foo", args -> null));
++    assertTrue(e.getMessage().contains("Function \"foo\" has been already registered"));
+ 
+     Page page = context.newPage();
+-    try {
+-      page.exposeFunction("foo", args -> null);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Function \"foo\" has been already registered in the browser context"));
+-    }
++    e = assertThrows(PlaywrightException.class, () -> page.exposeFunction("foo", args -> null));
++    assertTrue(e.getMessage().contains("Function \"foo\" has been already registered in the browser context"));
+ 
+     page.exposeFunction("baz", args -> null);
+-    try {
+-      context.exposeFunction("baz", args -> null);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Function \"baz\" has been already registered in one of the pages"));
+-    }
++    e = assertThrows(PlaywrightException.class, () -> context.exposeFunction("baz", args -> null));
++    assertTrue(e.getMessage().contains("Function \"baz\" has been already registered in one of the pages"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextFetch.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextFetch.java
+index fe88338..5eac139 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextFetch.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextFetch.java
+@@ -51,24 +51,16 @@ public class TestBrowserContextFetch extends TestBase {
+   @Test
+   void shouldThrowOnNetworkError() {
+     server.setRoute("/test", exchange -> exchange.getResponseBody().close());
+-    try {
+-      context.request().get(server.PREFIX + "/test");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("socket hang up"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.PREFIX + "/test"));
++    assertTrue(e.getMessage().contains("socket hang up"), e.getMessage());
+   }
+ 
+   @Test
+   void shouldThrowOnNetworkErrorAfterRedirect() {
+     server.setRedirect("/redirect", "/test");
+     server.setRoute("/test", exchange -> exchange.getResponseBody().close());
+-    try {
+-      context.request().get(server.PREFIX + "/redirect");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("socket hang up"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.PREFIX + "/redirect"));
++    assertTrue(e.getMessage().contains("socket hang up"), e.getMessage());
+   }
+ 
+   @Test
+@@ -80,12 +72,8 @@ public class TestBrowserContextFetch extends TestBase {
+         writer.write("<title>A");
+       }
+     });
+-    try {
+-      context.request().get(server.PREFIX + "/test");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("aborted"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.PREFIX + "/test"));
++    assertTrue(e.getMessage().contains("aborted"), e.getMessage());
+   }
+ 
+   @Test
+@@ -98,12 +86,8 @@ public class TestBrowserContextFetch extends TestBase {
+         writer.write("<title>A");
+       }
+     });
+-    try {
+-      context.request().get(server.PREFIX + "/redirect");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("aborted"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.PREFIX + "/redirect"));
++    assertTrue(e.getMessage().contains("aborted"), e.getMessage());
+   }
+ 
+   @Test
+@@ -134,12 +118,10 @@ public class TestBrowserContextFetch extends TestBase {
+ 
+   @Test
+   void getShouldSupportFailOnStatusCode() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       context.request().get(server.PREFIX + "/does-not-exist.html", RequestOptions.create().setFailOnStatusCode(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("404 Not Found"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("404 Not Found"), e.getMessage());
+   }
+ 
+   @Test
+@@ -385,29 +367,20 @@ public class TestBrowserContextFetch extends TestBase {
+ 
+   @Test
+   void shouldThrowOnInvalidHeaderValue() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       context.request().get(server.EMPTY_PAGE, RequestOptions.create()
+         .setHeader("foo", "недопустимое значение"));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Invalid character in header content"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Invalid character in header content"), e.getMessage());
+   }
+ 
+   @Test
+   void shouldThrowOnNonHttpSProtocol() {
+-    try {
+-      context.request().get("data:text/plain,test");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Protocol \"data:\" not supported"), e.getMessage());
+-    }
+-    try {
+-      context.request().get("file:///tmp/foo");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Protocol \"file:\" not supported"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get("data:text/plain,test"));
++    assertTrue(e.getMessage().contains("Protocol \"data:\" not supported"), e.getMessage());
++
++    e = assertThrows(PlaywrightException.class, () -> context.request().get("file:///tmp/foo"));
++    assertTrue(e.getMessage().contains("Protocol \"file:\" not supported"), e.getMessage());
+   }
+ 
+   @Test
+@@ -417,12 +390,10 @@ public class TestBrowserContextFetch extends TestBase {
+       exchange.sendResponseHeaders(200, 4096);
+     });
+ 
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       context.request().get(server.PREFIX + "/slow", RequestOptions.create().setTimeout(100));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Request timed out after 100ms"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Request timed out after 100ms"), e.getMessage());
+   }
+ 
+   @Test
+@@ -453,12 +424,8 @@ public class TestBrowserContextFetch extends TestBase {
+     });
+ 
+     context.setDefaultTimeout(100);
+-    try {
+-      context.request().get(server.PREFIX + "/redirect");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Request timed out after 100ms"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.PREFIX + "/redirect"));
++    assertTrue(e.getMessage().contains("Request timed out after 100ms"), e.getMessage());
+   }
+ 
+   @Test
+@@ -466,12 +433,8 @@ public class TestBrowserContextFetch extends TestBase {
+     APIResponse response = context.request().get(server.PREFIX + "/simple.json");
+     assertEquals("{\"foo\": \"bar\"}\n", response.text());
+     response.dispose();
+-    try {
+-      response.body();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> response.body());
++    assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+   }
+ 
+   @Test
+@@ -479,13 +442,9 @@ public class TestBrowserContextFetch extends TestBase {
+     APIResponse response = context.request().get(server.PREFIX + "/simple.json");
+     assertEquals("{\"foo\": \"bar\"}\n", response.text());
+     context.close();
+-    try {
+-      response.body();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Response has been disposed") ||
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> response.body());
++    assertTrue(e.getMessage().contains("Response has been disposed") ||
+         e.getMessage().contains("Target page, context or browser has been closed"), e.getMessage());
+-    }
+   }
+   @Test
+   void shouldOverrideRequestParameters() throws ExecutionException, InterruptedException {
+@@ -615,16 +574,13 @@ public class TestBrowserContextFetch extends TestBase {
+ 
+   @Test
+   void shouldThrowWhenDataPassedForUnsupportedRequest() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       context.request().fetch(server.EMPTY_PAGE, RequestOptions.create()
+         .setMethod("GET").setData("bar"));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Method GET does not accept post data"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Method GET does not accept post data"), e.getMessage());
+   }
+ 
+-
+   @Test
+   void contextRequestShouldExportSameStorageStateAsContext() {
+     server.setRoute("/setcookie.html", exchange -> {
+@@ -666,18 +622,10 @@ public class TestBrowserContextFetch extends TestBase {
+       return null;
+     });
+     page.evaluate("() => setTimeout(closeContext, 1000);");
+-    try {
+-      context.request().get(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Request context disposed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> context.request().get(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("Request context disposed"), e.getMessage());
+ 
+-    try {
+-      context.request().post(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Target page, context or browser has been closed"), e.getMessage());
+-    }
++    e = assertThrows(PlaywrightException.class, () ->  context.request().post(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("Target page, context or browser has been closed"), e.getMessage());
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextHar.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextHar.java
+index 1321256..e5e15ab 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextHar.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextHar.java
+@@ -79,11 +79,7 @@ public class TestBrowserContextHar extends TestBase {
+     Path path = Paths.get("src/test/resources/har-fulfill.har");
+     context.routeFromHAR(path);
+     Page page = context.newPage();
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
+   }
+ 
+   @Test
+@@ -350,11 +346,7 @@ public class TestBrowserContextHar extends TestBase {
+       assertEquals("2", page2.evaluate(fetchFunction, "2"));
+       assertEquals("3", page2.evaluate(fetchFunction, "3"));
+       assertEquals("3", page2.evaluate(fetchFunction, "3"));
+-      try {
+-        page2.evaluate(fetchFunction, "4");
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-      }
++      assertThrows(PlaywrightException.class, () -> page2.evaluate(fetchFunction, "4"));
+     }
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextProxy.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextProxy.java
+index 0252fab..ad9ac39 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextProxy.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextProxy.java
+@@ -47,9 +47,9 @@ public class TestBrowserContextProxy extends TestBase {
+   @EnabledIf(value="isChromiumWindows", disabledReason="Platform-specific")
+   void shouldThrowForMissingGlobalProxyOnChromiumWindows() {
+     try (Browser browser = browserType.launch(createLaunchOptions())) {
+-      browser.newContext(new Browser.NewContextOptions().setProxy("localhost:" + server.PORT));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
++        browser.newContext(new Browser.NewContextOptions().setProxy("localhost:" + server.PORT));
++      });
+       assertTrue(e.getMessage().contains("Browser needs to be launched with the global proxy"));
+     }
+   }
+@@ -179,23 +179,9 @@ public class TestBrowserContextProxy extends TestBase {
+     page.navigate("http://0.non.existent.domain.for.the.test/target.html");
+     assertEquals("Served by the proxy", page.title());
+ 
+-    try {
+-      page.navigate("http://1.non.existent.domain.for.the.test/target.html");
+-      fail("did not throw");
+-    } catch (PlaywrightException exception) {
+-    }
+-
+-    try {
+-      page.navigate("http://2.non.existent.domain.for.the.test/target.html");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
+-
+-    try {
+-      page.navigate("http://foo.is.the.another.test/target.html");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate("http://1.non.existent.domain.for.the.test/target.html"));
++    assertThrows(PlaywrightException.class, () -> page.navigate("http://2.non.existent.domain.for.the.test/target.html"));
++    assertThrows(PlaywrightException.class, () -> page.navigate("http://foo.is.the.another.test/target.html"));
+ 
+     page.navigate("http://3.non.existent.domain.for.the.test/target.html");
+     assertEquals("Served by the proxy", page.title());
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextRoute.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextRoute.java
+index a1b1109..be4b214 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextRoute.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextRoute.java
+@@ -169,12 +169,8 @@ public class TestBrowserContextRoute extends TestBase {
+       throw new RuntimeException("My Exception");
+     });
+ 
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (RuntimeException e) {
+-      assertTrue(e.getMessage().contains("My Exception"), e.getMessage());
+-    }
++    RuntimeException e = assertThrows(RuntimeException.class, () -> page.navigate(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("My Exception"), e.getMessage());
+   }
+ 
+   @Test
+@@ -187,12 +183,8 @@ public class TestBrowserContextRoute extends TestBase {
+       // Fulfilling with dsiposed response will lead to a server-side exception.
+       route.fulfill(new Route.FulfillOptions().setResponse(response));
+     });
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (RuntimeException e) {
+-      assertTrue(e.getMessage().contains("Fetch response has been disposed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("Fetch response has been disposed"), e.getMessage());
+   }
+ 
+   @Test
+@@ -201,12 +193,8 @@ public class TestBrowserContextRoute extends TestBase {
+     page.route("**/*", route -> {
+       route.resume(new Route.ResumeOptions().setUrl("file:///tmp"));
+     });
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (RuntimeException e) {
+-      assertTrue(e.getMessage().contains("New URL must have same protocol as overridden URL"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("New URL must have same protocol as overridden URL"), e.getMessage());
+   }
+ 
+ 
+@@ -260,12 +248,7 @@ public class TestBrowserContextRoute extends TestBase {
+       route.fallback();
+     });
+ 
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertNotNull(e);
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
+     assertFalse(failed[0]);
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextStrict.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextStrict.java
+index 814712c..c107e24 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextStrict.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserContextStrict.java
+@@ -38,12 +38,8 @@ public class TestBrowserContextStrict extends TestBase {
+   @Test
+   void shouldFailPageTextContentInStrictMode() {
+     page.setContent("<span>span1</span><div><span>target</span></div>");
+-    try {
+-      page.textContent("span");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.textContent("span"));
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeBasic.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeBasic.java
+index d54e5fb..08522ff 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeBasic.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeBasic.java
+@@ -43,11 +43,7 @@ public class TestBrowserTypeBasic extends TestBase {
+   @Test
+   @DisabledIf(value="com.microsoft.playwright.TestBase#isChromium", disabledReason="Non-chromium behavior")
+   void shouldThrowWhenTryingToConnectWithNotChromium() {
+-    try {
+-      browserType.connectOverCDP("foo");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Connecting over CDP is only supported in Chromium."));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> browserType.connectOverCDP("foo"));
++    assertTrue(e.getMessage().contains("Connecting over CDP is only supported in Chromium."));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeConnect.java b/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeConnect.java
+index fcf400e..64fd564 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeConnect.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestBrowserTypeConnect.java
+@@ -192,12 +192,8 @@ public class TestBrowserTypeConnect extends TestBase {
+ 
+     remote.kill();
+     assertEquals(1, disconnected1[0]);
+-    try {
+-      // Tickle connection so that it gets a chance to dispatch disconnect event.
+-      page2.title();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
++    // Tickle connection so that it gets a chance to dispatch disconnect event.
++    assertThrows(PlaywrightException.class, () -> page2.title());
+     assertEquals(1, disconnected2[0]);
+   }
+ 
+@@ -262,12 +258,8 @@ public class TestBrowserTypeConnect extends TestBase {
+       }
+     }
+     assertFalse(browser.isConnected());
+-    try {
+-      page.waitForNavigation(() -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Page closed") || e.getMessage().contains("Browser has been closed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.waitForNavigation(() -> {}));
++    assertTrue(e.getMessage().contains("Page closed") || e.getMessage().contains("Browser has been closed"), e.getMessage());
+   }
+ 
+   @Test
+@@ -277,12 +269,10 @@ public class TestBrowserTypeConnect extends TestBase {
+ 
+     server.setRoute("/one-style.css", r -> {});
+     page.onRequest(r -> remote.close());
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.navigate(server.PREFIX + "/one-style.html", new Page.NavigateOptions().setTimeout(60000));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Browser has been closed"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Browser has been closed"));
+   }
+ 
+   @Test
+@@ -408,12 +398,8 @@ public class TestBrowserTypeConnect extends TestBase {
+     Path savedAsPath = tempDir.resolve("my-video.webm");
+     page.video().saveAs(savedAsPath);
+     assertTrue(Files.exists(savedAsPath));
+-    try {
+-      page.video().path();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Path is not available when using browserType.connect(). Use saveAs() to save a local copy."));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.video().path());
++    assertTrue(e.getMessage().contains("Path is not available when using browserType.connect(). Use saveAs() to save a local copy."));
+   }
+ 
+ 
+@@ -435,12 +421,8 @@ public class TestBrowserTypeConnect extends TestBase {
+     download.saveAs(nestedPath);
+     assertTrue(Files.exists(nestedPath));
+     assertEquals("Hello world", new String(Files.readAllBytes(nestedPath), StandardCharsets.UTF_8));
+-    try {
+-      download.path();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Path is not available when using browserType.connect(). Use download.saveAs() to save a local copy."));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> download.path());
++    assertTrue(e.getMessage().contains("Path is not available when using browserType.connect(). Use download.saveAs() to save a local copy."));
+     page.close();
+   }
+ 
+@@ -459,12 +441,8 @@ public class TestBrowserTypeConnect extends TestBase {
+     Download download = page.waitForDownload(() -> page.click("a"));
+     Path userPath = tempDir.resolve("download.txt");
+     download.delete();
+-    try {
+-      download.saveAs(userPath);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Target page, context or browser has been closed"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> download.saveAs(userPath));
++    assertTrue(e.getMessage().contains("Target page, context or browser has been closed"));
+     page.close();
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestChromiumTracing.java b/playwright/src/test/java/com/microsoft/playwright/TestChromiumTracing.java
+index bde1bc4..034d464 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestChromiumTracing.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestChromiumTracing.java
+@@ -80,12 +80,10 @@ public class TestChromiumTracing extends TestBase {
+       browser.startTracing(page, new Browser.StartTracingOptions()
+         .setPath(outputTraceFile));
+       Page newPage = browser.newPage();
+-      try {
++      assertThrows(PlaywrightException.class, () -> {
+         browser.startTracing(newPage, new Browser.StartTracingOptions()
+           .setPath(outputTraceFile));
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-      }
++      });
+       newPage.close();
+       browser.stopTracing();
+     }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestClick.java b/playwright/src/test/java/com/microsoft/playwright/TestClick.java
+index 8be6c15..b717942 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestClick.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestClick.java
+@@ -564,12 +564,10 @@ public class TestClick extends TestBase {
+     page.evaluate("addButton()");
+     ElementHandle handle = page.querySelector("button");
+     page.evaluate("stopButton(true)");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       handle.click(new ElementHandle.ClickOptions().setForce(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+     assertEquals(null, page.evaluate("window.clicked"));
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestDefaultBrowserContext2.java b/playwright/src/test/java/com/microsoft/playwright/TestDefaultBrowserContext2.java
+index 9a784d7..193c80f 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestDefaultBrowserContext2.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestDefaultBrowserContext2.java
+@@ -192,12 +192,10 @@ public class TestDefaultBrowserContext2 extends TestBase {
+     BrowserType.LaunchPersistentContextOptions options = new BrowserType.LaunchPersistentContextOptions()
+       .setArgs(asList(server.EMPTY_PAGE));
+     Path userDataDir = Files.createTempDirectory("user-data-dir-");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       browserType.launchPersistentContext(userDataDir, options);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("can not specify page"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("can not specify page"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestDownload.java b/playwright/src/test/java/com/microsoft/playwright/TestDownload.java
+index 256576e..32c2965 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestDownload.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestDownload.java
+@@ -116,13 +116,9 @@ public class TestDownload extends TestBase {
+       Download download = page.waitForDownload(() -> page.click("a"));
+       assertEquals(server.PREFIX + "/downloadWithFilename", download.url());
+       assertEquals("file.txt", download.suggestedFilename());
+-      try {
+-        download.path();
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-        assertTrue(download.failure().contains("acceptDownloads"));
+-        assertTrue(e.getMessage().contains("acceptDownloads: true"));
+-      }
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> download.path());
++      assertTrue(download.failure().contains("acceptDownloads"));
++      assertTrue(e.getMessage().contains("acceptDownloads: true"));
+     }
+   }
+   @Test
+@@ -243,12 +239,8 @@ public class TestDownload extends TestBase {
+     Download download = page.waitForDownload(() -> page.click("a"));
+ 
+     Path userPath = Files.createTempFile("download-", ".txt");
+-    try {
+-      download.saveAs(userPath);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Pass { acceptDownloads: true } when you are creating your browser context"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> download.saveAs(userPath));
++    assertTrue(e.getMessage().contains("Pass { acceptDownloads: true } when you are creating your browser context"));
+     page.close();
+   }
+ 
+@@ -260,12 +252,8 @@ public class TestDownload extends TestBase {
+ 
+     Path userPath = Files.createTempFile("download-", ".txt");
+     download.delete();
+-    try {
+-      download.saveAs(userPath);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Target page, context or browser has been closed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> download.saveAs(userPath));
++    assertTrue(e.getMessage().contains("Target page, context or browser has been closed"), e.getMessage());
+     page.close();
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleConvenience.java b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleConvenience.java
+index d2fe884..f446439 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleConvenience.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleConvenience.java
+@@ -57,19 +57,12 @@ public class TestElementHandleConvenience extends TestBase {
+     ElementHandle handle = page.querySelector("#input");
+     assertEquals("input value", handle.inputValue());
+ 
+-    try {
+-      page.inputValue("#inner");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.inputValue("#inner"));
++    assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
++
+     ElementHandle handle2 = page.querySelector("#inner");
+-    try {
+-      handle2.inputValue();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+-    }
++    e = assertThrows(PlaywrightException.class, () -> handle2.inputValue());
++    assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+   }
+ 
+   @Test
+@@ -91,19 +84,11 @@ public class TestElementHandleConvenience extends TestBase {
+   @Test
+   void innerTextShouldThrow() {
+     page.setContent("<svg>text</svg>");
+-    try {
+-      page.innerText("svg");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.innerText("svg"));
++    assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+     ElementHandle handle = page.querySelector("svg");
+-    try {
+-      handle.innerText();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+-    }
++    e = assertThrows(PlaywrightException.class, () -> handle.innerText());
++    assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+   }
+ 
+   @Test
+@@ -267,11 +252,7 @@ public class TestElementHandleConvenience extends TestBase {
+     handle.evaluate("input => input.checked = false");
+     assertFalse(handle.isChecked());
+     assertFalse(page.isChecked("input"));
+-    try {
+-      page.isChecked("div");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Not a checkbox or radio button"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.isChecked("div"));
++    assertTrue(e.getMessage().contains("Not a checkbox or radio button"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleSelectText.java b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleSelectText.java
+index 7c9658c..46e66d3 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleSelectText.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleSelectText.java
+@@ -47,12 +47,10 @@ public class TestElementHandleSelectText extends TestBase {
+     page.navigate(server.PREFIX + "/input/textarea.html");
+     ElementHandle textarea = page.querySelector("textarea");
+     textarea.evaluate("e => e.style.display = 'none'");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       textarea.selectText(new ElementHandle.SelectTextOptions().setTimeout(3000));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("element is not visible"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("element is not visible"));
+   }
+ 
+ //  @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleWaitForElementState.java b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleWaitForElementState.java
+index e06a0da..a0ed263 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestElementHandleWaitForElementState.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestElementHandleWaitForElementState.java
+@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.condition.DisabledIf;
+ 
+ import static com.microsoft.playwright.options.ElementState.*;
+-import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
++import static org.junit.jupiter.api.Assertions.*;
+ 
+ public class TestElementHandleWaitForElementState extends TestBase {
+ 
+@@ -51,12 +50,10 @@ public class TestElementHandleWaitForElementState extends TestBase {
+   void shouldTimeoutWaitingForVisible() {
+     page.setContent("<div style='display:none'>content</div>");
+     ElementHandle div = page.querySelector("div");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       div.waitForElementState(VISIBLE, new ElementHandle.WaitForElementStateOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1000ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1000ms exceeded"));
+   }
+ 
+   @Test
+@@ -64,12 +61,8 @@ public class TestElementHandleWaitForElementState extends TestBase {
+     page.setContent("<div style='display:none'>content</div>");
+     ElementHandle div = page.querySelector("div");
+     div.evaluate("div => div.remove()");
+-    try {
+-      div.waitForElementState(VISIBLE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> div.waitForElementState(VISIBLE));
++    assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+   }
+ 
+   @Test
+@@ -111,12 +104,8 @@ public class TestElementHandleWaitForElementState extends TestBase {
+     page.setContent("<button disabled>Target</button>");
+     ElementHandle button = page.querySelector("button");
+     button.evaluate("button => button.remove()");
+-    try {
+-      button.waitForElementState(ENABLED);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> button.waitForElementState(ENABLED));
++    assertTrue(e.getMessage().contains("Element is not attached to the DOM"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestEvalOnSelector.java b/playwright/src/test/java/com/microsoft/playwright/TestEvalOnSelector.java
+index fddce6c..5b99c70 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestEvalOnSelector.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestEvalOnSelector.java
+@@ -119,12 +119,10 @@ public class TestEvalOnSelector extends TestBase {
+ 
+   @Test
+   void shouldThrowErrorIfNoElementIsFound() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evalOnSelector("section", "e => e.id");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("failed to find element matching selector \"section\""));
+-    }
++    });
++    assertTrue(e.getMessage().contains("failed to find element matching selector \"section\""));
+   }
+ 
+   @Test
+@@ -166,23 +164,20 @@ public class TestEvalOnSelector extends TestBase {
+ 
+   @Test
+   void shouldThrowOnMultipleCaptures() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evalOnSelector("*css=div >> *css=span", "e => e.outerHTML");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Only one of the selectors can capture using * modifier"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Only one of the selectors can capture using * modifier"));
+   }
+ 
+   @Test
+   void shouldThrowOnMalformedCapture() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evalOnSelector("*=div", "e => e.outerHTML");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Unknown engine \"\" while parsing selector *=div"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Unknown engine \"\" while parsing selector *=div"));
+   }
++
+   @Test
+   void shouldWorkWithSpacesInCssAttributes() {
+     page.setContent("<div><input placeholder='Select date'></div>");
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestFirefoxLauncher.java b/playwright/src/test/java/com/microsoft/playwright/TestFirefoxLauncher.java
+index df3384e..6d097c5 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestFirefoxLauncher.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestFirefoxLauncher.java
+@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.condition.EnabledIf;
+ 
+ import static com.microsoft.playwright.Utils.mapOf;
+-import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
++import static org.junit.jupiter.api.Assertions.*;
+ 
+ public class TestFirefoxLauncher extends TestBase {
+ 
+@@ -47,11 +46,7 @@ public class TestFirefoxLauncher extends TestBase {
+         "network.proxy.http_port", 3333));
+     launchBrowser(options);
+     Page page = browser.newPage();
+-    try {
+-      page.navigate("http://example.com");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("NS_ERROR_PROXY_CONNECTION_REFUSED"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate("http://example.com"));
++    assertTrue(e.getMessage().contains("NS_ERROR_PROXY_CONNECTION_REFUSED"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestGlobalFetch.java b/playwright/src/test/java/com/microsoft/playwright/TestGlobalFetch.java
+index 5fa095f..9757272 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestGlobalFetch.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestGlobalFetch.java
+@@ -146,12 +146,8 @@ public class TestGlobalFetch extends TestBase {
+     APIResponse response = request.get(server.PREFIX + "/simple.json");
+     assertEquals("{\"foo\": \"bar\"}\n", response.text());
+     request.dispose();
+-    try {
+-      response.body();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> response.body());
++    assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+   }
+ 
+   @Test
+@@ -168,12 +164,8 @@ public class TestGlobalFetch extends TestBase {
+   void shouldSupportGlobalTimeoutOption() {
+     APIRequestContext request = playwright.request().newContext(new APIRequest.NewContextOptions().setTimeout(1));
+     server.setRoute("/empty.html", exchange -> {});
+-    try {
+-      request.get(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Request timed out after 1ms"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> request.get(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("Request timed out after 1ms"), e.getMessage());
+   }
+ 
+ 
+@@ -265,12 +257,8 @@ public class TestGlobalFetch extends TestBase {
+     assertEquals(0, body.length);
+     assertEquals("", response.text());
+     request.dispose();
+-    try {
+-      response.body();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-     assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> response.body());
++    assertTrue(e.getMessage().contains("Response has been disposed"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestLocatorAssertions.java b/playwright/src/test/java/com/microsoft/playwright/TestLocatorAssertions.java
+index 20d3d51..1f21c57 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestLocatorAssertions.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestLocatorAssertions.java
+@@ -63,14 +63,12 @@ public class TestLocatorAssertions extends TestBase {
+   void containsTextWRegexFail() {
+     page.setContent("<div id=node>Text   content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).containsText(Pattern.compile("ex2"), new LocatorAssertions.ContainsTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("ex2", e.getExpected().getStringRepresentation());
+-      assertEquals("Text   content", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Locator expected to contain regex"), e.getMessage());
+-    }
++    });
++    assertEquals("ex2", e.getExpected().getStringRepresentation());
++    assertEquals("Text   content", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Locator expected to contain regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -112,14 +110,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasTextWRegexFail() {
+     page.setContent("<div id=node>Text   content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasText(Pattern.compile("Text 2"), new LocatorAssertions.HasTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("Text 2", e.getExpected().getStringRepresentation());
+-      assertEquals("Text   content", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Locator expected to have text matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("Text 2", e.getExpected().getStringRepresentation());
++    assertEquals("Text   content", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Locator expected to have text matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -139,14 +135,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+     // Should normalize whitespace.
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasText("Text", new LocatorAssertions.HasTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("Text", e.getExpected().getStringRepresentation());
+-      assertEquals("Text content", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Locator expected to have text"), e.getMessage());
+-    }
++    });
++    assertEquals("Text", e.getExpected().getStringRepresentation());
++    assertEquals("Text content", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Locator expected to have text"), e.getMessage());
+   }
+ 
+   @Test
+@@ -195,14 +189,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<div></div>");
+     Locator locator = page.locator("p");
+     // Should normalize whitespace.
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().hasText(new String[] {}, new LocatorAssertions.HasTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[]", e.getExpected().getStringRepresentation());
+-      assertEquals("null", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected not to have text"), e.getMessage());
+-    }
++    });
++    assertEquals("[]", e.getExpected().getStringRepresentation());
++    assertEquals("null", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected not to have text"), e.getMessage());
+   }
+ 
+   @Test
+@@ -223,16 +215,14 @@ public class TestLocatorAssertions extends TestBase {
+     page.evaluate("setTimeout(() => {\n" +
+       "  div.innerHTML = \"<p>Text 1</p><p>Text 2</p>\";\n" +
+       "}, 100);");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       // Should normalize whitespace.
+       assertThat(locator).hasText(new String[] {"Text 1", "Text 3", "Extra"}, new LocatorAssertions.HasTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[Text 1, Text 3, Extra]", e.getExpected().getStringRepresentation());
+-      assertEquals("[Text 1, Text 3]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have text: [Text 1, Text 3, Extra]"), e.getMessage());
+-      assertTrue(e.getMessage().contains("Received: [Text 1, Text 3]"), e.getMessage());
+-    }
++    });
++    assertEquals("[Text 1, Text 3, Extra]", e.getExpected().getStringRepresentation());
++    assertEquals("[Text 1, Text 3]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have text: [Text 1, Text 3, Extra]"), e.getMessage());
++    assertTrue(e.getMessage().contains("Received: [Text 1, Text 3]"), e.getMessage());
+   }
+ 
+   @Test
+@@ -247,15 +237,13 @@ public class TestLocatorAssertions extends TestBase {
+   void hasTextWRegExArrayFail() {
+     page.setContent("<div>Text 1</div><div>Text 3</div>");
+     Locator locator = page.locator("div");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       // Should normalize whitespace.
+       assertThat(locator).hasText(new Pattern[] {Pattern.compile( "Text 1"), Pattern.compile("Text   \\d"), Pattern.compile("Extra")}, new LocatorAssertions.HasTextOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[Text 1, Text   \\d, Extra]", e.getExpected().getStringRepresentation());
+-      assertEquals("[Text 1, Text 3]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have text"), e.getMessage());
+-    }
++    });
++    assertEquals("[Text 1, Text   \\d, Extra]", e.getExpected().getStringRepresentation());
++    assertEquals("[Text 1, Text 3]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have text"), e.getMessage());
+   }
+ 
+   @Test
+@@ -269,14 +257,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasAttributeTextFail() {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasAttribute("id", "foo", new LocatorAssertions.HasAttributeOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo", e.getExpected().getStringRepresentation());
+-      assertEquals("node", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have attribute 'id': foo\nReceived: node"), e.getMessage());
+-    }
++    });
++    assertEquals("foo", e.getExpected().getStringRepresentation());
++    assertEquals("node", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have attribute 'id': foo\nReceived: node"), e.getMessage());
+   }
+ 
+   @Test
+@@ -290,14 +276,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasAttributeRegExpFail() {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasAttribute("id", Pattern.compile(".Nod.."), new LocatorAssertions.HasAttributeOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals(".Nod..", e.getExpected().getStringRepresentation());
+-      assertEquals("node", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have attribute 'id' matching regex: .Nod..\nReceived: node"), e.getMessage());
+-    }
++    });
++    assertEquals(".Nod..", e.getExpected().getStringRepresentation());
++    assertEquals("node", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have attribute 'id' matching regex: .Nod..\nReceived: node"), e.getMessage());
+   }
+ 
+   @Test
+@@ -311,14 +295,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasClassTextFail() {
+     page.setContent("<div class=\"bar baz\"></div>");
+     Locator locator = page.locator("div");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasClass("foo bar baz", new LocatorAssertions.HasClassOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo bar baz", e.getExpected().getStringRepresentation());
+-      assertEquals("bar baz", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have class"), e.getMessage());
+-    }
++    });
++    assertEquals("foo bar baz", e.getExpected().getStringRepresentation());
++    assertEquals("bar baz", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have class"), e.getMessage());
+   }
+ 
+   @Test
+@@ -332,14 +314,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasClassRegExpFail() {
+     page.setContent("<div class=\"bar baz\"></div>");
+     Locator locator = page.locator("div");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasClass(Pattern.compile("foo Z.*"), new LocatorAssertions.HasClassOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo Z.*", e.getExpected().getStringRepresentation());
+-      assertEquals("bar baz", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have class matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("foo Z.*", e.getExpected().getStringRepresentation());
++    assertEquals("bar baz", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have class matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -353,14 +333,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasClassTextArrayFail() {
+     page.setContent("<div class=\"foo\"></div><div class=\"bar\"></div><div class=\"baz\"></div>");
+     Locator locator = page.locator("div");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasClass(new String[] {"foo", "bar", "missing"}, new LocatorAssertions.HasClassOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[foo, bar, missing]", e.getExpected().getStringRepresentation());
+-      assertEquals("[foo, bar, baz]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have class"), e.getMessage());
+-    }
++    });
++    assertEquals("[foo, bar, missing]", e.getExpected().getStringRepresentation());
++    assertEquals("[foo, bar, baz]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have class"), e.getMessage());
+   }
+ 
+   @Test
+@@ -374,14 +352,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasClassRegExpArrayFail() {
+     page.setContent("<div class=\"foo\"></div><div class=\"bar\"></div><div class=\"baz\"></div>");
+     Locator locator = page.locator("div");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasClass(new Pattern[] {Pattern.compile("fo.*"), Pattern.compile(".ar"), Pattern.compile("baz"), Pattern.compile("extra")}, new LocatorAssertions.HasClassOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[fo.*, .ar, baz, extra]", e.getExpected().getStringRepresentation());
+-      assertEquals("[foo, bar, baz]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have class matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("[fo.*, .ar, baz, extra]", e.getExpected().getStringRepresentation());
++    assertEquals("[foo, bar, baz]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have class matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -395,14 +371,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasCountFail() {
+     page.setContent("<select><option>One</option><option>Two</option></select>");
+     Locator locator = page.locator("option");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("1", e.getExpected().getStringRepresentation());
+-      assertEquals("2", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have count"), e.getMessage());
+-    }
++    });
++    assertEquals("1", e.getExpected().getStringRepresentation());
++    assertEquals("2", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have count"), e.getMessage());
+   }
+ 
+   @Test
+@@ -424,14 +398,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasCSSFail() {
+     page.setContent("<div id=node style='color: rgb(255, 0, 0)'>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasCSS("color", "red", new LocatorAssertions.HasCSSOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("red", e.getExpected().getStringRepresentation());
+-      assertEquals("rgb(255, 0, 0)", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have CSS property 'color'"), e.getMessage());
+-    }
++    });
++    assertEquals("red", e.getExpected().getStringRepresentation());
++    assertEquals("rgb(255, 0, 0)", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have CSS property 'color'"), e.getMessage());
+   }
+ 
+   @Test
+@@ -445,14 +417,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasCSSRegExFail() {
+     page.setContent("<div id=node style='color: rgb(255, 0, 0)'>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasCSS("color", Pattern.compile("red"), new LocatorAssertions.HasCSSOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("red", e.getExpected().getStringRepresentation());
+-      assertEquals("rgb(255, 0, 0)", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have CSS property 'color' matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("red", e.getExpected().getStringRepresentation());
++    assertEquals("rgb(255, 0, 0)", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have CSS property 'color' matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -466,14 +436,12 @@ public class TestLocatorAssertions extends TestBase {
+   void hasIdFail() {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasId("foo", new LocatorAssertions.HasIdOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo", e.getExpected().getStringRepresentation());
+-      assertEquals("node", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have ID"), e.getMessage());
+-    }
++    });
++    assertEquals("foo", e.getExpected().getStringRepresentation());
++    assertEquals("node", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have ID"), e.getMessage());
+   }
+ 
+   @Test
+@@ -489,14 +457,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+     page.evalOnSelector("div", "e => e.foo = 2021");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasJSProperty("foo", 1, new LocatorAssertions.HasJSPropertyOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("1", e.getExpected().getStringRepresentation());
+-      assertEquals("2021", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'foo'"), e.getMessage());
+-    }
++    });
++    assertEquals("1", e.getExpected().getStringRepresentation());
++    assertEquals("2021", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'foo'"), e.getMessage());
+   }
+ 
+   @Test
+@@ -504,28 +470,24 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+     page.evalOnSelector("div", "e => e.foo = { a: 1, b: 'string' }");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasJSProperty("foo", mapOf("a", 2), new LocatorAssertions.HasJSPropertyOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("{a=2}", e.getExpected().getStringRepresentation());
+-      assertEquals("{a=1, b=string}", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'foo'"), e.getMessage());
+-    }
++    });
++    assertEquals("{a=2}", e.getExpected().getStringRepresentation());
++    assertEquals("{a=1, b=string}", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'foo'"), e.getMessage());
+   }
+ 
+   @Test
+   void hasJSPropertyStringFail() {
+     page.setContent("<div id=node>Text content</div>");
+     Locator locator = page.locator("#node");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasJSProperty("id", "foo", new LocatorAssertions.HasJSPropertyOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo", e.getExpected().getStringRepresentation());
+-      assertEquals("node", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'id'"), e.getMessage());
+-    }
++    });
++    assertEquals("foo", e.getExpected().getStringRepresentation());
++    assertEquals("node", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have JavaScript property 'id'"), e.getMessage());
+   }
+ 
+   @Test
+@@ -541,14 +503,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<input id=node></input>");
+     Locator locator = page.locator("#node");
+     locator.fill("Text content");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasValue("Text2", new LocatorAssertions.HasValueOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("Text2", e.getExpected().getStringRepresentation());
+-      assertEquals("Text content", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have value"), e.getMessage());
+-    }
++    });
++    assertEquals("Text2", e.getExpected().getStringRepresentation());
++    assertEquals("Text content", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have value"), e.getMessage());
+   }
+ 
+   @Test
+@@ -572,14 +532,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<input id=node></input>");
+     Locator locator = page.locator("#node");
+     locator.fill("Text content");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasValue(Pattern.compile("Text2"), new LocatorAssertions.HasValueOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("Text2", e.getExpected().getStringRepresentation());
+-      assertEquals("Text content", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have value matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("Text2", e.getExpected().getStringRepresentation());
++    assertEquals("Text content", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have value matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -615,14 +573,12 @@ public class TestLocatorAssertions extends TestBase {
+       "            </select>");
+     Locator locator = page.locator("select");
+     locator.selectOption(new String[] {"RR", "GG"});
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasValues(new String[]{"R", "G"}, new LocatorAssertions.HasValuesOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[R, G]", e.getExpected().getStringRepresentation());
+-      assertEquals("[RR, GG]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have values"), e.getMessage());
+-    }
++    });
++    assertEquals("[R, G]", e.getExpected().getStringRepresentation());
++    assertEquals("[RR, GG]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have values"), e.getMessage());
+   }
+ 
+   @Test
+@@ -646,14 +602,12 @@ public class TestLocatorAssertions extends TestBase {
+       "            </select>");
+     Locator locator = page.locator("select");
+     locator.selectOption(new String[] {"B"}, new Locator.SelectOptionOptions().setTimeout(1000));
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).hasValues(new Pattern[]{ Pattern.compile("R"), Pattern.compile("G")});
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("[R, G]", e.getExpected().getStringRepresentation());
+-      assertEquals("[B]", e.getActual().getStringRepresentation());
+-      assertTrue(e.getMessage().contains("Locator expected to have values matching regex"), e.getMessage());
+-    }
++    });
++    assertEquals("[R, G]", e.getExpected().getStringRepresentation());
++    assertEquals("[B]", e.getActual().getStringRepresentation());
++    assertTrue(e.getMessage().contains("Locator expected to have values matching regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -665,24 +619,20 @@ public class TestLocatorAssertions extends TestBase {
+       "            </select>");
+     Locator locator = page.locator("select");
+     locator.selectOption(new String[] {"B"});
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       assertThat(locator).hasValues(new Pattern[]{ Pattern.compile("R"), Pattern.compile("G")});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Not a select element with a multiple attribute"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Not a select element with a multiple attribute"), e.getMessage());
+   }
+ 
+   @Test
+   void hasValuesFailsWhenNotASelectElement() {
+     page.setContent("<input value=\"foo\" />");
+     Locator locator = page.locator("input");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       assertThat(locator).hasValues(new Pattern[]{ Pattern.compile("R"), Pattern.compile("G")}, new LocatorAssertions.HasValuesOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Not a select element with a multiple attribute"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Not a select element with a multiple attribute"), e.getMessage());
+   }
+ 
+   @Test
+@@ -696,28 +646,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isCheckedFail() {
+     page.setContent("<input type=checkbox></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isChecked(new LocatorAssertions.IsCheckedOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be checked"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be checked"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsCheckedFail() {
+     page.setContent("<input type=checkbox checked></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isChecked(new LocatorAssertions.IsCheckedOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be checked"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be checked"), e.getMessage());
+   }
+ 
+   @Test
+@@ -738,28 +684,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isDisabledFail() {
+     page.setContent("<button>Text</button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isDisabled(new LocatorAssertions.IsDisabledOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be disabled"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be disabled"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsDisabledFail() {
+     page.setContent("<button disabled>Text</button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isDisabled(new LocatorAssertions.IsDisabledOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be disabled"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be disabled"), e.getMessage());
+   }
+ 
+   @Test
+@@ -773,28 +715,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isEditableFail() {
+     page.setContent("<input disabled></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isEditable(new LocatorAssertions.IsEditableOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be editable"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be editable"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsEditableFail() {
+     page.setContent("<input></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isEditable(new LocatorAssertions.IsEditableOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be editable"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be editable"), e.getMessage());
+   }
+ 
+ 
+@@ -809,28 +747,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isEmptyFail() {
+     page.setContent("<input value=text></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isEmpty(new LocatorAssertions.IsEmptyOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be empty"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be empty"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsEmptyFail() {
+     page.setContent("<input></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isEmpty(new LocatorAssertions.IsEmptyOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be empty"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be empty"), e.getMessage());
+   }
+ 
+   @Test
+@@ -844,28 +778,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isEnabledFail() {
+     page.setContent("<button disabled>Text</button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isEnabled(new LocatorAssertions.IsEnabledOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be enabled"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be enabled"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsEnabledFail() {
+     page.setContent("<button>Text</button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isEnabled(new LocatorAssertions.IsEnabledOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be enabled"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be enabled"), e.getMessage());
+   }
+ 
+   @Test
+@@ -880,14 +810,12 @@ public class TestLocatorAssertions extends TestBase {
+   void isFocusedFail() {
+     page.setContent("<input></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isFocused(new LocatorAssertions.IsFocusedOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be focused"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be focused"), e.getMessage());
+   }
+ 
+   @Test
+@@ -895,14 +823,12 @@ public class TestLocatorAssertions extends TestBase {
+     page.setContent("<input></input>");
+     Locator locator = page.locator("input");
+     locator.focus();
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isFocused(new LocatorAssertions.IsFocusedOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be focused"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be focused"), e.getMessage());
+   }
+ 
+   @Test
+@@ -916,28 +842,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isHiddenFail() {
+     page.setContent("<button></button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isHidden(new LocatorAssertions.IsHiddenOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be hidden"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be hidden"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsHiddenFail() {
+     page.setContent("<button style='display: none'></button>");
+     Locator locator = page.locator("button");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isHidden(new LocatorAssertions.IsHiddenOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be hidden"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be hidden"), e.getMessage());
+   }
+ 
+   @Test
+@@ -951,28 +873,24 @@ public class TestLocatorAssertions extends TestBase {
+   void isVisibleFail() {
+     page.setContent("<input style='display: none'></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected to be visible"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected to be visible"), e.getMessage());
+   }
+ 
+   @Test
+   void notIsVisibleFail() {
+     page.setContent("<input></input>");
+     Locator locator = page.locator("input");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(locator).not().isVisible(new LocatorAssertions.IsVisibleOptions().setTimeout(1000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertNull(e.getExpected());
+-      assertNull(e.getActual());
+-      assertTrue(e.getMessage().contains("Locator expected not to be visible"), e.getMessage());
+-    }
++    });
++    assertNull(e.getExpected());
++    assertNull(e.getActual());
++    assertTrue(e.getMessage().contains("Locator expected not to be visible"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestLocatorConvenience.java b/playwright/src/test/java/com/microsoft/playwright/TestLocatorConvenience.java
+index 8b135f4..16bdfc8 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestLocatorConvenience.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestLocatorConvenience.java
+@@ -61,19 +61,13 @@ public class TestLocatorConvenience extends TestBase {
+     Locator locator = page.locator("#input");
+     assertEquals("input value", locator.inputValue());
+ 
+-    try {
+-      page.inputValue("#inner");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+-    }
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.inputValue("#inner"));
++    assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
++    e = assertThrows(PlaywrightException.class, () -> {
+       Locator locator2 = page.locator("#inner");
+       locator2.inputValue();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Node is not an <input>, <textarea> or <select> element"), e.getMessage());
+   }
+ 
+   @Test
+@@ -95,19 +89,12 @@ public class TestLocatorConvenience extends TestBase {
+   @Test
+   void innerTextShouldThrow() {
+     page.setContent("<svg>text</svg>");
+-    try {
+-      page.innerText("svg");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.innerText("svg"));
++    assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
++
+     Locator locator = page.locator("svg");
+-    try {
+-      locator.innerText();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+-    }
++    e = assertThrows(PlaywrightException.class, () -> locator.innerText());
++    assertTrue(e.getMessage().contains("Node is not an HTMLElement"), e.getMessage());
+   }
+ 
+   @Test
+@@ -184,12 +171,8 @@ public class TestLocatorConvenience extends TestBase {
+     element.evaluate("input => input.checked = false");
+     assertFalse(element.isChecked());
+     assertFalse(page.isChecked("input"));
+-    try {
+-      page.isChecked("div");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Not a checkbox or radio button"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.isChecked("div"));
++    assertTrue(e.getMessage().contains("Not a checkbox or radio button"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestLocatorFrame.java b/playwright/src/test/java/com/microsoft/playwright/TestLocatorFrame.java
+index 04eb70c..35f8c66 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestLocatorFrame.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestLocatorFrame.java
+@@ -99,12 +99,10 @@ public class TestLocatorFrame extends TestBase {
+   @Test
+   void shouldWaitForFrame() {
+     page.navigate(server.EMPTY_PAGE);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.frameLocator("iframe").locator("span").click(new Locator.ClickOptions().setTimeout(300));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("waiting for frame \"iframe\""), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("waiting for frame \"iframe\""), e.getMessage());
+   }
+ 
+   @Test
+@@ -206,13 +204,9 @@ public class TestLocatorFrame extends TestBase {
+     routeIframe(page);
+     page.setContent("<div></div>");
+     Locator button = page.frameLocator("div").locator("button");
+-    try {
+-      button.waitFor();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("<div></div>"), e.getMessage());
+-      assertTrue(e.getMessage().contains("<iframe> was expected"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> button.waitFor());
++    assertTrue(e.getMessage().contains("<div></div>"), e.getMessage());
++    assertTrue(e.getMessage().contains("<iframe> was expected"), e.getMessage());
+   }
+ 
+   @Test
+@@ -231,12 +225,8 @@ public class TestLocatorFrame extends TestBase {
+     routeAmbiguous(page);
+     page.navigate(server.EMPTY_PAGE);
+     Locator button = page.locator("body").frameLocator("iframe").locator("button");
+-    try {
+-      button.waitFor();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Error: strict mode violation: \"body >> iframe\" resolved to 3 elements"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> button.waitFor());
++    assertTrue(e.getMessage().contains("Error: strict mode violation: \"body >> iframe\" resolved to 3 elements"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestLocatorMisc.java b/playwright/src/test/java/com/microsoft/playwright/TestLocatorMisc.java
+index b1efb89..81e99fd 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestLocatorMisc.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestLocatorMisc.java
+@@ -60,12 +60,10 @@ public class TestLocatorMisc extends TestBase{
+       page.locator("button", new Page.LocatorOptions().setHas(page.locator("text=Драматург")))
+     };
+     for (Locator locator: locators) {
+-      try {
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+         locator.click(new Locator.ClickOptions().setTimeout(100));
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-        assertTrue(e.getMessage().contains("Драматург"), e.getMessage());
+-      }
++      });
++      assertTrue(e.getMessage().contains("Драматург"), e.getMessage());
+     }
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestNetworkResponse.java b/playwright/src/test/java/com/microsoft/playwright/TestNetworkResponse.java
+index 1c4889f..1dc08d1 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestNetworkResponse.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestNetworkResponse.java
+@@ -67,12 +67,8 @@ public class TestNetworkResponse extends TestBase {
+     assertNotNull(redirectedFrom);
+     Response redirected = redirectedFrom.response();
+     assertEquals(302, redirected.status());
+-    try {
+-      redirected.text();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Response body is unavailable for redirect responses"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> redirected.text());
++    assertTrue(e.getMessage().contains("Response body is unavailable for redirect responses"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageAssertions.java b/playwright/src/test/java/com/microsoft/playwright/TestPageAssertions.java
+index e8bd32b..0fea886 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageAssertions.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageAssertions.java
+@@ -35,14 +35,12 @@ public class TestPageAssertions extends TestBase {
+   @Test
+   void hasURLTextFail() {
+     page.navigate("data:text/html,<div>B</div>");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(page).hasURL("foo", new PageAssertions.HasURLOptions().setTimeout(1_000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo", e.getExpected().getValue());
+-      assertEquals("data:text/html,<div>B</div>", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Page URL expected to be"), e.getMessage());
+-    }
++    });
++    assertEquals("foo", e.getExpected().getValue());
++    assertEquals("data:text/html,<div>B</div>", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Page URL expected to be"), e.getMessage());
+   }
+ 
+   @Test
+@@ -69,14 +67,12 @@ public class TestPageAssertions extends TestBase {
+   @Test
+   void hasURLRegexFail() {
+     page.navigate(server.EMPTY_PAGE);
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(page).hasURL(Pattern.compile(".*foo.*"), new PageAssertions.HasURLOptions().setTimeout(1_000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals(".*foo.*", e.getExpected().getStringRepresentation());
+-      assertEquals(server.EMPTY_PAGE, e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Page URL expected to match regex"), e.getMessage());
+-    }
++    });
++    assertEquals(".*foo.*", e.getExpected().getStringRepresentation());
++    assertEquals(server.EMPTY_PAGE, e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Page URL expected to match regex"), e.getMessage());
+   }
+ 
+   @Test
+@@ -100,14 +96,12 @@ public class TestPageAssertions extends TestBase {
+   @Test
+   void hasTitleTextFail() {
+     page.navigate(server.PREFIX + "/title.html");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(page).hasTitle("foo", new PageAssertions.HasTitleOptions().setTimeout(1_000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("foo", e.getExpected().getValue());
+-      assertEquals("Woof-Woof", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Page title expected to be: foo\nReceived: Woof-Woof"), e.getMessage());
+-    }
++    });
++    assertEquals("foo", e.getExpected().getValue());
++    assertEquals("Woof-Woof", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Page title expected to be: foo\nReceived: Woof-Woof"), e.getMessage());
+   }
+ 
+   @Test
+@@ -119,14 +113,12 @@ public class TestPageAssertions extends TestBase {
+   @Test
+   void hasTitleRegexFail() {
+     page.navigate(server.PREFIX + "/title.html");
+-    try {
++    AssertionFailedError e = assertThrows(AssertionFailedError.class, () -> {
+       assertThat(page).hasTitle(Pattern.compile("^foo[AB]"), new PageAssertions.HasTitleOptions().setTimeout(1_000));
+-      fail("did not throw");
+-    } catch (AssertionFailedError e) {
+-      assertEquals("^foo[AB]", e.getExpected().getStringRepresentation());
+-      assertEquals("Woof-Woof", e.getActual().getValue());
+-      assertTrue(e.getMessage().contains("Page title expected to match regex: ^foo[AB]\nReceived: Woof-Woof"), e.getMessage());
+-    }
++    });
++    assertEquals("^foo[AB]", e.getExpected().getStringRepresentation());
++    assertEquals("Woof-Woof", e.getActual().getValue());
++    assertTrue(e.getMessage().contains("Page title expected to match regex: ^foo[AB]\nReceived: Woof-Woof"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageEvaluate.java b/playwright/src/test/java/com/microsoft/playwright/TestPageEvaluate.java
+index e5d5637..a4ee9b4 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageEvaluate.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageEvaluate.java
+@@ -157,15 +157,13 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldThrowWhenEvaluationTriggersReload() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("() => {\n" +
+         "  location.reload();\n" +
+         "  return new Promise(() => { });\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("navigation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("navigation"));
+   }
+ 
+   @Test
+@@ -208,32 +206,20 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldRejectPromiseWithException() {
+-    try {
+-      page.evaluate("() => not_existing_object.property");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("not_existing_object"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("() => not_existing_object.property"));
++    assertTrue(e.getMessage().contains("not_existing_object"));
+   }
+ 
+   @Test
+   void shouldSupportThrownStringsAsErrorMessages() {
+-    try {
+-      page.evaluate("() => { throw 'qwerty'; }");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("qwerty"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("() => { throw 'qwerty'; }"));
++    assertTrue(e.getMessage().contains("qwerty"));
+   }
+ 
+   @Test
+   void shouldSupportThrownNumbersAsErrorMessages() {
+-    try {
+-      page.evaluate("() => { throw 100500; }");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("100500"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("() => { throw 100500; }"));
++    assertTrue(e.getMessage().contains("100500"));
+   }
+ 
+   @Test
+@@ -357,14 +343,12 @@ public class TestPageEvaluate extends TestBase {
+   @Test
+   void shouldBeAbleToThrowATrickyError() {
+     String errorText = "My error";
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("errorText => {\n" +
+         "  throw new Error(errorText);\n" +
+         "}", errorText);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains(errorText));
+-    }
++    });
++    assertTrue(e.getMessage().contains(errorText));
+   }
+ 
+   @Test
+@@ -399,12 +383,8 @@ public class TestPageEvaluate extends TestBase {
+     ElementHandle element = page.querySelector("section");
+     assertNotNull(element);
+     element.dispose();
+-    try {
+-      page.evaluate("e => e.textContent", element);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("JSHandle is disposed"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("e => e.textContent", element));
++    assertTrue(e.getMessage().contains("JSHandle is disposed"));
+   }
+ 
+   @Test
+@@ -418,7 +398,7 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldThrowANiceErrorAfterANavigation() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForNavigation(() -> {
+         page.evaluate("() => {\n" +
+           "  const promise = new Promise(f => window['__resolve'] = f);\n" +
+@@ -427,9 +407,8 @@ public class TestPageEvaluate extends TestBase {
+           "  return promise;\n" +
+           "}");
+       });
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("navigation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("navigation"));
+   }
+ 
+   @Test
+@@ -478,14 +457,12 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldThrowErrorWithDetailedInformationOnExceptionInsidePromise() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("() => new Promise(() => {\n" +
+         "  throw new Error('Error in promise');\n" +
+         "})");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Error in promise"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Error in promise"));
+   }
+ 
+   @Test
+@@ -523,7 +500,7 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldRespectUseStrictExpression() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("() => {\n" +
+         "  'use strict';\n" +
+         "  // @ts-ignore\n" +
+@@ -531,10 +508,8 @@ public class TestPageEvaluate extends TestBase {
+         "  // @ts-ignore\n" +
+         "  return variableY;\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("variableY"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("variableY"));
+   }
+ 
+   @Test
+@@ -544,12 +519,8 @@ public class TestPageEvaluate extends TestBase {
+ 
+   @Test
+   void shouldNotLeakHandles() {
+-    try {
+-      page.evaluate("handles.length");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains(" handles"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.evaluate("handles.length"));
++    assertTrue(e.getMessage().contains(" handles"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageExposeFunction.java b/playwright/src/test/java/com/microsoft/playwright/TestPageExposeFunction.java
+index 38748f9..45fc926 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageExposeFunction.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageExposeFunction.java
+@@ -196,12 +196,10 @@ public class TestPageExposeFunction extends TestBase {
+   @Test
+   void shouldThrowForDuplicateRegistrations() {
+     page.exposeFunction("foo", args -> null);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.exposeFunction("foo", args -> null);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Function \"foo\" has been already registered"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Function \"foo\" has been already registered"));
+   }
+ 
+   @Test
+@@ -218,14 +216,12 @@ public class TestPageExposeFunction extends TestBase {
+     assertEquals(17, page.evaluate("async function() {\n" +
+       "  return window['logme'](undefined, undefined, undefined);\n" +
+       "}"));
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("async function() {\n" +
+         "  return window['logme'](1, 2);\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("exposeBindingHandle supports a single argument, 2 received"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("exposeBindingHandle supports a single argument, 2 received"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageFill.java b/playwright/src/test/java/com/microsoft/playwright/TestPageFill.java
+index 8e286f4..fc06c77 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageFill.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageFill.java
+@@ -43,12 +43,8 @@ public class TestPageFill extends TestBase {
+     page.navigate(server.PREFIX + "/input/textarea.html");
+     for (String type : new String[]{"button", "checkbox", "file", "image", "radio", "reset", "submit"}) {
+       page.evalOnSelector("input", "(input, type) => input.setAttribute('type', type)", type);
+-      try {
+-        page.fill("input", "");
+-        fail("fill should throw");
+-      } catch (PlaywrightException e) {
+-        assertTrue(e.getMessage().contains("input of type \"" + type + "\" cannot be filled"), "type = " + type + e.getMessage());
+-      }
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", ""));
++      assertTrue(e.getMessage().contains("input of type \"" + type + "\" cannot be filled"), "type = " + type + e.getMessage());
+     }
+   }
+ 
+@@ -62,24 +58,14 @@ public class TestPageFill extends TestBase {
+   @Test
+   void shouldThrowOnIncorrectRangeValue() {
+     page.setContent("<input type=range min=0 max=100 value=50>");
+-    try {
+-      page.fill("input", "foo");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
+-    }
+-    try {
+-      page.fill("input", "200");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
+-    }
+-    try {
+-      page.fill("input", "15.43");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", "foo"));
++    assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
++
++    e = assertThrows(PlaywrightException.class, () -> page.fill("input", "200"));
++    assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
++
++    e = assertThrows(PlaywrightException.class, () ->  page.fill("input", "15.43"));
++    assertTrue(e.getMessage().contains("Malformed value"), e.getMessage());
+   }
+ 
+ 
+@@ -105,12 +91,8 @@ public class TestPageFill extends TestBase {
+   @DisabledIf(value="com.microsoft.playwright.TestBase#isWebKit", disabledReason="skip")
+   void shouldThrowOnIncorrectDate() {
+     page.setContent("<input type=date>");
+-    try {
+-      page.fill("input", "2020-13-05");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", "2020-13-05"));
++    assertTrue(e.getMessage().contains("Malformed value"));
+   }
+ 
+   @Test
+@@ -124,12 +106,8 @@ public class TestPageFill extends TestBase {
+   @DisabledIf(value="com.microsoft.playwright.TestBase#isWebKit", disabledReason="skip")
+   void shouldThrowOnIncorrectTime() {
+     page.setContent("<input type=time>");
+-    try {
+-      page.fill("input", "25:05");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", "25:05"));
++    assertTrue(e.getMessage().contains("Malformed value"));
+   }
+ 
+   @Test
+@@ -143,12 +121,8 @@ public class TestPageFill extends TestBase {
+   @EnabledIf(value="com.microsoft.playwright.TestBase#isChromium", disabledReason="skip")
+   void shouldThrowOnIncorrectDatetimeLocal() {
+     page.setContent("<input type=datetime-local>");
+-    try {
+-      page.fill("input", "abc");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed value"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", "abc"));
++    assertTrue(e.getMessage().contains("Malformed value"));
+   }
+ 
+   @Test
+@@ -188,12 +162,8 @@ public class TestPageFill extends TestBase {
+   @Test
+   void shouldThrowWhenElementIsNotAnInputTextareaOrContenteditable() {
+     page.navigate(server.PREFIX + "/input/textarea.html");
+-    try {
+-      page.fill("body", "");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Element is not an <input>"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("body", ""));
++    assertTrue(e.getMessage().contains("Element is not an <input>"));
+   }
+ 
+   void shouldThrowIfPassedANonStringValue() {
+@@ -252,12 +222,8 @@ public class TestPageFill extends TestBase {
+   @Test
+   void shouldNotBeAbleToFillTextIntoTheInputTypeNumber() {
+     page.setContent("<input id='input' type='number'></input>");
+-    try {
+-      page.fill("input", "abc");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Cannot type text into input[type=number]"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.fill("input", "abc"));
++    assertTrue(e.getMessage().contains("Cannot type text into input[type=number]"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageKeyboard.java b/playwright/src/test/java/com/microsoft/playwright/TestPageKeyboard.java
+index e796d0d..8bbc415 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageKeyboard.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageKeyboard.java
+@@ -295,24 +295,14 @@ public class TestPageKeyboard extends TestBase {
+ 
+   @Test
+   void shouldThrowOnUnknownKeys() {
+-    try {
+-      page.keyboard().press("NotARealKey");
+-      fail("did not throw");
+-    } catch (Exception e) {
+-      assertTrue(e.getMessage().contains("Unknown key: \"NotARealKey\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"NotARealKey\"");
+-    }
+-    try {
+-      page.keyboard().press("ё");
+-      fail("did not throw");
+-    } catch (Exception e) {
+-      assertTrue(e.getMessage().contains("Unknown key: \"ё\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"ё\"");
+-    }
+-    try {
+-      page.keyboard().press("😊");
+-      fail("did not throw");
+-    } catch (Exception e) {
+-      assertTrue(e.getMessage().contains("Unknown key: \"😊\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"😊\"");
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.keyboard().press("NotARealKey"));
++    assertTrue(e.getMessage().contains("Unknown key: \"NotARealKey\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"NotARealKey\"");
++
++    e = assertThrows(PlaywrightException.class, () -> page.keyboard().press("ё"));
++    assertTrue(e.getMessage().contains("Unknown key: \"ё\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"ё\"");
++
++    e = assertThrows(PlaywrightException.class, () -> page.keyboard().press("😊"));
++    assertTrue(e.getMessage().contains("Unknown key: \"😊\""), "Expecting Exception: " + e.getMessage() + " contain: Unknown key: \"😊\"");
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageLocatorQuery.java b/playwright/src/test/java/com/microsoft/playwright/TestPageLocatorQuery.java
+index 202d0eb..6af661b 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageLocatorQuery.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageLocatorQuery.java
+@@ -52,34 +52,28 @@ public class TestPageLocatorQuery extends TestBase {
+   @Test
+   void shouldThrowOnCaptureWNth() {
+     page.setContent("<section><div><p>A</p></div></section>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.locator("*css=div >> p").nth(1).click();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Can't query n-th element"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Can't query n-th element"), e.getMessage());
+   }
+ 
+   @Test
+   void shouldThrowOnDueToStrictness() {
+     page.setContent("<div>A</div><div>B</div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.locator("div").isVisible();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"), e.getMessage());
+   }
+ 
+   @Test
+   void shouldThrowOnDueToStrictness2() {
+     page.setContent("<select><option>One</option><option>Two</option></select>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.locator("option").evaluate("e => {}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageNavigate.java b/playwright/src/test/java/com/microsoft/playwright/TestPageNavigate.java
+index 094a117..b230f0b 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageNavigate.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageNavigate.java
+@@ -132,17 +132,13 @@ public class TestPageNavigate extends TestBase {
+       exchange.sendResponseHeaders(204, -1);
+       exchange.getResponseBody().close();
+     });
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      if (isChromium())
+-        assertTrue(e.getMessage().contains("net::ERR_ABORTED"));
+-      else if (isWebKit())
+-        assertTrue(e.getMessage().contains("Aborted: 204 No Content"));
+-      else
+-        assertTrue(e.getMessage().contains("NS_BINDING_ABORTED"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
++    if (isChromium())
++      assertTrue(e.getMessage().contains("net::ERR_ABORTED"));
++    else if (isWebKit())
++      assertTrue(e.getMessage().contains("Aborted: 204 No Content"));
++    else
++      assertTrue(e.getMessage().contains("NS_BINDING_ABORTED"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageRequestContinue.java b/playwright/src/test/java/com/microsoft/playwright/TestPageRequestContinue.java
+index b980187..a2eab76 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageRequestContinue.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageRequestContinue.java
+@@ -72,13 +72,9 @@ public class TestPageRequestContinue extends TestBase {
+       route.resume();
+       done[0] = true;
+     });
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Navigation failed because page was closed") ||
+-        e.getMessage().contains("frame was detached"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
++    assertTrue(e.getMessage().contains("Navigation failed because page was closed") ||
++      e.getMessage().contains("frame was detached"), e.getMessage());
+     assertTrue(done[0]);
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageRequestFallback.java b/playwright/src/test/java/com/microsoft/playwright/TestPageRequestFallback.java
+index da60895..c62321a 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageRequestFallback.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageRequestFallback.java
+@@ -106,12 +106,7 @@ public class TestPageRequestFallback extends TestBase {
+     page.route("**/empty.html", route -> {
+       route.fallback();
+     });
+-    try {
+-      Response response = page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-      assertEquals("fulfilled", response.text());
+-    } catch (PlaywrightException e) {
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
+     assertFalse(failed[0]);
+   }
+ 
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageRoute.java b/playwright/src/test/java/com/microsoft/playwright/TestPageRoute.java
+index 0be8bf3..32c0044 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageRoute.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageRoute.java
+@@ -251,10 +251,7 @@ public class TestPageRoute extends TestBase {
+     page.route("**/*", route -> route.abort("internetdisconnected"));
+     Request[] failedRequest = {null};
+     page.onRequestFailed(r -> failedRequest[0] = r);
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-    } catch (PlaywrightException e) {
+-    }
++    assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
+     assertNotNull(failedRequest[0]);
+     if (isWebKit()) {
+       assertEquals("Blocked by Web Inspector", failedRequest[0].failure());
+@@ -277,17 +274,13 @@ public class TestPageRoute extends TestBase {
+   @Test
+   void shouldFailNavigationWhenAbortingMainResource() {
+     page.route("**/*", route -> route.abort());
+-    try {
+-      page.navigate(server.EMPTY_PAGE);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      if (isWebKit())
+-        assertTrue(e.getMessage().contains("Blocked by Web Inspector"), e.getMessage());
+-      else if (isFirefox())
+-        assertTrue(e.getMessage().contains("NS_ERROR_FAILURE"));
+-      else
+-        assertTrue(e.getMessage().contains("net::ERR_FAILED"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.navigate(server.EMPTY_PAGE));
++    if (isWebKit())
++      assertTrue(e.getMessage().contains("Blocked by Web Inspector"), e.getMessage());
++    else if (isFirefox())
++      assertTrue(e.getMessage().contains("NS_ERROR_FAILURE"));
++    else
++      assertTrue(e.getMessage().contains("net::ERR_FAILED"));
+   }
+ 
+ 
+@@ -484,12 +477,8 @@ public class TestPageRoute extends TestBase {
+     page.waitForRequest("**", () -> page.evalOnSelector("iframe", "(frame, url) => frame.src = url", server.EMPTY_PAGE));
+     // Delete frame to cause request to be canceled.
+     page.evalOnSelector("iframe", "frame => frame.remove()");
+-    try {
+-      route[0].resume();
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Route is already handled!"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> route[0].resume());
++    assertTrue(e.getMessage().contains("Route is already handled!"), e.getMessage());
+   }
+ 
+   @Test
+@@ -555,20 +544,18 @@ public class TestPageRoute extends TestBase {
+     }
+     {
+       // Should be rejected
+-      try {
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+         page.evaluate("async () => {\n" +
+           "  const response = await fetch('https://example.com/cars?reject', { mode: 'cors' });\n" +
+           "  return response.json();\n" +
+           "}");
+-        fail("did not throw");
+-      } catch (PlaywrightException e) {
+-        if (isChromium()) {
+-          assertTrue(e.getMessage().contains("Failed"), e.getMessage());
+-        } else if (isWebKit()) {
+-          assertTrue(e.getMessage().contains("TypeError"), e.getMessage());
+-        } else if (isFirefox()) {
+-          assertTrue(e.getMessage().contains("NetworkError"), e.getMessage());
+-        }
++      });
++      if (isChromium()) {
++        assertTrue(e.getMessage().contains("Failed"), e.getMessage());
++      } else if (isWebKit()) {
++        assertTrue(e.getMessage().contains("TypeError"), e.getMessage());
++      } else if (isFirefox()) {
++        assertTrue(e.getMessage().contains("NetworkError"), e.getMessage());
+       }
+     }
+   }
+@@ -633,7 +620,7 @@ public class TestPageRoute extends TestBase {
+         .setHeaders(mapOf("Access-Control-Allow-Origin", server.PREFIX))
+         .setBody("[\"electric\",\"gas\"]"));
+     });
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.evaluate("async () => {\n" +
+         "  const response = await fetch('https://example.com/cars', {\n" +
+         "    method: 'POST',\n" +
+@@ -644,9 +631,7 @@ public class TestPageRoute extends TestBase {
+         "  });\n" +
+         "  return response.json();\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-    }
++    });
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageSelectOption.java b/playwright/src/test/java/com/microsoft/playwright/TestPageSelectOption.java
+index 1e563e7..c1d320f 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageSelectOption.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageSelectOption.java
+@@ -79,12 +79,11 @@ public class TestPageSelectOption extends TestBase {
+   void shouldNotSelectSingleOptionWhenSomeAttributesDoNotMatch() {
+     page.navigate(server.PREFIX + "/input/select.html");
+     page.evalOnSelector("select", "s => s.value = undefined");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.selectOption("select", new SelectOption()
+         .setValue("green").setLabel("Brown"), new Page.SelectOptionOptions().setTimeout(300));
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"));
+     assertEquals("", page.evaluate("() => document.querySelector('select').value"));
+   }
+ 
+@@ -137,12 +136,8 @@ public class TestPageSelectOption extends TestBase {
+   @Test
+   void shouldThrowWhenElementIsNotASelect() {
+     page.navigate(server.PREFIX + "/input/select.html");
+-    try {
+-      page.selectOption("body", "");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Element is not a <select> element"), e.getMessage());
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.selectOption("body", ""));
++    assertTrue(e.getMessage().contains("Element is not a <select> element"), e.getMessage());
+   }
+ 
+   @Test
+@@ -181,12 +176,10 @@ public class TestPageSelectOption extends TestBase {
+   void shouldNotAllowNullItems() {
+     page.navigate(server.PREFIX + "/input/select.html");
+     page.evaluate("() => window['makeMultiple']()");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.selectOption("select", new String[]{"blue", null, "black","magenta"});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("options.get(1): expected object, got null"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("options.get(1): expected object, got null"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageSetContent.java b/playwright/src/test/java/com/microsoft/playwright/TestPageSetContent.java
+index 080b907..3f8b5fd 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageSetContent.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageSetContent.java
+@@ -70,11 +70,9 @@ public class TestPageSetContent extends TestBase {
+     String imgPath = "/img.png";
+     // stall for image
+     server.setRoute(imgPath, exchange -> {});
+-    try {
++    assertThrows(PlaywrightException.class, () -> {
+       page.setContent("<img src='" + server.PREFIX + imgPath + "'></img>", new Page.SetContentOptions().setTimeout(100));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-    }
++    });
+   }
+ 
+   @Test
+@@ -83,12 +81,10 @@ public class TestPageSetContent extends TestBase {
+      String imgPath = "/img.png";
+     // stall for image
+     server.setRoute(imgPath, exchange -> {});
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.setContent("<img src='" + server.PREFIX + imgPath + "'></img>");
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 100ms exceeded."), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 100ms exceeded."), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageSetExtraHttpHeaders.java b/playwright/src/test/java/com/microsoft/playwright/TestPageSetExtraHttpHeaders.java
+index 95233d9..b55190f 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageSetExtraHttpHeaders.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageSetExtraHttpHeaders.java
+@@ -70,11 +70,9 @@ public class TestPageSetExtraHttpHeaders extends TestBase {
+ 
+   @Test
+   void shouldThrowForNonStringHeaderValues() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       browser.newContext(new Browser.NewContextOptions().setExtraHTTPHeaders(mapOf("foo", null)));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("expected string, got undefined"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("expected string, got undefined"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageSetInputFiles.java b/playwright/src/test/java/com/microsoft/playwright/TestPageSetInputFiles.java
+index 7b96221..3c7b0c2 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageSetInputFiles.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageSetInputFiles.java
+@@ -217,34 +217,28 @@ public class TestPageSetInputFiles extends TestBase {
+ 
+   @Test
+   void shouldRespectTimeout() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFileChooser(new Page.WaitForFileChooserOptions().setTimeout(1), () -> {});
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+   }
+ 
+   @Test
+   void shouldRespectDefaultTimeoutWhenThereIsNoCustomTimeout() {
+     page.setDefaultTimeout(1);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFileChooser(() -> {});
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+   }
+ 
+   @Test
+   void shouldPrioritizeExactTimeoutOverDefaultTimeout() {
+     page.setDefaultTimeout(0);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFileChooser(new Page.WaitForFileChooserOptions().setTimeout(1), () -> {});
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+   }
+ 
+   @Test
+@@ -340,13 +334,12 @@ public class TestPageSetInputFiles extends TestBase {
+   void shouldNotAcceptMultipleFilesForSingleFileInput() {
+     page.setContent("<input type=file>");
+     FileChooser fileChooser = page.waitForFileChooser(() -> page.click("input"));
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       fileChooser.setFiles(new Path[]{FILE_TO_UPLOAD, Paths.get("src/test/resources/pptr.png")});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Non-multiple file input can only accept single file"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Non-multiple file input can only accept single file"));
+   }
++
+   @Test
+   void shouldEmitInputAndChangeEvents() {
+     List<Object> events = new ArrayList<>();
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageStrict.java b/playwright/src/test/java/com/microsoft/playwright/TestPageStrict.java
+index a6b5733..0049ded 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageStrict.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageStrict.java
+@@ -4,74 +4,61 @@ import org.junit.jupiter.api.Test;
+ 
+ import java.util.HashMap;
+ 
+-import static org.junit.jupiter.api.Assertions.assertTrue;
+-import static org.junit.jupiter.api.Assertions.fail;
++import static org.junit.jupiter.api.Assertions.*;
+ 
+ public class TestPageStrict extends TestBase {
+   @Test
+   void shouldFailPageTextContentInStrictMode() {
+     page.setContent("<span>span1</span><div><span>target</span></div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.textContent("span", new Page.TextContentOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+   @Test
+   void shouldFailPageGetAttributeInStrictMode() {
+     page.setContent("<span>span1</span><div><span>target</span></div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.getAttribute("span", "id", new Page.GetAttributeOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+   @Test
+   void shouldFailPageFillInStrictMode() {
+     page.setContent("<input></input><div><input></input></div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.fill("input", "text", new Page.FillOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+ 
+   @Test
+   void shouldFailPageInStrictMode() {
+     page.setContent("<span>span1</span><div><span>target</span></div>");
+-    try {
+-      ElementHandle error = page.querySelector("span", new Page.QuerySelectorOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
++      page.querySelector("span", new Page.QuerySelectorOptions().setStrict(true));
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+   @Test
+   void shouldFailPageWaitForSelectorInStrictMode() {
+     page.setContent("<span>span1</span><div><span>target</span></div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForSelector("span", new Page.WaitForSelectorOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ 
+   @Test
+   void shouldFailPageDispatchEventInStrictMode() {
+     page.setContent("<span></span><div><span></span></div>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.dispatchEvent("span", "click", new HashMap<>(), new Page.DispatchEventOptions().setStrict(true));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("strict mode violation"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("strict mode violation"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForNavigation.java b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForNavigation.java
+index e622a19..8dbfa92 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForNavigation.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForNavigation.java
+@@ -44,14 +44,12 @@ public class TestPageWaitForNavigation extends TestBase {
+ 
+   @Test
+   void shouldRespectTimeout() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForNavigation(
+         new Page.WaitForNavigationOptions().setUrl("**/frame.html").setTimeout(5000),
+           () -> page.navigate(server.EMPTY_PAGE));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 5000ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 5000ms exceeded"));
+   }
+ 
+   // Skipped in sync API.
+@@ -92,14 +90,12 @@ public class TestPageWaitForNavigation extends TestBase {
+   void shouldWorkWithClickingOnLinksWhichDoNotCommitNavigation() throws InterruptedException {
+     page.navigate(server.EMPTY_PAGE);
+     page.setContent("<a href='" + httpsServer.EMPTY_PAGE + "'>foobar</a>");
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForNavigation(() -> page.click("a"));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      // TODO: figure out why it is inconsistent on Linux WebKit.
+-      List<String> possibleErrorMessages = expectedSSLError(browserType.name());
+-      assertTrue(checkSSLErrorMessage(e.getMessage(), possibleErrorMessages), "Unexpected exception: '" + e.getMessage() + "' check message(s): " + String.join(",", possibleErrorMessages));
+-    }
++    });
++    // TODO: figure out why it is inconsistent on Linux WebKit.
++    List<String> possibleErrorMessages = expectedSSLError(browserType.name());
++    assertTrue(checkSSLErrorMessage(e.getMessage(), possibleErrorMessages), "Unexpected exception: '" + e.getMessage() + "' check message(s): " + String.join(",", possibleErrorMessages));
+   }
+ 
+   @Test
+@@ -239,7 +235,7 @@ public class TestPageWaitForNavigation extends TestBase {
+     page.navigate(server.PREFIX + "/frames/one-frame.html");
+     Frame frame = page.frames().get(1);
+     server.setRoute("/empty.html", exchange -> {});
+-    try {
++    PlaywrightException ex = assertThrows(PlaywrightException.class, () -> {
+       frame.waitForNavigation(() -> {
+         Future<Server.Request> req = server.futureRequest("/empty.html");
+         page.evalOnSelector("iframe", "frame => { frame.contentWindow.location.href = '/empty.html'; }");
+@@ -250,35 +246,29 @@ public class TestPageWaitForNavigation extends TestBase {
+         }
+         page.evaluate("setTimeout(() => document.querySelector('iframe').remove());");
+       });
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("frame was detached"), e.getMessage());
+-    }
++    });
++    assertTrue(ex.getMessage().contains("frame was detached"), ex.getMessage());
+   }
+ 
+   @Test
+   void shouldThrowOnInvalidUrlMatcherTypeInPage() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       Page.WaitForNavigationOptions options = new Page.WaitForNavigationOptions();
+       options.url = new Object();
+       page.waitForNavigation(options, () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Url must be String, Pattern or Predicate<String>"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Url must be String, Pattern or Predicate<String>"));
+   }
+ 
+   @Test
+   void shouldThrowOnInvalidUrlMatcherTypeInFrame() {
+     page.navigate(server.PREFIX + "/frames/one-frame.html");
+     Frame frame = page.frames().get(1);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       Frame.WaitForNavigationOptions options = new Frame.WaitForNavigationOptions();
+       options.url = new Object();
+       frame.waitForNavigation(options, () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Url must be String, Pattern or Predicate<String>"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Url must be String, Pattern or Predicate<String>"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForRequest.java b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForRequest.java
+index 5e20a97..bbe1d8e 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForRequest.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForRequest.java
+@@ -52,23 +52,19 @@ public class TestPageWaitForRequest extends TestBase {
+ 
+   @Test
+   void shouldRespectTimeout() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForRequest(url -> false, new Page.WaitForRequestOptions().setTimeout(1), () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+   }
+ 
+   @Test
+   void shouldRespectDefaultTimeout() {
+     page.setDefaultTimeout(1);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForRequest(request -> false, () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForResponse.java b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForResponse.java
+index 04adcad..c470ad2 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForResponse.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForResponse.java
+@@ -63,12 +63,10 @@ public class TestPageWaitForResponse extends TestBase {
+   @Test
+   void shouldRespectDefaultTimeout() {
+     page.setDefaultTimeout(1);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForResponse(response -> false, () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForUrl.java b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForUrl.java
+index 9755afe..053edca 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForUrl.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPageWaitForUrl.java
+@@ -37,12 +37,10 @@ public class TestPageWaitForUrl extends TestBase {
+   @Test
+   void shouldRespectTimeout() {
+     page.navigate(server.EMPTY_PAGE);
+-    try {
++    TimeoutError e = assertThrows(TimeoutError.class, () -> {
+       page.waitForURL("**/frame.html", new Page.WaitForURLOptions().setTimeout(2500));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 2500ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 2500ms exceeded"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPdf.java b/playwright/src/test/java/com/microsoft/playwright/TestPdf.java
+index e83bb85..4ee3f84 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPdf.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPdf.java
+@@ -50,16 +50,8 @@ public class TestPdf extends TestBase {
+ 
+   @Test
+   @DisabledIf(value="com.microsoft.playwright.TestBase#isChromium", disabledReason="skip")
+-  void shouldOnlyHavePdfInChromium() {
+-    try {
+-      page.pdf();
+-      if (isChromium()) {
+-        return;
+-      }
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertFalse(e.getMessage().contains("did not throw"));
+-    }
++  void shouldThrowInNonChromium() {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.pdf());
++    assertTrue(e.getMessage().contains("Page.pdf only supported in headless Chromium"));
+   }
+-
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestPlaywrightCreate.java b/playwright/src/test/java/com/microsoft/playwright/TestPlaywrightCreate.java
+index 95aaadd..6afc841 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestPlaywrightCreate.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestPlaywrightCreate.java
+@@ -41,13 +41,9 @@ public class TestPlaywrightCreate {
+     Playwright.CreateOptions options = new Playwright.CreateOptions().setEnv(env);
+ 
+     try (Playwright playwright = PlaywrightImpl.createImpl(options, true)) {
+-      try {
+-        getBrowserTypeFromEnv(playwright).launch();
+-        fail("Did not throw");
+-      } catch (PlaywrightException e) {
+-        assertTrue(e.getMessage().contains("Looks like Playwright Test or Playwright was just installed or updated") ||
+-          e.getMessage().contains("Looks like Playwright was just installed or updated."), e.getMessage());
+-      }
++      PlaywrightException e = assertThrows(PlaywrightException.class, () -> getBrowserTypeFromEnv(playwright).launch());
++      assertTrue(e.getMessage().contains("Looks like Playwright Test or Playwright was just installed or updated") ||
++        e.getMessage().contains("Looks like Playwright was just installed or updated."), e.getMessage());
+ 
+       try (DirectoryStream<Path> ds = Files.newDirectoryStream(browsersDir)) {
+         for (Path child : ds) {
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestQuerySelector.java b/playwright/src/test/java/com/microsoft/playwright/TestQuerySelector.java
+index aaeaaf7..ec2d1dd 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestQuerySelector.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestQuerySelector.java
+@@ -29,12 +29,8 @@ public class TestQuerySelector extends TestBase {
+ 
+   @Test
+   void shouldThrowForNonStringSelector() {
+-    try {
+-      page.querySelector(null);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("selector: expected string, got undefined"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.querySelector(null));
++    assertTrue(e.getMessage().contains("selector: expected string, got undefined"));
+   }
+ 
+   @Test
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestSelectorsMisc.java b/playwright/src/test/java/com/microsoft/playwright/TestSelectorsMisc.java
+index 7498853..7faaa04 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestSelectorsMisc.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestSelectorsMisc.java
+@@ -176,46 +176,22 @@ public class TestSelectorsMisc extends TestBase {
+ 
+     assertEquals("id5,id6,id3", page.evalOnSelectorAll("div:right-of(#id0) + div:above(#id8)", "els => els.map(e => e.id).join(',')"));
+ 
+-    try {
+-      ElementHandle error = page.querySelector(":near(50)");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"near\" engine expects a selector list and optional maximum distance in pixels"), e.getMessage());
+-    }
+-
+-    try {
+-      ElementHandle error1 = page.querySelector("div >> left-of=abc");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed selector: left-of=abc"));
+-    }
+-
+-    try {
+-      ElementHandle error2 = page.querySelector("left-of=\"div\"");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"left-of\" selector cannot be first"), e.getMessage());
+-    }
+-
+-    try {
+-      ElementHandle error3 = page.querySelector("div >> left-of=33");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed selector: left-of=33"));
+-    }
+-
+-    try {
+-      ElementHandle error4 = page.querySelector("div >> left-of='span','foo'");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed selector: left-of='span','foo'"));
+-    }
+-
+-    try {
+-      ElementHandle error5 = page.querySelector("div >> left-of='span',3,4");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Malformed selector: left-of='span',3,4"));
+-    }
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> page.querySelector(":near(50)"));
++    assertTrue(e.getMessage().contains("\"near\" engine expects a selector list and optional maximum distance in pixels"), e.getMessage());
++
++    e = assertThrows(PlaywrightException.class, () -> page.querySelector("div >> left-of=abc"));
++    assertTrue(e.getMessage().contains("Malformed selector: left-of=abc"));
++
++    e = assertThrows(PlaywrightException.class, () -> page.querySelector("left-of=\"div\""));
++    assertTrue(e.getMessage().contains("\"left-of\" selector cannot be first"), e.getMessage());
++
++    e = assertThrows(PlaywrightException.class, () -> page.querySelector("div >> left-of=33"));
++    assertTrue(e.getMessage().contains("Malformed selector: left-of=33"));
++
++    e = assertThrows(PlaywrightException.class, () -> page.querySelector("div >> left-of='span','foo'"));
++    assertTrue(e.getMessage().contains("Malformed selector: left-of='span','foo'"));
++
++    e = assertThrows(PlaywrightException.class, () -> page.querySelector("div >> left-of='span',3,4"));
++    assertTrue(e.getMessage().contains("Malformed selector: left-of='span',3,4"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestSelectorsRegister.java b/playwright/src/test/java/com/microsoft/playwright/TestSelectorsRegister.java
+index 85dd0bc..4d50891 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestSelectorsRegister.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestSelectorsRegister.java
+@@ -53,13 +53,11 @@ public class TestSelectorsRegister extends TestBase {
+     assertEquals("DIV", page.evalOnSelector("tag2=DIV", "e => e.nodeName"));
+     assertEquals("SPAN", page.evalOnSelector("tag2=SPAN", "e => e.nodeName"));
+     assertEquals(2, page.evalOnSelectorAll("tag2=DIV", "es => es.length"));
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       // Selector names are case-sensitive.
+       page.querySelector("tAG=DIV");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Unknown engine \"tAG\" while parsing selector tAG=DIV"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Unknown engine \"tAG\" while parsing selector tAG=DIV"));
+     context.close();
+   }
+ 
+@@ -105,12 +103,10 @@ public class TestSelectorsRegister extends TestBase {
+ 
+   @Test
+   void shouldHandleErrors() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.querySelector("neverregister=ignored");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Unknown engine \"neverregister\" while parsing selector neverregister=ignored"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Unknown engine \"neverregister\" while parsing selector neverregister=ignored"));
+     String createDummySelector = "{\n" +
+       "  create(root, target) {\n" +
+       "    return target.nodeName;\n" +
+@@ -122,26 +118,20 @@ public class TestSelectorsRegister extends TestBase {
+       "    return Array.from(root.querySelectorAll(\"dummy\"));\n" +
+       "  }\n" +
+       "}";
+-    try {
++    e = assertThrows(PlaywrightException.class, () -> {
+       playwright.selectors().register("$", createDummySelector);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Selector engine name may only contain [a-zA-Z0-9_] characters"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Selector engine name may only contain [a-zA-Z0-9_] characters"));
+     // Selector names are case-sensitive.
+     playwright.selectors().register("dummy", createDummySelector);
+     playwright.selectors().register("duMMy", createDummySelector);
+-    try {
++    e = assertThrows(PlaywrightException.class, () -> {
+       playwright.selectors().register("dummy", createDummySelector);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"dummy\" selector engine has been already registered"));
+-    }
+-    try {
++    });
++    assertTrue(e.getMessage().contains("\"dummy\" selector engine has been already registered"));
++    e = assertThrows(PlaywrightException.class, () -> {
+       playwright.selectors().register("css", createDummySelector);
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("\"css\" is a predefined selector engine"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("\"css\" is a predefined selector engine"));
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestWaitForFunction.java b/playwright/src/test/java/com/microsoft/playwright/TestWaitForFunction.java
+index e345231..9f93b6d 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestWaitForFunction.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestWaitForFunction.java
+@@ -74,15 +74,13 @@ public class TestWaitForFunction extends TestBase {
+     int[] counter = { 0 };
+     page.onConsoleMessage(message -> ++counter[0]);
+ 
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       JSHandle result = page.waitForFunction("() => {\n" +
+         "  window['counter'] = (window['counter'] || 0) + 1;\n" +
+         "  console.log(window['counter']);\n" +
+         "}", null, new Page.WaitForFunctionOptions().setPollingInterval(1).setTimeout(1000));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1000ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1000ms exceeded"));
+ 
+     int savedCounter = counter[0];
+     page.waitForTimeout(2000); // Give it some time to produce more logs.
+@@ -101,37 +99,31 @@ public class TestWaitForFunction extends TestBase {
+ 
+   @Test
+   void shouldFailWithPredicateThrowingOnFirstCall() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => { throw new Error('oh my'); }");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("oh my"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("oh my"));
+   }
+ 
+   @Test
+   void shouldFailWithPredicateThrowingSometimes() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => {\n" +
+         "  window['counter'] = (window['counter'] || 0) + 1;\n" +
+         "  if (window['counter'] === 3)\n" +
+         "    throw new Error('Bad counter!');\n" +
+         "  return window['counter'] === 5 ? 'result' : false;\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Bad counter!"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Bad counter!"));
+   }
+ 
+   @Test
+   void shouldFailWithReferenceErrorOnWrongPage() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => globalVar === 123");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("globalVar"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("globalVar"));
+   }
+ 
+   @Test
+@@ -149,12 +141,10 @@ public class TestWaitForFunction extends TestBase {
+ 
+   @Test
+   void shouldThrowNegativePollingInterval() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => !!document.body", null, new Page.WaitForFunctionOptions().setPollingInterval(-10));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Cannot poll with non-positive interval"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Cannot poll with non-positive interval"));
+   }
+ 
+   @Test
+@@ -177,23 +167,19 @@ public class TestWaitForFunction extends TestBase {
+ 
+   @Test
+   void shouldRespectTimeout() {
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("false", null, new Page.WaitForFunctionOptions().setTimeout(10));
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 10ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 10ms exceeded"));
+   }
+ 
+   @Test
+   void shouldRespectDefaultTimeout() {
+     page.setDefaultTimeout(1);
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("false");
+-      fail("did not throw");
+-    } catch (TimeoutError e) {
+-      assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout 1ms exceeded"));
+   }
+ 
+   @Test
+@@ -269,33 +255,29 @@ public class TestWaitForFunction extends TestBase {
+         messages.add(msg.text());
+       }
+     });
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => {\n" +
+         "  console.log('waitForFunction1');\n" +
+         "  throw new Error('waitForFunction1');\n" +
+         "}");
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("waitForFunction1"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("waitForFunction1"));
+     page.reload();
+-    try {
++    e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => {\n" +
+         "  console.log('waitForFunction2');\n" +
+         "  throw new Error('waitForFunction2');\n" +
+         "}");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("waitForFunction2"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("waitForFunction2"));
+     page.reload();
+-    try {
++    e = assertThrows(PlaywrightException.class, () -> {
+       page.waitForFunction("() => {\n" +
+         "  console.log('waitForFunction3');\n" +
+         "  throw new Error('waitForFunction3');\n" +
+         "}");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("waitForFunction3"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("waitForFunction3"));
+     assertEquals(asList("waitForFunction1", "waitForFunction2", "waitForFunction3"), messages);
+   }
+ }
+diff --git a/playwright/src/test/java/com/microsoft/playwright/TestWebSocket.java b/playwright/src/test/java/com/microsoft/playwright/TestWebSocket.java
+index 83b8ca9..12cfc78 100644
+--- a/playwright/src/test/java/com/microsoft/playwright/TestWebSocket.java
++++ b/playwright/src/test/java/com/microsoft/playwright/TestWebSocket.java
+@@ -182,12 +182,10 @@ public class TestWebSocket extends TestBase {
+         "}", webSocketServer.getPort());
+     });
+     ws.waitForFrameReceived(() -> {});
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       ws.waitForFrameSent(() -> page.evaluate("window.ws.close()"));
+-      fail("did not throw");
+-    } catch (PlaywrightException exception) {
+-      assertTrue(exception.getMessage().contains("Socket closed"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Socket closed"));
+   }
+ 
+   @Test
+@@ -198,12 +196,10 @@ public class TestWebSocket extends TestBase {
+         "}", webSocketServer.getPort());
+     });
+     ws.waitForFrameReceived(() -> {});
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       ws.waitForFrameSent(() -> page.close());
+-      fail("did not throw");
+-    } catch (PlaywrightException exception) {
+-      assertTrue(exception.getMessage().contains("Page closed"));
+-    }
++    });
++    assertTrue(e.getMessage().contains("Page closed"));
+   }
+ 
+   @Test
+@@ -258,13 +254,11 @@ public class TestWebSocket extends TestBase {
+         "}", webSocketServer.getPort());
+     });
+ 
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       ws.waitForFrameReceived(new WebSocket.WaitForFrameReceivedOptions()
+         .setPredicate(webSocketFrame -> false).setTimeout(1), () -> {});
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+   }
+ 
+   @Test
+@@ -276,12 +270,10 @@ public class TestWebSocket extends TestBase {
+         "}", webSocketServer.getPort());
+     });
+ 
+-    try {
++    PlaywrightException e = assertThrows(PlaywrightException.class, () -> {
+       ws.waitForFrameSent(new WebSocket.WaitForFrameSentOptions()
+         .setPredicate(webSocketFrame -> false).setTimeout(1), () -> page.evaluate("ws.send('outgoing');"));
+-      fail("did not throw");
+-    } catch (PlaywrightException e) {
+-      assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+-    }
++    });
++    assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
+   }
+ }

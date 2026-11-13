@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/karaf/pull/2074",
+  "repo": "apache/karaf",
+  "number": 2074,
+  "title": "karaf-maven-plugin: Remove try/catch blocks from tests",
+  "merged_at": "2025-09-30T13:47:08Z",
+  "stars": 721,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "migration",
+  "split": "tuning",
+  "base_sha": "47bfc03f4e907872d273510dffae2491b40be648",
+  "head_sha": "6947240fee9de9dd1f6f7f953eccfc5ff99790a8",
+  "files_changed": 17,
+  "additions": 33,
+  "deletions": 64
+}

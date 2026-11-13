@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/googleapis/google-cloud-java/pull/13185",
+  "repo": "googleapis/google-cloud-java",
+  "number": 13185,
+  "title": "test(spanner): wrap backup schedule deletion in try-catch to prevent exception masking",
+  "merged_at": "2026-05-14T07:18:43Z",
+  "stars": 2106,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "4c5fe0ce85ac92072a299ca5abfddba3ae6c1323",
+  "head_sha": "70d8d5d616d2b200c5c77a709631975ea4401ae0",
+  "files_changed": 6,
+  "additions": 77,
+  "deletions": 14
+}

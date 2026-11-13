@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/kafka/pull/23277",
+  "repo": "apache/kafka",
+  "number": 23277,
+  "title": "MINOR: Replace try/fail/catch with assertThrows in producer tests",
+  "merged_at": "2026-08-31T17:02:53Z",
+  "stars": 34109,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "migration",
+  "split": "heldout",
+  "base_sha": "d3b8b1bd023dc3d8dff4f7f85af5963de0214b11",
+  "head_sha": "28ad6dbd97982c04836f9d3da143e6bf6524e76e",
+  "files_changed": 3,
+  "additions": 14,
+  "deletions": 38
+}

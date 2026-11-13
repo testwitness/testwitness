@@ -1,0 +1,30 @@
+[
+  {
+    "path": "connect/api/src/test/java/org/apache/kafka/connect/header/ConnectHeadersTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/runtime/src/test/java/org/apache/kafka/connect/integration/ConnectorClientPolicyIntegrationTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/runtime/src/test/java/org/apache/kafka/connect/runtime/ConnectorConfigTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerSinkTaskThreadedTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/runtime/src/test/java/org/apache/kafka/connect/runtime/WorkerTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/runtime/src/test/java/org/apache/kafka/connect/util/ConvertingFutureCallbackTest.java",
+    "status": "modified"
+  },
+  {
+    "path": "connect/transforms/src/test/java/org/apache/kafka/connect/transforms/ExtractFieldTest.java",
+    "status": "modified"
+  }
+]
