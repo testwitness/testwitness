@@ -6,8 +6,7 @@ Each entry: the decision, my recommendation, and the reversible default I am pro
 
 The brief asks for a Stryker score above 75 percent on core. A full run is about 14,000 mutants; this workspace has two cores and estimated 28 hours, and the old weekly workflow had a 90 minute limit, so no full score exists yet (the last partial run, 3,055 mutants, killed 30 percent and left 44 percent without coverage, which says more about which files the run reached first than about the suite).
 
-Recommendation: after batch 3 merges, start the "mutation" workflow once by hand (Actions tab, mutation, Run workflow). Eleven shards run in parallel and the summary job prints the score per package. I then read the survivors and write tests in the next batch.
-Default: the workflow also runs every Monday on its own.
+Decided by Sajjad (13 Nov): he runs the workflow once by hand after the last batch merges. Eleven shards run in parallel and the summary job prints the score per package; the survivors become tests in the next batch. The workflow also runs every Monday on its own.
 
 ## 2026-11-13: no repository or person named in public prose
 
@@ -16,8 +15,7 @@ The brief says public material names no repository or person. The repository sti
 Done in this batch: docs/launch is moved out of the public repository (the files now live in ~/Project AI Builder/testwitness/launch on your Mac), and the prose elsewhere describes cases by shape, not by name.
 
 Still named, and your call: the corpus itself (corpus/entries, one folder per public pull request with its URL and a copy of its description) and a source line in nine fixture READMEs pointing at the public PR a case was modelled on. These are data and attribution rather than claims, and the corpus cannot be reproduced without its URLs.
-Recommendation: keep both; a corpus of public PRs that does not say which PRs is not checkable.
-Default: kept.
+Decided by Sajjad (13 Nov): the PR links stay for auditability. corpus/README.md says a finding is not a judgement of the PR or its authors, that skipping or removing a test is often correct, and that entries are removed on request.
 
 ## 2026-11-13: how to merge the port of 4 and 5 Nov work (PR "port day 4 afternoon")
 
