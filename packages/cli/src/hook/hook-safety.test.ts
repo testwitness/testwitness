@@ -28,7 +28,9 @@ afterAll(() => {
 });
 
 /** git subcommands the engine and the hook may run. All of them read the local repository; none talks to a remote. */
-const LOCAL_GIT = ['rev-parse', 'merge-base', 'symbolic-ref', 'diff', 'show', 'ls-tree', 'log', 'add', 'read-tree', 'write-tree'];
+const LOCAL_GIT = ['rev-parse', 'merge-base', 'symbolic-ref', 'diff', 'show', 'ls-tree', 'log', 'add', 'read-tree', 'write-tree', 'cat-file'];
+// cat-file --batch (the blob reader) reads stored objects as they are; unlike show with --textconv or --filters it runs no
+// program from the git config or .gitattributes.
 
 describe('no network', () => {
   it('the guard trips on a socket, a DNS lookup and a fetch', async () => {
