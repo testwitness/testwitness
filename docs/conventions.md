@@ -127,11 +127,13 @@ Path patterns per spec R002 plus a content sniff when the path is unusual
 fixtures/<lang>-<framework>-<build>/     e.g. java-junit5-maven, ts-jest, py-pytest
   project/                 # a tiny real project that builds and runs
   junit/                   # real XML produced by the real runner, committed
+  results/<format>/        # real TAP or JSON reporter output (tap, jest-json, vitest-json, pytest-json-report, playwright-json)
   cases/<rule>-<slug>/
     base/                  # files as they are before the PR (relative to project root)
     head/                  # files after the PR; a missing file means deleted
     expected.json          # golden findings: [{ruleId, severity, subject, label?}]
     README.md              # one paragraph: what the case is and why it is positive or negative
+    junit/ or results/     # results of the head run; results/ takes any format the reader knows
 ```
 
 A case is positive when `expected.json` lists findings and negative when it is
@@ -140,7 +142,9 @@ tests renamed, moved to another file, parametrised folds, helper extraction,
 conditional skips with constants that fold to false, reason strings that
 reference an issue.
 
-## JUnit XML fixtures (`fixtures/<x>/junit/`)
+## Test results fixtures (`fixtures/<x>/junit/`, `fixtures/<x>/results/<format>/`)
 
 Always produced by running the real framework. Never hand written. Record the
-producer and version in a `PRODUCER.md` next to the XML.
+producer and version in a `PRODUCER.md` next to the files. A positive V003 case
+derives its results from the real file by removing one named record, with
+`fixtures/runner/derive-results.ts` for TAP and JSON.

@@ -26,9 +26,9 @@ export const V003: Rule = {
   languages: 'any',
   needs: ['diff', 'ast', 'junit'],
   docs: {
-    summary: 'A test added or modified by the PR has no record in the JUnit XML of this run. Names are normalised across Surefire, Gradle, pytest, jest-junit, Vitest, Playwright and Mocha producers.',
+    summary: 'A test added or modified by the PR has no record in the test results of this run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright). Names are normalised across Surefire, Gradle, pytest, jest-junit, Vitest, Playwright, Mocha and Node test runner producers.',
     falsePositives:
-      'Tests in a matrix leg whose XML was not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.',
+      'Tests in a matrix leg whose results were not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.',
     example: 'Modified test CartTest#handlesEmpty has no testcase record in 3 result files (42 tests).',
     history:
       'A finding on a test recorded in every one of the last 5 runs of the history becomes high with the label ran before, not now. A test the history has never seen, or that is missing from any of those 5 runs, keeps the severity above, and a finding labelled partial results stays low. A history with fewer than 5 runs changes nothing.',
@@ -179,15 +179,15 @@ export const V005: Rule = {
   languages: 'any',
   needs: ['diff'],
   docs: {
-    summary: 'The PR touches tests or test configuration and no JUnit XML was found. The evidence section reads unreadable and changed tests cannot be checked against what ran.',
-    falsePositives: 'None: this is an instruction to add a reporter (--junitxml, jest-junit, the Playwright junit reporter, Surefire writes it by default).',
-    example: 'No JUnit XML matched **/junit*.xml.',
+    summary: 'The PR touches tests or test configuration and no test results were found. The evidence section reads unreadable and changed tests cannot be checked against what ran.',
+    falsePositives: 'None: this is an instruction to add a reporter (JUnit XML first: --junitxml, jest-junit, the Playwright junit reporter, Surefire writes it by default; TAP and the Jest, Vitest, pytest-json-report and Playwright JSON reporters are read too).',
+    example: 'No test results matched **/junit*.xml.',
   },
   run(ctx) {
     if (ctx.evidence) return [];
     const touches = ctx.files.some((f) => f.kind === 'test' || f.kind === 'runner-config' || f.kind === 'ci-workflow');
     if (!touches) return [];
-    return [makeFinding(ctx, 'V005', 'low', 'results', 'none', 'No JUnit XML found for this run. Add a reporter (pytest --junitxml, jest-junit, Playwright junit reporter; Surefire and Gradle write it by default) so changed tests can be checked against what ran.', { label: 'unreadable', snippet: 'no-xml' })];
+    return [makeFinding(ctx, 'V005', 'low', 'results', 'none', 'No test results found for this run. Add a reporter (JUnit XML first: pytest --junitxml, jest-junit, Playwright junit reporter; Surefire and Gradle write it by default; TAP and the Jest, Vitest, pytest-json-report and Playwright JSON reporters are read too) so changed tests can be checked against what ran.', { label: 'unreadable', snippet: 'no-xml' })];
   },
 };
 

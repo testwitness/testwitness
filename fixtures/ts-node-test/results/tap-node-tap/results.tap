@@ -1,0 +1,119 @@
+TAP version 14
+1..1
+# Subtest: test/text.test.js
+    # Subtest: Text
+        # Subtest: slugify
+            # Subtest: lowercases and joins with dashes
+                ok 1 - should be equal
+                1..1
+            ok 1 - lowercases and joins with dashes # time=6.997ms
+            
+            ok 2 - handles unicode # SKIP not supported yet
+            ok 3 - keeps numbers # TODO
+            # Subtest: fails on purpose
+                not ok 1 - should be equal
+                  ---
+                  compare: ===
+                  at:
+                    fileName: test/text.test.js
+                    lineNumber: 14
+                    columnNumber: 9
+                    typeName: Test
+                  stack: |
+                    Test.<anonymous> (test/text.test.js:14:9)
+                  source: |2
+                        t.test('keeps numbers', { todo: true });
+                        t.test('fails on purpose', async (t) => {
+                          t.equal(slugify('A B'), 'a_b');
+                    --------^
+                        });
+                      });
+                  diff: |
+                    --- expected
+                    +++ actual
+                    @@ -1,1 +1,1 @@
+                    -a_b
+                    +a-b
+                  ...
+                
+                1..1
+            not ok 4 - fails on purpose # time=18.563ms
+              ---
+              at:
+                fileName: test/text.test.js
+                lineNumber: 13
+                columnNumber: 7
+                typeName: Test
+              source: |2
+                    });
+                    t.test('keeps numbers', { todo: true });
+                    t.test('fails on purpose', async (t) => {
+                ------^
+                      t.equal(slugify('A B'), 'a_b');
+                    });
+              ...
+            
+            1..4
+        not ok 1 - slugify # time=36.192ms
+          ---
+          at:
+            fileName: test/text.test.js
+            lineNumber: 5
+            columnNumber: 5
+            typeName: Test
+          source: |
+          
+            t.test('Text', async (t) => {
+              t.test('slugify', async (t) => {
+            ----^
+                t.test('lowercases and joins with dashes', async (t) => {
+                  t.equal(slugify('Hello World'), 'hello-world');
+          ...
+        
+        1..1
+    not ok 1 - Text # time=43.102ms
+      ---
+      at:
+        fileName: test/text.test.js
+        lineNumber: 4
+        columnNumber: 3
+        typeName: Object
+      source: |
+        const { slugify, clamp } = require('../text');
+      
+        t.test('Text', async (t) => {
+        --^
+          t.test('slugify', async (t) => {
+            t.test('lowercases and joins with dashes', async (t) => {
+      ...
+    
+    # Subtest: Numbers
+        # Subtest: clamps below the range
+            ok 1 - should be equal
+            1..1
+        ok 1 - clamps below the range # time=0.713ms
+        
+        1..1
+    ok 2 - Numbers # time=4.778ms
+    
+    1..2
+    # time=65.503ms
+not ok 1 - test/text.test.js # time=65.503ms
+  ---
+  stdio: inherit
+  cwd: /tmp/nodetap
+  externalID: test/text.test.js
+  command: /opt/node22/bin/node
+  args:
+    - --import=file:///tmp/nodetap/node_modules/@tapjs/typescript/dist/esm/import.mjs
+    - --import=file:///tmp/nodetap/node_modules/@tapjs/mock/dist/esm/import.mjs
+    - --enable-source-maps
+    - --import=file:///tmp/nodetap/node_modules/@tapjs/processinfo/dist/esm/import.mjs
+    - /tmp/nodetap/test/text.test.js
+  exitCode: 1
+  signal: null
+  ...
+
+# No coverage generated
+# { total: 5, pass: 2, fail: 1, todo: 1, skip: 1 }
+# time=1086.477ms

@@ -294,9 +294,12 @@ describe('runEngine', () => {
     expect(none.sources).toEqual([]);
     expect(none.total).toBe(0);
     expect(none.notes).toHaveLength(1);
-    expect(none.notes[0]).toContain('No JUnit XML');
+    expect(none.notes[0]).toContain('No test results');
+    expect(none.formats).toEqual([]);
     const got = (await runEngine(opts({ evidence: evidence() }))).report.evidence;
-    expect(got).toEqual({ state: 'read', sources: ['junit.xml'], total: 1, passed: 1, failed: 0, errored: 0, skipped: 0, flaky: 0, notes: [] });
+    expect(got).toEqual({ state: 'read', sources: ['junit.xml'], formats: ['junit-xml'], total: 1, passed: 1, failed: 0, errored: 0, skipped: 0, flaky: 0, notes: [] });
+    const tap = (await runEngine(opts({ evidence: { ...evidence(), formats: ['tap'] } }))).report.evidence;
+    expect(tap.formats).toEqual(['tap']);
   });
 
   it('marks partial evidence from the notes', async () => {

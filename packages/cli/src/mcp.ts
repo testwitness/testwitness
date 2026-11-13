@@ -18,7 +18,7 @@ const ref = z
   .regex(/^[^-\s]\S*$/, 'a git ref: no leading dash, no whitespace');
 
 const CHECK_DESCRIPTION = [
-  'Run testwitness on a local git repository: compare base and head and report tests that were deleted, skipped, emptied or loosened, assertions removed, failures hidden in CI config, and changed tests missing from JUnit XML results.',
+  'Run testwitness on a local git repository: compare base and head and report tests that were deleted, skipped, emptied or loosened, assertions removed, failures hidden in CI config, and changed tests missing from the test results (JUnit XML, TAP or a JSON reporter).',
   'Read only. It reads the git history and files as text, never executes repository code (no install, no test run, no import of config files), and makes no network calls.',
   'Returns the report (JSON, schemaVersion 1, schema at ' + REPORT_SCHEMA + ') as structured content and a short text summary.',
   'Run it before pushing; fix every medium or high finding, or acknowledge it with a reason.',
@@ -76,7 +76,8 @@ export function createServer(): McpServer {
         cwd: z.string().min(1).describe('Absolute path of the git repository to check.'),
         base: ref.optional().describe("Base ref. The merge base with head is compared. Default: origin's default branch, else origin/main, origin/master, main or master."),
         head: ref.optional().describe('Head ref. Default HEAD (the last commit; uncommitted changes are not seen).'),
-        junit: z.string().max(1024).optional().describe('Comma separated globs of JUnit XML files, relative to cwd. Default from .testwitness.yml.'),
+        results: z.string().max(1024).optional().describe('Comma separated globs of test results, relative to cwd: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content. Default from .testwitness.yml.'),
+        junit: z.string().max(1024).optional().describe('Older name of results; used when results is not given.'),
         coverage: z.string().max(1024).optional().describe('Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to cwd. Default from .testwitness.yml coverage.paths.'),
         mutation: z.string().max(1024).optional().describe('Comma separated globs of Stryker JSON or PIT mutations.xml reports, relative to cwd. Read only; the tool never runs a mutation tool. Default from .testwitness.yml mutation.paths.'),
         prTitle: z.string().max(10_000).optional().describe('Pull request title, for claim checks such as "all tests pass".'),
@@ -109,6 +110,7 @@ export function createServer(): McpServer {
           cwd: top,
           base: args.base ?? (await defaultBase(top)),
           head: args.head ?? 'HEAD',
+          results: args.results,
           junit: args.junit,
           coverage: args.coverage,
           mutation: args.mutation,

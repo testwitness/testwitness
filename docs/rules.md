@@ -327,9 +327,9 @@ A test command, script, workflow or runner config now passes when no test is fou
 
 Default severity: high. Since 0.1.0. Languages: all. Needs: diff, ast, junit.
 
-A test added or modified by the PR has no record in the JUnit XML of this run. Names are normalised across Surefire, Gradle, pytest, jest-junit, Vitest, Playwright and Mocha producers.
+A test added or modified by the PR has no record in the test results of this run (JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright). Names are normalised across Surefire, Gradle, pytest, jest-junit, Vitest, Playwright, Mocha and Node test runner producers.
 
-**False positive controls.** Tests in a matrix leg whose XML was not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.
+**False positive controls.** Tests in a matrix leg whose results were not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.
 
 **With run history.** A finding on a test recorded in every one of the last 5 runs of the history becomes high with the label ran before, not now. A test the history has never seen, or that is missing from any of those 5 runs, keeps the severity above, and a finding labelled partial results stays low. A history with fewer than 5 runs changes nothing. See [run history](history.md).
 
@@ -353,12 +353,12 @@ PR body says "all tests pass"; results show 2 failures.
 
 Default severity: low. Since 0.1.0. Languages: all. Needs: diff.
 
-The PR touches tests or test configuration and no JUnit XML was found. The evidence section reads unreadable and changed tests cannot be checked against what ran.
+The PR touches tests or test configuration and no test results were found. The evidence section reads unreadable and changed tests cannot be checked against what ran.
 
-**False positive controls.** None: this is an instruction to add a reporter (--junitxml, jest-junit, the Playwright junit reporter, Surefire writes it by default).
+**False positive controls.** None: this is an instruction to add a reporter (JUnit XML first: --junitxml, jest-junit, the Playwright junit reporter, Surefire writes it by default; TAP and the Jest, Vitest, pytest-json-report and Playwright JSON reporters are read too).
 
 ```diff
-No JUnit XML matched **/junit*.xml.
+No test results matched **/junit*.xml.
 ```
 
 ## V006 Failures in results while the PR claims passing

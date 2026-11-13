@@ -36,6 +36,8 @@ export async function run(): Promise<void> {
   const head = headInput || (pr ? (pr['head'] as { sha: string }).sha : 'HEAD');
   // A push to the default branch has no pull request to compare; it runs to record history, so the diff is empty.
   const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : defaultPush ? head : 'origin/main');
+  // `results` is the preferred input; `junit` is its older name and carries the default globs.
+  const results = core.getInput('results') || undefined;
   const junit = core.getInput('junit') || undefined;
   const coverage = core.getInput('coverage') || undefined;
   const mutation = core.getInput('mutation') || undefined;
@@ -70,7 +72,7 @@ export async function run(): Promise<void> {
   }
 
   const { report, config, history: updatedHistory } = await check({
-    cwd, base, head, junit, coverage, mutation, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
+    cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
     history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
   });
 

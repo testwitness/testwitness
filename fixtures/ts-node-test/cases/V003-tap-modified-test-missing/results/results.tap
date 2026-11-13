@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: counts with a plan
+ok 1 - counts with a plan
+  ---
+  duration_ms: 7.104445
+  type: 'test'
+  ...
+# Subtest: skipped with a reason
+ok 2 - skipped with a reason # SKIP waiting on the upstream fix
+  ---
+  duration_ms: 0.183797
+  type: 'test'
+  ...
+# Subtest: todo that fails
+not ok 3 - todo that fails # TODO not finished
+  ---
+  duration_ms: 1.234593
+  type: 'test'
+  location: '/home/claude/testwitness/fixtures/ts-node-test/project/test/extras.test.js:14:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/home/claude/testwitness/fixtures/ts-node-test/project/test/extras.test.js:15:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Text
+    # Subtest: slugify
+        # Subtest: strips leading and trailing separators
+        ok 2 - strips leading and trailing separators
+          ---
+          duration_ms: 0.237877
+          type: 'test'
+          ...
+        # Subtest: handles unicode
+        ok 3 - handles unicode # SKIP
+          ---
+          duration_ms: 0.104196
+          type: 'test'
+          ...
+        # Subtest: keeps numbers
+        ok 4 - keeps numbers # TODO
+          ---
+          duration_ms: 0.167219
+          type: 'test'
+          ...
+        # Subtest: fails on purpose
+        not ok 5 - fails on purpose
+          ---
+          duration_ms: 2.136018
+          type: 'test'
+          location: '/home/claude/testwitness/fixtures/ts-node-test/project/test/text.test.js:21:5'
+          failureType: 'testCodeFailure'
+          error: |-
+            Expected values to be strictly equal:
+            
+            'a-b' !== 'a_b'
+            
+          code: 'ERR_ASSERTION'
+          name: 'AssertionError'
+          expected: 'a_b'
+          actual: 'a-b'
+          operator: 'strictEqual'
+          stack: |-
+            TestContext.<anonymous> (/home/claude/testwitness/fixtures/ts-node-test/project/test/text.test.js:22:14)
+            Test.runInAsyncScope (node:async_hooks:214:14)
+            Test.run (node:internal/test_runner/test:1047:25)
+            Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+            Test.postRun (node:internal/test_runner/test:1173:19)
+            Test.run (node:internal/test_runner/test:1101:12)
+            async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+          ...
+        1..5
+    not ok 1 - slugify
+      ---
+      duration_ms: 4.46892
+      type: 'suite'
+      location: '/home/claude/testwitness/fixtures/ts-node-test/project/test/text.test.js:6:3'
+      failureType: 'subtestsFailed'
+      error: '1 subtest failed'
+      code: 'ERR_TEST_FAILURE'
+      stack: |-
+        async Promise.all (index 0)
+      ...
+    1..1
+not ok 4 - Text
+  ---
+  duration_ms: 4.830161
+  type: 'suite'
+  location: '/home/claude/testwitness/fixtures/ts-node-test/project/test/text.test.js:5:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: Numbers
+    # Subtest: clamps below the range
+    ok 1 - clamps below the range
+      ---
+      duration_ms: 0.235391
+      type: 'test'
+      ...
+    # Subtest: clamps above the range
+    ok 2 - clamps above the range
+      ---
+      duration_ms: 0.232628
+      type: 'test'
+      ...
+    1..2
+ok 5 - Numbers
+  ---
+  duration_ms: 0.722232
+  type: 'suite'
+  ...
+# Subtest: clamp table
+    # Subtest: inside the range
+    ok 1 - inside the range
+      ---
+      duration_ms: 0.15047
+      type: 'test'
+      ...
+    # Subtest: at the edge
+    ok 2 - at the edge
+      ---
+      duration_ms: 0.16428
+      type: 'test'
+      ...
+    1..2
+ok 6 - clamp table
+  ---
+  duration_ms: 0.742603
+  type: 'test'
+  ...
+1..6
+# tests 13
+# suites 3
+# pass 8
+# fail 1
+# cancelled 0
+# skipped 2
+# todo 2
+# duration_ms 267.714139

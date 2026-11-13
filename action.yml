@@ -1,12 +1,15 @@
 name: testwitness
-description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the JUnit XML. Java, TypeScript, JavaScript and Python. No model, no secrets. The only network calls go to the GitHub API, for the optional comment and run history.
+description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the test results (JUnit XML, TAP or a JSON reporter). Java, TypeScript, JavaScript and Python. No model, no secrets. The only network calls go to the GitHub API, for the optional comment and run history.
 author: Sajjad Hossain
 branding:
   icon: eye
   color: gray-dark
 inputs:
+  results:
+    description: Comma separated globs of the test results written by the test job. JUnit XML first; TAP and the JSON output of Jest, Vitest, pytest-json-report and Playwright are read too, told apart by content. When empty, the junit input is used
+    required: false
   junit:
-    description: Comma separated globs of JUnit XML files written by the test job
+    description: Older name of the results input, still read when results is empty. Its default globs match the usual JUnit XML locations
     required: false
     default: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml"
   coverage:

@@ -1,0 +1,594 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/home/claude/testwitness/fixtures/ts-playwright/project/node_modules/.bin/playwright",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "/home/claude/testwitness/fixtures/ts-playwright/project/playwright.config.ts",
+    "rootDir": "/home/claude/testwitness/fixtures/ts-playwright/project/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "unit",
+        "name": "unit",
+        "testDir": "/home/claude/testwitness/fixtures/ts-playwright/project/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/unit\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/home/claude/testwitness/fixtures/ts-playwright/project/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/api\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "unit.spec.ts",
+      "file": "unit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "expected to fail",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "fail",
+                  "location": {
+                    "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                    "line": 40,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "failed",
+              "projectId": "unit",
+              "projectName": "unit",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 5,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:41:27",
+                    "location": {
+                      "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                      "column": 27,
+                      "line": 41
+                    },
+                    "snippet": "  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m99\u001b[39m\nReceived: \u001b[31m0\u001b[39m\n\n  39 | test('expected to fail', () => {\n  40 |   test.fail();\n> 41 |   expect(parsePrice('x')).toBe(99);\n     |                           ^\n  42 | });\n  43 |\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:41:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T17:03:04.428Z",
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "location": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "line": 40,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results/unit-expected-to-fail-unit/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                    "column": 27,
+                    "line": 41
+                  }
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1aa6966ccd4b754046b6-2c266e044f7fdbe6f29c",
+          "file": "unit.spec.ts",
+          "line": 39,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "pricing",
+          "file": "unit.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "parses a bare number",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "unit",
+                  "projectName": "unit",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:02.589Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-1a4eddb2509bd5dd055e",
+              "file": "unit.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "parses euro amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "line": 20,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "unit",
+                  "projectName": "unit",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:02.607Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                            "line": 20,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-eac3dbd6e823e5faf874",
+              "file": "unit.spec.ts",
+              "line": 20,
+              "column": 8
+            },
+            {
+              "title": "handles negative amounts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "line": 24,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "unit",
+                  "projectName": "unit",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:02.608Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                            "line": 24,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-938b14855acc4b74257e",
+              "file": "unit.spec.ts",
+              "line": 24,
+              "column": 8
+            },
+            {
+              "title": "fails on purpose",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "unit",
+                  "projectName": "unit",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 7,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:02.609Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results/unit-pricing-fails-on-purpose-unit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30",
+                        "location": {
+                          "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                          "column": 30,
+                          "line": 29
+                        },
+                        "snippet": "  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                            "column": 30,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m2\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  27 |\n  28 |   test('fails on purpose', () => {\n> 29 |     expect(parsePrice('$1')).toBe(2);\n     |                              ^\n  30 |   });\n  31 |\n  32 |   test('flaky passes on retry', () => {\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:29:30"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T17:03:03.259Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results/unit-pricing-fails-on-purpose-unit-retry1/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "column": 30,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-987802f0d0901fd2e5fb",
+              "file": "unit.spec.ts",
+              "line": 28,
+              "column": 7
+            },
+            {
+              "title": "flaky passes on retry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "unit",
+                  "projectName": "unit",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:35:22",
+                        "location": {
+                          "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                          "column": 22,
+                          "line": 35
+                        },
+                        "snippet": "  33 |     const attempts = fs.existsSync(counterFile) ? Number(fs.readFileSync(counterFile, 'utf8')) : 0;\n  34 |     fs.writeFileSync(counterFile, String(attempts + 1));\n> 35 |     expect(attempts).toBeGreaterThan(0);\n     |                      ^\n  36 |   });\n  37 | });\n  38 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                            "column": 22,
+                            "line": 35
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n  33 |     const attempts = fs.existsSync(counterFile) ? Number(fs.readFileSync(counterFile, 'utf8')) : 0;\n  34 |     fs.writeFileSync(counterFile, String(attempts + 1));\n> 35 |     expect(attempts).toBeGreaterThan(0);\n     |                      ^\n  36 |   });\n  37 | });\n  38 |\n    at /home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts:35:22"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:03.813Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/claude/testwitness/fixtures/ts-playwright/project/test-results/unit-pricing-flaky-passes-on-retry-unit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/claude/testwitness/fixtures/ts-playwright/project/tests/unit.spec.ts",
+                        "column": 22,
+                        "line": 35
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 23,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T17:03:04.346Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "1aa6966ccd4b754046b6-7908d33f4f6ff1140ad9",
+              "file": "unit.spec.ts",
+              "line": 32,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api.spec.ts",
+      "file": "api.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "page basics",
+          "file": "api.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "renders inline html",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 214,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:04.941Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-2616b7236cd459313047",
+              "file": "api.spec.ts",
+              "line": 4,
+              "column": 7
+            },
+            {
+              "title": "evaluates in the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 60,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T17:03:05.521Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1ea1b1599cbc08f16936-8ad757c5e1b3fe7454f8",
+              "file": "api.spec.ts",
+              "line": 9,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T17:03:01.935Z",
+    "duration": 3725.8999999999996,
+    "expected": 5,
+    "skipped": 2,
+    "unexpected": 1,
+    "flaky": 1
+  }
+}

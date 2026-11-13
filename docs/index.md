@@ -2,7 +2,7 @@
 
 Did this PR weaken its tests, and did they actually run?
 
-testwitness reads a pull request's diff, the test code and the JUnit XML from the test run and tells the reviewer whether the tests still mean anything. Java, TypeScript, JavaScript and Python. No model, no secrets, no network, never runs your code.
+testwitness reads a pull request's diff, the test code and the test results (JUnit XML, TAP or a JSON reporter) from the test run and tells the reviewer whether the tests still mean anything. Java, TypeScript, JavaScript and Python. No model, no secrets, no network, never runs your code.
 
 ## Quick start
 
@@ -22,15 +22,15 @@ jobs:
           fetch-depth: 0
       - uses: testwitness/testwitness@v0
         with:
-          junit: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
+          results: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml"
 ```
 
-If your tests run in a separate job, upload their JUnit XML as an artifact, download it in this job, and point `junit` at it. See [Evidence](./evidence) for the one line per framework that turns the reporter on.
+If your tests run in a separate job, upload their results as an artifact, download them in this job, and point `results` at them. See [Evidence](./evidence) for the one line per framework that turns the reporter on.
 
 Locally:
 
 ```bash
-npx testwitness check --base origin/main --head HEAD --junit "**/junit*.xml"
+npx testwitness check --base origin/main --head HEAD --results "**/junit*.xml"
 ```
 
 ## What you get

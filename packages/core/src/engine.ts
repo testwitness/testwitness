@@ -345,13 +345,14 @@ export async function runEngine(opts: EngineOptions): Promise<EngineResult> {
     evidence: {
       state: opts.evidence ? (opts.evidenceNotes?.some((n) => /partial/i.test(n)) ? 'partial' : 'read') : 'unreadable',
       sources: opts.evidence?.sources ?? [],
+      formats: opts.evidence ? (opts.evidence.formats ?? ['junit-xml']) : [],
       total: opts.evidence?.total ?? 0,
       passed: opts.evidence?.passed ?? 0,
       failed: opts.evidence?.failed ?? 0,
       errored: opts.evidence?.errored ?? 0,
       skipped: opts.evidence?.skipped ?? 0,
       flaky: opts.evidence?.flaky ?? 0,
-      notes: opts.evidenceNotes ?? (opts.evidence ? [] : ['No JUnit XML was found. Add a reporter so changed tests can be checked against what ran.']),
+      notes: opts.evidenceNotes ?? (opts.evidence ? [] : ['No test results were found. Add a reporter (JUnit XML first) so changed tests can be checked against what ran.']),
     },
     provenance,
     files: {

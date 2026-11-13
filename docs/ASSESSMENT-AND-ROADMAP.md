@@ -212,6 +212,14 @@ TAP and the JSON reporters first (small readers that fill the same Evidence
 object; the rules do not change). Then Kotlin and Go, which share most of the
 Java and TypeScript rule shapes, then C# with TRX.
 
+Status, 4 Nov 2026: the first step is done. The `results` input (the old
+`junit` name still works) reads TAP 13 and 14 (Node's test runner, node-tap,
+Perl) line by line, and the JSON output of Jest, Vitest, pytest-json-report and
+Playwright whole within a 50 MB cap per file, all told apart by content and
+keyed like the same runner's JUnit XML. Each format has real fixture output
+and a V003 golden pair (`fixtures/JUNIT-FIXTURES.md`, `docs/evidence.md`).
+JUnit XML stays the first recommendation. Kotlin, Go and TRX are next.
+
 ### 4.10 An optional explainer outside the tool
 
 If a team wants prose, a separate opt in step can summarise the findings with a

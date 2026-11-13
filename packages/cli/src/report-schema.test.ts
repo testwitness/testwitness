@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { builtinRules, emptyHistory, HISTORY_SCHEMA, mergeHistory, parseHistory, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, serializeHistory } from '@testwitness/core';
+import { RESULT_FORMATS } from '@testwitness/junit';
 import { check, render } from './check.js';
 import { discoverCases, runCase, type GoldenCase } from '../../../fixtures/runner/golden.js';
 import { generate, SMALL } from '../../../bench/generate.js';
@@ -16,7 +17,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const schema = JSON.parse(readFileSync(join(root, 'docs/report.schema.json'), 'utf8')) as {
   $id: string;
   $defs: { ruleId: { enum: string[] }; label: { enum: string[] }; severity: { enum: string[] } };
-  properties: { schemaVersion: { const: string } };
+  properties: { schemaVersion: { const: string }; evidence: { properties: { formats: { items: { enum: string[] } } } } };
 };
 
 function validator() {
@@ -37,7 +38,7 @@ function sampleCases(): GoldenCase[] {
   const byProject = new Map<string, GoldenCase[]>();
   for (const c of all) byProject.set(c.project, [...(byProject.get(c.project) ?? []), c]);
   for (const cases of byProject.values()) {
-    for (const c of [cases[0], cases.find((x) => x.pr), cases.find((x) => x.junit), cases.find((x) => x.expected.some((e) => e.label))]) {
+    for (const c of [cases[0], cases.find((x) => x.pr), cases.find((x) => x.junit), cases.find((x) => x.results), cases.find((x) => x.expected.some((e) => e.label))]) {
       if (c) picked.set(`${c.project}/${c.name}`, c);
     }
   }
@@ -54,9 +55,14 @@ describe('report schema', () => {
 
   const cases = sampleCases();
   it('samples golden cases from every fixture project', () => {
-    expect(new Set(cases.map((c) => c.project)).size).toBe(9);
+    expect(new Set(cases.map((c) => c.project)).size).toBe(10);
     expect(cases.some((c) => c.pr)).toBe(true);
     expect(cases.some((c) => c.junit)).toBe(true);
+    expect(cases.some((c) => c.results)).toBe(true);
+  });
+
+  it('lists exactly the result formats the readers understand', () => {
+    expect(schema.properties.evidence.properties.formats.items.enum).toEqual([...RESULT_FORMATS]);
   });
 
   for (const c of cases) {
