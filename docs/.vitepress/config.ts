@@ -32,6 +32,7 @@ export default defineConfig({
       { text: 'Fork PRs and security', link: '/security' },
       { text: 'Rules reference', link: '/rules' },
       { text: 'Precision', link: '/precision' },
+      { text: 'How we measure precision', link: '/how-we-measure-precision' },
       { text: 'Design', link: '/design' },
       { text: 'Mutation on request', link: '/mutation-on-request' },
       { text: 'Mutation testing (our own)', link: '/mutation' },
