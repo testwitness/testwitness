@@ -5,9 +5,9 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { check } from 'testwitness';
 import type { Finding, Report } from '@testwitness/core';
 
@@ -39,13 +39,43 @@ export function loadCorpus(root: string): CorpusEntry[] {
   return entries;
 }
 
+/**
+ * Copy an entry tree into the repo by reading and writing each file, never with cpSync.
+ * On Windows cpSync keeps the source file's modification time, and when a head file has the
+ * same size and mtime second as the base file it overwrites, git's index treats it as
+ * unchanged and the head commit silently drops the change. Writing gives every file a fresh
+ * mtime (the same approach as fixtures/runner/golden.ts).
+ */
+function writeTree(from: string, to: string): void {
+  if (!existsSync(from)) return;
+  for (const rel of listFiles(from)) {
+    const target = join(to, rel);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, readFileSync(join(from, rel)));
+  }
+}
+
+function listFiles(dir: string, base = dir): string[] {
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) out.push(...listFiles(p, base));
+    else out.push(relative(base, p));
+  }
+  return out;
+}
+
 export async function runEntry(e: CorpusEntry): Promise<Report> {
   const repo = mkdtempSync(join(tmpdir(), `tw-corpus-${e.slug}-`));
   try {
     git(repo, ['init', '-q', '-b', 'main']);
+    // Byte exact checkouts and no signing prompts, whatever the user's global git config says.
+    git(repo, ['config', 'core.autocrlf', 'false']);
+    git(repo, ['config', 'commit.gpgsign', 'false']);
     const base = join(e.dir, 'files', 'base');
     const head = join(e.dir, 'files', 'head');
-    if (existsSync(base)) cpSync(base, repo, { recursive: true });
+    writeTree(base, repo);
     writeFileSync(join(repo, '.gitkeep'), '');
     git(repo, ['add', '-A']);
     git(repo, ['commit', '-q', '-m', 'base']);
@@ -54,7 +84,7 @@ export async function runEntry(e: CorpusEntry): Promise<Report> {
       if (m.status === 'deleted') rmSync(join(repo, m.path), { force: true });
       if (m.status === 'renamed' && m.oldPath) rmSync(join(repo, m.oldPath), { force: true });
     }
-    if (existsSync(head)) cpSync(head, repo, { recursive: true });
+    writeTree(head, repo);
     git(repo, ['add', '-A']);
     git(repo, ['commit', '-q', '-m', 'head', '--allow-empty']);
     const headSha = git(repo, ['rev-parse', 'HEAD']).trim();
