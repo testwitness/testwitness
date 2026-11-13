@@ -113,3 +113,23 @@ Verified by running (unit 1111 in 65 files, golden fixtures 688 cases in 10 proj
 - Stryker on the engine started 13:35 local in the background (50 minute cap).
 
 Open for Sajjad: first push (docs/launch/push.md), quiet week repositories, study pace option, Maven run on the Mac for the JUnit 5, JaCoCo and PIT fixture output (one command: mvn -B test -Dmaven.test.failure.ignore=true in fixtures/java-junit5-maven/project, then org.pitest:pitest-maven:mutationCoverage for PIT), Maven version for PRODUCER.md.
+
+## 2026-11-13 (long run, cycle 1)
+
+The public repository github.com/testwitness/testwitness is the source of truth; the old bundle is retired. Public main holds PR 1 (CI on ubuntu, windows and macos, Node 22 for development, "check" aggregate job) and PR 2 (bin path, portable pack:check, docs build). It was pushed from the 4 Nov 05:20 state, so twelve commits made on 4 and 5 Nov were not public. They are ported onto main on branch port/day4-afternoon: report schema and MCP server, helper index, C001 to C003 and V008, run history, mutation on request, TAP and JSON results, the independent review hardening, Stryker fixes.
+
+Found while porting:
+- packages/core/src/coverage/ and the seven V008 fixture coverage files had never been committed anywhere, because .gitignore ignored every directory named coverage/ and reports/. The ignore rules are now anchored at the root (/coverage/, /reports/) and the files are in the C rules commit.
+- PR 1's Windows glob fix and the hardening rewrite of loadEvidence collided; the conversion now lives in one splitGlobs helper used by results, coverage and mutation.
+- The fixture runner globs for coverage, mutation and results use forward slashes like the JUnit glob.
+- pack:check steps added after PR 2 spawned the bin directly; they now go through node and bin/testwitness.js like the portable runner.
+- action.yml declared runs.using node20. GitHub removed node20 from hosted runners on 23 Sep 2026, so the Action is moved to node24 on its own branch fix/action-node24 (bundle target node24 too; the npm CLI still supports Node 20).
+- Commit authors on the port are reset to the noreply address.
+
+Verified on the port branch (Node 22, this container): typecheck and lint clean, unit 1111 in 55 files, golden fixtures 698 in 10 files, docs site builds, pack:check passing, actionlint clean apart from the expected dist/index.js note for uses: ./ in the dogfood workflow (it builds the bundle first).
+
+Running: study sampler (old workspace, resumes from its checkpoint at 146 of 650), Stryker on the port branch (14,203 mutants), and five parallel agents on their own branches: complaint research (Track B), corpus to 300 (corpus/expand-300), CRLF fixtures and Windows path tests (fix/crlf-windows), benchmarks on three sizes in CI (ci/bench-matrix), real world replay on 20 repositories (trial/replay).
+
+Delivery: patches and one apply.sh per batch in ~/Project AI Builder/testwitness/outbox/<date>-<n>/; Sajjad runs one line; decisions in DECISIONS.md.
+
+Resume from here: `git clone https://github.com/testwitness/testwitness`, check open PRs, then the branches named above in /home/claude/work/<branch with slash replaced by dash>.
