@@ -1,0 +1,14 @@
+diff --git a/test/production/app-dir/sync-io-blocks-root/sync-io-blocks-root.test.ts b/test/production/app-dir/sync-io-blocks-root/sync-io-blocks-root.test.ts
+index d4cddaa87..a7e57f6df 100644
+--- a/test/production/app-dir/sync-io-blocks-root/sync-io-blocks-root.test.ts
++++ b/test/production/app-dir/sync-io-blocks-root/sync-io-blocks-root.test.ts
+@@ -1,6 +1,8 @@
+ import { nextTestSetup } from 'e2e-utils'
+ 
+-describe('sync IO that blocks the root', () => {
++// TODO(lubieowoce): reenable when the cause of flakiness is found and fixed
++// (seems to have increased sharply around 2026-08-24/25)
++describe.skip('sync IO that blocks the root', () => {
+   const { next } = nextTestSetup({
+     files: __dirname,
+     skipStart: true,

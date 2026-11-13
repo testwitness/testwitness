@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/TanStack/query/pull/4381",
+  "repo": "TanStack/query",
+  "number": 4381,
+  "title": "stabilize a flaky test for isFetchedAfterMount",
+  "merged_at": "2022-10-28T09:54:17Z",
+  "stars": 50514,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "99119a581486fea37c8b30af299861ed4dc47c68",
+  "head_sha": "25ffa082d648a152d1fc58a2419467a6a54269df",
+  "files_changed": 1,
+  "additions": 19,
+  "deletions": 16
+}

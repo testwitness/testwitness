@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/trinodb/trino/pull/31720",
+  "repo": "trinodb/trino",
+  "number": 31720,
+  "title": "Fix flaky TestHttpTokenPoller.testHttpStatus503",
+  "merged_at": "2026-10-22T10:56:28Z",
+  "stars": 13424,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "e76d788b1099d71dcaa917208b3dc4ffa16d24f8",
+  "head_sha": "3053e6565fe626f93a60f040ee65613fb6cea5da",
+  "files_changed": 1,
+  "additions": 14,
+  "deletions": 1
+}

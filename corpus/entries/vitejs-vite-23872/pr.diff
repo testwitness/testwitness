@@ -1,0 +1,218 @@
+diff --git a/playground/assets/__tests__/assets.spec.ts b/playground/assets/__tests__/assets.spec.ts
+index 91342b1..116b0da 100644
+--- a/playground/assets/__tests__/assets.spec.ts
++++ b/playground/assets/__tests__/assets.spec.ts
+@@ -17,6 +17,7 @@ import {
+   readManifest,
+   serverLogs,
+   viteTestUrl,
++  waitForRebuild,
+   watcher,
+ } from '~utils'
+ 
+@@ -883,7 +884,7 @@ describe.runIf(isBuild)('css and assets in css in build watch', () => {
+   test('import module.css', async () => {
+     expect(await getColor('#foo')).toBe('red')
+     editFile('css/foo.module.css', (code) => code.replace('red', 'blue'))
+-    await notifyRebuildComplete(watcher)
++    await waitForRebuild('css/foo.module.css')
+     await page.reload()
+     expect(await getColor('#foo')).toBe('blue')
+   })
+@@ -891,7 +892,7 @@ describe.runIf(isBuild)('css and assets in css in build watch', () => {
+   test('import with raw query', async () => {
+     expect(await page.textContent('.raw-query')).toBe('foo')
+     editFile('static/foo.txt', (code) => code.replace('foo', 'zoo2'))
+-    await notifyRebuildComplete(watcher)
++    await waitForRebuild('static/foo.txt')
+     await page.reload()
+     expect(await page.textContent('.raw-query')).toBe('zoo2')
+   })
+diff --git a/playground/legacy/__tests__/watch/legacy-styles-only-entry-watch.spec.ts b/playground/legacy/__tests__/watch/legacy-styles-only-entry-watch.spec.ts
+index ad8444c..294995e 100644
+--- a/playground/legacy/__tests__/watch/legacy-styles-only-entry-watch.spec.ts
++++ b/playground/legacy/__tests__/watch/legacy-styles-only-entry-watch.spec.ts
+@@ -1,12 +1,10 @@
+-import { setTimeout } from 'node:timers/promises'
+ import { expect, test } from 'vitest'
+ import {
+   editFile,
+   findAssetFile,
+   isBuild,
+-  notifyRebuildComplete,
+   readManifest,
+-  watcher,
++  waitForRebuild,
+ } from '~utils'
+ 
+ test.runIf(isBuild)('rebuilds styles only entry on change', async () => {
+@@ -23,10 +21,7 @@ test.runIf(isBuild)('rebuilds styles only entry on change', async () => {
+   editFile('style-only-entry.css', (originalContents) =>
+     originalContents.replace('#ff69b4', '#ffb6c1 '),
+   )
+-  await notifyRebuildComplete(watcher)
+-  // wait for both "output" to complete, workaround for https://github.com/rolldown/rolldown/issues/10613
+-  await Promise.race([notifyRebuildComplete(watcher), setTimeout(100)])
+-
++  await waitForRebuild('style-only-entry.css')
+   const updatedManifest = readManifest('watch')
+   expect(Object.keys(updatedManifest)).toHaveLength(numberOfManifestEntries)
+ 
+diff --git a/playground/test-utils.ts b/playground/test-utils.ts
+index f363b06..825b75e 100644
+--- a/playground/test-utils.ts
++++ b/playground/test-utils.ts
+@@ -26,6 +26,7 @@ import {
+   sourcemapSnapshot,
+   testDir,
+   viteServer,
++  watchBuilds,
+ } from './vitestSetup'
+ 
+ export * from './vitestSetup'
+@@ -291,6 +292,32 @@ export async function gotoLatestBuild(url: string): Promise<void> {
+   await page.goto(url)
+ }
+ 
++/**
++ * Wait for every output containing the edited module to finish rebuilding.
++ * Workaround for Rolldown emitting END per output before all outputs finish:
++ * https://github.com/rolldown/rolldown/issues/10613
++ * Call immediately after a synchronous edit, before yielding to watcher callbacks.
++ */
++export async function waitForRebuild(filename: string): Promise<void> {
++  const id = path.resolve(testDir, filename)
++  const builds = watchBuilds
++    .filter((build) => build.files.has(id))
++    .map((build) => ({
++      build,
++      version: build.invalidated.get(id) ?? 0,
++    }))
++  if (!builds.length) {
++    throw new Error(`No build output contains "${filename}"`)
++  }
++  await expect
++    .poll(() =>
++      builds.every(
++        ({ build, version }) => (build.completed.get(id) ?? 0) > version,
++      ),
++    )
++    .toBe(true)
++}
++
+ export function hotUpdatedLog(file: string): string {
+   return isBundledDev
+     ? `[vite] hot updated: ${normalizePath(path.relative(process.cwd(), testDir))}/${file}`
+diff --git a/playground/vitestSetup.ts b/playground/vitestSetup.ts
+index 0d9e028..6ab78d6 100644
+--- a/playground/vitestSetup.ts
++++ b/playground/vitestSetup.ts
+@@ -12,6 +12,7 @@ import type {
+   ConfigEnv,
+   InlineConfig,
+   Logger,
++  Plugin,
+   PluginOption,
+   ResolvedConfig,
+   UserConfig,
+@@ -115,6 +116,13 @@ export let browser: Browser = undefined!
+ export let viteTestUrl: string = ''
+ export let watcher: RolldownWatcher | undefined = undefined
+ 
++export const watchBuilds: {
++  files: Set<string>
++  invalidated: Map<string, number>
++  written: Map<string, number>
++  completed: Map<string, number>
++}[] = []
++
+ export function setViteUrl(url: string): void {
+   viteTestUrl = url
+ }
+@@ -360,7 +368,7 @@ export async function startDefaultServe(): Promise<void> {
+     const buildConfig = mergeConfig(
+       await loadConfig({ command: 'build', mode: 'production' }),
+       {
+-        plugins: [resolvedPlugin()],
++        plugins: [resolvedPlugin(), buildWatchPlugin()],
+       },
+     )
+     if (buildConfig.builder) {
+@@ -396,6 +404,77 @@ export async function startDefaultServe(): Promise<void> {
+   }
+ }
+ 
++// Workaround for Rolldown emitting END per output before all outputs finish:
++// https://github.com/rolldown/rolldown/issues/10613
++function buildWatchPlugin(): Plugin {
++  let subscribedWatcher: RolldownWatcher | undefined
++  const onEvent = (event: RolldownWatcherEvent): void => {
++    for (const state of watchBuilds) {
++      if (event.code === 'END') state.completed = state.written
++      if (event.code === 'ERROR') state.written = state.completed
++    }
++  }
++  return {
++    name: 'test-watch-builds',
++    buildStart() {
++      // The initial build can start before build() returns the watcher.
++      if (this.meta.watchMode && watcher && subscribedWatcher !== watcher) {
++        subscribedWatcher = watcher
++        subscribedWatcher.on('event', onEvent)
++      }
++    },
++    closeWatcher() {
++      subscribedWatcher?.off('event', onEvent)
++      subscribedWatcher = undefined
++    },
++    options(options) {
++      if (!this.meta.watchMode) return
++
++      // Rolldown creates a separate watch task for each output.
++      const state = {
++        files: new Set<string>(),
++        invalidated: new Map<string, number>(),
++        written: new Map<string, number>(),
++        completed: new Map<string, number>(),
++      }
++      watchBuilds.push(state)
++      let building = new Map<string, number>()
++      const watch = options.watch || {}
++      return {
++        ...options,
++        watch: {
++          ...watch,
++          onInvalidate(id) {
++            const filename = path.normalize(id)
++            state.invalidated.set(
++              filename,
++              (state.invalidated.get(filename) ?? 0) + 1,
++            )
++            watch.onInvalidate?.(id)
++          },
++        },
++        plugins: [
++          options.plugins,
++          {
++            name: 'test-watch-build-completion',
++            buildStart() {
++              building = new Map(state.invalidated)
++            },
++            writeBundle() {
++              state.files = new Set(
++                [...this.getModuleIds()].map((id) =>
++                  path.normalize(id.split('?')[0]),
++                ),
++              )
++              state.written = building
++            },
++          },
++        ],
++      }
++    },
++  }
++}
++
+ /**
+  * Send the rebuild complete message in build watch
+  */

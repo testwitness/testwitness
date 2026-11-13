@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/94196",
+  "repo": "vercel/next.js",
+  "number": 94196,
+  "title": "test: skip flaky instant-nav-panel tests",
+  "merged_at": "2026-05-28T13:31:48Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "1bc1da711cd0699b620716b204b480485274ff05",
+  "head_sha": "9cfc8fc00b2f0f9d98590b41b29fb2df442b8462",
+  "files_changed": 1,
+  "additions": 2,
+  "deletions": 1
+}

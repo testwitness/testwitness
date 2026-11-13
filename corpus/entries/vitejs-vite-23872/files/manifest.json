@@ -1,0 +1,18 @@
+[
+  {
+    "path": "playground/assets/__tests__/assets.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "playground/legacy/__tests__/watch/legacy-styles-only-entry-watch.spec.ts",
+    "status": "modified"
+  },
+  {
+    "path": "playground/test-utils.ts",
+    "status": "modified"
+  },
+  {
+    "path": "playground/vitestSetup.ts",
+    "status": "modified"
+  }
+]

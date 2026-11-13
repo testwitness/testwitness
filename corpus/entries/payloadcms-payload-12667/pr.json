@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/payloadcms/payload/pull/12667",
+  "repo": "payloadcms/payload",
+  "number": 12667,
+  "title": "ci: skip flaky test on supabase",
+  "merged_at": "2025-06-03T20:24:15Z",
+  "stars": 45799,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "2bd098c9eadb6d987ee560d9f6bd4b425324083f",
+  "head_sha": "0d4b7935ecd822a02937f3f96c1754f66be2fa0d",
+  "files_changed": 1,
+  "additions": 6,
+  "deletions": 0
+}

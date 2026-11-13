@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/mui/material-ui/pull/49024",
+  "repo": "mui/material-ui",
+  "number": 49024,
+  "title": "[Select] Fix flaky opening mouseup timing",
+  "merged_at": "2026-09-07T13:32:43Z",
+  "stars": 99292,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "f4358d45ebd9db5c2a6ee94b8ed9215760d0c735",
+  "head_sha": "664b7566e19c609456d4784380e6ddb878ce06ff",
+  "files_changed": 2,
+  "additions": 12,
+  "deletions": 7
+}

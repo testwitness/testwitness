@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".github/workflows/ci.yml",
+    "status": "modified"
+  },
+  {
+    "path": ".github/workflows/pr.yml",
+    "status": "modified"
+  }
+]

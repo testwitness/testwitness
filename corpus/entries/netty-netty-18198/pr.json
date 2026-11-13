@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/netty/netty/pull/18198",
+  "repo": "netty/netty",
+  "number": 18198,
+  "title": "Fix flaky SSLEngineTest.testSessionInvalidate with Conscrypt",
+  "merged_at": "2026-10-31T15:20:44Z",
+  "stars": 35073,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "d86ca4993262d041ff0744ead6d36394bb8175b3",
+  "head_sha": "294415017a94843beca3d9f8fd4553fc3e564c6d",
+  "files_changed": 1,
+  "additions": 20,
+  "deletions": 4
+}

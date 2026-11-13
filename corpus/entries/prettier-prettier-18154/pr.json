@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/prettier/prettier/pull/18154",
+  "repo": "prettier/prettier",
+  "number": 18154,
+  "title": "Remove flaky test",
+  "merged_at": "2025-10-30T14:39:44Z",
+  "stars": 52408,
+  "license": "MIT",
+  "language": "javascript",
+  "category": "R001",
+  "split": "tuning",
+  "base_sha": "e5118b26506c0f1d61ca122b9950615886005051",
+  "head_sha": "aa3363df7fd8eb48dbd7c5e499e730fde62a1a3e",
+  "files_changed": 1,
+  "additions": 0,
+  "deletions": 29
+}

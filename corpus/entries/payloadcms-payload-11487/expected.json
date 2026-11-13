@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R003",
+    "severity": "medium",
+    "subject": "Config \u203a bin config \u203a should execute a custom script",
+    "verdict": "tp",
+    "reason": "it.skip for flakiness"
+  }
+]

@@ -1,0 +1,13 @@
+diff --git a/test/config/int.spec.ts b/test/config/int.spec.ts
+index c3a843cc..0b6b5688 100644
+--- a/test/config/int.spec.ts
++++ b/test/config/int.spec.ts
+@@ -129,7 +129,7 @@ describe('Config', () => {
+       }
+     }
+ 
+-    it('should execute a custom script', () => {
++    it.skip('should execute a custom script', () => {
+       deleteTestFile()
+       executeCLI('start-server')
+       expect(JSON.parse(readFileSync(testFilePath, 'utf-8')).docs).toHaveLength(1)

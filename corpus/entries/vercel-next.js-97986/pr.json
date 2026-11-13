@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vercel/next.js/pull/97986",
+  "repo": "vercel/next.js",
+  "number": 97986,
+  "title": "test: disable flaky sync-io-blocks-root.test.ts",
+  "merged_at": "2026-08-27T15:27:43Z",
+  "stars": 143460,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "R003",
+  "split": "tuning",
+  "base_sha": "d42ea11842b0182266314272902972f960f0c3c1",
+  "head_sha": "7c66491f83171477b7865a893bee54d02dbe74ce",
+  "files_changed": 1,
+  "additions": 3,
+  "deletions": 1
+}

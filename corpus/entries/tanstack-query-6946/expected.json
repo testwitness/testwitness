@@ -1,0 +1,23 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "queryClient \u203a setQueryData \u203a should set 10k data in less than 500ms",
+    "verdict": "tp",
+    "reason": "performance test deleted"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "queryClient \u203a getQueryData \u203a should get 10k queries in less than 500ms",
+    "verdict": "tp",
+    "reason": "performance test deleted"
+  },
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "queryClient \u203a getQueryState \u203a should get 10k queries in less than 500ms",
+    "verdict": "tp",
+    "reason": "performance test deleted"
+  }
+]

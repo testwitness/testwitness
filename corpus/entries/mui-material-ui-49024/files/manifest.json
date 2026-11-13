@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/mui-material/src/Select/Select.test.js",
+    "status": "modified"
+  },
+  {
+    "path": "packages/mui-material/src/Select/SelectInput.js",
+    "status": "modified"
+  }
+]

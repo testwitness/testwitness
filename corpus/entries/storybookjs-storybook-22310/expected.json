@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "Next.js \u203a next/image \u203a should eager load images when loading parameter is set to eager",
+    "verdict": "tp",
+    "reason": "test commented out"
+  }
+]

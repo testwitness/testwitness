@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/hudi/pull/19356",
+  "repo": "apache/hudi",
+  "number": 19356,
+  "title": "test(spark): Fix flaky TestSparkFilterHelper by giving it its own SparkSession",
+  "merged_at": "2026-07-23T07:35:42Z",
+  "stars": 6347,
+  "license": "Apache-2.0",
+  "language": "scala",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "f25e0799c5b73e8b77d777910dab78859406b1c5",
+  "head_sha": "62878e82296fd14248656f5ff749f993a8fc8c81",
+  "files_changed": 1,
+  "additions": 11,
+  "deletions": 1
+}

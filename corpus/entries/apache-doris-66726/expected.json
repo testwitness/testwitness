@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "R001",
+    "severity": "medium",
+    "subject": "MetaServiceHttpTest#ShortGetTabletStatsDebugStringTest",
+    "verdict": "tp",
+    "reason": "gtest TEST deleted"
+  }
+]

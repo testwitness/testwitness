@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/backend-defaults/src/entrypoints/auth/plugin/keys/DatabaseKeyStore.test.ts",
+    "status": "modified"
+  },
+  {
+    "path": "plugins/events-backend/src/service/hub/DatabaseEventBusStore.test.ts",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/backstage/backstage/pull/34444",
+  "repo": "backstage/backstage",
+  "number": 34444,
+  "title": "fix: increase timing thresholds in CI-flaky database tests",
+  "merged_at": "2026-05-29T15:36:39Z",
+  "stars": 34838,
+  "license": "Apache-2.0",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "c2f9d8c25d3f4725f0ad6fc568f3cb46e527f8c6",
+  "head_sha": "496982782b21b897f04e782a682f23d5e29817b6",
+  "files_changed": 2,
+  "additions": 11,
+  "deletions": 9
+}

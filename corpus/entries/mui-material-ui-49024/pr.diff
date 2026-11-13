@@ -1,0 +1,59 @@
+diff --git a/packages/mui-material/src/Select/Select.test.js b/packages/mui-material/src/Select/Select.test.js
+index e675791f..6e18710c 100644
+--- a/packages/mui-material/src/Select/Select.test.js
++++ b/packages/mui-material/src/Select/Select.test.js
+@@ -256,7 +256,8 @@ describe('<Select />', () => {
+       await user.pointer({ keys: '[MouseLeft>]', target: trigger });
+ 
+       await act(async () => {
+-        await sleep(450);
++        // Well past the 400ms selected-item window; a tight margin flakes on slow CI.
++        await sleep(700);
+       });
+ 
+       await user.pointer({
+@@ -283,7 +284,8 @@ describe('<Select />', () => {
+       await user.pointer({ keys: '[MouseLeft>]', target: trigger });
+ 
+       await act(async () => {
+-        await sleep(250);
++        // Well past the 200ms drag window; a tight margin flakes on slow CI.
++        await sleep(400);
+       });
+       await user.pointer({
+         keys: '[/MouseLeft]',
+@@ -332,7 +334,8 @@ describe('<Select />', () => {
+       await user.pointer({ keys: '[MouseLeft>]', target: trigger });
+ 
+       await act(async () => {
+-        await sleep(250);
++        // Well past the 200ms drag window; a tight margin flakes on slow CI.
++        await sleep(400);
+       });
+       await user.pointer({
+         keys: '[/MouseLeft]',
+diff --git a/packages/mui-material/src/Select/SelectInput.js b/packages/mui-material/src/Select/SelectInput.js
+index 7c6c82f9..ca6a2876 100644
+--- a/packages/mui-material/src/Select/SelectInput.js
++++ b/packages/mui-material/src/Select/SelectInput.js
+@@ -383,14 +383,16 @@ const SelectInput = React.forwardRef(function SelectInput(props, ref) {
+         selectionRef.current.allowUnselectedMouseUp = true;
+       });
+     } else {
++      // Both timers start from the mousedown. Chaining the selected timer inside the
++      // unselected callback would compound setTimeout jitter past the 400ms window.
+       // mousedown -> move to unselected item -> mouseup should not select within 200ms.
+       unselectedMouseUpTimer.start(UNSELECTED_MOUSE_UP_DELAY, () => {
+         selectionRef.current.allowUnselectedMouseUp = true;
++      });
+ 
+-        // mousedown -> mouseup on selected item should not select within 400ms.
+-        selectedMouseUpTimer.start(UNSELECTED_MOUSE_UP_DELAY, () => {
+-          selectionRef.current.allowSelectedMouseUp = true;
+-        });
++      // mousedown -> mouseup on selected item should not select within 400ms.
++      selectedMouseUpTimer.start(SELECTED_MOUSE_UP_DELAY, () => {
++        selectionRef.current.allowSelectedMouseUp = true;
+       });
+     }
+   };

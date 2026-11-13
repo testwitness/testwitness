@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apollographql/apollo-client/pull/12443",
+  "repo": "apollographql/apollo-client",
+  "number": 12443,
+  "title": "Disable warnings in mocks to fix flaky test",
+  "merged_at": "2025-03-14T20:01:23Z",
+  "stars": 19779,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "cc6cc1e80dbb82a1a1a1b0f850f8a5d9217bedd3",
+  "head_sha": "cc52d414757f4a432844ae035565f9cee42685af",
+  "files_changed": 1,
+  "additions": 17,
+  "deletions": 14
+}

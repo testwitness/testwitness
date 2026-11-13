@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/apache/doris/pull/65445",
+  "repo": "apache/doris",
+  "number": 65445,
+  "title": "[test](nereids) Replace flaky null stats case with unit test",
+  "merged_at": "2026-07-13T09:40:41Z",
+  "stars": 16178,
+  "license": "Apache-2.0",
+  "language": "java",
+  "category": "flaky",
+  "split": "tuning",
+  "base_sha": "0af6eaca00c8ac60282dd133b2eca159be09c6c6",
+  "head_sha": "ea04ab637a2fd3877573729cc2729a01476d36b9",
+  "files_changed": 2,
+  "additions": 75,
+  "deletions": 60
+}

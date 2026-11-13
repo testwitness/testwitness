@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/vitejs/vite/pull/22786",
+  "repo": "vitejs/vite",
+  "number": 22786,
+  "title": "test: mock vite.dev to avoid flaky failure",
+  "merged_at": "2026-06-26T14:48:58Z",
+  "stars": 83652,
+  "license": "MIT",
+  "language": "typescript",
+  "category": "flaky",
+  "split": "heldout",
+  "base_sha": "84f5cccc7574c740c46f5cb2a09f29cde8380701",
+  "head_sha": "a218434d48e97e1322cda4ab02dac059c96a395f",
+  "files_changed": 1,
+  "additions": 8,
+  "deletions": 0
+}
