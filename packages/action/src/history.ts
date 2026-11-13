@@ -42,6 +42,7 @@ export async function downloadBaseHistory(token: string | undefined, artifactNam
     const { data: runs } = await octokit.rest.actions.listWorkflowRuns({ owner, repo, workflow_id: current.workflow_id, branch: baseRef, status: 'success', per_page: RUNS_TO_SEARCH });
     for (const run of runs.workflow_runs) {
       if (run.id === runId) continue;
+      if (!isTrustedHistoryRun(run, owner, repo)) continue;
       const { data: arts } = await octokit.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id: run.id, name: artifactName, per_page: 10 });
       const art = arts.artifacts.find((a) => a.name === artifactName && !a.expired);
       if (!art) continue;
@@ -62,6 +63,19 @@ export async function downloadBaseHistory(token: string | undefined, artifactNam
     core.info(`History: could not read the ${artifactName} artifact of ${baseRef} (the token needs actions: read; fork pull requests may not have it): ${(err as Error).message}. Severities do not use earlier runs.`);
   }
   return undefined;
+}
+
+/**
+ * Events whose runs may supply the history. The `branch` filter of listWorkflowRuns matches the run's head branch,
+ * and a pull request from a fork whose branch is also named `main` runs this workflow with head branch `main`, using
+ * the workflow file of the pull request, which can upload any artifact under the history's name. Only runs of this
+ * repository on events a pull request cannot start are read.
+ */
+const HISTORY_EVENTS = new Set(['push', 'schedule', 'workflow_dispatch']);
+
+/** A workflow run whose history artifact can be trusted: started by a push (or schedule, or dispatch) in this repository. */
+export function isTrustedHistoryRun(run: { event?: string | null; head_repository?: { full_name?: string | null } | null }, owner: string, repo: string): boolean {
+  return HISTORY_EVENTS.has(run.event ?? '') && run.head_repository?.full_name?.toLowerCase() === `${owner}/${repo}`.toLowerCase();
 }
 
 /** True on a push to the repository's default branch. */

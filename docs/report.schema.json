@@ -661,6 +661,7 @@
         "replaced by call",
         "rewritten",
         "smoke",
+        "too large",
         "tracked",
         "uncovered change",
         "unreadable",

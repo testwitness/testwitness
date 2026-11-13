@@ -116,8 +116,13 @@ describe('renderMarkdown findings', () => {
   it('escapes markdown and newlines in messages and locations', () => {
     const md = renderMarkdown(report({ findings: [finding({ message: 'Test `x` | y\nz <b>', location: { path: 'a_b.test.ts', line: 1 } })] }));
     expect(md).toContain('Test \\`x\\` \\| y z \\<b\\>');
-    expect(md).toContain('`a\\_b.test.ts:1`');
+    // A code span shows backslashes literally, so the path is not escaped inside it.
+    expect(md).toContain('`a_b.test.ts:1`');
     expect(md).not.toContain('y\nz');
+  });
+  it('keeps a hostile path inside its code span and its table cell', () => {
+    const md = renderMarkdown(report({ findings: [finding({ location: { path: 'a` [x](https://evil.test) |b.test.ts', line: 2 } })] }));
+    expect(md).toContain("| `a' [x](https://evil.test) \\|b.test.ts:2` |");
   });
   it('keeps low rows in the main table when collapseLow is off', () => {
     const md = renderMarkdown(report({ findings: [finding({ severity: 'low', message: 'low one' })] }));

@@ -147,7 +147,7 @@ describe('runEngine', () => {
   it('paths.ignore excludes a file from inventories', async () => {
     const { pairs } = await runEngine(opts());
     expect(pairs.map((p) => p.file.path)).toEqual(['src/calc.test.ts']);
-    const { pairs: all } = await runEngine(opts({ config: { ...cfg(), paths: { tests: [], ignore: [] } } }));
+    const { pairs: all } = await runEngine(opts({ config: { ...cfg(), paths: { tests: [], ignore: [], followSymlinks: false } } }));
     expect(all.map((p) => p.file.path).sort()).toEqual(['src/calc.test.ts', 'vendor/dist/ignored.test.ts']);
   });
 

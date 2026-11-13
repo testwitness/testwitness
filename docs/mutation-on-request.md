@@ -55,7 +55,7 @@ The shell format is a list of single quoted assignments (`STRYKER_MUTATE`, `PIT_
 
 An `issue_comment` workflow runs the workflow file of the default branch with the base repository's token and secrets, whoever wrote the pull request. GitHub's setting that holds fork workflows for approval does not apply to it. So the template treats fork pull requests as untrusted code that a maintainer has to approve commit by commit:
 
-- The comment must name the head commit the maintainer reviewed: `/testwitness mutate 1a2b3c4d`. A bare `/testwitness mutate` on a fork pull request is refused with the sha to use.
+- The comment must name the head commit the maintainer reviewed, at least 12 hex digits: `/testwitness mutate 1a2b3c4d5e6f`. A shorter prefix can be matched by a commit ground out and pushed after the review. A bare `/testwitness mutate` on a fork pull request is refused with the sha to use.
 - If the head moved after the comment, the gate refuses and asks for a new comment, and the mutate job checks out exactly the gated commit, so a push between the comment and the checkout is never run.
 - The mutate job has `contents: read` and nothing else, no secrets, `persist-credentials: false`, and no `cache:` on any setup step: a cache saved by an `issue_comment` run is scoped to the default branch, so code from the pull request could otherwise plant it for later trusted runs.
 - The report job never runs a step of its own, uses the published Action (never `uses: ./`), and treats the artifact as untrusted data: the readers only parse it, within the caps.

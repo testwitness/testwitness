@@ -35,6 +35,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--history <file>', 'run history JSON from earlier runs; severities then depend on what tests did before (docs/history.md)')
     .option('--history-out <file>', 'write the run history with this run merged in')
     .option('--run-id <id>', 'id of this run in the history (default GITHUB_RUN_ID, then local-<head sha>)')
+    .option('--follow-symlinks', 'follow symbolic links in the results, coverage, mutation and history paths (for Bazel style layouts; default from config paths.followSymlinks, off)')
     .option('--cwd <dir>', 'repository directory', process.cwd())
     .option('-q, --quiet', 'no progress on stderr', false)
     .action(async (o) => {
@@ -60,6 +61,7 @@ export async function main(argv: string[]): Promise<number> {
           history: o.history,
           historyOut: o.historyOut,
           runId: o.runId,
+          ...(o.followSymlinks ? { followSymlinks: true } : {}),
         });
         const text = render(report, o.format, config.comment.collapseLow);
         if (o.out) await writeFile(resolve(o.cwd, o.out), text);

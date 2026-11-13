@@ -114,7 +114,8 @@ function indentOf(line: string): { level: number; text: string; spaces: number }
     else if (line[i] === '\t') spaces += 4;
     else break;
   }
-  return { level: Math.floor(spaces / 4), text: line.slice(i).replace(/\s+$/, ''), spaces };
+  // trimEnd, not /\s+$/: the regex is quadratic on a line with a long run of inner spaces (8 s for 100 kB).
+  return { level: Math.floor(spaces / 4), text: line.slice(i).trimEnd(), spaces };
 }
 
 /** A line based TAP parser. Feed lines with `line()`, then call `end()`. Never throws on any input. */

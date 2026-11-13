@@ -51,12 +51,32 @@ export const CONFIG_SUPPRESSORS: Suppressor[] = [
   { re: /<skip>\s*true\s*<\/skip>/, what: '<skip>true' },
   { re: /<maven\.test\.skip>\s*true\s*<\/maven\.test\.skip>/, what: '<maven.test.skip>true' },
   { re: /\btest\s*\{\s*enabled\s*=\s*false/, what: 'test { enabled = false }' },
-  { re: /\btasks\.(test|withType<Test>)\s*\{[^}]*enabled\s*=\s*false/, what: 'test task disabled' },
+  // `(?:(?!X)[^}])*X` reaches only the first header of a brace free run, so repeated headers cannot make it quadratic.
+  { re: /(?:^|\})(?:(?!\btasks\.(?:test|withType<Test>)\s*\{)[^}])*\btasks\.(test|withType<Test>)\s*\{[^}]*enabled\s*=\s*false/, what: 'test task disabled' },
 ];
 
 /** Quoted strings are not commands: `echo "run pytest now"` is not a test run. */
 export function stripQuoted(line: string): string {
-  return line.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""');
+  // A scanner, not /"(?:\\.|[^"\\])*"|.../g: that regex rescans to the end of the line from every unclosed quote,
+  // quadratic on a hostile line (5 s for 100 kB). Same result: once a quote of one kind has no closing quote, no later
+  // quote of that kind has one either, so it is not searched again.
+  let out = '';
+  const unclosed = new Set<string>();
+  for (let i = 0; i < line.length; i++) {
+    const q = line[i]!;
+    if ((q === '"' || q === "'") && !unclosed.has(q)) {
+      let j = i + 1;
+      while (j < line.length && line[j] !== q) j += line[j] === '\\' ? 2 : 1;
+      if (j < line.length) {
+        out += '""';
+        i = j;
+        continue;
+      }
+      unclosed.add(q);
+    }
+    out += q;
+  }
+  return out;
 }
 
 function isTestCommandLine(line: string): boolean {
@@ -130,17 +150,19 @@ export const W003: Rule = {
 };
 
 export const SNAPSHOT_UPDATE: Suppressor[] = [
-  { re: /\b(jest|vitest)\b[^|&;]*\s(-u|--updateSnapshot|--update)\b/, what: '-u' },
-  { re: /\bjest\b[^|&;]*--ci=false\b/, what: '--ci=false' },
+  // The `(?:^|[|&;])(?:(?!\bX\b)[^|&;])*` prefix makes each pattern start only at the first command word of a
+  // pipeline segment: equivalent, and linear on a line that repeats the command word (it was quadratic).
+  { re: /(?:^|[|&;])(?:(?!\b(?:jest|vitest)\b)[^|&;])*\b(jest|vitest)\b[^|&;]*\s(-u|--updateSnapshot|--update)\b/, what: '-u' },
+  { re: /(?:^|[|&;])(?:(?!\bjest\b)[^|&;])*\bjest\b[^|&;]*--ci=false\b/, what: '--ci=false' },
   { re: /\bUPDATE_SNAPSHOTS?=1\b/, what: 'UPDATE_SNAPSHOTS=1' },
   { re: /\bSNAPSHOT_UPDATE=1\b/, what: 'SNAPSHOT_UPDATE=1' },
   { re: /\bUPDATE_EXPECT=1\b/, what: 'UPDATE_EXPECT=1' },
-  { re: /\bpytest\b[^|&;]*--snapshot-update\b/, what: '--snapshot-update' },
-  { re: /\bpytest\b[^|&;]*--force-regen\b/, what: '--force-regen' },
-  { re: /\bplaywright\s+test\b[^|&;]*--update-snapshots\b/, what: '--update-snapshots' },
+  { re: /(?:^|[|&;])(?:(?!\bpytest\b)[^|&;])*\bpytest\b[^|&;]*--snapshot-update\b/, what: '--snapshot-update' },
+  { re: /(?:^|[|&;])(?:(?!\bpytest\b)[^|&;])*\bpytest\b[^|&;]*--force-regen\b/, what: '--force-regen' },
+  { re: /(?:^|[|&;])(?:(?!\bplaywright\s+test\b)[^|&;])*\bplaywright\s+test\b[^|&;]*--update-snapshots\b/, what: '--update-snapshots' },
   { re: /--approve\b/, what: '--approve' },
   { re: /\bupdateSnapshot\s*:\s*['"]?(all|new)['"]?/, what: 'updateSnapshot: all' },
-  { re: /\bsnapshot(s)?\s*:\s*\{[^}]*\bupdate\s*:\s*true/, what: 'snapshot update: true' },
+  { re: /(?:^|\})(?:(?!\bsnapshots?\s*:\s*\{)[^}])*\bsnapshot(s)?\s*:\s*\{[^}]*\bupdate\s*:\s*true/, what: 'snapshot update: true' },
   { re: /\bci\s*:\s*false\b/, what: 'ci: false' },
 ];
 
@@ -196,7 +218,8 @@ export const S004: Rule = {
 /** A workflow line that marks a step as running tests: a run or command line with a test command, or a step name that says so. */
 function isTestStepLine(l: string): boolean {
   if (/^\s*(-\s+)?(run|command):/.test(l) && isTestCommandLine(stripYamlAndJson(l))) return true;
-  return /^\s*(-\s+)?name:\s*.*\b(unit tests?|tests?|specs?|e2e|integration tests?|verify)\b/i.test(l) && !/\b(lint|upload|download|build only|coverage upload)\b/i.test(l);
+  // `name:.*`, not `name:\s*.*`: the overlapping quantifiers were quadratic on a long run of spaces (10 s for 100 kB).
+  return /^\s*(-\s+)?name:.*\b(unit tests?|tests?|specs?|e2e|integration tests?|verify)\b/i.test(l) && !/\b(lint|upload|download|build only|coverage upload)\b/i.test(l);
 }
 
 /** W002 continue-on-error added to a test step or job. */

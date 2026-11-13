@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, lstatSync, realpathSync } from 'node:fs';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import fg from 'fast-glob';
 import {
   exitCodeFor,
@@ -22,6 +22,7 @@ import {
   type HistoryDocument,
   type MutationEvidence,
   type CoverageEvidence,
+  type ChangedFile,
   type Evidence,
   type PullRequestText,
   type Report,
@@ -72,6 +73,12 @@ export interface CheckOptions {
   recordHistory?: boolean;
   /** Id of this run in the history; default GITHUB_RUN_ID, then local-<head sha>. */
   runId?: string | undefined;
+  /**
+   * Follow symbolic links in the results, coverage, mutation and history paths (default from config
+   * paths.followSymlinks, false). Off, a matched file that is a link, or whose real path is outside the repository
+   * (or outside the directory an absolute glob names), is skipped with a note.
+   */
+  followSymlinks?: boolean | undefined;
   /** Index assertion helpers in test support files of the working tree (default true). The environment variable TESTWITNESS_HELPER_INDEX=off also turns it off. */
   helperIndex?: boolean;
   log?: (s: string) => void;
@@ -83,6 +90,9 @@ export interface CheckResult {
   config: ResolvedConfig;
   /** The history with this run merged in, when a history was read or results were read. */
   history?: HistoryDocument;
+  /** The changed files and the evidence the engine graded with, so a caller that changes findings afterwards (the Action's acknowledgements) recomputes the state from the same inputs. */
+  files: ChangedFile[];
+  evidence?: Evidence;
 }
 
 export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
@@ -109,54 +119,146 @@ export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
   return cfg;
 }
 
-export async function loadEvidence(cwd: string, globs: string, log: (s: string) => void): Promise<{ evidence: Evidence | undefined; notes: string[] }> {
-  // fast-glob only understands forward slashes. On Windows a pattern built with path.join
-  // arrives with backslashes, so convert those; a pattern without backslashes is left alone
-  // so that glob syntax such as [abc] keeps its meaning.
-  const patterns = globs
+/** Directories a matched report file may really live in: the repository, and the fixed base of any glob that points outside it. */
+function allowedRoots(cwd: string, patterns: string[]): string[] {
+  const roots = new Set<string>();
+  const real = (p: string): string | undefined => {
+    try {
+      return realpathSync(p);
+    } catch {
+      return undefined;
+    }
+  };
+  const root = real(cwd) ?? resolve(cwd);
+  roots.add(root);
+  for (const pattern of patterns) {
+    const fixed: string[] = [];
+    for (const seg of pattern.split('/')) {
+      if (seg !== '' && fg.isDynamicPattern(seg)) break;
+      fixed.push(seg);
+    }
+    const base = resolve(cwd, fixed.join('/') || '.');
+    const rel = relative(resolve(cwd), base);
+    // Only a glob the workflow wrote with an absolute or `..` base reaches outside the repository on purpose.
+    if (rel.startsWith('..') || isAbsolute(rel)) {
+      const r = real(base);
+      if (r) roots.add(r);
+    }
+  }
+  return [...roots];
+}
+
+/**
+ * Files matching the globs. Without followSymlinks, links are not followed: a matched file that is itself a link, or
+ * whose real path lies outside the allowed roots (through a linked directory), is skipped, so a link committed by a
+ * pull request cannot point the check at a file elsewhere on the runner.
+ */
+export async function matchReportFiles(cwd: string, patterns: string[], followSymlinks: boolean): Promise<{ files: string[]; notes: string[] }> {
+  const opts = { cwd, absolute: true, ignore: ['**/node_modules/**'], dot: true };
+  if (followSymlinks) return { files: (await fg(patterns, { ...opts, onlyFiles: true, followSymbolicLinks: true })).sort(), notes: [] };
+  // Not following links, fast-glob neither enters a linked directory nor reports a linked file as a file; entries are
+  // listed with their types so a linked file can be named in the note.
+  const entries = await fg(patterns, { ...opts, onlyFiles: false, followSymbolicLinks: false, objectMode: true });
+  const roots = allowedRoots(cwd, patterns);
+  const kept: string[] = [];
+  const skipped: string[] = [];
+  for (const e of entries) if (e.dirent.isSymbolicLink()) skipped.push(e.path);
+  // A glob whose fixed base is a link (bazel-testlogs/**) is not entered at all; say so.
+  for (const pattern of patterns) {
+    const fixed: string[] = [];
+    for (const seg of pattern.split('/')) {
+      if (seg !== '' && fg.isDynamicPattern(seg)) break;
+      fixed.push(seg);
+    }
+    const base = resolve(cwd, fixed.join('/') || '.');
+    try {
+      if (fixed.length && lstatSync(base).isSymbolicLink() && !skipped.includes(base)) skipped.push(base);
+    } catch {
+      /* no such base: nothing matched */
+    }
+  }
+  const files = entries.filter((e) => e.dirent.isFile()).map((e) => e.path);
+  for (const f of files.sort()) {
+    let ok = false;
+    try {
+      if (!lstatSync(f).isSymbolicLink()) {
+        const r = realpathSync(f);
+        ok = roots.some((root) => r === root || r.startsWith(root.endsWith(sep) ? root : root + sep));
+      }
+    } catch {
+      ok = false;
+    }
+    if (ok) kept.push(f);
+    else skipped.push(f);
+  }
+  skipped.sort();
+  const notes = skipped.length
+    ? [`${skipped.length} matched path${skipped.length === 1 ? ' was' : 's were'} skipped because ${skipped.length === 1 ? 'it is' : 'they are'} a symbolic link or outside the repository (${skipped.slice(0, 3).map((f) => relative(cwd, f)).join(', ')}${skipped.length > 3 ? ', ...' : ''}); set paths.followSymlinks or --follow-symlinks to read linked outputs`]
+    : [];
+  return { files: kept, notes };
+}
+
+/**
+ * Comma separated globs as fast-glob patterns. fast-glob only understands forward slashes: on
+ * Windows a pattern built with path.join arrives with backslashes, so convert those; a pattern
+ * without backslashes is left alone so that glob syntax such as [abc] keeps its meaning.
+ */
+export function splitGlobs(globs: string, platform: NodeJS.Platform = process.platform): string[] {
+  return globs
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((p) => (process.platform === 'win32' && p.includes('\\') ? fg.convertPathToPattern(p) : p));
+    .map((p) => (platform === 'win32' && p.includes('\\') ? fg.convertPathToPattern(p) : p));
+}
+
+export async function loadEvidence(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<{ evidence: Evidence | undefined; notes: string[] }> {
+  const patterns = splitGlobs(globs);
   if (!patterns.length) return { evidence: undefined, notes: [] };
-  const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
-  if (!files.length) {
+  const matched = await matchReportFiles(cwd, patterns, followSymlinks);
+  for (const n of matched.notes) log(n);
+  if (!matched.files.length) {
     log(`no test results matched ${globs}`);
-    return { evidence: undefined, notes: [] };
+    return { evidence: undefined, notes: matched.notes };
   }
-  const data = await readResultsFiles(files.sort());
+  const data = await readResultsFiles(matched.files);
+  // Cap and link notes first, so they are never cut by the ten warning limit.
+  const all = [...matched.notes, ...data.limits, ...data.warnings];
+  const notes = all.slice(0, 10);
+  if (all.length > 10) notes.push(`${all.length - 10} more warnings`);
   if (!data.sources.length) {
-    for (const w of data.warnings.slice(0, 10)) log(w);
-    return { evidence: undefined, notes: data.warnings.slice(0, 10) };
+    for (const w of notes) log(w);
+    return { evidence: undefined, notes };
   }
-  const notes = data.warnings.slice(0, 10);
-  if (data.warnings.length > 10) notes.push(`${data.warnings.length - 10} more warnings`);
   return { evidence: toEvidence(data), notes };
 }
 
-export async function loadCoverage(cwd: string, globs: string, log: (s: string) => void): Promise<CoverageEvidence | undefined> {
-  const patterns = globs.split(',').map((s) => s.trim()).filter(Boolean);
+export async function loadCoverage(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<CoverageEvidence | undefined> {
+  const patterns = splitGlobs(globs);
   if (!patterns.length) return undefined;
-  const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
-  if (!files.length) {
+  const matched = await matchReportFiles(cwd, patterns, followSymlinks);
+  for (const n of matched.notes) log(n);
+  if (!matched.files.length) {
     log(`no coverage report matched ${globs}`);
     return undefined;
   }
-  const data = await readCoverageFiles(files.sort(), cwd);
+  const data = await readCoverageFiles(matched.files, cwd);
+  data.warnings.unshift(...matched.notes);
   for (const w of data.warnings.slice(0, 10)) log(w);
   if (!data.sources.length) return undefined;
   return toCoverageEvidence(data);
 }
 
-export async function loadMutation(cwd: string, globs: string, log: (s: string) => void): Promise<MutationEvidence | undefined> {
-  const patterns = globs.split(',').map((s) => s.trim()).filter(Boolean);
+export async function loadMutation(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<MutationEvidence | undefined> {
+  const patterns = splitGlobs(globs);
   if (!patterns.length) return undefined;
-  const files = await fg(patterns, { cwd, absolute: true, onlyFiles: true, ignore: ['**/node_modules/**'], dot: true });
-  if (!files.length) {
+  const matched = await matchReportFiles(cwd, patterns, followSymlinks);
+  for (const n of matched.notes) log(n);
+  if (!matched.files.length) {
     log(`no mutation report matched ${globs}`);
     return undefined;
   }
-  const data = await readMutationFiles(files.sort(), cwd);
+  const data = await readMutationFiles(matched.files, cwd);
+  data.warnings.unshift(...matched.notes);
   for (const w of data.warnings.slice(0, 10)) log(w);
   if (!data.sources.length) return undefined;
   return toMutationEvidence(data);
@@ -165,9 +267,10 @@ export async function loadMutation(cwd: string, globs: string, log: (s: string) 
 export async function check(opts: CheckOptions): Promise<CheckResult> {
   const log = opts.log ?? ((s: string) => { if (!opts.quiet) process.stderr.write(`testwitness: ${s}\n`); });
   const config = await loadConfig(opts);
-  const { evidence, notes } = await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log);
-  const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log);
-  const mutation = await loadMutation(opts.cwd, opts.mutation ?? config.mutation.paths.join(','), log);
+  const follow = opts.followSymlinks ?? config.paths.followSymlinks;
+  const { evidence, notes } = await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log, follow);
+  const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log, follow);
+  const mutation = await loadMutation(opts.cwd, opts.mutation ?? config.mutation.paths.join(','), log, follow);
   let prText: PullRequestText | undefined;
   if (opts.prTitle !== undefined || opts.prBodyFile || opts.prBody !== undefined) {
     const body = opts.prBody ?? (opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '');
@@ -176,7 +279,8 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   let history: HistoryDocument | undefined;
   const historyNotes = [...(opts.historyNotes ?? [])];
   if (opts.history) {
-    const read = await readHistoryFile(resolve(opts.cwd, opts.history));
+    const allowed = (await matchReportFiles(opts.cwd, [fg.escapePath(opts.history)], follow)).files.length > 0 || !existsSync(resolve(opts.cwd, opts.history));
+    const read = allowed ? await readHistoryFile(resolve(opts.cwd, opts.history)) : { doc: undefined, error: `history ${opts.history} is a symbolic link or outside the repository; set paths.followSymlinks or --follow-symlinks to read it` };
     if (read.doc) history = read.doc;
     else {
       historyNotes.push(`${read.error}; severities do not use history in this run.`);
@@ -185,7 +289,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   }
   const runAttempt = process.env['GITHUB_RUN_ATTEMPT'];
   const runId = opts.runId ?? (process.env['GITHUB_RUN_ID'] ? `${process.env['GITHUB_RUN_ID']}${runAttempt && runAttempt !== '1' ? `.${runAttempt}` : ''}` : undefined);
-  const { report, history: updated } = await runEngine({
+  const { report, files, history: updated } = await runEngine({
     cwd: opts.cwd,
     base: opts.base,
     head: opts.head,
@@ -213,7 +317,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   } else if (opts.historyOut) {
     log('history: no results were read and no history was given, so no history was written');
   }
-  return { report, exitCode: exitCodeFor(report, config), config, ...(updated ? { history: updated } : {}) };
+  return { report, exitCode: exitCodeFor(report, config), config, files, ...(evidence ? { evidence } : {}), ...(updated ? { history: updated } : {}) };
 }
 
 export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean): string {

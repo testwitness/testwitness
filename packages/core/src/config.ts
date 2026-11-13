@@ -17,7 +17,7 @@ export function defaultConfig(): ResolvedConfig {
     failOn: 'high',
     requireEvidence: false,
     languages: 'auto',
-    paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'] },
+    paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'], followSymlinks: false },
     junit: { head: DEFAULT_JUNIT_GLOB, base: '' },
     coverage: { paths: [] },
     mutation: { paths: [] },
@@ -79,6 +79,11 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
     const ignore = stringList(doc['paths']['ignore'], 'paths.ignore');
     if (tests.length) cfg.paths.tests = tests;
     if (ignore.length) cfg.paths.ignore = [...cfg.paths.ignore, ...ignore];
+    const follow = doc['paths']['followSymlinks'] ?? doc['paths']['follow_symlinks'];
+    if (follow !== undefined) {
+      if (typeof follow !== 'boolean') throw new ConfigError('paths.followSymlinks must be a boolean');
+      cfg.paths.followSymlinks = follow;
+    }
   }
   // `results` is the preferred key; `junit` is its older name and still works. When both are set, `results` wins.
   for (const key of ['junit', 'results'] as const) {

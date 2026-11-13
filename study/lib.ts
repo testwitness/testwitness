@@ -125,7 +125,7 @@ export async function ghSearch<T>(endpoint: 'search/issues' | 'search/repositori
     const r = tryRun('gh', args);
     if (r.ok) return JSON.parse(r.out);
     const msg = (r.err || r.out).slice(0, 300);
-    if (/rate limit|403|secondary|abuse|502|503|timeout/i.test(msg) && attempt < 3) {
+    if (/rate limit|403|secondary|abuse|502|503|504|timeout|connection reset|connection refused|EOF|i\/o timeout|TLS handshake/i.test(msg) && attempt < 3) {
       const wait = 60_000 * (attempt + 1);
       log(`search throttled (${msg.replace(/\s+/g, ' ').slice(0, 120)}), waiting ${wait / 1000}s`);
       await sleep(wait);

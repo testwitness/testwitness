@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
-import { emptyIndex, readJunitFiles, readJunitStream, readJunitString, readResultsFiles, sniffResultsFormat, toEvidence } from './reader.js';
+import { emptyIndex, readJunitFiles, readJunitStream, readJunitString, readResultsFiles, RESULTS_MAX_BYTES, RESULTS_MAX_FILES, sniffResultsFormat, toEvidence } from './reader.js';
 
 const SUREFIRE = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="com.acme.FooTest" time="0.1" tests="4" errors="1" skipped="1" failures="1">
@@ -177,5 +177,26 @@ describe('results of any format, told apart by content', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('caps on results files (review decision)', () => {
+  it('stops at the file cap and skips files past the byte cap, with notes', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tw-caps-'));
+    const files = [0, 1, 2, 3].map((i) => {
+      const p = join(dir, `TEST-${i}.xml`);
+      writeFileSync(p, `<testsuite name="s"><testcase classname="C${i}" name="t"/></testsuite>`);
+      return p;
+    });
+    const byFiles = await readResultsFiles(files, { maxFiles: 2 });
+    expect(byFiles.totals.total).toBe(2);
+    expect(byFiles.limits).toEqual(['results: stopped after 2 files; 2 not read']);
+    const big = join(dir, 'TEST-big.xml');
+    writeFileSync(big, `<testsuite name="s"><testcase classname="Big" name="${'x'.repeat(500)}"/></testsuite>`);
+    const byBytes = await readResultsFiles([files[0]!, big, files[1]!], { maxBytes: 200 });
+    expect(byBytes.totals.total).toBe(2);
+    expect(byBytes.limits[0]).toMatch(/^results: 1 file not read, it would pass the 0 MB cap on results$/);
+    expect(RESULTS_MAX_FILES).toBe(1000);
+    expect(RESULTS_MAX_BYTES).toBe(500 * 1024 * 1024);
   });
 });
