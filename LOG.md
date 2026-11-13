@@ -166,3 +166,11 @@ Verified on int/batch3: typecheck and lint clean, 2842 tests with 2 skipped (77 
 Time to first finding, CLI path: installing the packed tarball into a fresh npm prefix took 0.6 s and `testwitness check --base <base>` on a real merged PR in a cloned repository took 1.7 s, so 2.3 s plus the npm download. The Action path is not measured yet.
 
 Running: study sampler (265 of 650), study fetch for the accepted PRs.
+
+## 2026-11-13 (cycle 4)
+
+PR #3 merged. PR #4 failed on Windows (three tests, two of them the history path and the skipped link note) and its self check flagged the repository's own fixture cases. PR #4 and batches 2 and 3 are replaced by one chain on current main, opened one pull request at a time by the same apply.sh:
+- A: .testwitness.yml ignores the fixture cases, projects and results and corpus/entries/**, and the self check workflow records history on main. It changes the gate, so the self check reports W006 there by design; the author cannot acknowledge W006, so that one check stays red on A only. The required check passes.
+- B: the port and the v0.1 hardening (81 commits, the Windows history path fix among them), plus three fixes found by running the self check here: the skipped link note names paths with forward slashes; paths.ignore reaches every rule, the configuration and workflow rules included (.testwitness.yml itself is never ignored); V003 reads template literal titles in loops as templates and the TypeScript front end reads escapes in quoted titles. Verified: 2819 tests with 2 skipped, corpus report unchanged, pack:check and docs build clean, and the self check run locally against A has no high finding.
+- C: the launch polish, the corpus README note on what an entry means, and a packed tarball no longer committed. Verified: 2846 tests with 2 skipped, corpus report unchanged, pack:check and docs build clean, self check against B passes with no finding.
+Windows and macOS checks cannot be read from here; Sajjad pastes the failing log after each push.

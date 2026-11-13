@@ -4,6 +4,10 @@ Real merged pull requests from public GitHub repositories, collected so the
 rules can be tuned against honest test refactors (false positive controls) and
 checked against a few clearly weakened test changes (true positives).
 
+## What an entry means
+
+An entry is a public pull request kept here so the rules can be measured against it, with a link to the pull request so anyone can check the labels. A finding on an entry is an observation about a diff, not a judgement of the pull request or of the people who wrote and reviewed it. Skipping, moving or removing a test is often the right change, and most entries were picked because they are honest changes a naive detector would get wrong. If you maintain a repository in this corpus and want an entry removed, open an issue or write to the maintainer privately (address in the repository profile), and it will be removed.
+
 ## Method
 
 1. Candidate PRs were found with the GitHub search API (`gh api search/issues`
