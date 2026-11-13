@@ -1,6 +1,7 @@
 export * from './types.js';
 export * from './treesitter.js';
 export * from './hash.js';
+export * from './eol.js';
 export * from './diff/parse.js';
 export * from './diff/classify.js';
 export * from './git.js';
