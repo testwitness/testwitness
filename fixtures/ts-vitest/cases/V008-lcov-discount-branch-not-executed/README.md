@@ -1,0 +1,1 @@
+Positive. src/cart.ts gains a discount branch that no test takes. coverage/lcov.info was written by Vitest 5.0.5 with @vitest/coverage-v8 5.0.5 and the lcov reporter, running the head tree, with paths relative to the run directory. The two lines inside the branch are instrumented and never executed, and the finding is low with the label uncovered change.

@@ -19,6 +19,7 @@ export function defaultConfig(): ResolvedConfig {
     languages: 'auto',
     paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'] },
     junit: { head: DEFAULT_JUNIT_GLOB, base: '' },
+    coverage: { paths: [] },
     assertions: { extra: [] },
     rules: {},
     acknowledge: [],
@@ -88,6 +89,11 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
       if (typeof doc['junit']['base'] !== 'string') throw new ConfigError('junit.base must be a string');
       cfg.junit.base = doc['junit']['base'];
     }
+  }
+  if (doc['coverage'] !== undefined) {
+    if (!isRecord(doc['coverage'])) throw new ConfigError('coverage must be a mapping');
+    const p = doc['coverage']['paths'];
+    cfg.coverage.paths = typeof p === 'string' ? p.split(',').map((s) => s.trim()).filter(Boolean) : stringList(p, 'coverage.paths');
   }
   if (doc['assertions'] !== undefined) {
     if (!isRecord(doc['assertions'])) throw new ConfigError('assertions must be a mapping');

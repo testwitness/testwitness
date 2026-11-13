@@ -86,7 +86,7 @@ describe('testwitness mcp server', () => {
     expect(checkTool.description).toMatch(/never executes repository code/);
     expect(checkTool.description).toMatch(/no network/);
     expect(checkTool.inputSchema.required).toEqual(['cwd']);
-    expect(Object.keys(checkTool.inputSchema.properties ?? {}).sort()).toEqual(['base', 'cwd', 'head', 'junit', 'mode', 'prBody', 'prTitle']);
+    expect(Object.keys(checkTool.inputSchema.properties ?? {}).sort()).toEqual(['base', 'coverage', 'cwd', 'head', 'junit', 'mode', 'prBody', 'prTitle']);
   });
 
   it('testwitness_rules lists every built in rule with its default severity', async () => {

@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+configurations.all {
+    exclude group: 'commons-logging'
+}
+
+jar {
+    exclude 'META-INF/*.SF'
+}
+
+test {
+    useJUnit()
+}

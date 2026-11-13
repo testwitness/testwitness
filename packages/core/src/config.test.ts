@@ -77,3 +77,21 @@ describe('applyConfiguredSeverity', () => {
     expect(applyConfiguredSeverity('medium', 'medium', 'medium')).toBe('medium');
   });
 });
+
+describe('coverage config', () => {
+  it('defaults to no coverage reports', () => {
+    expect(parseConfig(undefined).coverage.paths).toEqual([]);
+  });
+  it('reads coverage.paths as a list or a comma separated string', () => {
+    expect(parseConfig('coverage:\n  paths: ["coverage/lcov.info", "**/jacoco.xml"]\n', known).coverage.paths).toEqual(['coverage/lcov.info', '**/jacoco.xml']);
+    expect(parseConfig('coverage:\n  paths: "coverage.xml, lcov.info"\n', known).coverage.paths).toEqual(['coverage.xml', 'lcov.info']);
+  });
+  it('rejects a coverage value that is not a mapping, and paths that are not strings', () => {
+    expect(() => parseConfig('coverage: yes\n', known)).toThrow(ConfigError);
+    expect(() => parseConfig('coverage:\n  paths: [1, 2]\n', known)).toThrow(ConfigError);
+  });
+  it('accepts severities for the C rules and V008', () => {
+    const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n  V008: medium\n', known);
+    expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity, c.rules['V008']!.severity]).toEqual(['medium', 'off', 'low', 'medium']);
+  });
+});

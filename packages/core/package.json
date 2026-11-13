@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "picomatch": "^4.0.2",
+    "saxes": "6.0.0",
+    "smol-toml": "1.9.1",
     "web-tree-sitter": "^0.27.1",
     "yaml": "^2.9.1"
   }

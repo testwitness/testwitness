@@ -20,6 +20,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--base <ref>', 'base ref (merge base is computed)', 'origin/main')
     .option('--head <ref>', 'head ref', 'HEAD')
     .option('--junit <globs>', 'comma separated globs of JUnit XML files (default from config)')
+    .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
     .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
     .option('--format <fmt>', 'json | markdown | both', 'markdown')
     .option('--out <path>', 'write the output to a file instead of stdout')
@@ -38,6 +39,7 @@ export async function main(argv: string[]): Promise<number> {
           base: o.base,
           head: o.head,
           junit: o.junit,
+          coverage: o.coverage,
           config: o.config,
           format: o.format,
           out: o.out,

@@ -1,0 +1,13 @@
+{
+  "name": "fixture",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/src/payments/"
+    ]
+  }
+}

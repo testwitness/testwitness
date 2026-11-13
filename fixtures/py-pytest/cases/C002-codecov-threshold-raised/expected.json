@@ -1,0 +1,7 @@
+[
+  {
+    "ruleId": "C002",
+    "severity": "medium",
+    "subject": "codecov.status.project.default.threshold"
+  }
+]

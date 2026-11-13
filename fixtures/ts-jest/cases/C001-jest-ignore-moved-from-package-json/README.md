@@ -1,0 +1,1 @@
+Negative. The jest settings move from package.json to a new jest.config.js. The payments exclusion was already there before, so the same pattern leaving one file and arriving in another is not a new exclusion.

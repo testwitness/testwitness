@@ -56,7 +56,7 @@ These shapes were checked against the Claude Code, Cursor and Codex documentatio
 
 | Tool | Input | Returns |
 |---|---|---|
-| `testwitness_check` | `cwd` (required), `base`, `head`, `junit`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
+| `testwitness_check` | `cwd` (required), `base`, `head`, `junit`, `coverage`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
 | `testwitness_explain_rule` | `ruleId` | The rule's summary, false positive controls and an example |
 | `testwitness_rules` | none | Every rule id with its name and default severity |
 
@@ -70,6 +70,7 @@ Inputs:
 | `base` | Base ref; the merge base with head is compared | origin's default branch, else `origin/main`, `origin/master`, `main` or `master` |
 | `head` | Head ref | `HEAD` |
 | `junit` | Comma separated globs of JUnit XML, relative to the repository root | from `.testwitness.yml` |
+| `coverage` | Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to the repository root | from `.testwitness.yml` `coverage.paths` |
 | `prTitle`, `prBody` | Pull request text, for claim checks such as "all tests pass" | none |
 | `mode` | `report`, `require-ack` or `strict` | from `.testwitness.yml` |
 

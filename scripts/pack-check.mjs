@@ -152,6 +152,17 @@ try {
   process.stdout.write(`testwitness mcp tools: ${tools.join(', ')}\n`);
   if (tools.join(',') === 'testwitness_check,testwitness_explain_rule,testwitness_rules') ok('mcp server lists its three tools');
   else fail(`mcp server tools/list returned ${JSON.stringify(tools)} (exit ${mcp.status}, stderr ${mcp.stderr.trim()})`);
+
+  // 4e. --coverage reads an lcov report and V008 reports a changed production line it never executed
+  const gitIn = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: repo });
+  writeFileSync(join(repo, 'src/math.ts'), 'export const add = (a: number, b: number) => a + b;\nexport const sub = (a: number, b: number) =>\n  a - b;\n');
+  gitIn('commit', '-q', '-am', 'add sub');
+  writeFileSync(join(work, 'lcov.info'), 'SF:src/math.ts\nDA:1,3\nDA:2,0\nDA:3,0\nend_of_record\n');
+  const cov = spawnSync(bin, ['check', '--cwd', repo, '--base', 'main', '--format', 'json', '--coverage', join(work, 'lcov.info'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
+  const covReport = cov.status === 0 ? JSON.parse(cov.stdout) : undefined;
+  const v008 = covReport?.findings.find((f) => f.ruleId === 'V008');
+  if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
+  else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
 } catch (err) {
   fail(err instanceof Error ? err.message : String(err));
 } finally {
