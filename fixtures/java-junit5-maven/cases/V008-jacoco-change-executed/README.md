@@ -1,1 +1,0 @@
-Negative. Same production change, and the PR adds a test that divides by zero, so every changed line has covered instructions in coverage/jacoco.xml. The report follows the JaCoCo 0.8 XML format and was written by hand because the workspace cannot reach Maven Central. Nothing is reported.

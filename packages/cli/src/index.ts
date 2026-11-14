@@ -37,7 +37,6 @@ const NOT_WITH_PR: Array<[key: string, flag: string]> = [
   ['worktree', '--worktree'],
   ['results', '--results'],
   ['junit', '--junit'],
-  ['coverage', '--coverage'],
 ];
 
 export interface MainDeps {
@@ -59,7 +58,6 @@ export async function main(argv: string[], deps: MainDeps = {}): Promise<number>
     .option('--results <globs>', 'comma separated globs of test results: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (default from config)')
     .option('--junit <globs>', 'older name of --results; used when --results is not given')
     .option('--diff-only', 'check the diff and the PR text only: read no test results and skip V005 (for local runs and existing PRs)', false)
-    .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
     .option('--config <path>', 'path to .testwitness.yml (default: the merge base, then a local uncommitted file; never one the change adds)')
     .option('--format <fmt>', 'text | markdown | json | both (default: text at a terminal, markdown otherwise)')
     .option('--out <path>', 'write the output to a file instead of stdout')
@@ -69,7 +67,7 @@ export async function main(argv: string[], deps: MainDeps = {}): Promise<number>
     .option('--pr-body-file <path>', 'file holding the pull request body')
     .option('--author <login>', 'pull request author login, shown in provenance')
     .option('--author-type <type>', 'pull request author account type, for example User or Bot')
-    .option('--follow-symlinks', 'follow symbolic links in the results and coverage paths (for Bazel style layouts; default from config paths.followSymlinks, off)')
+    .option('--follow-symlinks', 'follow symbolic links in the results paths (for Bazel style layouts; default from config paths.followSymlinks, off)')
     .option('--pr <url>', 'trial run on a public pull request, https://github.com/<owner>/<repo>/pull/<n>: fetches it with git (into this clone, or a cached blobless clone) and checks the diff only (docs/cli.md)')
     .option('--cwd <dir>', 'repository directory', process.cwd())
     .option('-q, --quiet', 'no progress on stderr', false)
@@ -89,7 +87,6 @@ export async function main(argv: string[], deps: MainDeps = {}): Promise<number>
           results: o.results,
           junit: o.junit,
           ...(o.diffOnly ? { diffOnly: true } : {}),
-          coverage: o.coverage,
           config: o.config,
           format,
           out: o.out,
@@ -203,7 +200,6 @@ async function checkPr(o: Record<string, unknown>, format: ReturnType<typeof def
       configFromBaseOnly: true,
       helperIndex: false,
       results: '',
-      coverage: '',
       ...(o['config'] !== undefined ? { config: resolve(cwd, String(o['config'])) } : {}),
       format,
       ...(title !== undefined ? { prTitle: title } : {}),

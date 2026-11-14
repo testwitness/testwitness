@@ -164,11 +164,6 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
     lines.push(`- Read ${e.sources.length} result file${e.sources.length === 1 ? '' : 's'}${formats}: ${num(e.total)} tests, ${num(e.passed)} passed, ${num(e.failed)} failed, ${num(e.errored)} errored, ${num(e.skipped)} skipped${e.flaky ? `, ${num(e.flaky)} flaky` : ''}`);
   }
   for (const n of e.notes) lines.push(`- ${escBlock(n)}`);
-  const c = report.coverage;
-  if (c) {
-    lines.push(`- Coverage: ${c.sources.length} report${c.sources.length === 1 ? '' : 's'}, ${num(c.files)} source file${c.files === 1 ? '' : 's'}, ${num(c.linesExecuted)} of ${num(c.linesInstrumented)} instrumented lines executed`);
-    for (const n of c.notes) lines.push(`- ${escBlock(n)}`);
-  }
   lines.push('');
 
   const hi = report.helperIndex;

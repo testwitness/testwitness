@@ -285,7 +285,7 @@ async function decide(event: HookEvent, opts: HookOptions, deadline: Deadline): 
   }
 
   await opts.beforeCheck?.();
-  const common = { cwd: top, base, format: 'json' as const, quiet: true, log: () => {}, configFromBaseOnly: true, results: opts.results ?? '', coverage: '' };
+  const common = { cwd: top, base, format: 'json' as const, quiet: true, log: () => {}, configFromBaseOnly: true, results: opts.results ?? '' };
   const runs: CheckResult[] = [];
   if (event.agent === 'git') {
     // pre-push: what is being pushed is committed, so each pushed commit is checked commit to commit.

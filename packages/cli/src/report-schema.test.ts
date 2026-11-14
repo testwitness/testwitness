@@ -131,6 +131,9 @@ describe('report schema', () => {
     expect(validate({ ...base, mutation: { sources: [], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] } })).toBe(false);
     expect(validate(withFinding({ ruleId: 'M001' }))).toBe(false);
     expect(validate(withFinding({ label: 'measured weak' }))).toBe(false);
+    expect(validate({ ...base, coverage: { sources: [], files: 1, linesInstrumented: 3, linesExecuted: 2, notes: [] } })).toBe(false);
+    expect(validate(withFinding({ ruleId: 'V008' }))).toBe(false);
+    expect(validate(withFinding({ label: 'uncovered change' }))).toBe(false);
   });
 });
 

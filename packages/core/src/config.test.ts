@@ -93,32 +93,24 @@ describe('keys of features cut from v0.1', () => {
       ['mutation:\n  paths: ["reports/mutation/mutation.json"]\n', 'mutation'],
       ['mutation: yes\n', 'mutation'],
       ['history: history.json\n', 'history'],
+      ['coverage:\n  paths: ["coverage/lcov.info"]\n', 'coverage'],
+      ['coverage: yes\n', 'coverage'],
     ] as const) {
       expect(() => parseConfig(doc, known)).toThrow(ConfigError);
       expect(() => parseConfig(doc, known)).toThrow(new RegExp(`^${key}: .* is not in v0\\.1`));
     }
   });
-  it('rejects M001 and M002 as unknown rules', () => {
+  it('rejects M001, M002 and V008 as unknown rules', () => {
+    expect(() => parseConfig('rules:\n  V008: medium\n', known)).toThrow(/unknown rule V008/);
     expect(() => parseConfig('rules:\n  M001: low\n', known)).toThrow(/unknown rule M001/);
     expect(() => parseConfig('rules:\n  M002: off\n', known)).toThrow(/unknown rule M002/);
   });
 });
 
-describe('coverage config', () => {
-  it('defaults to no coverage reports', () => {
-    expect(parseConfig(undefined).coverage.paths).toEqual([]);
-  });
-  it('reads coverage.paths as a list or a comma separated string', () => {
-    expect(parseConfig('coverage:\n  paths: ["coverage/lcov.info", "**/jacoco.xml"]\n', known).coverage.paths).toEqual(['coverage/lcov.info', '**/jacoco.xml']);
-    expect(parseConfig('coverage:\n  paths: "coverage.xml, lcov.info"\n', known).coverage.paths).toEqual(['coverage.xml', 'lcov.info']);
-  });
-  it('rejects a coverage value that is not a mapping, and paths that are not strings', () => {
-    expect(() => parseConfig('coverage: yes\n', known)).toThrow(ConfigError);
-    expect(() => parseConfig('coverage:\n  paths: [1, 2]\n', known)).toThrow(ConfigError);
-  });
-  it('accepts severities for the C rules and V008', () => {
-    const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n  V008: medium\n', known);
-    expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity, c.rules['V008']!.severity]).toEqual(['medium', 'off', 'low', 'medium']);
+describe('configuration rule severities', () => {
+  it('accepts severities for the C rules', () => {
+    const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n', known);
+    expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity]).toEqual(['medium', 'off', 'low']);
   });
 });
 

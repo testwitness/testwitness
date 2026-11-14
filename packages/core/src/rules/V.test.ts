@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Evidence } from '../types.js';
-import { V003, V004, V005, V006, V008, V008_MAX_FILES } from './V.js';
-import { readCoverageString, toCoverageEvidence } from '../coverage/reader.js';
-import type { ChangedFile, CoverageEvidence } from '../types.js';
+import { V003, V004, V005, V006 } from './V.js';
+import type { ChangedFile } from '../types.js';
 import { changedFile, context, inventory, test as t } from './testkit.js';
 
 function evidence(keys: string[], extra: Partial<Evidence> = {}): Evidence {
@@ -122,48 +121,5 @@ describe('V003 template titles', () => {
     const pair = { file: changedFile('src/billing.test.ts', 'added'), head: inventory('src/billing.test.ts', [head]) };
     const ev = evidence(['billing adds 1 and 2 to get 3::billing adds 1 and 2 to get 3', 'billing adds 2 and 2 to get 4::billing adds 2 and 2 to get 4']);
     expect(await V003.run(context({ pairs: [pair], evidence: ev }), {})).toEqual([]);
-  });
-});
-
-describe('V008 changed production lines not executed', () => {
-  function prod(path: string, lines: number[], extra: Partial<ChangedFile> = {}): ChangedFile {
-    return { status: 'modified', path, kind: 'production', language: 'python', hunks: [], binary: false, addedLines: new Set(lines), removedLines: new Set(), ...extra };
-  }
-  async function cov(lcov: string): Promise<CoverageEvidence> {
-    return toCoverageEvidence(await readCoverageString(lcov, 'lcov.info', '/repo'));
-  }
-  function ctxWith(files: ChangedFile[], coverage?: CoverageEvidence) {
-    const c = context({ pairs: [] });
-    c.files = files;
-    if (coverage) c.coverage = coverage;
-    return c;
-  }
-
-  it('reports instrumented changed lines nobody executed, one low finding per file with the first three lines', async () => {
-    const c = await cov('SF:/repo/app/refund.py\nDA:1,1\nDA:4,0\nDA:5,0\nDA:7,0\nDA:9,0\nDA:10,2\nend_of_record\n');
-    const out = await V008.run(ctxWith([prod('app/refund.py', [3, 4, 5, 6, 7, 9, 10])], c), {});
-    expect(out).toHaveLength(1);
-    expect(out[0]).toMatchObject({ ruleId: 'V008', severity: 'low', label: 'uncovered change', subject: 'app/refund.py', location: { path: 'app/refund.py', line: 4 } });
-    expect(out[0]!.message).toBe('4 changed lines in app/refund.py never executed by the tests (lines 4, 5, 7 and 1 more)');
-    expect(out[0]!.fingerprint).toBe('V008:app/refund.py:app/refund.py');
-  });
-
-  it('is silent when changed lines ran, are not instrumented, or the file is not in the report', async () => {
-    const c = await cov('SF:/repo/app/a.py\nDA:1,1\nDA:2,0\nend_of_record\n');
-    expect(await V008.run(ctxWith([prod('app/a.py', [1, 3])], c), {})).toEqual([]);
-    expect(await V008.run(ctxWith([prod('app/b.py', [2])], c), {})).toEqual([]);
-  });
-
-  it('ignores test files, deleted files and runs without coverage', async () => {
-    const c = await cov('SF:/repo/app/a.py\nDA:2,0\nend_of_record\n');
-    expect(await V008.run(ctxWith([prod('app/a.py', [2], { kind: 'test' })], c), {})).toEqual([]);
-    expect(await V008.run(ctxWith([prod('app/a.py', [2], { status: 'deleted' })], c), {})).toEqual([]);
-    expect(await V008.run(ctxWith([prod('app/a.py', [2])]), {})).toEqual([]);
-  });
-
-  it('checks at most the file cap', async () => {
-    const lcov = Array.from({ length: V008_MAX_FILES + 5 }, (_, i) => `SF:/repo/f${i}.py\nDA:1,0\nend_of_record`).join('\n');
-    const files = Array.from({ length: V008_MAX_FILES + 5 }, (_, i) => prod(`f${i}.py`, [1]));
-    expect(await V008.run(ctxWith(files, await cov(lcov)), {})).toHaveLength(V008_MAX_FILES);
   });
 });
