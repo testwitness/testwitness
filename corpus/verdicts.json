@@ -91,14 +91,6 @@
     "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
   },
   {
-    "slug": "alphagov-govuk-frontend-6590",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Components › Sass render › renders CSS for all components"
-  },
-  {
     "slug": "apache-airflow-59542",
     "split": "heldout",
     "ruleId": "R002",
@@ -130,48 +122,6 @@
     "severity": "medium",
     "verdict": "fp",
     "subject": "Backfill creation and validation › verify backfill with 'missing and errored runs' behavior"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "Backfill creation and validation › Verify backfill table filters",
-    "label": "refactored"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "validate date range › verify date range selection (start date, end date)",
-    "label": "refactored"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Backfill pause, resume, and cancel controls › verify pause and resume backfill"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Backfill pause, resume, and cancel controls › verify cancel backfill"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Backfill pause, resume, and cancel controls › verify cancelled backfill cannot be resumed"
   },
   {
     "slug": "apache-airflow-63936",
@@ -1368,15 +1318,6 @@
     "subject": "textWysiwyg › start text editing › should bump the version of a labeled arrow when the label is updated"
   },
   {
-    "slug": "excalidraw-excalidraw-7213",
-    "split": "heldout",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "textWysiwyg › should bump the version of a labeled arrow when the label is updated",
-    "label": "refactored"
-  },
-  {
     "slug": "expo-entity-305",
     "split": "heldout",
     "ruleId": "R005",
@@ -1456,15 +1397,6 @@
     "severity": "high",
     "verdict": "tp",
     "subject": "task.ignoreFailures = true"
-  },
-  {
-    "slug": "getsentry-sentry-python-6225",
-    "split": "tuning",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_span_batcher_lock_reset_in_child_after_fork",
-    "label": "smoke"
   },
   {
     "slug": "getsentry-sentry-python-6225",
@@ -3407,34 +3339,31 @@
     "split": "tuning",
     "ruleId": "O002",
     "severity": "medium",
-    "verdict": "tp",
-    "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer",
-    "label": "smoke"
+    "verdict": "missed",
+    "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
     "severity": "medium",
-    "verdict": "tp",
-    "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData",
-    "label": "smoke"
+    "verdict": "missed",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
     "severity": "medium",
-    "verdict": "tp",
-    "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
-    "label": "smoke"
+    "verdict": "missed",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData"
   },
   {
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ChronicleHistoryReaderMainTest#testOptionsConfiguration",
     "label": "smoke"
   },
@@ -3442,8 +3371,8 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ChronicleQueueTest#testSingleBuilderCreatesNewInstance",
     "label": "smoke"
   },
@@ -3451,8 +3380,8 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ChronicleQueueTest#testCreateTailerCreatesNewExcerptTailer",
     "label": "smoke"
   },
@@ -3460,8 +3389,17 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "ChronicleQueueTest#testNonAsyncTailerCallsCreateTailer",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "ChronicleReaderMainTest#testOptionsConfiguration",
     "label": "smoke"
   },
@@ -3469,8 +3407,26 @@
     "slug": "openhft-chronicle-queue-1630",
     "split": "tuning",
     "ruleId": "O002",
-    "severity": "medium",
-    "verdict": "fp",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithMetaData",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "ExcerptTailerTest#testReadingDocumentWithoutMetaData",
+    "label": "smoke"
+  },
+  {
+    "slug": "openhft-chronicle-queue-1630",
+    "split": "tuning",
+    "ruleId": "O002",
+    "severity": "low",
+    "verdict": "expected-low",
     "subject": "NoMessageHistoryTest#testSingletonInstance",
     "label": "smoke"
   },
@@ -4012,10 +3968,10 @@
   {
     "slug": "pandas-dev-pandas-61007",
     "split": "tuning",
-    "ruleId": "R001",
+    "ruleId": "A001",
     "severity": "low",
     "verdict": "expected-low",
-    "subject": "test_get_callable_name",
+    "subject": "TestGetCallableName::test_get_callable_name",
     "label": "parameterised"
   },
   {
@@ -4299,33 +4255,6 @@
     "severity": "low",
     "verdict": "expected-low",
     "subject": "test_load_flows_concurrently"
-  },
-  {
-    "slug": "prefecthq-prefect-18450",
-    "split": "heldout",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_deploy",
-    "label": "smoke"
-  },
-  {
-    "slug": "prefecthq-prefect-18450",
-    "split": "heldout",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_docker_deploy",
-    "label": "smoke"
-  },
-  {
-    "slug": "prefecthq-prefect-18450",
-    "split": "heldout",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_schedule_statefulness",
-    "label": "smoke"
   },
   {
     "slug": "prestodb-presto-28724",
@@ -5024,15 +4953,6 @@
   {
     "slug": "scikit-learn-scikit-learn-28842",
     "split": "heldout",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test__is_polars_df",
-    "label": "smoke"
-  },
-  {
-    "slug": "scikit-learn-scikit-learn-28842",
-    "split": "heldout",
     "ruleId": "R001",
     "severity": "low",
     "verdict": "expected-low",
@@ -5082,15 +5002,6 @@
     "verdict": "expected-low",
     "subject": "test__is_polars_df",
     "label": "moved"
-  },
-  {
-    "slug": "scikit-learn-scikit-learn-33218",
-    "split": "heldout",
-    "ruleId": "O002",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "test_display_from_cv_results_curve_kwargs",
-    "label": "smoke"
   },
   {
     "slug": "scikit-learn-scikit-learn-33218",
@@ -5664,15 +5575,6 @@
     "severity": "low",
     "verdict": "expected-low",
     "subject": "in dev server › should support css modules",
-    "label": "refactored"
-  },
-  {
-    "slug": "vercel-next.js-76631",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "in dev server › should support browserslist",
     "label": "refactored"
   },
   {
