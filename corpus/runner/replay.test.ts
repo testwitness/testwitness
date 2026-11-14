@@ -13,9 +13,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { GATE_RULES, HOOK_BLOCKING, HOOK_BLOCKING_UNMEASURED, measuredSeverity, PROVEN_RULES } from '@testwitness/core';
+import { GATE_RULES, HOOK_BLOCKING, HOOK_BLOCKING_UNMEASURED, measuredSeverity, PROVEN_RULES, SEVERITY_RANK } from '@testwitness/core';
 import { loadCorpus } from './corpus.js';
-import { cleanButUnproven, HOOK_REPLAY_HEADING, hookStats, loadTrial, renderHookReplayMarkdown, replayWithHook, wrongfulBlockers, type EntryReplay, type HookStats } from './hook-replay.js';
+import { cleanButUnproven, HOOK_REPLAY_HEADING, hookStats, hookThreshold, loadTrial, renderHookReplayMarkdown, replayWithHook, wrongfulBlockers, type EntryReplay, type HookStats } from './hook-replay.js';
 import { findingKey, pool } from './replay.js';
 import { installNetworkGuard } from '../../packages/cli/src/testing/no-network.js';
 
@@ -62,9 +62,9 @@ describe('criterion 1: the working tree check equals the commit check', () => {
 
 describe('criteria 12 and 13: the hook on the corpus as working tree changes', () => {
   for (const e of entries) {
-    it(`${e.slug}: the hook blocks exactly on the open high findings of the blocking list`, () => {
+    it(`${e.slug}: the hook blocks exactly on the open findings of the blocking list at its threshold`, () => {
       const r = results.get(e.slug)!;
-      const expected = r.replay.commit.findings.filter((f) => f.severity === 'high' && !f.acknowledged && HOOK_BLOCKING.includes(f.ruleId)).map((f) => f.fingerprint);
+      const expected = r.replay.commit.findings.filter((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[hookThreshold(f.ruleId)] && !f.acknowledged && HOOK_BLOCKING.includes(f.ruleId)).map((f) => f.fingerprint);
       expect([...r.hook.blocking].sort()).toEqual([...expected].sort());
       expect([...r.hook.atDefault].sort()).toEqual([...expected].sort());
       expect(r.hook.blocked).toBe(expected.length > 0);
@@ -76,8 +76,8 @@ describe('criteria 12 and 13: the hook on the corpus as working tree changes', (
     });
   }
 
-  it('every true positive at high severity of a blocking rule is blocked', () => {
-    for (const row of stats.rows.filter((r) => r.blocks)) expect(row.tpBlocked, row.ruleId).toBe(row.tpHigh);
+  it('every true positive of a blocking rule at its hook threshold is blocked', () => {
+    for (const row of stats.rows.filter((r) => r.blocks)) expect(row.tpBlocked, row.ruleId).toBe(row.tpAtThreshold);
     for (const row of stats.rows.filter((r) => !r.blocks)) expect(row.tpBlocked, row.ruleId).toBe(0);
     expect(stats.tpEntries).toBeGreaterThan(50);
     expect(stats.tpEntriesBlocked).toBeGreaterThan(0);

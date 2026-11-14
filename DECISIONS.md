@@ -6,9 +6,9 @@ Each entry: the decision, my recommendation, and the reversible default I am pro
 
 Decided by Sajjad: v0.1 supports Linux and macOS. The Windows job runs on every pull request and is visible, but it is out of the required check until it has been green for a week. The self check reports that as a weakened gate (W006), which is correct.
 
-## 2026-11-14: open question, the state of a medium only change
+## 2026-11-14: medium is the default threshold; the hook blocks A002 only at high
 
-With the default threshold (high), a change whose only finding is R003 at medium reads "pass", and the hook does not block it. The demo needs fail_on: medium to show a skipped test as "review". Recommendation: since v0.1 reports only proven rules at medium or high, set the default fail_on to medium, so every finding v0.1 still shows above low reads "review" and the hook blocks on it. Default until Sajjad decides: unchanged (high).
+Decided by Sajjad (14 Nov). `fail_on` defaults to medium, so a finding of any of the four proven rules puts a pull request in review. The hook blocks R003, R004 and R005 at medium and above, and A002 only at high (`HOOK_HIGH_ONLY` in packages/core/src/proven.ts): at medium A002 blocked one honest change on the corpus (a float comparison made approximate) and one in the 300 pull request trial. A medium A002 finding is advice in the hook and still reported by the pull request check. With these defaults the hook blocks 43 of the 130 corpus pull requests with a true positive and none of the 217 without one; in the trial it blocks 1 pull request, rightly. The demo needs no config any more.
 
 ## 2026-11-13: v0.1 narrowed to four proven rules
 

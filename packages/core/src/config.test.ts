@@ -8,7 +8,7 @@ describe('parseConfig', () => {
   it('returns defaults for empty input', () => {
     const c = parseConfig(undefined);
     expect(c.mode).toBe('report');
-    expect(c.failOn).toBe('high');
+    expect(c.failOn).toBe('medium');
     expect(c.languages).toBe('auto');
   });
 

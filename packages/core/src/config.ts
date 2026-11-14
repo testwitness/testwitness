@@ -32,7 +32,7 @@ export function defaultConfig(): ResolvedConfig {
   return {
     version: 1,
     mode: 'report',
-    failOn: 'high',
+    failOn: 'medium',
     requireEvidence: false,
     languages: 'auto',
     paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'], followSymlinks: false },
