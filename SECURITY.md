@@ -21,20 +21,18 @@ testwitness reads pull requests from people it has no reason to trust, including
 
 **No code from the repository runs.** No install, no test run, no `require` or `import` of a repository file. Configs are parsed as text and source is parsed by bundled tree-sitter grammars. The only program testwitness starts is `git`, with local subcommands, without external diff, textconv or hooks. A test traces every child process on a repository full of traps.
 
-**No network calls from the engine, the CLI, the hook or the MCP server.** The Action calls the GitHub API with the job token for the comment, the acknowledgements and the history artifact, and nothing else.
+**No network calls from the engine, the CLI, the hook or the MCP server.** The Action calls the GitHub API with the job token for the comment and the acknowledgements, and nothing else.
 
-**Files.** Result, coverage, mutation and history files are found by globs that come from the workflow or the base config, never from the pull request. Symbolic links are not followed unless the base config says so. Output files are not written through a symbolic link.
+**Files.** Result files are found by globs that come from the workflow or the base config, never from the pull request. Symbolic links are not followed unless the base config says so. Output files are not written through a symbolic link.
 
 **Hostile input does not take the check down.** XML entities are not expanded and external entities are not resolved. Reports are read within file and byte caps. Nesting in XML, JSON and YAML is bounded. Every regular expression in the source was run against 100 kB of adversarial input, and the ones that were slow were replaced.
-
-**The run history cannot be supplied by a pull request.** It is read only from runs that a push, a schedule or a manual dispatch started in the same repository.
 
 ### What is out of scope
 
 * **A workflow that gives pull request code a write token or secrets.** If you run the check on `pull_request_target` and check out the pull request's head, every install and test step in that job runs untrusted code with your secrets. testwitness does not execute that code, and it cannot stop the other steps from doing so. Use `pull_request`.
 * **An attacker with write access.** They can change the config on the base branch, the workflow and the branch protection, and they can acknowledge findings.
 * **A pull request that edits the workflow so testwitness no longer runs.** On `pull_request` events GitHub takes the workflow file from the pull request. Make the check required, and run it from a workflow the pull request cannot edit if the gate matters to you.
-* **Forged test results.** Result, coverage and mutation files are written by the pull request's own test run, and testwitness cannot tell a forged one from a real one. The rules that read the diff do not depend on them.
+* **Forged test results.** Result files are written by the pull request's own test run, and testwitness cannot tell a forged one from a real one. The rules that read the diff do not depend on them.
 * **The agent hook as a sandbox.** The hook is an early warning in a coding agent's loop. It fails open on a crash, on its timeout and after it has blocked the same finding twice, and it says so each time. An agent with a shell can get around it. The pull request check is the gate.
 * **Runners reused between jobs.** State in the temp directory of a self hosted runner that earlier pull request code could write is not trusted input. Use ephemeral runners.
 * **What a model does with quoted text.** The hook and the MCP server quote test names and test code to a coding agent. Invisible characters are removed; visible sentences are not.
@@ -48,7 +46,7 @@ testwitness reads pull requests from people it has no reason to trust, including
 
 ### Fuzzing
 
-The review of November 2026 fuzzed 31 targets with 10,000 generated cases each, 310,000 cases in all, in 78 seconds of fuzzing time. The targets: the unified diff parser and git's quoted and renamed paths; the JUnit XML, TAP, Jest, Vitest, pytest-json-report and Playwright readers; the lcov, Cobertura and JaCoCo readers; the Stryker and PIT readers; the history reader; the YAML config loader; the Markdown, text and JSON renderers; the annotation writer and the Action's log lines; and the hook event parser of each agent with its command scanner and answer renderer. A case fails when it throws, takes more than 2 seconds or breaks a stated property, for example that a rendered report has the same structure as the same report with harmless text. The fuzzers found four bugs, all fixed with a regression test. Separately, every one of the 556 regular expressions in the source was run against about 1,400 adversarial inputs of 100 kB; the ones that were quadratic or worse were replaced. The table of targets with counts and times is in [docs/threat-model.md](docs/threat-model.md#fuzzing).
+The review of November 2026 fuzzed 31 targets with 10,000 generated cases each, 310,000 cases in all, in 78 seconds of fuzzing time. The targets: the unified diff parser and git's quoted and renamed paths; the JUnit XML, TAP, Jest, Vitest, pytest-json-report and Playwright readers; the lcov, Cobertura and JaCoCo readers; the Stryker and PIT readers; the history reader; the YAML config loader; the Markdown, text and JSON renderers; the annotation writer and the Action's log lines; and the hook event parser of each agent with its command scanner and answer renderer. A case fails when it throws, takes more than 2 seconds or breaks a stated property, for example that a rendered report has the same structure as the same report with harmless text. The fuzzers found four bugs, all fixed with a regression test. Six of those targets (the lcov, Cobertura, JaCoCo, Stryker, PIT and history readers) belonged to features that were cut from v0.1 and are no longer in the package. Separately, every one of the 556 regular expressions in the source was run against about 1,400 adversarial inputs of 100 kB; the ones that were quadratic or worse were replaced. The table of targets with counts and times is in [docs/threat-model.md](docs/threat-model.md#fuzzing).
 
 The fuzz targets run in the normal test suite (`pnpm test`) from a fixed seed. `TESTWITNESS_FUZZ_RUNS=100000 pnpm vitest run --project unit fuzz` runs more cases. The ReDoS scan is `node scripts/security/redos-scan.mjs`.
 

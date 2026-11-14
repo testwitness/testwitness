@@ -14,24 +14,17 @@ paths:
     - "**/*.test.ts"
   ignore:               # no rule reads these files, configuration and workflow rules included; .testwitness.yml itself is never ignored
     - "**/generated/**"
-  followSymlinks: false # follow symbolic links in results, coverage, mutation and history paths (see below)
+  followSymlinks: false # follow symbolic links in the results paths (see below)
 results:                # test results of the head run; `junit` is the older name of this key and still works
   head: "**/junit*.xml"  # JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON (docs/evidence.md)
-coverage:
-  paths:                # lcov, Cobertura or JaCoCo XML of the head run; empty: V008 is off
-    - "coverage/lcov.info"
-    - "**/jacoco.xml"
-mutation:
-  paths:                # Stryker mutation.json or PIT mutations.xml from the opt in mutation job; empty: M001 and M002 are off
-    - "reports/mutation/mutation.json"
-    - "**/pit-reports/mutations.xml"
 assertions:
   extra:                # helpers outside the scanned support files, or without an assertion inside
     - "assert_ledger_balanced"
     - "com.acme.test.Check#*"
 rules:
   R003: high            # per rule severity: high | medium | low | off
-  T001: off
+  R001: medium          # naming a severity opts a rule that is not proven yet back in (see below)
+  O006: off
 acknowledge:
   - fingerprint: "R003:src/test/java/com/acme/PaymentsIT.java:PaymentsIT#pollsSettlement"
     reason: "needs a live sandbox, tracked in PAY-412"
@@ -51,16 +44,39 @@ protect:                # agent hook only: paths a coding agent may not change (
 hook:                   # agent hook only
   timeout: 20           # seconds before the hook gives up and allows the action
   max_blocks: 2         # how often the same finding may block in one agent session
-  blocking: [A002, C001, C002, R004, R005, W003, W006]   # the rules the hook may block on; the default is the set the replay has proven (docs/precision.md)
+  blocking: [A002, R003, R004, R005, W006]   # the rules the hook may block on; the default is the proven rules and W006
   advice_only: []       # rules taken off the blocking list again
 ```
 
 `protect` and `hook` are read by the [agent guard](./agent-guard) only, and only from the merge base, never from the working tree. The pull request check ignores them.
 
+## Proven rules and the cap at low
+
+v0.1 reports four rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule still runs, but its findings are capped at low until it passes an untuned replay ([how we measure precision](./how-we-measure-precision#proven-and-unproven-rules)). W006, a change to the gate itself, is the one exception and keeps its severity. In `testwitness.json` a capped finding carries the severity the rule gave in `uncappedSeverity`.
+
+A repository that has checked a rule on its own pull requests can opt it back in by naming its severity under `rules`:
+
+```yaml
+rules:
+  R001: medium              # or the long form: R001: { severity: medium }
+```
+
+The rule's findings are then graded the way the rule grades them, shifted by the configured severity as usual, and no longer capped. A mapping without a severity (`R001: {}`) does not opt a rule in. The agent hook still blocks only on rules in `hook.blocking`, so a rule you want it to block on needs both.
+
+## Keys that are not in v0.1
+
+Run history, coverage on changed lines (V008) and mutation on request (M001, M002) are not in v0.1. A config that still sets `coverage`, `mutation` or `history` fails with an error that names the key, instead of being accepted and doing nothing:
+
+```text
+testwitness: coverage: coverage on changed lines (V008, lcov, Cobertura and JaCoCo reports) is not in v0.1; remove the coverage key from .testwitness.yml (docs/configuration.md)
+```
+
+Rule ids of the removed rules (V008, M001, M002) are unknown rules and fail the same way.
+
 ## Symbolic links in report paths
 
 ::: v-pre
-The results, coverage, mutation and history paths do not follow symbolic links by default. A matched file that is itself a link, or that lies outside the repository through a linked directory, is skipped with a note in the report. Otherwise a pull request could commit `test-results/a.xml` as a link to any file on the runner and have the check read it. A glob that names a directory outside the repository on purpose (an absolute path such as `${{ runner.temp }}/reports/**/*.xml`, or a `../` path) may read files under that directory.
+The results paths do not follow symbolic links by default. A matched file that is itself a link, or that lies outside the repository through a linked directory, is skipped with a note in the report. Otherwise a pull request could commit `test-results/a.xml` as a link to any file on the runner and have the check read it. A glob that names a directory outside the repository on purpose (an absolute path such as `${{ runner.temp }}/reports/**/*.xml`, or a `../` path) may read files under that directory.
 :::
 
 Layouts that link their outputs into the checkout need the links followed. Bazel is the common case: `bazel-testlogs` is a link into the output base.
@@ -99,6 +115,6 @@ The index never imports or runs repository code; it only parses files. To turn i
 
 ## Rule ids and fingerprints
 
-Unknown rule ids and options are errors, not silently ignored. Changing a rule's severity shifts every finding of that rule by the same number of steps.
+Unknown rule ids and options are errors, not silently ignored. Changing a rule's severity shifts every finding of that rule by the same number of steps; for a rule that is not proven yet it also opts the rule in (see above).
 
 Fingerprints are in `testwitness.json` next to each finding and survive line shifts and rebases.

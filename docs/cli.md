@@ -30,8 +30,6 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--results <globs>` | comma separated globs of test results: JUnit XML (recommended), TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content ([evidence](./evidence)) | from config `results.head` |
 | `--junit <globs>` | older name of `--results`, used when `--results` is not given | |
 | `--diff-only` | check the diff and the PR text only: read no test results, skip V005, and grade the state on the diff and claim rules alone (`pass` or `review`) | off |
-| `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
-| `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
 | `--config <path>` | `.testwitness.yml` path, read from disk as given | the merge base; without a config there, a local uncommitted `.testwitness.yml` (never one the change being checked adds) |
 | `--format <fmt>` | `text`, `markdown`, `json` or `both` | `text` when stdout is a terminal, `markdown` when it is a pipe or with `--out` |
 | `--out <path>` | write to a file instead of stdout | |
@@ -39,13 +37,14 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--fail-on <sev>` | `high`, `medium`, `low` | from config |
 | `--pr-title <t>`, `--pr-body-file <f>` | PR text for claim checks | |
 | `--author <login>`, `--author-type <type>` | PR author and account type, shown in provenance | |
-| `--history <file>` | run history JSON of earlier runs; R001, R003, R004 and V003 then grade by what the test did before ([run history](./history)) | none |
-| `--history-out <file>` | write the run history with this run's results merged in | none |
-| `--run-id <id>` | id of this run in the history | `GITHUB_RUN_ID`, then `local-<head sha>` |
-| `--follow-symlinks` | follow symbolic links in the results, coverage, mutation and history paths, for Bazel style layouts ([configuration](./configuration#symbolic-links-in-report-paths)) | config `paths.followSymlinks`, off |
-| `--pr <url>` | trial run on a public pull request, `https://github.com/<owner>/<repo>/pull/<n>` (a trailing `/files` and the like is fine): fetches it with git, then checks it with `--diff-only`. Not with `--base`, `--head`, `--worktree`, `--results`, `--junit`, `--coverage`, `--mutation`, `--history` or `--history-out` ([trying it on a pull request](#trying-it-on-a-pull-request)) | |
+| `--follow-symlinks` | follow symbolic links in the results paths, for Bazel style layouts ([configuration](./configuration#symbolic-links-in-report-paths)) | config `paths.followSymlinks`, off |
+| `--pr <url>` | trial run on a public pull request, `https://github.com/<owner>/<repo>/pull/<n>` (a trailing `/files` and the like is fine): fetches it with git, then checks it with `--diff-only`. Not with `--base`, `--head`, `--worktree`, `--results` or `--junit` ([trying it on a pull request](#trying-it-on-a-pull-request)) | |
 | `--cwd <dir>` | repository directory | current |
 | `-q, --quiet` | no progress on stderr | |
+
+`--coverage`, `--mutation`, `--history`, `--history-out`, `--run-id` and the `mutate-plan` command are not in v0.1; the CLI refuses them as unknown options.
+
+Findings of rules that are not proven yet are reported at low (see [configuration](./configuration#proven-rules-and-the-cap-at-low)); in `--format json` each such finding keeps the rule's own severity in `uncappedSeverity`.
 
 The `text` format is for a person at a terminal: findings sorted high first, each with its file and line, the message and the text before and after, then one summary line. It is coloured unless `NO_COLOR` is set or `TERM` is `dumb`, and control characters from test names or PR text are shown as a placeholder so they cannot drive the terminal. Scripts and CI logs keep getting markdown, the same text as the PR comment, because a pipe is not a terminal.
 
@@ -66,7 +65,7 @@ Nothing to set up and no token. It works on public repositories only.
 * When the current directory is a clone of that repository (its `origin` is the same GitHub repository), the pull request head and its base branch are fetched into `refs/testwitness/pr/<n>/head` and `refs/testwitness/pr/<n>/base`. Your branches, working tree and `FETCH_HEAD` are not touched. The command prints how to delete the two refs.
 * Anywhere else, it makes a blobless partial clone (`--filter=blob:none --no-checkout`) in the temp directory, `testwitness-pr-clones-<uid>/<owner>/<repo>`, next to the helper index cache. The next run on the same repository reuses it and only fetches the new commits. The command prints where the clone is and the `rm -rf` line that deletes it.
 * Base is the merge base of the pull request head and its base branch; head is the pull request head commit.
-* It is a trial, so no test results are read: `--diff-only` applies on its own and the evidence section says so. Coverage, mutation reports and the helper index are not used either. `.testwitness.yml` is read from the merge base only, unless you pass `--config`.
+* It is a trial, so no test results are read: `--diff-only` applies on its own and the evidence section says so. The helper index is not used either. `.testwitness.yml` is read from the merge base only, unless you pass `--config`.
 * One unauthenticated request to `api.github.com` reads the title, the body and the base branch. When it fails (offline, blocked, or the 60 requests an hour limit), the check goes on without the title and body, one line in the report says so and names the claim rules that were skipped (V004 and V006), and the base is the repository's default branch.
 * Output is what `check` prints anywhere else: text at a terminal, markdown in a pipe, `--format` and `--out` as usual.
 
@@ -84,9 +83,7 @@ Use the branch the pull request targets as `--base` (a backport or release branc
 
 **What `unreadable` means without results.** Without test results the diff rules still run, but nothing confirms which tests ran, so the state reads `unreadable` and V005 asks for a reporter. That is expected on a laptop. Pass `--diff-only` to say you only want the diff and claim rules: no results are searched for, V005 is skipped and the state is `pass` or `review`.
 
-`testwitness mutate-plan --base <ref> --head <ref> [--format json|shell] [--out <file>] [--cwd <dir>]` prints the production files the PR changed and the settings that mutate only them: StrykerJS `--mutate` line ranges with `--incremental`, and PIT `targetClasses` and `targetTests`. It reads git and runs nothing. The shell format is single quoted variable assignments for a workflow to source. See [mutation on request](./mutation-on-request).
-
-`testwitness hook --agent claude|cursor|codex|git [--base <ref>] [--timeout <seconds>] [--results <globs>] [--cwd <dir>]` is the [agent guard](./agent-guard). It reads the agent's hook event JSON on stdin (for `git`, the pre-push lines), checks the working tree when the event is a `git commit`, a `git push` or the end of a turn, and answers in that agent's blocking format. It blocks on open high findings of the rules on its blocking list (a small proven set by default, `hook.blocking` in the base config), at most twice per finding and session, and allows the action with a note when it crashes or runs past the timeout (20 seconds, or `hook.timeout` in the base config). Configuration is read from the merge base only. Exit code 0, except `--agent git`, which exits 1 to refuse a push.
+`testwitness hook --agent claude|cursor|codex|git [--base <ref>] [--timeout <seconds>] [--results <globs>] [--cwd <dir>]` is the [agent guard](./agent-guard). It reads the agent's hook event JSON on stdin (for `git`, the pre-push lines), checks the working tree when the event is a `git commit`, a `git push` or the end of a turn, and answers in that agent's blocking format. It blocks on open high findings of the rules on its blocking list (the proven rules R003, R004, R005 and A002 plus W006 by default, `hook.blocking` in the base config), at most twice per finding and session, and allows the action with a note when it crashes or runs past the timeout (20 seconds, or `hook.timeout` in the base config). Configuration is read from the merge base only. Exit code 0, except `--agent git`, which exits 1 to refuse a push.
 
 `testwitness init --agent claude|cursor|codex|git [--command <cmd>] [--force] [--cwd <dir>]` writes the hook config for that agent and nothing else: `.claude/settings.json`, `.cursor/hooks.json`, `.codex/hooks.json`, or `pre-push` in the git hooks directory. It merges into an existing file, prints what it wrote and changes nothing on a second run. `--force` replaces a different existing pre-push hook. Exit codes: `0` written or unchanged, `1` refused (a different pre-push hook exists), `2` the existing config could not be read.
 

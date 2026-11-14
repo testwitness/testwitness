@@ -2,6 +2,16 @@
 
 Each entry: the decision, my recommendation, and the reversible default I am proceeding with. Newest first.
 
+## 2026-11-13: v0.1 narrowed to four proven rules
+
+Decided by Sajjad (13 Nov), after an untuned replay of 300 ordinary merged PRs from 20 unseen repositories found 0 correct findings out of 60 at medium or high: run history, coverage on changed lines (V008) and mutation on request (M001, M002) are cut from v0.1 and kept on the `experimental` branch; only R003, R004, R005 and A002 report at medium or high, and the hook blocks on the same set.
+
+Choices made while doing it, each reversible:
+- W006 keeps its severity in the report as well as blocking in the hook. Capping it at low would have made the hook exception empty and would have let a change to `.testwitness.yml` pass `require-ack` without a maintainer. Its replay shows no wrongful block (it never fired on either set).
+- Opting a rule back in reuses the per rule severity that already existed: `rules: { R001: medium }`. A mapping without a severity does not opt in.
+- The golden fixture cases and the corpus judge findings at `uncappedSeverity`, so they keep testing and measuring every rule. The cap itself has its own unit tests.
+- Config keys `coverage`, `mutation` and `history` fail with a ConfigError that names the key.
+
 ## 2026-11-13: mutation testing runs in GitHub Actions, not here
 
 The brief asks for a Stryker score above 75 percent on core. A full run is about 14,000 mutants; this workspace has two cores and estimated 28 hours, and the old weekly workflow had a 90 minute limit, so no full score exists yet (the last partial run, 3,055 mutants, killed 30 percent and left 44 percent without coverage, which says more about which files the run reached first than about the suite).
@@ -47,7 +57,7 @@ Default: done in this batch.
 
 ## 2026-11-13: what the agent hook blocks by default
 
-The hook blocks only on rules with true positives at high on the corpus and no wrongful block on the corpus or the 300 PR trial: A002, C001, C002, R004, R005, W003, plus W006 (the gate protecting itself). Deleted tests (R001, R002) are advice in the hook until their replay is clean; a maintainer can widen the list with `hook.blocking`.
+Superseded by "v0.1 narrowed to four proven rules" above: the hook now blocks on A002, R003, R004, R005 and W006. The earlier list was the rules with true positives at high on the corpus and no wrongful block on the corpus or the 300 PR trial: A002, C001, C002, R004, R005, W003, plus W006 (the gate protecting itself). Deleted tests (R001, R002) are advice in the hook until their replay is clean; a maintainer can widen the list with `hook.blocking`.
 
 Recommendation: keep the list derived by the replay test, which fails when the measurement and the list disagree.
 Default: as above.
