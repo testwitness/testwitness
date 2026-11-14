@@ -174,3 +174,16 @@ PR #3 merged. PR #4 failed on Windows (three tests, two of them the history path
 - B: the port and the v0.1 hardening (81 commits, the Windows history path fix among them), plus three fixes found by running the self check here: the skipped link note names paths with forward slashes; paths.ignore reaches every rule, the configuration and workflow rules included (.testwitness.yml itself is never ignored); V003 reads template literal titles in loops as templates and the TypeScript front end reads escapes in quoted titles. Verified: 2819 tests with 2 skipped, corpus report unchanged, pack:check and docs build clean, and the self check run locally against A has no high finding.
 - C: the launch polish, the corpus README note on what an entry means, and a packed tarball no longer committed. Verified: 2846 tests with 2 skipped, corpus report unchanged, pack:check and docs build clean, self check against B passes with no finding.
 Windows and macOS checks cannot be read from here; Sajjad pastes the failing log after each push.
+
+## 2026-11-14 (cycle 5)
+
+CI is now read directly from the public API (runs, jobs, annotations) from Sajjad's Mac; no logs are relayed.
+
+- PR 6 (the port and hardening): green on the required check after three follow ups. macOS: hook paths compared through the /var link. Windows: the batch git reader did not wait for its process, test payloads pasted raw Windows paths into JSON, 8.3 short paths in the test helpers. Decision (Sajjad): v0.1 supports Linux and macOS; the Windows job runs on every PR but is out of the required check until it is green for a week (issue text in the outbox).
+- Untuned replay 1: the frozen tool on 300 merged PRs from 20 repositories never looked at. Two independent judges: 0 of 60 medium and high findings correct (Wilson 95% upper bound 6%).
+- Decisions (Sajjad): cut run history, coverage on changed lines (V008 and readers) and mutation on request from v0.1, kept on the branch experimental; v0.1 reports only R003, R004, R005 and A002 at medium or high, every other rule capped at low until it passes an untuned replay; the hook blocks on the same set (plus W006, the gate itself). Do not publish the tuned 4 of 4.
+- Security review: 19 findings fixed, 1 open (quadratic tree-sitter read on pathological input), 310,000 fuzz cases; the serious one was a PR's own .testwitness.yml read when the base had none.
+- The false shapes of replay 1 were fixed using it as a tuning set: 60 medium and high findings to 7 there (a tuning number).
+- Untuned replay 2: the narrowed tool on 300 more PRs from 20 more unseen repositories. As shipped: 3 findings at medium or high (1.0 per 100 PRs), none a real weakening. R004 and R005 did not fire. R001 raised one uncapped finding, false, so it stays capped. Uncapped, all rules raised 74 findings at medium or high and 1 was true (two judges, agreement 72 of 74).
+- README claim: that noise number next to recall on the held out weakened PRs of the corpus (57 of 64, 89%).
+- Also built: release workflow with a dry run and tested scripts, the Action's comment token default (the README snippet never commented before), MCP registry and Claude plugin metadata, `check --pr <url>`, the summary counting capped findings, the demo repository content (9 PRs) and a session kit for recorded agent runs.

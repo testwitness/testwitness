@@ -2,6 +2,14 @@
 
 Each entry: the decision, my recommendation, and the reversible default I am proceeding with. Newest first.
 
+## 2026-11-14: Windows is experimental in v0.1
+
+Decided by Sajjad: v0.1 supports Linux and macOS. The Windows job runs on every pull request and is visible, but it is out of the required check until it has been green for a week. The self check reports that as a weakened gate (W006), which is correct.
+
+## 2026-11-14: open question, the state of a medium only change
+
+With the default threshold (high), a change whose only finding is R003 at medium reads "pass", and the hook does not block it. The demo needs fail_on: medium to show a skipped test as "review". Recommendation: since v0.1 reports only proven rules at medium or high, set the default fail_on to medium, so every finding v0.1 still shows above low reads "review" and the hook blocks on it. Default until Sajjad decides: unchanged (high).
+
 ## 2026-11-13: v0.1 narrowed to four proven rules
 
 Decided by Sajjad (13 Nov), after an untuned replay of 300 ordinary merged PRs from 20 unseen repositories found 0 correct findings out of 60 at medium or high: run history, coverage on changed lines (V008) and mutation on request (M001, M002) are cut from v0.1 and kept on the `experimental` branch; only R003, R004, R005 and A002 report at medium or high, and the hook blocks on the same set.
