@@ -4,7 +4,8 @@
 //   * Node level: ChildProcess.prototype.spawn is the one door spawn, exec, execFile and fork go through; spawnSync,
 //     execFileSync and execSync are wrapped as well.
 //   * git level: GIT_TRACE makes git log each built in command it runs and each external program it starts
-//     ("trace: run_command:" and "trace: exec:"), into a file the test reads.
+//     ("trace: run_command:", "trace: exec:" and, on newer git, "trace: start_command:"), into a file the test reads.
+//     testing/git-trace.ts tells git's own transport helpers apart from everything else.
 import childProcess, { ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';

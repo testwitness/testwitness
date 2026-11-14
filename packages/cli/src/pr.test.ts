@@ -2,7 +2,7 @@
 // The file runs with the network guard installed: the remote is a file:// URL and the REST call is a stub, so any
 // socket, DNS lookup or fetch fails the run. The last test proves the plain check never fetches.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +10,7 @@ import { main } from './index.js';
 import { githubRepoOf, parseMeta, parsePrUrl, type ApiResult, type PrDeps, type PullRequestRef } from './pr.js';
 import { makeRepo, MATH_TEST_WEAKENED, OTHER_TEST_FOCUSED, type TestRepo } from './testing/repo.js';
 import { installNetworkGuard } from './testing/no-network.js';
+import { foreignGitCommands } from './testing/git-trace.js';
 import { traceProcesses } from './testing/trace-processes.js';
 
 const network = installNetworkGuard();
@@ -250,19 +251,81 @@ describe('check --pr on a local bare repository', () => {
     expect(calls).toEqual([]);
   });
 
-  it('runs no hook and no filter from the fetched repository', async () => {
-    remote.src.write('.gitattributes', '*.ts filter=trap diff=trap\n');
-    remote.src.git('add', '-A');
-    remote.src.git('commit', '-q', '-m', 'attributes');
-    execFileSync('git', ['push', '-q', remote.bare, 'main'], { cwd: remote.src.dir });
-    const trace = await traceProcesses(async () => {
-      await run([], deps());
-    });
-    // git itself starts only the transport: upload-pack on the local remote, pack-objects there and index-pack here.
-    const transport = /trace: run_command: (?:unset [A-Z_ ]+; GIT_PROTOCOL=version=2 'git-upload-pack |git (?:pack-objects|index-pack) )/;
-    expect(trace.gitExternal.filter((l) => !transport.test(l))).toEqual([]);
-    expect(trace.gitExternal.length).toBeGreaterThan(0);
-    expect(trace.spawned.every((s) => s.startsWith('git '))).toBe(true);
+  // Traps: one script that records how it was called. A filter, a textconv driver, fsmonitor, sshCommand and hooks all
+  // point at it, in the remote's config, in the clone's config and in the fetched content (.gitattributes).
+  function setTraps(): { marker: string; trapsDir: string; arm(cwd: string): void } {
+    const trapsDir = mkdtempSync(join(tmpdir(), 'tw-traps-'));
+    const marker = join(trapsDir, 'fired.log');
+    const trap = join(trapsDir, 'trap');
+    writeFileSync(trap, `#!/bin/sh\necho "$*" >> '${marker}'\ncat\n`, { mode: 0o755 });
+    const hooks = join(trapsDir, 'hooks');
+    mkdirSync(hooks);
+    for (const h of ['post-checkout', 'reference-transaction', 'post-merge', 'post-rewrite', 'pre-auto-gc', 'post-index-change']) {
+      writeFileSync(join(hooks, h), `#!/bin/sh\necho "hook ${h} $*" >> '${marker}'\n`, { mode: 0o755 });
+    }
+    const arm = (cwd: string): void => {
+      const set = (k: string, v: string) => execFileSync('git', ['config', k, v], { cwd });
+      set('filter.trap.smudge', `${trap} smudge`);
+      set('filter.trap.clean', `${trap} clean`);
+      set('filter.trap.required', 'true');
+      set('diff.trap.textconv', `${trap} textconv`);
+      set('core.fsmonitor', `${trap} fsmonitor`);
+      set('core.sshCommand', `${trap} ssh`);
+      set('core.hooksPath', hooks);
+    };
+    return { marker, trapsDir, arm };
+  }
+  const fired = (marker: string): string => (existsSync(marker) ? readFileSync(marker, 'utf8') : '');
+
+  it.skipIf(process.platform === 'win32')('positive control: the traps fire, and the trace check names them, when git is allowed to run them', async () => {
+    const { marker, trapsDir, arm } = setTraps();
+    try {
+      remote.src.write('.gitattributes', '*.ts filter=trap diff=trap\n');
+      remote.src.git('add', '-A');
+      remote.src.git('commit', '-q', '-m', 'attributes');
+      const clone = join(work, 'control');
+      execFileSync('git', ['clone', '-q', '--no-checkout', remote.src.dir, clone]);
+      arm(clone);
+      const trace = await traceProcesses(async () => {
+        execFileSync('git', ['checkout', '-q', 'main'], { cwd: clone });
+      });
+      expect(fired(marker)).toMatch(/^smudge$/m);
+      expect(fired(marker)).toMatch(/^hook post-checkout /m);
+      const found = foreignGitCommands(trace.gitExternal, []);
+      expect(found.some((l) => l.includes(`${trapsDir}/trap smudge`))).toBe(true);
+      expect(found.some((l) => l.includes(`${trapsDir}/hooks/post-checkout`))).toBe(true);
+    } finally {
+      rmSync(trapsDir, { recursive: true, force: true });
+    }
+  });
+
+  it.skipIf(process.platform === 'win32')('runs no hook, filter, textconv, fsmonitor or sshCommand, from the fetched repository or the clone', async () => {
+    const { marker, trapsDir, arm } = setTraps();
+    try {
+      remote.src.write('.gitattributes', '*.ts filter=trap diff=trap\n');
+      remote.src.git('add', '-A');
+      remote.src.git('commit', '-q', '-m', 'attributes');
+      execFileSync('git', ['push', '-q', remote.bare, 'main'], { cwd: remote.src.dir });
+      arm(remote.bare);
+      // The current clone path, with the traps in the clone's own config.
+      const clone = join(work, 'clone');
+      execFileSync('git', ['clone', '-q', '--no-checkout', remote.url, clone]);
+      arm(clone);
+      const trace = await traceProcesses(async () => {
+        await run([], deps());
+        const out = join(work, 'clone-out.json');
+        expect(await main(['check', '--pr', PR_URL, '--format', 'json', '--out', out, '--cwd', clone], { pr: deps() })).toBe(0);
+      });
+      expect(fired(marker)).toBe('');
+      // git started its transport helpers (upload-pack on the local remote, pack-objects there, index-pack here) and
+      // nothing else. See testing/git-trace.ts for the two trace formats and the git versions on the runners.
+      const uploadPackPaths = [remote.bare, realpathSync(remote.bare)];
+      expect(foreignGitCommands(trace.gitExternal, uploadPackPaths)).toEqual([]);
+      expect(trace.gitExternal.length).toBeGreaterThan(0);
+      expect(trace.spawned.every((s) => s.startsWith('git '))).toBe(true);
+    } finally {
+      rmSync(trapsDir, { recursive: true, force: true });
+    }
   });
 });
 
