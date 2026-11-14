@@ -12,6 +12,7 @@ import { DefaultArtifactClient } from '@actions/artifact';
 import { existsSync, mkdtempSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
+import { info } from './annotations.js';
 
 /** File name of the history inside the artifact. */
 export const HISTORY_FILE = 'testwitness-history.json';
@@ -60,7 +61,7 @@ export async function downloadBaseHistory(token: string | undefined, artifactNam
     }
     core.info(`History: no ${artifactName} artifact on the last ${RUNS_TO_SEARCH} successful runs of this workflow on ${baseRef}. Severities do not use earlier runs; a push to ${baseRef} will start the history.`);
   } catch (err) {
-    core.info(`History: could not read the ${artifactName} artifact of ${baseRef} (the token needs actions: read; fork pull requests may not have it): ${(err as Error).message}. Severities do not use earlier runs.`);
+    info(`History: could not read the ${artifactName} artifact of ${baseRef} (the token needs actions: read; fork pull requests may not have it): ${(err as Error).message}. Severities do not use earlier runs.`);
   }
   return undefined;
 }
@@ -94,7 +95,7 @@ export async function uploadHistory(artifactName: string, file: string): Promise
     core.info(`History: uploaded ${basename(file)} as the ${artifactName} artifact (id ${res.id ?? 'unknown'}, kept 90 days).`);
     return true;
   } catch (err) {
-    core.info(`History: could not upload the ${artifactName} artifact: ${(err as Error).message}`);
+    info(`History: could not upload the ${artifactName} artifact: ${(err as Error).message}`);
     return false;
   }
 }

@@ -119,7 +119,7 @@ describe('action provenance on a pull_request event payload', () => {
     expect(out.markdown).toMatch(/- Claude Code: .*Co-Authored-By trailer on 1 of 1 commit/);
     expect(out.markdown).toContain('Generated with Claude Code footer in PR text');
     expect(out.markdown).not.toContain('Bot author');
-  });
+    }, 30_000); // the first run loads the Action's dependencies, which passed the default 5 s when the whole suite runs
 
   it('shows the Bot author line when the payload user is a Bot', async () => {
     const out = await runAction({ trailer: false, marker: false, user: { login: 'dependabot[bot]', type: 'Bot' } });
