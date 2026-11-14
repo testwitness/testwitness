@@ -11,11 +11,10 @@ npx testwitness check --pr https://github.com/<owner>/<repo>/pull/<n>   # trial 
 
 Needs Node 20 or newer and a git checkout with the base branch fetched. Supported on Linux and macOS; Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support). For pull requests, use the [GitHub Action](#github-action).
 
-Measured on 347 public pull requests ([how we measure](docs/how-we-measure-precision.md)):
+v0.1 reports four rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule runs and reports at low until it passes an untuned replay. Two numbers, both on pull requests no rule was tuned on ([how we measure](docs/how-we-measure-precision.md)):
 
-- R003 (test newly skipped), R004 (test converted to expected failure) and R005 (focused test added): 64, 28 and 15 true positives, 0 false positives on medium or high.
-- A002 (assertion loosened): 27 true positives, 1 false positive, held out precision 0.93 on medium or high.
-- As a Claude Code hook with default settings, it blocks 0 of the 217 pull requests that have no true positive finding.
+- Noise: TODO (filled in after the next untuned replay) findings at medium or high per 100 ordinary merged pull requests, in repositories testwitness was never tuned on.
+- <!-- recall:start -->Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the four rules report 57 of their 64 true positive labels at medium or high (89%).<!-- recall:end -->
 
 ## What it checks
 
@@ -74,7 +73,7 @@ testwitness init --agent claude    # or cursor, codex, git
 
 In Claude Code you can install it as a plugin instead, with the hook and the read only MCP server bundled (the package must be installed as above): `/plugin marketplace add testwitness/testwitness`, then `/plugin install testwitness@testwitness`.
 
-By default it blocks on a small proven set of rules (loosened assertions at high, expected failure markers, focused tests, tests or coverage thresholds cut in config, failures ignored in CI, and changes to the gate itself): the ones with true positives and no wrongful block on our corpus and on 300 real merged pull requests. Every other rule, deleted tests included, is advice until the replay proves it; a maintainer can widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
+By default it blocks on the same four rules (a newly skipped test only with `fail_on: medium`, since that finding is medium) and on changes to the gate itself. Every other rule, deleted tests included, stays quiet until it passes an untuned replay; a maintainer can opt a rule in and widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
 
 ## What it reports
 
@@ -89,38 +88,44 @@ One PR comment, updated in place, with a four number summary (tests deleted, tes
 ## Rules in v0.1
 
 <!-- rules:start -->
-A rule shows a precision number only when the engine confirmed at least 10 true positives for it on the public PR corpus and its precision on medium and high findings on the held out half is at least 0.9 (see [docs/precision.md](docs/precision.md)).
+v0.1 reports 4 rules at medium or high, the proven ones. Their numbers on the public PR corpus ([docs/precision.md](docs/precision.md)):
 
-| Rule | Finding | Default | True positives | False positives (medium or high) | Precision | Held out precision (medium or high) |
-|---|---|---|---|---|---|---|
-| R003 | Test newly skipped or disabled | medium | 64 | 0 | 1.00 | 1.00 |
-| R004 | Test converted to expected failure | high | 28 | 0 | 1.00 | 1.00 |
-| R005 | Focused test added | high | 15 | 0 | 1.00 | 1.00 |
-| A002 | Assertion loosened | medium | 27 | 1 | 0.96 | 0.93 |
-| C002 | Coverage threshold lowered or removed | medium | 10 | 1 | 0.91 | 1.00 |
+| Rule | Finding | Severity | True positives (corpus) | False positives (medium or high) | Held out precision (medium or high) |
+|---|---|---|---|---|---|
+| R003 | Test newly skipped or disabled | medium | 64 | 0 | 1.00 |
+| R004 | Test converted to expected failure | high | 28 | 0 | 1.00 |
+| R005 | Focused test added | high | 15 | 0 | 1.00 |
+| A002 | Assertion loosened | medium | 27 | 1 | 0.93 |
 
-Measured, not yet promoted (no headline number):
+Every other rule still runs, but its findings are capped at low (informational, collapsed in the comment) until it passes an untuned replay on pull requests from repositories it was never tuned on ([how we measure](docs/how-we-measure-precision.md)). W006, a change to the gate itself, is the one exception and keeps its severity. A repository can opt a rule back in by naming its severity in `.testwitness.yml`, for example `rules: { R001: medium }`. The severity in brackets is what the rule says before the cap; the corpus counts are judged at that severity:
 
-- R001 Test function deleted: 32 true positives, 23 false positives, held out precision 0.77
-- R002 Test file deleted: 12 true positives, 3 false positives, held out precision 0.75
-- R010 Test added then skipped: 13 true positives, 0 false positives, held out precision n/a
-- A001 Assertion removed: 14 true positives, 0 false positives, held out precision n/a
-- A009 Tautological assertion: 3 true positives, 0 false positives, held out precision n/a
-- O001 New test without an assertion: 5 true positives, 0 false positives, held out precision n/a
-- O002 New test with a smoke oracle only: 9 true positives, 5 false positives, held out precision n/a
-- E001 Catch all added in a test: 3 true positives, 0 false positives, held out precision 1.00
-- W002 continue-on-error added to a test step or job: 9 true positives, 2 false positives, held out precision 0.67
-- W003 Failure suppressed in the run command: 1 true positive, 0 false positives, held out precision 1.00
-- C001 Test selection narrowed in config: 7 true positives, 0 false positives, held out precision n/a
-- C003 Passing with no tests enabled: 1 true positive, 2 false positives, held out precision 0.50
-- V004 Claim in PR text not supported by results: 9 true positives, 0 false positives, held out precision 1.00
+- R001 Test function deleted (says medium): 32 true positives, 23 false positives on the corpus
+- R002 Test file deleted (says high): 12 true positives, 3 false positives on the corpus
+- R006 Test body emptied or commented out (says high): no true positive on the corpus yet
+- R010 Test added then skipped (says low): 13 true positives, 0 false positives on the corpus
+- A001 Assertion removed (says low): 14 true positives, 0 false positives on the corpus
+- A009 Tautological assertion (says low): 3 true positives, 0 false positives on the corpus
+- O001 New test without an assertion (says low): 5 true positives, 0 false positives on the corpus
+- O002 New test with a smoke oracle only (says low): 9 true positives, 5 false positives on the corpus
+- O006 New test file with no tests collected (says medium): no true positive on the corpus yet
+- E001 Catch all added in a test (says high): 3 true positives, 0 false positives on the corpus
+- W002 continue-on-error added to a test step or job (says high): 9 true positives, 2 false positives on the corpus
+- W003 Failure suppressed in the run command (says high): 1 true positive, 0 false positives on the corpus
+- S004 Snapshot update enabled in the test command (says high): no true positive on the corpus yet
+- C001 Test selection narrowed in config (says high): 7 true positives, 0 false positives on the corpus
+- C002 Coverage threshold lowered or removed (says medium): 10 true positives, 1 false positive on the corpus
+- C003 Passing with no tests enabled (says high): 1 true positive, 2 false positives on the corpus
+- V003 Changed test did not run (says high): no true positive on the corpus yet
+- V004 Claim in PR text not supported by results (says medium): 9 true positives, 0 false positives on the corpus
+- V005 No test results found (says low): no true positive on the corpus yet
+- V006 Failures in results while the PR claims passing (says high): no true positive on the corpus yet
 
-10 more rules ship in v0.1 but have no true positive in the corpus yet, so no precision number is claimed for them: R006 Test body emptied or commented out; O006 New test file with no tests collected; M001 Changed lines with surviving mutants; M002 New test kills nothing; W006 The integrity gate itself weakened; S004 Snapshot update enabled in the test command; V003 Changed test did not run; V005 No test results found; V006 Failures in results while the PR claims passing; V008 Changed production lines not executed. The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
+The full catalogue with false positive controls is in [docs/rules.md](docs/rules.md).
 <!-- rules:end -->
 
 ## Precision
 
-Measured on a corpus of real public pull requests chosen because a naive detector would flag them (honest refactors) plus a few real weakenings. See [docs/precision.md](docs/precision.md) for the per rule table, regenerated with `pnpm corpus:report`. How the corpus is built and labelled, the held out split and the known limits: [docs/how-we-measure-precision.md](docs/how-we-measure-precision.md). Low findings (moved, parameterised, refactored, conditional) are informational and collapsed in the comment.
+Measured on a corpus of real public pull requests chosen because a naive detector would flag them (honest refactors) plus a few real weakenings. See [docs/precision.md](docs/precision.md) for the per rule table, regenerated with `pnpm corpus:report`; it judges every rule at the severity the rule gives before the cap, so the rules that are not proven yet stay measured. How the corpus is built and labelled, the held out split and the known limits: [docs/how-we-measure-precision.md](docs/how-we-measure-precision.md). Low findings (moved, parameterised, refactored, conditional) are informational and collapsed in the comment.
 
 ## Configuration
 
@@ -131,7 +136,8 @@ mode: report          # report | require-ack | strict
 fail_on: high
 rules:
   R003: high
-  T001: off
+  R001: medium        # naming a severity opts a rule that is not proven yet back in
+  O006: off
 assertions:
   extra: ["assert_ledger_balanced", "com.acme.test.Check#*"]
 acknowledge:
@@ -143,7 +149,7 @@ acknowledge:
 
 ## Security and privacy
 
-Runs on `pull_request` with `contents: read`. No secrets, no network calls from the engine, no execution of your code: grammars are bundled, configs are parsed as text. The Action talks only to the GitHub API, for the optional comment and the optional [run history](docs/history.md) artifact. Nothing leaves the runner; the JSON report stays in your workspace. See [docs/design.md](docs/design.md). The one place your code runs is the optional [mutation on request](docs/mutation-on-request.md) workflow, which you add yourself and which starts only on a maintainer's `/testwitness mutate` comment; testwitness then only reads the Stryker or PIT report it wrote.
+Runs on `pull_request` with `contents: read`. No secrets, no network calls from the engine, no execution of your code: grammars are bundled, configs are parsed as text. The Action talks only to the GitHub API, for the optional comment and the acknowledgements. Nothing leaves the runner; the JSON report stays in your workspace. See [docs/design.md](docs/design.md).
 
 ## Development
 

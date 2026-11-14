@@ -1,6 +1,6 @@
 # Mutation testing
 
-This page is about the mutation score of testwitness's own code. To have testwitness read mutation reports of a pull request in your repository, see [mutation on request](./mutation-on-request).
+This page is about the mutation score of testwitness's own code.
 
 StrykerJS runs over `packages/core/src` with the vitest unit project (fixture cases are excluded because each spawns a git repository). Incremental mode keeps `reports/stryker-incremental.json` so later runs only retest what changed. Run: `pnpm mutate` (about 20 minutes on 2 cores with `--concurrency 2`).
 

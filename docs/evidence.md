@@ -66,18 +66,4 @@ TAP: test points (`ok`, `not ok`, the description up to the first unescaped `#`)
 
 JSON reporters: each test's name path, file and status, mapped so a test gets the same key as from the same runner's JUnit XML: Jest and Vitest `testResults[].assertionResults[]` (`passed`, `failed`, and `pending`, `skipped`, `todo` as skipped), pytest-json-report `tests[].nodeid` and `outcome` (`error` stays an error; `rerun`, which pytest-rerunfailures leaves in place of the final outcome, is decided by the call phase), Playwright `suites[].specs[].tests[]` with the test `status` (`expected`, `unexpected`, `flaky`, `skipped`) and the results of each retry. The quirks of each, with the exact output quoted, are in `fixtures/JUNIT-FIXTURES.md`.
 
-## Coverage reports (optional)
-
-V008 reads line coverage of the head run when you attach it with the `coverage` input of the Action, `--coverage` on the CLI or `coverage.paths` in `.testwitness.yml`. Three formats are read, told apart by their first bytes: lcov (`lcov.info` from Istanbul, c8, Vitest, Jest or `coverage lcov`), Cobertura XML (`coverage.xml` from coverage.py and pytest cov, and the Cobertura writers of other tools) and JaCoCo XML (`jacoco.xml`). Only line hits are read. Paths are made relative to the repository root when the report holds an absolute path under it or a Cobertura source root under it; otherwise they are matched by suffix, so a report written on a CI runner with another checkout path, or a JaCoCo report that names `com/acme/Refund.java`, still finds `src/main/java/com/acme/Refund.java`. The readers stream, stop after 200 report files or 50 MB, never fetch a DTD and never run anything. The report gains a `coverage` section and the comment a Coverage line under Evidence.
-
-```yaml
-- uses: testwitness/testwitness@v0
-  with:
-    results: "**/junit*.xml"
-    coverage: "coverage/lcov.info,**/coverage.xml,**/jacoco.xml"
-```
-
-## Mutation reports (optional, opt in)
-
-M001 and M002, and the measured grades of O001 and O002, read mutation reports: StrykerJS `mutation.json` (the json reporter) and PIT `mutations.xml` (outputFormats XML), through the `mutation` input, `--mutation` or `mutation.paths`. Producing them means running the tests, which testwitness never does on its own; the separate workflow that does it, triggered by a maintainer's `/testwitness mutate` comment, is described in [mutation on request](./mutation-on-request). mutmut results are not read, because they carry no line numbers or killing tests.
 

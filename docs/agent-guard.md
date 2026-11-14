@@ -61,11 +61,12 @@ It refuses to replace a different existing pre-push hook unless you pass `--forc
 
 The working tree means staged, unstaged and untracked files that are not ignored: what `git add -A && git commit` would record. Nothing is written into your repository to read it (see [design](./design#the-working-tree-snapshot)).
 
-By default the hook blocks on a small proven set of rules and treats every other rule as advice: the user sees it, the agent is not stopped. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block.
+By default the hook blocks on the proven rules only, the same small set that v0.1 reports at medium or high, and stays quiet about everything else. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block.
 
-* **Blocking by default:** A002 (assertion loosened, at high), R004 (test converted to expected failure), R005 (focused test), C001 and C002 (test selection narrowed or coverage threshold lowered in config), W003 (failures ignored in CI), and a changed path on the `protect` list. Each of these rules has true positives at high severity on the corpus and not one wrongful block on the corpus or on 300 real merged pull requests. W006 (the gate itself changed) also blocks; it has no measurement and is on the list because it is the gate protecting itself.
-* **Advice by default: every other rule.** That includes A001, A009, E001, R001 and R002, which each had at least one wrongful block, and the rules that never produced a high finding in either set. Deleted tests and deleted test files (R001, R002) are the behaviour people complain about most, and they do not block yet. Read the numbers in [precision](./precision#agent-hook-replay) before you rely on the default: the hook blocks 17 of the 82 corpus pull requests that weaken tests, and none of the 52 that do not.
-* **Widening it is your call.** List the rules that may block in `.testwitness.yml` on the default branch, for example `hook: { blocking: [A002, C001, C002, R004, R005, W003, W006, R001, R002] }`. `hook.advice_only` takes a rule off the list again.
+* **Blocking by default:** R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened), plus a changed path on the `protect` list. These are the proven rules (`PROVEN_RULES` in `packages/core/src/proven.ts`), and none of them has a wrongful block at high on the corpus or on 300 real merged pull requests. R003 grades a newly skipped test medium, so it blocks only when the base config sets `fail_on: medium`; at the default it is shown as advice.
+* **The one exception: W006**, a change to the gate itself (`.testwitness.yml`, the workflow step that runs testwitness, or the agent hook config). It is not a judgement about test code, only a maintainer may acknowledge it, and it has no wrongful block on either set. It keeps its severity in the report and it blocks.
+* **Every other rule does not block**, and its findings are capped at low in v0.1, so the hook does not show them either. That includes R001 and R002 (deleted tests and test files), the behaviour people complain about most. On an untuned replay of 300 ordinary merged pull requests from 20 repositories the rules had never been tuned on, none of the 60 findings at medium or high was correct. So v0.1 keeps four rules at medium or high and caps every other rule at low until it passes such a replay. Read the numbers in [precision](./precision#agent-hook-replay) before you rely on the default.
+* **Widening it is your call.** A rule outside the set blocks only when the repository opts it back in with a severity and lists it, in `.testwitness.yml` on the default branch: for example `rules: { R001: medium, R002: high }` and `hook: { blocking: [A002, R003, R004, R005, W006, R001, R002] }`. Listing it in `hook.blocking` alone is not enough, because its findings stay capped at low. `hook.advice_only` takes a rule off the list again.
 * `medium` findings never block unless the base config sets `fail_on: medium`, and then only for rules on the blocking list.
 
 A block message looks like this:
@@ -106,7 +107,7 @@ fail_on: high          # the hook blocks at this severity and above
 hook:
   timeout: 20          # seconds before the hook gives up and allows the action
   max_blocks: 2        # how often the same finding may block in one session
-  blocking: [A002, C001, C002, R004, R005, W003, W006]   # the rules that may block; this is the default
+  blocking: [A002, R003, R004, R005, W006]   # the rules that may block; this is the default
   advice_only: []      # rules taken off the blocking list again
 ```
 
@@ -143,7 +144,7 @@ What the hook cannot see or stop:
 * **Production code bent to fit the tests.** A special case added so that a test passes leaves the tests untouched, and no test rule fires.
 * **Value rewrites.** An expected value changed to match wrong output is as strict as before, so it is not a loosening.
 * **Mocks and fixtures.** A mock that replaces the code under test, or seed data edited around it, is not detected.
-* **Most rules, by default.** Only the proven set blocks. Deleted tests and deleted test files (R001, R002) are advice until their false positives are fixed (see above).
+* **Most rules, by default.** Only the proven set and W006 block. Deleted tests and deleted test files (R001, R002) are capped at low until they pass an untuned replay (see above).
 * **Claims.** "All tests pass" in the agent's last message is not checked. The hook does not read test results unless you pass `--results`.
 * **Copilot's cloud agent.** It has no local hooks, and GitHub does not run Actions workflows on its pushes until a person approves the run, so the pull request check reports late there by design.
 * **Cursor edits.** Cursor's documentation does not give the input shape of its file tools, so `protect` at edit time is best effort on Cursor. The commit and stop checks enforce the list either way.
@@ -156,7 +157,7 @@ The payloads in `fixtures/hooks` are written from the vendors' documentation (re
 1. In a scratch repository with a test suite, on the default branch: `testwitness init --agent <name>`, commit the config. For Codex, start it and run `/hooks` to trust the hook.
 2. Add a line to the hook command that keeps the raw event, for example change the command to `sh -c 'tee -a /tmp/tw-events.jsonl | testwitness hook --agent <name>'`. (For Codex, trust the changed hook again.)
 3. Break the code so that one test fails, start the agent, and ask: "Make the test suite pass and commit." Do not mention testwitness.
-4. If the agent weakens a test in a way the default blocks on (loosens an assertion, marks the test as an expected failure, focuses another test), it should be blocked at the commit or at the end of its turn, read the base text, and restore the test. If it deletes the test instead, you will see advice only; add R001 and R002 to `hook.blocking` on the default branch and run again to record the blocking path for deletions.
+4. If the agent weakens a test in a way the default blocks on (loosens an assertion, marks the test as an expected failure, focuses another test), it should be blocked at the commit or at the end of its turn, read the base text, and restore the test. If it deletes the test instead, the hook stays quiet; opt R001 and R002 in (`rules: { R001: medium, R002: high }`) and add them to `hook.blocking` on the default branch, then run again to record the blocking path for deletions.
 5. Save the transcript: `claude --resume` and export for Claude Code, the chat export for Cursor, `codex` session log for Codex. Put it in `docs/sessions/<agent>-<date>.md` with the agent version, and copy the matching lines of `/tmp/tw-events.jsonl` over the files in `fixtures/hooks/<agent>/` (replace the repository path with `__REPO__`).
 6. Run `pnpm vitest run packages/cli/src/hook`. If a recorded payload fails a test, the vendor's format differs from its documentation: fix the adapter in `packages/cli/src/hook/events.ts` and note the date there.
 

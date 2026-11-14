@@ -146,12 +146,10 @@ temporary repository sets `core.autocrlf false` so git stores the CRLF bytes.
 One directive per line:
 
 - `twin <case>`: take `base/`, `head/`, `expected.json`, `pr.json` and the
-  result, coverage, mutation and history inputs from that LF case of the same
-  project. The suite then requires exactly the findings of the twin, line
+  result inputs from that LF case of the same project. The suite then requires exactly the findings of the twin, line
   numbers, messages and fingerprints included.
 - `sides base|head|both` (default `both`): which commit gets CRLF. The head
-  side also converts the PR body and the result, coverage, mutation and
-  history inputs. `twin X` with `sides head` is a PR that converts to CRLF
+  side also converts the PR body and the result inputs. `twin X` with `sides head` is a PR that converts to CRLF
   while it edits; `sides base` one that converts to LF.
 - `from <case>`: take only `base/` and `head/` from that case, without its
   expectations.
