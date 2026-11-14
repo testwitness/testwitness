@@ -13,7 +13,7 @@ Needs Node 20 or newer and a git checkout with the base branch fetched. Supporte
 
 v0.1 reports four rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule runs and reports at low until it passes an untuned replay. Two numbers, both on pull requests no rule was tuned on ([how we measure](docs/how-we-measure-precision.md)):
 
-- Noise: on 300 ordinary merged pull requests from 20 repositories testwitness was never tuned on, it reported 3 findings at medium or high, 1.0 per 100 pull requests. None of the 3 was a real weakening (two loosened assertions that were exact checks of a new value, and a skip added to a test that already ran nothing). Measured 14 November 2026 with v0.1 as shipped, judged by two independent judges with a written rubric where a doubtful finding counts as false.
+- Noise: on 300 ordinary merged pull requests from 20 repositories testwitness was never tuned on, it reported 3 findings at medium or high, 1.0 per 100 pull requests. All 3 were wrong: two loosened assertions that were exact checks of a new value, and a skip added to a test that already ran nothing. So false findings are rare on ordinary work, but not zero. Measured 14 November 2026 with v0.1 as shipped, judged by two independent judges with a written rubric where a doubtful finding counts as false.
 - <!-- recall:start -->Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the four rules report 57 of their 64 true positive labels at medium or high (89%).<!-- recall:end -->
 
 ## What it checks
