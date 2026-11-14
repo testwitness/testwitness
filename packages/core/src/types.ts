@@ -229,7 +229,13 @@ export interface Location {
 
 export interface Finding {
   ruleId: string;
+  /** The severity the report gives: for a rule that is not proven yet, capped at low (proven.ts). */
   severity: Severity;
+  /**
+   * What the rule itself said, before the cap on unproven rules (proven.ts). Present on every finding of a capped
+   * rule, absent otherwise. For measurement only (the corpus report); gating, the comment and the hook use `severity`.
+   */
+  uncappedSeverity?: Severity;
   message: string;
   location: Location;
   /** Stable fingerprint: survives line shifts and rebases. */
@@ -325,6 +331,11 @@ export interface RuleContext {
 export interface RuleConfigEntry {
   severity: SeveritySetting;
   options: Record<string, unknown>;
+  /**
+   * True when the config names a severity for the rule (`R001: medium`, or `R001: { severity: medium }`). For a rule
+   * that is not proven yet this opts it back in: its findings are no longer capped at low (proven.ts).
+   */
+  explicitSeverity?: boolean;
 }
 
 export interface ResolvedConfig {

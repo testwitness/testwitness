@@ -6,6 +6,7 @@ export * from './diff/parse.js';
 export * from './diff/classify.js';
 export * from './git.js';
 export * from './config.js';
+export * from './proven.js';
 export * from './rules/index.js';
 export * from './engine.js';
 export * from './safe-write.js';

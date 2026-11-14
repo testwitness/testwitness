@@ -85,18 +85,18 @@
   {
     "slug": "alphagov-govuk-frontend-6590",
     "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "Components › Sass render › renders CSS for all components"
-  },
-  {
-    "slug": "alphagov-govuk-frontend-6590",
-    "split": "tuning",
     "ruleId": "O001",
     "severity": "low",
     "verdict": "expected-low",
     "subject": "Components › Sass render › all components › does not use custom properties in shorthand properties"
+  },
+  {
+    "slug": "alphagov-govuk-frontend-6590",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "Components › Sass render › renders CSS for all components"
   },
   {
     "slug": "apache-airflow-59542",
@@ -135,6 +135,24 @@
     "slug": "apache-airflow-62913",
     "split": "tuning",
     "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "Backfill creation and validation › Verify backfill table filters",
+    "label": "refactored"
+  },
+  {
+    "slug": "apache-airflow-62913",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "validate date range › verify date range selection (start date, end date)",
+    "label": "refactored"
+  },
+  {
+    "slug": "apache-airflow-62913",
+    "split": "tuning",
+    "ruleId": "R001",
     "severity": "medium",
     "verdict": "fp",
     "subject": "Backfill pause, resume, and cancel controls › verify pause and resume backfill"
@@ -154,24 +172,6 @@
     "severity": "medium",
     "verdict": "fp",
     "subject": "Backfill pause, resume, and cancel controls › verify cancelled backfill cannot be resumed"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "Backfill creation and validation › Verify backfill table filters",
-    "label": "refactored"
-  },
-  {
-    "slug": "apache-airflow-62913",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "low",
-    "verdict": "expected-low",
-    "subject": "validate date range › verify date range selection (start date, end date)",
-    "label": "refactored"
   },
   {
     "slug": "apache-airflow-63936",
@@ -4165,22 +4165,6 @@
     "slug": "pandas-dev-pandas-64457",
     "split": "tuning",
     "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period"
-  },
-  {
-    "slug": "pandas-dev-pandas-64457",
-    "split": "tuning",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period_nat"
-  },
-  {
-    "slug": "pandas-dev-pandas-64457",
-    "split": "tuning",
-    "ruleId": "R001",
     "severity": "low",
     "verdict": "expected-low",
     "subject": "TestPeriodIndexComparisons::test_parr_cmp_period_scalar2",
@@ -4194,6 +4178,22 @@
     "verdict": "expected-low",
     "subject": "TestPeriodIndexComparisons::test_comp_nat",
     "label": "refactored"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period"
+  },
+  {
+    "slug": "pandas-dev-pandas-64457",
+    "split": "tuning",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "TestPeriodIndexSeriesComparisonConsistency::test_pi_comp_period_nat"
   },
   {
     "slug": "pandas-dev-pandas-69986",
@@ -5024,14 +5024,6 @@
   {
     "slug": "scikit-learn-scikit-learn-28842",
     "split": "heldout",
-    "ruleId": "R001",
-    "severity": "medium",
-    "verdict": "fp",
-    "subject": "test_deprecated"
-  },
-  {
-    "slug": "scikit-learn-scikit-learn-28842",
-    "split": "heldout",
     "ruleId": "O002",
     "severity": "low",
     "verdict": "expected-low",
@@ -5046,6 +5038,14 @@
     "verdict": "expected-low",
     "subject": "test_make_rng",
     "label": "moved"
+  },
+  {
+    "slug": "scikit-learn-scikit-learn-28842",
+    "split": "heldout",
+    "ruleId": "R001",
+    "severity": "medium",
+    "verdict": "fp",
+    "subject": "test_deprecated"
   },
   {
     "slug": "scikit-learn-scikit-learn-28842",
@@ -5634,19 +5634,19 @@
   {
     "slug": "vercel-next.js-76214",
     "split": "heldout",
-    "ruleId": "R002",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "test/development/acceptance/ReactRefreshLogBoxMisc.test.ts"
-  },
-  {
-    "slug": "vercel-next.js-76214",
-    "split": "heldout",
     "ruleId": "R001",
     "severity": "low",
     "verdict": "expected-low",
     "subject": "Client Navigation › with <Link/> › should have a redbox when no children are provided",
     "label": "rewritten"
+  },
+  {
+    "slug": "vercel-next.js-76214",
+    "split": "heldout",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "test/development/acceptance/ReactRefreshLogBoxMisc.test.ts"
   },
   {
     "slug": "vercel-next.js-76631",
@@ -5678,19 +5678,19 @@
   {
     "slug": "vercel-next.js-83372",
     "split": "tuning",
-    "ruleId": "R002",
-    "severity": "high",
-    "verdict": "fp",
-    "subject": "packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx"
-  },
-  {
-    "slug": "vercel-next.js-83372",
-    "split": "tuning",
     "ruleId": "R001",
     "severity": "low",
     "verdict": "expected-low",
     "subject": "DevErrorOverlay › can get error code from client side error thrown by framework",
     "label": "replaced"
+  },
+  {
+    "slug": "vercel-next.js-83372",
+    "split": "tuning",
+    "ruleId": "R002",
+    "severity": "high",
+    "verdict": "fp",
+    "subject": "packages/next/src/next-devtools/dev-overlay/components/errors/error-overlay-layout/error-overlay-layout.test.tsx"
   },
   {
     "slug": "vercel-next.js-83591",

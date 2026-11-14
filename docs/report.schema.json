@@ -558,6 +558,10 @@
         "severity": {
           "$ref": "#/$defs/severity"
         },
+        "uncappedSeverity": {
+          "$ref": "#/$defs/severity",
+          "description": "What the rule itself said before the v0.1 cap. Present on every finding of a rule that is not proven yet (its severity is then capped at low) and absent otherwise. For measurement only; the state, the comment and the agent hook use severity. See https://testwitness.github.io/testwitness/how-we-measure-precision"
+        },
         "message": {
           "type": "string",
           "description": "One plain sentence saying what changed and why it matters."

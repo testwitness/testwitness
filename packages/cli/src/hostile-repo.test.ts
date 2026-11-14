@@ -27,17 +27,17 @@ function branch(files: Record<string, string>, base: Record<string, string> = {}
 }
 
 describe('a runner config a parser cannot read safely', () => {
-  it('a YAML config of open brackets does not crash the check and is reported at high', async () => {
+  it('a YAML config of open brackets does not crash the check and is reported (high, capped at low in v0.1)', async () => {
     // Before the nesting check this aborted the process inside the YAML parser (exit code 134).
     const r = branch({ '.mocharc.yml': `spec: ${'['.repeat(200_000)}\n`, 'codecov.yml': `${'- '.repeat(5000)}x\n` }, { '.mocharc.yml': 'spec: test\n', 'codecov.yml': 'coverage:\n  status:\n    project:\n      default:\n        target: 80%\n' });
     const { report } = await check({ cwd: r.dir, base: 'main', head: 'HEAD', format: 'json', quiet: true, results: '' });
     const deep = report.findings.filter((f) => f.label === 'too deep');
-    expect(deep.map((f) => [f.ruleId, f.severity, f.location.path]).sort()).toEqual([
-      ['C001', 'high', '.mocharc.yml'],
-      ['C002', 'high', 'codecov.yml'],
+    expect(deep.map((f) => [f.ruleId, f.severity, f.uncappedSeverity, f.location.path]).sort()).toEqual([
+      ['C001', 'low', 'high', '.mocharc.yml'],
+      ['C002', 'low', 'high', 'codecov.yml'],
     ]);
     expect(deep[0]!.message).toMatch(/nested deeper than 200 levels.*review it by hand/);
-    expect(report.state).toBe('review');
+    expect(report.state).toBe('unreadable');
   }, 60_000);
 });
 

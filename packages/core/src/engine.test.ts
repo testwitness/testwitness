@@ -168,7 +168,9 @@ describe('runEngine', () => {
     });
     const nonLow = (pred: (id: string) => boolean) => report.findings.filter((f) => pred(f.ruleId) && f.severity !== 'low').length;
     expect(report.summary.testsDeleted).toBe(nonLow((id) => id === 'R001' || id === 'R002'));
-    expect(report.summary.testsDeleted).toBeGreaterThanOrEqual(1);
+    // R001 and R002 are not proven rules: their findings are capped at low, so no deletion counts in v0.1.
+    expect(report.summary.testsDeleted).toBe(0);
+    expect(report.findings.some((f) => f.ruleId === 'R001' && f.severity === 'low' && f.uncappedSeverity !== undefined)).toBe(true);
     expect(report.summary.testsSkipped).toBe(nonLow((id) => id === 'R003' || id === 'R004'));
     expect(report.summary.testsSkipped).toBeGreaterThanOrEqual(1);
     expect(report.summary.assertionsWeakened).toBe(nonLow((id) => id.startsWith('A')));
@@ -182,7 +184,9 @@ describe('runEngine', () => {
       stubRule('X002', 'medium'),
       stubRule('X000', 'high'),
     ];
-    const { report } = await runEngine(opts({ rules }));
+    // Custom rules are not proven: opt them in with a severity so the cap leaves their findings alone.
+    const config = cfg({ rules: Object.fromEntries(rules.map((r) => [r.id, { severity: r.defaultSeverity, options: {}, explicitSeverity: true }])) });
+    const { report } = await runEngine(opts({ rules, config }));
     expect(report.findings.map((f) => f.ruleId)).toEqual(['X000', 'X001', 'X002', 'X003']);
     expect(report.findings.map((f) => f.severity)).toEqual(['high', 'high', 'medium', 'low']);
   });

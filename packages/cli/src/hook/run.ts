@@ -67,13 +67,18 @@ export interface EvaluateOptions {
   adviceOnly?: readonly string[];
   /** Hook config files that had no testwitness hook at the base: the change installs the guard. */
   gateInstalls?: ReadonlySet<string>;
+  /**
+   * Grade on what each rule said before the v0.1 cap on unproven rules (`uncappedSeverity`), not on the reported
+   * severity. For measurement only: the corpus replay uses it to see what a rule would block if it were proven.
+   */
+  uncapped?: boolean;
 }
 
 /**
  * Grade a check result the way the hook does. Pure: no loop guard, no I/O.
  *
  * Blocking: open findings at or above `fail_on` (high unless the base config lowers it) of a rule on the blocking
- * list (`hook.blocking`, by default the small set the replay has proven) and not on `hook.advice_only`, plus changed
+ * list (`hook.blocking`, by default the proven rules and W006) and not on `hook.advice_only`, plus changed
  * paths on the `protect` list. Everything else at medium or above is advice. Never blocking: acknowledged findings,
  * and W006 on a file the change adds or on a hook config that had no testwitness hook at the base (`gateInstalls`): a
  * gate that did not exist at the base cannot have been weakened, and running `testwitness init` on a branch must not
@@ -88,11 +93,12 @@ export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: 
   const byPath = new Map(result.files.map((f) => [f.path, f]));
   for (const f of result.report.findings) {
     if (f.acknowledged) continue;
-    const g: GuardFinding = { ruleId: f.ruleId, severity: f.severity, path: f.location.path, ...(f.location.line ? { line: f.location.line } : {}), message: f.message, fingerprint: f.fingerprint, finding: f };
-    const atThreshold = SEVERITY_RANK[f.severity] >= SEVERITY_RANK[config.failOn];
+    const severity = opts.uncapped ? (f.uncappedSeverity ?? f.severity) : f.severity;
+    const g: GuardFinding = { ruleId: f.ruleId, severity, path: f.location.path, ...(f.location.line ? { line: f.location.line } : {}), message: f.message, fingerprint: f.fingerprint, finding: f };
+    const atThreshold = SEVERITY_RANK[severity] >= SEVERITY_RANK[config.failOn];
     const adviceRule = (allowed !== 'all' && !allowed.includes(f.ruleId)) || adviceOnly.includes(f.ruleId) || (f.ruleId === 'W006' && (byPath.get(f.location.path)?.status === 'added' || gateInstalls.has(f.location.path)));
     if (atThreshold && !adviceRule) blocking.push(g);
-    else if (SEVERITY_RANK[f.severity] >= SEVERITY_RANK.medium) advice.push(g);
+    else if (SEVERITY_RANK[severity] >= SEVERITY_RANK.medium) advice.push(g);
   }
   if (config.protect.length) {
     const isProtected = pathMatcher(config.protect);
