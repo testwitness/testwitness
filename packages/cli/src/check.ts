@@ -157,7 +157,7 @@ function allowedRoots(cwd: string, patterns: string[]): string[] {
   const roots = new Set<string>();
   const real = (p: string): string | undefined => {
     try {
-      return realpathSync(p);
+      return realpathSync.native(p);
     } catch {
       return undefined;
     }
@@ -207,7 +207,7 @@ export async function matchReportFiles(cwd: string, patterns: string[], followSy
     let ok = false;
     try {
       if (!lstatSync(f).isSymbolicLink()) {
-        const r = realpathSync(f);
+        const r = realpathSync.native(f);
         ok = roots.some((root) => r === root || r.startsWith(root.endsWith(sep) ? root : root + sep));
       }
     } catch {

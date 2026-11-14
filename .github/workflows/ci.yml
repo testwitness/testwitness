@@ -11,8 +11,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+
+  # Windows is experimental in v0.1: this job runs on every pull request and its result is shown,
+  # but it is not part of the required "check" below. It becomes required again after a week of
+  # green runs (see the Windows support issue).
+  test-windows:
+    name: test (windows-latest, experimental)
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
         with:
@@ -55,7 +75,8 @@ jobs:
       - run: pnpm tsc -b
       - run: pnpm pack:check
 
-  # Single status for branch protection: green only when every matrix job is green.
+  # Single status for branch protection: green only when every supported platform is green.
+  # test-windows is left out on purpose while Windows is experimental.
   check:
     name: check
     needs: [test, cli-node20]

@@ -3,11 +3,11 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import fg from 'fast-glob';
 import { mergeHistory, serializeHistory } from '@testwitness/core';
 import { check, globBase, pathToPattern, splitGlobs, windowsGlobToPattern } from './check.js';
+import { TMP } from './testing/repo.js';
 
 describe('splitGlobs', () => {
   it('splits on commas and trims, and leaves POSIX globs alone on every platform', () => {
@@ -35,7 +35,7 @@ describe('splitGlobs', () => {
 
 describe('windowsGlobToPattern', () => {
   it('gives a pattern fast-glob matches against the literal directories', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'tw-winglob-'));
+    const dir = mkdtempSync(join(TMP, 'tw-winglob-'));
     try {
       mkdirSync(join(dir, 'out', '[id]', '(x)'), { recursive: true });
       writeFileSync(join(dir, 'out', '[id]', '(x)', 'a.xml'), '');
@@ -102,7 +102,7 @@ function repoAt(dir: string, eol: '\n' | '\r\n' = '\n'): { base: string; head: s
 
 describe('paths across platforms, end to end', () => {
   it('reads a history outside the repository from a directory whose name has brackets, parentheses and spaces', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'tw-paths-'));
+    const root = mkdtempSync(join(TMP, 'tw-paths-'));
     try {
       const repo = join(root, 'repo');
       mkdirSync(repo);
@@ -123,7 +123,7 @@ describe('paths across platforms, end to end', () => {
   });
 
   it('gives the same fingerprints and forward slash paths whatever the checkout path and line endings', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'tw-fp-'));
+    const root = mkdtempSync(join(TMP, 'tw-fp-'));
     try {
       const run = async (name: string, eol: '\n' | '\r\n') => {
         const dir = join(root, name);
@@ -147,7 +147,7 @@ describe('paths across platforms, end to end', () => {
   });
 
   it.runIf(process.platform === 'win32')('matches results through a path.join glob into a directory with brackets on Windows', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'tw-win-glob-'));
+    const root = mkdtempSync(join(TMP, 'tw-win-glob-'));
     try {
       const repo = join(root, 'repo');
       mkdirSync(repo);

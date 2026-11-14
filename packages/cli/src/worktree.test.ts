@@ -2,7 +2,7 @@
 // writing anything into the repository. The corpus replay (corpus/runner/replay.test.ts) proves it equals the commit check.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { snapshotWorktree, git as runGit } from '@testwitness/core';
 import { check } from './check.js';
@@ -58,7 +58,7 @@ describe('check --worktree', () => {
 
   it('works from a linked worktree and from a subdirectory', async () => {
     repo = makeRepo();
-    const linked = join(repo.dir, '..', `${repo.dir.split('/').pop()}-linked`);
+    const linked = join(dirname(repo.dir), `${basename(repo.dir)}-linked`);
     repo.git('worktree', 'add', '-q', '-b', 'linked', linked);
     try {
       writeFileSync(join(linked, 'src/math.test.ts'), MATH_TEST_WEAKENED);

@@ -8,13 +8,12 @@
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import dns from 'node:dns';
 import net from 'node:net';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import { runHook } from './run.js';
 import { init } from '../init.js';
-import { makeRepo, MATH_TEST_WEAKENED } from '../testing/repo.js';
+import { makeRepo, MATH_TEST_WEAKENED, TMP } from '../testing/repo.js';
 import { installNetworkGuard } from '../testing/no-network.js';
 import { traceProcesses } from '../testing/trace-processes.js';
 
@@ -44,10 +43,10 @@ describe('no network', () => {
 
 describe('no execution of the repository', () => {
   it('only git runs, with local subcommands, and git starts nothing, on a repository full of traps', async () => {
-    const marker = join(mkdtempSync(join(tmpdir(), 'tw-trap-')), 'executed');
+    const marker = join(mkdtempSync(join(TMP, 'tw-trap-')), 'executed');
     const trap = `#!/bin/sh\necho "$0" >> "${marker}"\n`;
     const repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/other.test.ts"\n' });
-    const stateDir = mkdtempSync(join(tmpdir(), 'tw-safety-state-'));
+    const stateDir = mkdtempSync(join(TMP, 'tw-safety-state-'));
     try {
       // Traps in the repository's files: anything that installs, imports or runs project code would fire one.
       repo.write('package.json', JSON.stringify({ name: 'trap', scripts: { preinstall: `touch ${marker}`, test: `touch ${marker}`, prepare: `touch ${marker}` } }));

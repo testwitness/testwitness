@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseHistory } from '@testwitness/core';
 import { check } from './check.js';
+import { TMP } from './testing/repo.js';
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'Maple Ridge', GIT_AUTHOR_EMAIL: 'maple@example.test', GIT_COMMITTER_NAME: 'Maple Ridge', GIT_COMMITTER_EMAIL: 'maple@example.test' };
 const git = (cwd: string, ...args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8', env: ENV }).trim();
@@ -16,7 +16,7 @@ const XML = (refunds: 'pass' | 'fail') =>
 
 /** A repo whose head skips test_refunds. */
 function repo(): { dir: string; base: string; head: string } {
-  const dir = mkdtempSync(join(tmpdir(), 'tw-cli-history-'));
+  const dir = mkdtempSync(join(TMP, 'tw-cli-history-'));
   git(dir, 'init', '-q', '-b', 'main');
   mkdirSync(join(dir, 'tests'));
   writeFileSync(join(dir, 'tests/test_cart.py'), BASE);

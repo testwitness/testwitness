@@ -1,17 +1,18 @@
 // Review decision 1: report globs do not follow symbolic links unless paths.followSymlinks or --follow-symlinks says so.
 import { describe, expect, it } from 'vitest';
-import { mkdtempSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { mergeHistory, serializeHistory } from '@testwitness/core';
 import { check, loadEvidence, matchReportFiles } from './check.js';
+import { TMP } from './testing/repo.js';
 
 const xml = (name: string) => `<testsuite name="s"><testcase classname="C" name="${name}"/></testsuite>`;
 
 /** A checkout with one real results file, a link to a file outside it, and a linked directory leading outside. */
 function layout(): { root: string; repo: string; outside: string } {
-  const root = mkdtempSync(join(tmpdir(), 'tw-links-'));
+  const root = mkdtempSync(join(TMP, 'tw-links-'));
   const repo = join(root, 'repo');
   const outside = join(root, 'outside');
   mkdirSync(join(repo, 'test-results'), { recursive: true });
@@ -43,8 +44,20 @@ describe('report globs and symbolic links', () => {
 
   it('still reads an absolute glob the workflow points outside the repository on purpose', async () => {
     const { repo, outside } = layout();
-    const m = await matchReportFiles(repo, [`${outside}/*.xml`], false);
-    expect(m.files).toEqual([join(outside, 'secret.xml')]);
+    // A glob is written with forward slashes on every platform, as the CLI and the Action pass it.
+    const m = await matchReportFiles(repo, [`${outside.replace(/\\/g, '/')}/*.xml`], false);
+    expect(m.files.map((f) => resolve(f))).toEqual([join(outside, 'secret.xml')]);
+  });
+});
+
+describe('8.3 short paths on Windows', () => {
+  // On the Windows runner os.tmpdir() is the short form (C:\Users\RUNNER~1\...) and TMP the long one, so a glob a
+  // workflow writes with the short form must still reach the same files.
+  it.runIf(process.platform === 'win32' && tmpdir() !== TMP)('reads an absolute glob written with the short form of a long path', async () => {
+    const { repo, outside } = layout();
+    const short = join(tmpdir(), outside.slice(TMP.length));
+    const m = await matchReportFiles(repo, [`${short.replace(/\\/g, '/')}/*.xml`], false);
+    expect(m.files.map((f) => realpathSync.native(f))).toEqual([join(outside, 'secret.xml')]);
   });
 });
 

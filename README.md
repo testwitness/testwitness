@@ -29,6 +29,8 @@ jobs:
 
 That is the whole install when your test job already writes JUnit XML into the workspace (Surefire and Gradle do by default; pytest needs `--junitxml`, Jest needs jest-junit, Vitest `--reporter=junit`, Playwright the `junit` reporter). JUnit XML is the first recommendation. When a runner only gives you TAP (`node --test --test-reporter=tap`) or a JSON report (`jest --json`, `vitest --reporter=json`, `pytest --json-report`, Playwright `--reporter=json`), point `results` at that file instead; the format is told from the content ([evidence](docs/evidence.md)). `results` used to be called `junit`, and `junit` still works. Without any results the diff rules still run and the evidence section reads `unreadable`.
 
+Supported on Linux and macOS. Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support).
+
 Locally or in any CI, with Node 20 or newer, the same engine ships as one npm package with no runtime dependencies:
 
 ```bash

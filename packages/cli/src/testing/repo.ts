@@ -1,8 +1,15 @@
 // Test helper: a small git repository in a temp dir, with a test file an agent can weaken.
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+
+/**
+ * The real path of the temporary directory, taken once. On macOS os.tmpdir() is under the /var link to /private/var,
+ * and on Windows it can be the 8.3 short form (C:\Users\RUNNER~1); git reports the real long path. Every test
+ * directory is made under this, so paths from the tests and from git agree.
+ */
+export const TMP = realpathSync.native(tmpdir());
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@testwitness.local', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@testwitness.local' };
 
@@ -37,7 +44,7 @@ export interface TestRepo {
 
 /** A repository on `main` with one commit: src/math.ts, src/math.test.ts (two tests), src/other.test.ts and .gitignore. */
 export function makeRepo(files: Record<string, string> = {}): TestRepo {
-  const dir = mkdtempSync(join(tmpdir(), 'tw-repo-'));
+  const dir = mkdtempSync(join(TMP, 'tw-repo-'));
   const git = (...args: string[]) => execFileSync('git', ['-c', 'commit.gpgsign=false', ...args], { cwd: dir, encoding: 'utf8', env: ENV });
   const write = (rel: string, text: string) => {
     mkdirSync(dirname(join(dir, rel)), { recursive: true });
@@ -57,7 +64,7 @@ export function makeRepo(files: Record<string, string> = {}): TestRepo {
     write,
     remove: (rel) => rmSync(join(dir, rel), { force: true }),
     state: () => [git('status', '--porcelain=v1', '-uall'), git('count-objects', '-v'), git('for-each-ref'), git('stash', 'list'), git('ls-files', '--stage')].join('\n---\n'),
-    dispose: () => rmSync(dir, { recursive: true, force: true }),
+    dispose: () => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }),
   };
 }
 
