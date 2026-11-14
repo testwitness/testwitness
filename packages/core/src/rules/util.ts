@@ -221,7 +221,9 @@ function nameKey(t: TestCase): string {
 }
 
 /** Classes and top level functions a production source defines (Java: types and public or protected methods). */
-export function definedSymbols(src: string, language: string | undefined): Set<string> {
+export function definedSymbols(source: string, language: string | undefined): Set<string> {
+  // A definition inside a comment defines nothing: a class commented out line by line is a removed class.
+  const src = withoutComments(source, language === 'python');
   const out = new Set<string>();
   const res: RegExp[] =
     language === 'python'
@@ -233,32 +235,207 @@ export function definedSymbols(src: string, language: string | undefined): Set<s
   return out;
 }
 
-const removedCache = new WeakMap<RuleContext, Promise<Set<string>>>();
+/** Source text with every comment blanked out (line structure kept). */
+export function withoutComments(src: string, python: boolean): string {
+  if (!(python ? src.includes('#') : src.includes('//') || src.includes('/*'))) return src;
+  let out = '';
+  let last = 0;
+  for (const t of lexTokens(src, python)) {
+    if (t.kind !== 'comment') continue;
+    out += src.slice(last, t.start) + t.text.replace(/[^\n]/g, ' ');
+    last = t.start + t.text.length;
+  }
+  return out + src.slice(last);
+}
+
+/** Words that are syntax, not names, in any of the three languages. */
+const RESERVED = new Set(
+  `abstract assert async await boolean break byte case catch char class const continue debugger default delete double
+  elif else enum except export extends false final finally float from function global implements import instanceof
+  interface lambda long native nonlocal null package pass private protected public raise readonly record return short
+  static super switch synchronized this throw throws transient true type typeof undefined void volatile while with
+  yield self None True False constructor require module exports string number object never unknown override declare
+  namespace keyof infer satisfies`.split(/\s+/),
+);
+
+const NAME = /^[A-Za-z_$][\w$]*$/;
+const isName = (w: string): boolean => w.length >= 4 && NAME.test(w) && !RESERVED.has(w);
+const DEFINING_KEYWORD = new Set(['function', 'class', 'interface', 'enum', 'record', 'type', 'const', 'let', 'var', 'def', 'namespace']);
+const MEMBER_MODIFIER = new Set(['public', 'private', 'protected', 'static', 'final', 'abstract', 'async', 'readonly', 'override', 'export', 'default', 'declare', 'get', 'set', 'synchronized']);
 
 /**
- * Symbols this PR removed from production files that still exist: defined in the base of a modified production file,
- * absent from its head, and defined in the head of no other changed production file (not moved).
+ * Names a production source binds: what it defines at any depth (functions, classes, types, variables, methods,
+ * fields, object and config keys) and what it imports. A use of a name (a call, a read) binds nothing. Comments bind
+ * nothing either. Read from tokens, so it is linear in the source and needs no grammar. With `declaredOnly`, only what
+ * the source declares for itself: functions, classes, variables and plain assignments, the locals of a test.
  */
-export function removedProductionSymbols(ctx: RuleContext): Promise<Set<string>> {
+export function boundNames(source: string, language: string | undefined, declaredOnly = false): Set<string> {
+  const python = language === 'python';
+  const out = new Set<string>();
+  const add = (w: string | undefined): void => {
+    if (w && isName(w)) out.add(w);
+  };
+  const toks = lexTokens(source, python).filter((t) => t.kind !== 'comment');
+  /** The token is the first of its source line. */
+  const firstOnLine = (i: number): boolean => {
+    if (i === 0) return true;
+    const prev = toks[i - 1]!;
+    return source.slice(prev.start + prev.text.length, toks[i]!.start).includes('\n');
+  };
+  /** Index of the token that closes the bracket opening at `i`, or -1 (bounded, so a missing closer costs little). */
+  const closing = (i: number): number => {
+    let depth = 0;
+    for (let j = i; j < toks.length && j < i + 400; j++) {
+      const x = toks[j]!.text;
+      if (x === '(') depth++;
+      else if (x === ')' && --depth === 0) return j;
+    }
+    return -1;
+  };
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i]!;
+    if (t.kind !== 'word') continue;
+    const next = toks[i + 1]?.text;
+    const prev = toks[i - 1]?.text;
+    // Imports: every name up to the end of the statement (the module path of a JavaScript import is a string, not a name).
+    if (t.text === 'import' && prev !== '.' && next !== '(') {
+      if (declaredOnly) continue;
+      // Not import.meta or import('x'). A Java import binds its last segment only.
+      if (language === 'java') {
+        let j = i + 1;
+        while (j < toks.length && j < i + 60 && toks[j]!.text !== ';') j++;
+        if (toks[j - 1]?.kind === 'word') add(toks[j - 1]!.text);
+        continue;
+      }
+      let depth = 0;
+      for (let j = i + 1; j < toks.length && j < i + 200; j++) {
+        const x = toks[j]!;
+        if (x.text === '(' || x.text === '{') depth++;
+        else if (x.text === ')' || x.text === '}') depth--;
+        else if (x.text === ';' || x.kind === 'string') break;
+        else if (depth <= 0 && j > i + 1 && firstOnLine(j) && toks[j - 1]!.text !== ',' && toks[j - 1]!.text !== '\\') break;
+        if (x.kind === 'word') add(x.text);
+      }
+      continue;
+    }
+    if (prev !== undefined && DEFINING_KEYWORD.has(prev) && toks[i - 2]?.text !== '.') {
+      add(t.text);
+      continue;
+    }
+    if (prev === '*' && toks[i - 2]?.text === 'function') {
+      add(t.text);
+      continue;
+    }
+    // Destructured bindings: const { a, b: c } = ...
+    if ((t.text === 'const' || t.text === 'let' || t.text === 'var') && (next === '{' || next === '[')) {
+      for (let j = i + 2; j < toks.length && j < i + 100; j++) {
+        const x = toks[j]!;
+        if (x.text === '=' || x.text === ';') break;
+        if (x.kind === 'word') add(x.text);
+      }
+      continue;
+    }
+    if (declaredOnly) {
+      // Locals only: a plain assignment that starts a line. Keys, methods and imports refer to something else.
+      if (isName(t.text) && prev !== '.' && next === '=' && toks[i + 2]?.text !== '=' && firstOnLine(i)) out.add(t.text);
+      continue;
+    }
+    if (!isName(t.text) || prev === '.') {
+      // self.name = value and this.name = value bind a field.
+      if (prev === '.' && (toks[i - 2]?.text === 'self' || toks[i - 2]?.text === 'this') && next === '=' && toks[i + 2]?.text !== '=' && isName(t.text)) out.add(t.text);
+      continue;
+    }
+    // A method: name(args) followed by a body, a return type or a throws clause.
+    if (next === '(' && !python) {
+      const close = closing(i + 1);
+      const after = close >= 0 ? toks[close + 1]?.text : undefined;
+      if (after === '{' || after === 'throws' || (after === ':' && (firstOnLine(i) || (prev !== undefined && MEMBER_MODIFIER.has(prev))))) out.add(t.text);
+      continue;
+    }
+    // A field, a variable or a key: the first name of a line (after modifiers) followed by `=` or `:`, or a key
+    // after `{` or `,`. Java fields (`private final Cache cache = ...`) end the declaration before `=`.
+    const assigned = next === '=' && toks[i + 2]?.text !== '=' && toks[i + 2]?.text !== '>';
+    const keyed = next === ':' && toks[i + 2]?.text !== ':';
+    if (!assigned && !keyed) continue;
+    let k = i;
+    while (k > 0 && !firstOnLine(k) && toks[k - 1]!.kind === 'word' && (MEMBER_MODIFIER.has(toks[k - 1]!.text) || language === 'java')) k--;
+    if (firstOnLine(k) || (!python && keyed && (prev === '{' || prev === ','))) out.add(t.text);
+  }
+  return out;
+}
+
+/** Every name a source mentions outside comments, including a string literal that is exactly one name (a key read as config["KEY"]). */
+export function mentionedNames(source: string, language: string | undefined, strings = true): Set<string> {
+  const out = new Set<string>();
+  for (const t of lexTokens(source, language === 'python')) {
+    if (t.kind === 'word') out.add(t.text);
+    else if (t.kind === 'string' && strings) {
+      // A string that is one name (config["KEY"], getattr(x, "name")) reads that name; a longer text does not.
+      const m = /^[A-Za-z]*(["'`]{1,3})([A-Za-z_$][\w$]*)\1$/.exec(t.text);
+      if (m) out.add(m[2]!);
+    }
+  }
+  return out;
+}
+
+interface RemovedProduction {
+  /** Classes and top level functions removed from a production file that stays. */
+  symbols: Set<string>;
+  /** Names production code bound in the base (see boundNames) that no changed production file mentions in the head. */
+  names: Set<string>;
+}
+
+const removedCache = new WeakMap<RuleContext, Promise<RemovedProduction>>();
+
+function removedProduction(ctx: RuleContext): Promise<RemovedProduction> {
   let p = removedCache.get(ctx);
   if (!p) {
     p = (async () => {
       const removed = new Set<string>();
       const stillDefined = new Set<string>();
+      const boundBefore = new Set<string>();
+      const mentioned = new Set<string>();
       for (const f of ctx.files) {
-        if (f.kind !== 'production' || f.status === 'deleted') continue;
-        const head = definedSymbols((await ctx.readHead(f.path)) ?? '', f.language);
+        if (f.kind !== 'production' || f.language === undefined) continue;
+        const baseSrc = f.status === 'added' ? '' : ((await ctx.readBase(f.oldPath ?? f.path)) ?? '');
+        if (f.status === 'deleted') {
+          for (const s of boundNames(baseSrc, f.language)) boundBefore.add(s);
+          continue;
+        }
+        const headSrc = (await ctx.readHead(f.path)) ?? '';
+        const head = definedSymbols(headSrc, f.language);
         for (const s of head) stillDefined.add(s);
+        for (const s of mentionedNames(headSrc, f.language)) mentioned.add(s);
         if (f.status !== 'modified' && f.status !== 'renamed') continue;
-        const base = definedSymbols((await ctx.readBase(f.oldPath ?? f.path)) ?? '', f.language);
+        const base = definedSymbols(baseSrc, f.language);
         for (const s of base) if (!head.has(s)) removed.add(s);
+        for (const s of boundNames(baseSrc, f.language)) boundBefore.add(s);
       }
       for (const s of stillDefined) removed.delete(s);
-      return removed;
+      const names = new Set<string>();
+      for (const s of boundBefore) if (!mentioned.has(s)) names.add(s);
+      return { symbols: removed, names };
     })();
     removedCache.set(ctx, p);
   }
   return p;
+}
+
+/**
+ * Symbols this PR removed from production files that still exist: defined in the base of a modified production file,
+ * absent from its head, and defined in the head of no other changed production file (not moved).
+ */
+export async function removedProductionSymbols(ctx: RuleContext): Promise<Set<string>> {
+  return (await removedProduction(ctx)).symbols;
+}
+
+/**
+ * Names this PR removed from the production code: bound in the base of a changed or deleted production file (a
+ * method, a field, a config key, an import) and mentioned in the head of no changed production file. A name that only
+ * moved, was renamed in one place, or is still read somewhere in the changed files is not removed.
+ */
+export async function removedProductionNames(ctx: RuleContext): Promise<Set<string>> {
+  return (await removedProduction(ctx)).names;
 }
 
 /** Source lines of a base test, with the decorators or annotations directly above it. */
@@ -271,11 +448,156 @@ export async function baseTestText(ctx: RuleContext, path: string, t: TestCase):
 
 /** The production symbol a deleted test exercised that this PR removed from a file that still exists, if any. */
 export async function removedSubjectOf(ctx: RuleContext, path: string, t: TestCase): Promise<string | undefined> {
-  const removed = await removedProductionSymbols(ctx);
-  if (removed.size === 0) return undefined;
-  const text = `${t.container.join(' ')}\n${await baseTestText(ctx, path, t)}`;
-  for (const s of removed) if (new RegExp(`\\b${s}\\b|\\b${s}(?=Tests?\\b)`).test(text)) return s;
+  const { symbols, names } = await removedProduction(ctx);
+  const fromDeleted = await importsFromDeletedModules(ctx, path);
+  if (symbols.size === 0 && names.size === 0 && fromDeleted.size === 0) return undefined;
+  const own = await baseTestText(ctx, path, t);
+  const text = `${t.container.join(' ')}\n${own}`;
+  for (const s of symbols) if (new RegExp(`\\b${s.replace(/\$/g, '\\$')}\\b|\\b${s.replace(/\$/g, '\\$')}(?=Tests?\\b)`).test(text)) return s;
+  if (names.size === 0 && fromDeleted.size === 0) return undefined;
+  return removedNameIn(ctx, path, `${own}\n${await deletedHelperText(ctx, path, own)}`);
+}
+
+const headNamesCache = new WeakMap<RuleContext, Map<string, Promise<Set<string>>>>();
+
+/** Names the head of a test file still uses as code (not inside strings or comments). */
+export function headTestNames(ctx: RuleContext, path: string): Promise<Set<string>> {
+  let byPath = headNamesCache.get(ctx);
+  if (!byPath) headNamesCache.set(ctx, (byPath = new Map()));
+  let p = byPath.get(path);
+  if (!p) {
+    const file = ctx.files.find((f) => f.path === path);
+    p = (file?.status === 'deleted' ? Promise.resolve(undefined) : ctx.readHead(path)).then((src) => mentionedNames(src ?? '', file?.language, false));
+    byPath.set(path, p);
+  }
+  return p;
+}
+
+/**
+ * A name in `text` (base source of a test, or of an assertion) that this PR removed from the production code and that
+ * the head of the test file no longer uses: the test or assertion exercised something that is gone on both sides.
+ */
+export async function removedNameIn(ctx: RuleContext, path: string, text: string): Promise<string | undefined> {
+  const removed = await removedProductionNames(ctx);
+  const fromDeleted = await importsFromDeletedModules(ctx, path);
+  if (removed.size === 0 && fromDeleted.size === 0) return undefined;
+  const names = fromDeleted.size ? new Set([...removed, ...fromDeleted]) : removed;
+  const language = ctx.files.find((f) => f.path === path)?.language;
+  const still = await headTestNames(ctx, path);
+  // A name the text declares itself (a local variable) is not a reference to the production code, unless the text
+  // also reads it as a member of something (`recency.renamed(...)` beside a local `const renamed = ...`).
+  const own = boundNames(text, language, true);
+  const members = memberNames(text, language);
+  for (const w of mentionedNames(text, language, false)) if (names.has(w) && !still.has(w) && (!own.has(w) || members.has(w))) return w;
   return undefined;
+}
+
+const deletedImportsCache = new WeakMap<RuleContext, Map<string, Promise<Set<string>>>>();
+
+/**
+ * Names the base of a test file imported from a module this PR deletes: `from pkg.legacy import shim`,
+ * `from pkg.legacy.shim import helper` or `import { helper } from './shim'` where the module file (or the package
+ * directory's init file) is deleted in the PR. Such a name has nothing left to point at.
+ */
+export function importsFromDeletedModules(ctx: RuleContext, path: string): Promise<Set<string>> {
+  let byPath = deletedImportsCache.get(ctx);
+  if (!byPath) deletedImportsCache.set(ctx, (byPath = new Map()));
+  let p = byPath.get(path);
+  if (!p) {
+    p = (async () => {
+      const out = new Set<string>();
+      const deleted = ctx.files.filter((f) => f.status === 'deleted' && f.kind !== 'test').map((f) => f.path);
+      if (deleted.length === 0) return out;
+      const file = ctx.files.find((f) => f.path === path);
+      const isDeleted = (candidates: string[]): boolean => candidates.some((c) => deleted.some((d) => d === c || d.endsWith(`/${c}`)));
+      const src = withoutComments((await ctx.readBase(file?.oldPath ?? path)) ?? '', file?.language === 'python');
+      if (file?.language === 'python') {
+        const pyFiles = (mod: string): string[] => {
+          const base = mod.replace(/\./g, '/');
+          return [`${base}.py`, `${base}/__init__.py`];
+        };
+        // Parenthesised imports are joined onto one line first.
+        const joined = src.replace(/\(\s*([^)]*)\)/g, (_m, inner: string) => inner.replace(/\s+/g, ' '));
+        for (const m of joined.matchAll(/^[ \t]*from[ \t]+([\w.]+)[ \t]+import[ \t]+([^\n]+)/gm)) {
+          const mod = m[1]!;
+          if (mod.startsWith('.')) continue;
+          for (const part of m[2]!.split(',')) {
+            const [name, alias] = part.trim().split(/\s+as\s+/);
+            if (!name || !/^\w+$/.test(name)) continue;
+            if (isDeleted(pyFiles(mod)) || isDeleted(pyFiles(`${mod}.${name}`))) out.add((alias ?? name).trim());
+          }
+        }
+        for (const m of joined.matchAll(/^[ \t]*import[ \t]+([\w.]+)(?:[ \t]+as[ \t]+(\w+))?/gm)) {
+          if (isDeleted(pyFiles(m[1]!))) out.add(m[2] ?? m[1]!.split('.')[0]!);
+        }
+      } else if (file?.language === 'java') {
+        for (const m of src.matchAll(/^[ \t]*import[ \t]+(?:static[ \t]+)?([\w.]+)\.(\w+)[ \t]*;/gm)) {
+          const owner = `${m[1]!.replace(/\./g, '/')}`;
+          if (isDeleted([`${owner}/${m[2]}.java`, `${owner}.java`])) out.add(m[2]!);
+        }
+      } else {
+        const dir = path.split('/').slice(0, -1);
+        for (const m of src.matchAll(/\bimport\s+(?:type\s+)?([^'"`;]*?)\s+from\s+['"](\.{1,2}\/[^'"]+)['"]/g)) {
+          const parts = [...dir];
+          for (const seg of m[2]!.split('/')) {
+            if (seg === '..') parts.pop();
+            else if (seg !== '.') parts.push(seg);
+          }
+          const target = parts.join('/').replace(/\.(?:js|mjs|cjs|jsx)$/, '');
+          const exts = ['', '.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs', '.cjs', '/index.ts', '/index.tsx', '/index.js'];
+          if (!exts.some((e) => deleted.includes(target + e))) continue;
+          for (const w of m[1]!.split(/[\s,{}*]+/)) if (isName(w) && w !== 'type') out.add(w);
+        }
+      }
+      return out;
+    })();
+    byPath.set(path, p);
+  }
+  return p;
+}
+
+/** Names read after a dot: members and methods of some value. */
+function memberNames(source: string, language: string | undefined): Set<string> {
+  const out = new Set<string>();
+  const toks = lexTokens(source, language === 'python').filter((t) => t.kind !== 'comment');
+  toks.forEach((t, i) => {
+    // `a.name`, not a spread or rest (`...name`).
+    if (t.kind === 'word' && i > 0 && toks[i - 1]!.text === '.' && toks[i - 2]?.text !== '.') out.add(t.text);
+  });
+  return out;
+}
+
+// A helper is a function: a function or def statement, or a variable bound to an arrow function or function expression.
+const HELPER = /^(\s*)(?:(?:export|async)\s+)*(?:function\*?\s+([A-Za-z_$][\w$]*)|def\s+([A-Za-z_$][\w$]*)|(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^=]*)?=>|[A-Za-z_$][\w$]*\s*=>))/;
+const JAVA_HELPER = /^(\s*)(?:(?:static|private|public|protected|final)\s+)+[\w<>[\],.?]+\s+([A-Za-z_$][\w$]*)\s*\(/;
+
+/**
+ * Base source of the helpers a deleted test calls that the head of its file no longer has (a setup function that
+ * went away with its tests). The helper body often names the removed production code when the test itself does not.
+ * A helper is a function or variable defined in the test file; its extent is read from indentation.
+ */
+export async function deletedHelperText(ctx: RuleContext, path: string, testText: string): Promise<string> {
+  const language = ctx.files.find((f) => f.path === path)?.language;
+  const still = await headTestNames(ctx, path);
+  const called = new Set<string>();
+  for (const m of testText.matchAll(/([A-Za-z_$][\w$]*)\s*\(/g)) if (isName(m[1]!) && !still.has(m[1]!)) called.add(m[1]!);
+  if (called.size === 0) return '';
+  const lines = withoutComments((await ctx.readBase(path)) ?? '', language === 'python').split(/\r?\n/);
+  const out: string[] = [];
+  for (let i = 0; i < lines.length && out.length < 400; i++) {
+    const def = (language === 'java' ? JAVA_HELPER : HELPER).exec(lines[i]!);
+    const name = def ? (def[2] ?? def[3] ?? def[4]) : undefined;
+    if (!def || !name || !called.has(name)) continue;
+    const indent = def[1]!.length;
+    out.push(lines[i]!);
+    for (let j = i + 1; j < lines.length && j < i + 200; j++) {
+      const ln = lines[j]!;
+      const depth = ln.length - ln.trimStart().length;
+      if (ln.trim() === '' || depth > indent) out.push(ln);
+      else break;
+    }
+  }
+  return out.join('\n');
 }
 
 const VERSION_GATE = /\bsys\.version_info\b|\bPY_?3\d+\b|\bpython_version\b|\bprocess\.versions?\b|@(?:Enabled|Disabled)(?:On|For)Jre|\bJRE_\d+\b/;
@@ -333,6 +655,8 @@ const LINE_BREAK = new Set(['\n', '\r', String.fromCharCode(0x2028), String.from
 export interface LexToken {
   kind: 'string' | 'comment' | 'word' | 'char';
   text: string;
+  /** Offset of the token in the source. */
+  start: number;
 }
 
 /**
@@ -411,7 +735,7 @@ export function lexTokens(src: string, python: boolean): LexToken[] {
       end = m ? pos + m[0].length : pos + 1;
       kind = m ? 'word' : 'char';
     }
-    out.push({ kind, text: src.slice(pos, end) });
+    out.push({ kind, text: src.slice(pos, end), start: pos });
     pos = end;
   }
   return out;
