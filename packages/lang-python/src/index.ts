@@ -11,7 +11,8 @@ export { loadPythonGrammar, parsePython, pythonWasmPath } from './grammar.js';
 
 const TEST_BASENAME = /^test_.*\.py$|_test\.py$/;
 const TEST_DIR = /(^|\/)(tests?)\//;
-const CONTENT_SNIFF = /^\s*(async\s+)?def\s+test_/m;
+// Indentation only after `^`: `^\s*` is quadratic on a file of blank lines.
+const CONTENT_SNIFF = /^[^\S\r\n\u2028\u2029]*(async\s+)?def\s+test_/m;
 
 /** Decide whether a path (and optionally its content) is a Python test file. */
 export function isPythonTestFile(path: string, source?: string): boolean {

@@ -1,3 +1,4 @@
+import { regexLines } from '../linear.js';
 import picomatch from 'picomatch';
 import type { Finding, Rule, RuleContext, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
@@ -78,7 +79,7 @@ export const O002: Rule = {
   },
   run(ctx) {
     const out: Finding[] = [];
-    const regression = ctx.prText ? /\bregression\b|\bfix(es|ed)?\b.*\btests?\b/i.test(`${ctx.prText.title}\n${ctx.prText.body}`) : false;
+    const regression = ctx.prText ? claimsRegression(`${ctx.prText.title}\n${ctx.prText.body}`) : false;
     for (const { pair, change } of allChanges(ctx.pairs)) {
       if (change.kind !== 'added') continue;
       const t = change.head;
@@ -207,4 +208,18 @@ export const O006: Rule = {
 
 export function rulesO(): Rule[] {
   return [O001, O002, O006];
+}
+
+/**
+ * The PR text speaks of a regression, or of a fix and, later on the same line, of a test. The same language as
+ * `/\bregression\b|\bfix(es|ed)?\b.*\btests?\b/i`, read line by line from the first `fix`: the regex rescanned the
+ * rest of the line from every `fix`, quadratic on one long line.
+ */
+export function claimsRegression(text: string): boolean {
+  if (/\bregression\b/i.test(text)) return true;
+  for (const line of regexLines(text)) {
+    const fix = /\bfix(es|ed)?\b/i.exec(line);
+    if (fix && /\btests?\b/i.test(line.slice(fix.index + fix[0].length))) return true;
+  }
+  return false;
 }

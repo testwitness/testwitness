@@ -12,6 +12,7 @@
  * the change), survived, and no coverage. Compile errors, runtime errors, ignored, pending and non viable mutants are
  * not counted anywhere. Test names are normalised to the `classKey::nameKey` keys the JUnit reader builds.
  */
+import { XmlErrors } from '../xml-errors.js';
 import { createReadStream } from 'node:fs';
 import { open, readFile, stat } from 'node:fs/promises';
 import { StringDecoder } from 'node:string_decoder';
@@ -129,7 +130,9 @@ export function readStrykerJson(text: string, source: string, data: MutationData
     const path = normaliseCoveragePath(rawPath, root, projectRoot);
     for (const m of fr['mutants']) {
       if (!isRecord(m) || !isRecord(m['location']) || !isRecord(m['location']['start'])) continue;
-      const outcome = STRYKER_STATUS[String(m['status'])];
+      // Own keys only: a status of `constructor` or `__proto__` would otherwise find Object.prototype's members.
+      const status = String(m['status']);
+      const outcome = Object.hasOwn(STRYKER_STATUS, status) ? STRYKER_STATUS[status] : undefined;
       if (!outcome) continue;
       mutants++;
       record(data, path, Number(m['location']['start']['line']), outcome, outcome === 'killed' ? keys(m['killedBy']) : [], keys(m['coveredBy']));
@@ -174,14 +177,13 @@ export function readPitXmlStream(stream: NodeJS.ReadableStream, source: string, 
   void root; // PIT names classes, not paths; the package path is matched by suffix at lookup time.
   return new Promise((resolve, reject) => {
     const parser = new SaxesParser({ xmlns: false, position: false });
+    const errors = new XmlErrors(source, data.warnings);
     const stack: string[] = [];
     let isPit = false;
     let mutants = 0;
     let cur: { status: string; fields: Record<string, string> } | undefined;
     let field: string | undefined;
-    parser.on('error', (e) => {
-      data.warnings.push(`${source}: ${e.message}`);
-    });
+    parser.on('error', (e) => errors.add(e.message));
     parser.on('opentag', (tag: SaxesTagPlain) => {
       if (!stack.length) isPit = tag.name === 'mutations';
       stack.push(tag.name);
@@ -200,8 +202,9 @@ export function readPitXmlStream(stream: NodeJS.ReadableStream, source: string, 
       if (cur && stack.length === 2 && tag.name === field) field = undefined;
       if (cur && tag.name === 'mutation' && stack.length === 1) {
         const f = cur.fields;
-        const outcome = PIT_STATUS[cur.status.trim().toUpperCase()];
-        const cls = (f['mutatedClass'] ?? '').trim().replace(/\$.*$/, '');
+        const pitStatus = cur.status.trim().toUpperCase();
+        const outcome = Object.hasOwn(PIT_STATUS, pitStatus) ? PIT_STATUS[pitStatus] : undefined;
+        const cls = outerClass((f['mutatedClass'] ?? '').trim());
         const file = (f['sourceFile'] ?? '').trim();
         if (outcome && file) {
           const pkg = cls.includes('.') ? cls.slice(0, cls.lastIndexOf('.')).replace(/\./g, '/') : '';
@@ -229,7 +232,7 @@ export function readPitXmlStream(stream: NodeJS.ReadableStream, source: string, 
       try {
         parser.write(typeof chunk === 'string' ? chunk : decoder.write(chunk));
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
     });
     stream.on('end', () => {
@@ -238,8 +241,9 @@ export function readPitXmlStream(stream: NodeJS.ReadableStream, source: string, 
         if (rest) parser.write(rest);
         parser.close();
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
+      errors.done();
       if (!isPit) data.warnings.push(`${source}: not a PIT mutations.xml report`);
       else {
         if (!mutants) data.warnings.push(`${source}: no killed, survived or uncovered mutations in the report`);
@@ -375,4 +379,14 @@ export function toMutationEvidence(data: MutationData): MutationEvidence {
     warnings,
     lookup,
   };
+}
+
+/**
+ * The outer class of `Outer$Inner$1`: the name up to the first `$`. Same result as `.replace(/\$.*$/, '')`, which
+ * rescanned the rest of the name from every `$` when a line break followed (quadratic on a hostile report).
+ */
+export function outerClass(cls: string): string {
+  const lastBreak = Math.max(cls.lastIndexOf('\n'), cls.lastIndexOf('\r'), cls.lastIndexOf('\u2028'), cls.lastIndexOf('\u2029'));
+  const i = cls.indexOf('$', lastBreak + 1);
+  return i < 0 ? cls : cls.slice(0, i);
 }

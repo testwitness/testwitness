@@ -4,6 +4,7 @@
  * parsed with a real parser for its format, or with the literal reader in config-text.ts for JavaScript and
  * TypeScript configs. Nothing is executed.
  */
+import { trimEndChars } from '../linear.js';
 import picomatch from 'picomatch';
 import type { ChangedFile, Finding, Rule, RuleContext } from '../types.js';
 import {
@@ -18,6 +19,8 @@ import {
   parseIni,
   parseProperties,
   parseTomlSafe,
+  nestsTooDeep,
+  CONFIG_MAX_NESTING,
   parseXml,
   parseYamlOrJson,
   shellWords,
@@ -57,14 +60,28 @@ export const CONFIG_TEXT_MAX_BYTES = 1024 * 1024;
  * reports the file at high without reading it (fail closed), because a config that large is not something a person
  * reviews and the readers are not meant to parse it.
  */
-async function texts(ctx: RuleContext, f: ChangedFile): Promise<{ base: string | undefined; head: string | undefined; tooLarge: boolean }> {
+async function texts(ctx: RuleContext, f: ChangedFile): Promise<{ base: string | undefined; head: string | undefined; tooLarge: boolean; tooDeep?: boolean }> {
   const base = f.status === 'added' ? undefined : await ctx.readBase(f.oldPath ?? f.path);
   const head = f.status === 'deleted' ? undefined : await ctx.readHead(f.path);
   const tooLarge = [base, head].some((t) => t !== undefined && Buffer.byteLength(t, 'utf8') > CONFIG_TEXT_MAX_BYTES);
-  return tooLarge ? { base: undefined, head: undefined, tooLarge } : { base, head, tooLarge };
+  if (tooLarge) return { base: undefined, head: undefined, tooLarge };
+  // Nested deeper than the readers accept (config-text.ts, nestsTooDeep): also reported without being read, for the
+  // same reason, and because a parser that gives up on such a file must not read as "no setting changed".
+  const kind = nestedKind(f.path);
+  if (kind && [base, head].some((t) => t !== undefined && nestsTooDeep(t, kind))) return { base: undefined, head: undefined, tooLarge: true, tooDeep: true };
+  return { base, head, tooLarge };
 }
 
-function tooLargeFinding(ctx: RuleContext, ruleId: 'C001' | 'C002', f: ChangedFile, what: string): Finding {
+/** How a config file nests, for the files whose readers recurse: YAML and JSON (and rc files, which are one of the two), and XML. */
+function nestedKind(path: string): 'yaml-json' | 'xml' | undefined {
+  const name = (path.split('/').pop() ?? path).toLowerCase();
+  if (name.endsWith('.xml')) return 'xml';
+  if (/\.(ya?ml|jsonc?|json5)$/.test(name) || /^\.[\w.-]*rc$/.test(name)) return 'yaml-json';
+  return undefined;
+}
+
+function tooLargeFinding(ctx: RuleContext, ruleId: 'C001' | 'C002', f: ChangedFile, what: string, tooDeep = false): Finding {
+  if (tooDeep) return makeFinding(ctx, ruleId, 'high', f, 'too deep', `${f.path} changed and is nested deeper than ${CONFIG_MAX_NESTING} levels, so its ${what} could not be read; review it by hand`, { label: 'too deep' });
   return makeFinding(ctx, ruleId, 'high', f, 'too large', `${f.path} changed and is larger than ${CONFIG_TEXT_MAX_BYTES / 1048576} MB, so its ${what} could not be read; review it by hand`, { label: 'too large' });
 }
 
@@ -230,7 +247,7 @@ function gradleThresholds(text: string, out: Threshold[]): void {
     const counter = (/\bcounter\s*=\s*["'](\w+)["']/.exec(body)?.[1] ?? 'INSTRUCTION').toUpperCase();
     const type = (/\bvalue\s*=\s*["'](\w+)["']/.exec(body)?.[1] ?? 'COVEREDRATIO').toUpperCase();
     for (const bound of ['minimum', 'maximum'] as const) {
-      const m = new RegExp(`\\b${bound}\\s*=\\s*(?:new\\s+)?(?:BigDecimal\\(|\\()?\\s*["']?(\\d+(?:\\.\\d+)?)`).exec(body);
+      const m = new RegExp(`\\b${bound}\\s*=\\s*(?:new\\s+)?(?:(?:BigDecimal\\(|\\()\\s*)?["']?(\\d+(?:\\.\\d+)?)`).exec(body);
       if (!m) continue;
       const value = jacocoLimitValue(m[1]!, type);
       if (value === undefined) continue;
@@ -334,7 +351,7 @@ export const C002: Rule = {
     summary:
       'A coverage gate got weaker: a threshold was lowered (medium) or removed (high). Read as config text and compared as numbers between base and head: Jest coverageThreshold (jest.config.*, package.json jest), Vitest coverage.thresholds, nyc check-coverage values (.nycrc, package.json nyc), pytest --cov-fail-under in addopts (pytest.ini, setup.cfg, tox.ini, pyproject.toml), coverage.py fail_under (.coveragerc, [coverage:report], [tool.coverage.report]), JaCoCo limits in pom.xml and Gradle violationRules, Kover minBound and minValue, codecov.yml target and threshold, and .coveralls.yml thresholds. For an allowed drop (codecov threshold, a JaCoCo maximum, a coveralls decrease threshold) a higher value is the weaker one.',
     falsePositives:
-      'A threshold moved to another file in the same PR (or to another setting in the same file, such as --cov-fail-under to fail_under) with the same or a stricter value is silent. A new project with its own threshold is not a lowering, because only settings present in the base are compared. Removing an allowed drop (codecov threshold) is stricter and is not reported. Values that are not literal numbers (codecov auto, a variable) are not read. A changed config file over 1 MB is not read and is reported high with the label too large.',
+      'A threshold moved to another file in the same PR (or to another setting in the same file, such as --cov-fail-under to fail_under) with the same or a stricter value is silent. A new project with its own threshold is not a lowering, because only settings present in the base are compared. Removing an allowed drop (codecov threshold) is stricter and is not reported. Values that are not literal numbers (codecov auto, a variable) are not read. A changed config file over 1 MB is not read and is reported high with the label too large; a YAML, JSON or XML config nested deeper than 200 levels is not read either and is reported high with the label too deep.',
     example: '   coverageThreshold: {\n-    global: { lines: 90, branches: 80 },\n+    global: { lines: 70, branches: 80 },\n   },',
   },
   async run(ctx) {
@@ -344,7 +361,7 @@ export const C002: Rule = {
       if (f.binary || !isThresholdFile(f.path)) continue;
       const t = await texts(ctx, f);
       if (t.tooLarge) {
-        tooLarge.push(tooLargeFinding(ctx, 'C002', f, 'coverage thresholds'));
+        tooLarge.push(tooLargeFinding(ctx, 'C002', f, 'coverage thresholds', t.tooDeep));
         continue;
       }
       const e: (typeof entries)[number] = { f, base: thresholdsOf(f.oldPath ?? f.path, t.base), head: thresholdsOf(f.path, t.head) };
@@ -535,10 +552,12 @@ function gradleSelectors(text: string, root: string, out: Selector[]): void {
     seen.add(k);
     out.push(sel);
   };
+  // Each optional token carries the whitespace after it (`(?:\(\s*)?`, not `\(?\s*` after another `\s*`): two
+  // adjacent whitespace runs were quadratic on a long run of spaces.
   for (const { body } of blockBodies(text, GRADLE_TEST_BLOCK)) {
-    for (const m of body.matchAll(/\bexclude\s*\(?\s*((?:["'][^"'\n]+["']\s*,?\s*)+)/g)) for (const p of quoted(m[1]!)) add({ key: 'gradle.test.exclude', kind: 'exclude', pattern: p, match: 'jvm-path', root });
-    for (const m of body.matchAll(/\bexcludeTestsMatching\s*\(?\s*((?:["'][^"'\n]+["']\s*,?\s*)+)/g)) for (const p of quoted(m[1]!)) add({ key: 'gradle.test.filter.excludeTestsMatching', kind: 'exclude', pattern: p, match: 'jvm-class', root });
-    for (const m of body.matchAll(/\b(excludeTags|excludeCategories|excludeGroups|excludeEngines)\s*(?:\(|\+=|\.add(?:All)?\()?\s*((?:(?:setOf\(|listOf\()?["'][^"'\n]+["']\s*,?\s*\)?\s*)+)/g)) {
+    for (const m of body.matchAll(/\bexclude\s*(?:\(\s*)?((?:["'][^"'\n]+["']\s*(?:,\s*)?)+)/g)) for (const p of quoted(m[1]!)) add({ key: 'gradle.test.exclude', kind: 'exclude', pattern: p, match: 'jvm-path', root });
+    for (const m of body.matchAll(/\bexcludeTestsMatching\s*(?:\(\s*)?((?:["'][^"'\n]+["']\s*(?:,\s*)?)+)/g)) for (const p of quoted(m[1]!)) add({ key: 'gradle.test.filter.excludeTestsMatching', kind: 'exclude', pattern: p, match: 'jvm-class', root });
+    for (const m of body.matchAll(/\b(excludeTags|excludeCategories|excludeGroups|excludeEngines)\s*(?:(?:\(|\+=|\.add(?:All)?\()\s*)?((?:(?:setOf\(|listOf\()?["'][^"'\n]+["']\s*(?:,\s*)?(?:\)\s*)?)+)/g)) {
       for (const p of quoted(m[2]!)) add({ key: `gradle.test.${m[1]}`, kind: 'exclude', pattern: p, match: 'none', root });
     }
   }
@@ -626,7 +645,8 @@ export function isGeneratedPattern(pattern: string): boolean {
   const p = pattern.replace(/<rootDir>/g, '').replace(/\\\./g, '.').replace(/\\\//g, '/');
   if (GENERATED.has(p.trim())) return true;
   for (const seg of p.split('/')) {
-    const s = seg.replace(/^[\^*?(|[\]{}+!]+/, '').replace(/[*?$)|[\]{}+!]+$/, '');
+    const lead = seg.replace(/^[\^*?(|[\]{}+!]+/, '');
+    const s = trimEndChars(lead, '*?$)|[]{}+!');
     if (s && GENERATED.has(s)) return true;
   }
   return false;
@@ -638,7 +658,7 @@ function relUnder(root: string, path: string): string | undefined {
 }
 
 function cleanPath(p: string): string {
-  return p.replace(/<rootDir>\/?/g, '').replace(/^\.\//, '').replace(/\/+$/, '');
+  return trimEndChars(p.replace(/<rootDir>\/?/g, '').replace(/^\.\//, ''), '/');
 }
 
 function jvmRel(rel: string): string {
@@ -837,7 +857,7 @@ export const C001: Rule = {
     summary:
       'Runner configuration now selects fewer tests. pytest addopts gaining --ignore, --ignore-glob, --deselect or -k, testpaths narrowed, norecursedirs grown; Jest testPathIgnorePatterns or modulePathIgnorePatterns grown, testMatch or testRegex narrowed; Vitest test.include narrowed or test.exclude grown; Mocha spec narrowed or ignore grown in .mocharc; Playwright testIgnore grown or testMatch narrowed; Surefire or Failsafe <excludes> or <excludedGroups> grown, <includes> narrowed; Gradle test exclude(...), filter excludeTestsMatching, useJUnitPlatform excludeTags (and excludeCategories, excludeGroups) grown; TestNG suite <exclude> grown; junit.jupiter.conditions.deactivate set in junit-platform.properties (medium). Path patterns are matched against the test files of the head tree and the finding names how many it drops. Test tasks disabled outright (<skipTests>, <skip>, test { enabled = false }) are reported by W003.',
     falsePositives:
-      'An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high, as do regular expressions that could backtrack without bound (nested or alternated repetition, backreferences, more than three unbounded repeats), which are not run. A changed config file over 1 MB is not read and is reported high with the label too large.',
+      'An exclusion of a generated or installed directory (node_modules, dist, build, target, .venv and the like) is silent. An exclusion whose pattern matches no test file in the head tree is low with the label matches nothing. An include pattern replaced by others that still cover every test file it matched is silent. The same pattern removed from the same setting in another file of the PR (a config moved from package.json to jest.config.js) is silent. Tags, groups, -k expressions and TestNG method excludes cannot be matched to files and stay high, as do regular expressions that could backtrack without bound (nested or alternated repetition, backreferences, more than three unbounded repeats), which are not run. A changed config file over 1 MB is not read and is reported high with the label too large; a YAML, JSON or XML config nested deeper than 200 levels is not read either and is reported high with the label too deep.',
     example: '   testPathIgnorePatterns: [\n     "/node_modules/",\n+    "<rootDir>/src/payments/",\n   ],',
   },
   async run(ctx) {
@@ -847,7 +867,7 @@ export const C001: Rule = {
       if (f.binary || !isSelectionFile(f.path)) continue;
       const t = await texts(ctx, f);
       if (t.tooLarge) {
-        tooLarge.push(tooLargeFinding(ctx, 'C001', f, 'test selection'));
+        tooLarge.push(tooLargeFinding(ctx, 'C001', f, 'test selection', t.tooDeep));
         continue;
       }
       const e: (typeof entries)[number] = { f, base: selectorsOf(f.oldPath ?? f.path, t.base), head: selectorsOf(f.path, t.head) };

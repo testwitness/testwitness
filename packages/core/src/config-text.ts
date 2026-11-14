@@ -279,8 +279,70 @@ export function jsValuesForKey(text: string, key: string): Lit[] {
   return out;
 }
 
-/** JSON, JSONC or YAML text to a value. */
+/** Nesting the config readers accept. Real runner and coverage configs nest a handful of levels. */
+export const CONFIG_MAX_NESTING = 200;
+
+/**
+ * True when a config text nests deeper than `max` levels, counted without parsing. YAML and JSON: the running depth
+ * of `[` and `{` (flow collections), and the length of the run of indentation and block indicators (`- `, `? `) at
+ * the start of a line, where every level takes at least one character. XML: the running depth of open tags.
+ *
+ * Why: the YAML parser recurses once per level. Around 800 levels it runs out of stack, and when V8 has to compile a
+ * regular expression at that moment the whole process aborts ("RegExpCompiler Allocation failed"), which no try can
+ * catch: a 2 kB `.mocharc.yml` of `[` in a pull request killed the check, and in the agent hook a crash lets the
+ * action through. The XML reader builds a tree that the rules then walk by recursion. Brackets inside strings are
+ * counted too, so this over counts; a config with 200 unclosed brackets in a string is not one a person reviews.
+ */
+export function nestsTooDeep(text: string, kind: 'yaml-json' | 'xml', max = CONFIG_MAX_NESTING): boolean {
+  const xml = kind === 'xml';
+  let brackets = 0;
+  let tags = 0;
+  let lead = 0;
+  let atLineStart = true;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (c === 10 || c === 13) {
+      atLineStart = true;
+      lead = 0;
+      continue;
+    }
+    if (xml) {
+      // Only tags nest in XML; brackets and indentation mean nothing there.
+    } else if (atLineStart) {
+      // space, tab, `-`, `?`, `:`
+      if (c === 32 || c === 9 || c === 45 || c === 63 || c === 58) {
+        if (++lead > max * 2) return true;
+      } else atLineStart = false;
+    }
+    if (!xml) {
+      if (c === 91 || c === 123) {
+        if (++brackets > max) return true;
+      } else if ((c === 93 || c === 125) && brackets > 0) brackets--;
+    } else if (c === 60) {
+      const n = text.charCodeAt(i + 1);
+      // Comments and CDATA sections are skipped whole: a commented out tag does not nest.
+      const skipTo = text.startsWith('<!--', i) ? '-->' : text.startsWith('<![CDATA[', i) ? ']]>' : undefined;
+      if (skipTo) {
+        const end = text.indexOf(skipTo, i + 4);
+        if (end < 0) break;
+        i = end + skipTo.length - 1;
+        continue;
+      }
+      // `</` closes; `<!` and `<?` are declarations and instructions.
+      if (n === 47) {
+        if (tags > 0) tags--;
+      } else if (n !== 33 && n !== 63 && ++tags > max) return true;
+    } else if (c === 47 && text.charCodeAt(i + 1) === 62) {
+      // `/>` closes the tag it ends.
+      if (tags > 0) tags--;
+    }
+  }
+  return false;
+}
+
+/** JSON, JSONC or YAML text to a value. Undefined when it does not parse or nests too deep to parse safely. */
 export function parseYamlOrJson(text: string): unknown {
+  if (nestsTooDeep(text, 'yaml-json')) return undefined;
   try {
     return parseYaml(text);
   } catch {
@@ -353,6 +415,7 @@ export interface XmlNode {
 
 /** Small DOM from saxes. Entities are not expanded beyond the XML built ins, DTDs are never fetched. */
 export function parseXml(text: string): XmlNode | undefined {
+  if (nestsTooDeep(text, 'xml')) return undefined;
   const root: XmlNode = { name: '#root', attrs: {}, children: [], text: '' };
   const stack: XmlNode[] = [root];
   const parser = new SaxesParser({ xmlns: false, position: false });

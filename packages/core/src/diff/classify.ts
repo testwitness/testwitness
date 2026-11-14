@@ -134,9 +134,11 @@ export function looksLikeTestSource(language: LanguageId | undefined, source: st
       return /@(Test|ParameterizedTest|RepeatedTest|TestFactory|org\.junit\.[\w.]*Test)\b/.test(source);
     case 'typescript':
     case 'javascript':
-      return /\b(describe|context|suite)\s*(\.\w+)?\s*\(/.test(source) && /\b(it|test|specify)\s*(\.\w+)?\s*\(/.test(source);
+      // One whitespace run on each side of the optional `.only`: two adjacent `\s*` were quadratic on `describe` and a long run of spaces.
+      return /\b(describe|context|suite)\s*(?:\.\w+\s*)?\(/.test(source) && /\b(it|test|specify)\s*(?:\.\w+\s*)?\(/.test(source);
     case 'python':
-      return /^\s*(async\s+)?def\s+test_?\w*\s*\(/m.test(source) || /\bunittest\.TestCase\b/.test(source);
+      // Indentation only after `^`: `^\s*` ran over every following blank line from each line start, quadratic on a file of newlines.
+      return /^[^\S\r\n\u2028\u2029]*(async\s+)?def\s+test_?\w*\s*\(/m.test(source) || /\bunittest\.TestCase\b/.test(source);
     default:
       return false;
   }

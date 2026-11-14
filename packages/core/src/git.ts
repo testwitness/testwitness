@@ -93,7 +93,7 @@ export async function showFile(ref: string, path: string, opts: GitOptions): Pro
   try {
     return toLf(await git(['show', `${ref}:${path}`], opts));
   } catch (err) {
-    if (err instanceof GitError && /does not exist|exists on disk, but not in|bad object|Path .* does not exist/i.test(err.stderr)) {
+    if (err instanceof GitError && /does not exist|exists on disk, but not in|bad object|Path .* does not exist/i.test(err.stderr.slice(0, 8192))) {
       return undefined;
     }
     throw err;

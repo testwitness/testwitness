@@ -39,7 +39,9 @@ export const INLINE_SUPPRESSORS: Suppressor[] = [
   { re: /-DtestFailureIgnore=true\b/, what: '-DtestFailureIgnore=true' },
   { re: /-Dsurefire\.failIfNoSpecifiedTests=false\b/, what: 'failIfNoSpecifiedTests=false' },
   { re: /\s-x\s+test\b/, what: '-x test' },
-  { re: /--exitcode\s*[= ]\s*0\b|--exit-code\s*[= ]\s*0\b/, what: '--exitcode 0' },
+  // An equals sign with optional whitespace around it, or whitespace with at least one space in it: the same language
+  // as `\s*[= ]\s*`, without two whitespace runs that can share a space (quadratic on a long run).
+  { re: /--exit-?code(?:\s*=\s*|[^\S ]* \s*)0\b/, what: '--exitcode 0' },
   { re: /\|\|\s*\$\{?\{?\s*false/, what: '|| false' },
 ];
 
@@ -87,7 +89,7 @@ function isTestCommandLine(line: string): boolean {
 export function stripYamlAndJson(line: string): string {
   // Lines in workflows and package.json scripts carry a key and quotes; strip to the command.
   return line
-    .replace(/^\s*-?\s*(run|script|cmd|command|"test"|test|"[\w:-]+")\s*:\s*/, '')
+    .replace(/^\s*(?:-\s*)?(run|script|cmd|command|"test"|test|"[\w:-]+")\s*:\s*/, '')
     .replace(/^\s*"[^"]*"\s*:\s*"/, '')
     .replace(/",?\s*$/, '')
     .replace(/\\"/g, '"');
@@ -343,7 +345,7 @@ export const W006: Rule = {
       }
       if (f.kind !== 'ci-workflow') continue;
       const inHunks = f.hunks.some((h) => [...h.added, ...h.removed].some((l) => /testwitness/i.test(l)));
-      const inFile = inHunks || /uses:\s*\S*testwitness/i.test((await ctx.readHead(f.path)) ?? '') || /uses:\s*\S*testwitness/i.test((await ctx.readBase(f.oldPath ?? f.path)) ?? '');
+      const inFile = inHunks || usesTestwitness((await ctx.readHead(f.path)) ?? '') || usesTestwitness((await ctx.readBase(f.oldPath ?? f.path)) ?? '');
       if (!inFile) continue;
       out.push(makeFinding(ctx, 'W006', 'high', f, f.path, `${f.path} changes the testwitness workflow step`, { snippet: 'workflow', label: 'maintainer only' }));
     }
@@ -353,4 +355,25 @@ export const W006: Rule = {
 
 export function rulesW(): Rule[] {
   return [W002, W003, W006, S004];
+}
+
+/**
+ * Does a workflow text hold a `uses:` whose value mentions testwitness? The same language as
+ * `/uses:\s*\S*testwitness/i`, read one word at a time: the regex rescanned the rest of a long word from every `uses:`
+ * in it, quadratic on a hostile workflow file. A word matches when `uses:` stands in it before a `testwitness`, or when
+ * the word before it ends in `uses:` and it holds `testwitness` anywhere.
+ */
+export function usesTestwitness(text: string): boolean {
+  let previousEndsWithUses = false;
+  for (const m of text.toLowerCase().matchAll(/\S+/g)) {
+    const word = m[0];
+    const last = word.lastIndexOf('testwitness');
+    if (last >= 0) {
+      if (previousEndsWithUses) return true;
+      const uses = word.indexOf('uses:');
+      if (uses >= 0 && uses + 5 <= last) return true;
+    }
+    previousEndsWithUses = word.endsWith('uses:');
+  }
+  return false;
 }

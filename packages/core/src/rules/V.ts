@@ -1,3 +1,4 @@
+import { replaceDelimited } from '../linear.js';
 import type { ChangedFile, Finding, Rule, Severity, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
 import { inventoryKeys } from '../evidence/normalise.js';
@@ -50,7 +51,7 @@ export function templateRegex(key: string): { test(row: string): boolean } {
  */
 export function templateTitle(qualifiedName: string): string {
   if (!qualifiedName.includes('`')) return qualifiedName;
-  return qualifiedName.replace(/`([^`]*)`/g, (whole, inner: string) => (inner.includes('${') ? inner.replace(/\$\{[^}]*\}/g, '%s') : whole));
+  return qualifiedName.replace(/`([^`]*)`/g, (whole, inner: string) => (inner.includes('${') ? replaceDelimited(inner, '${', '}', '%s') : whole));
 }
 
 /** V003 Changed test did not run. */
