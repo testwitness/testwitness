@@ -7,19 +7,14 @@
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { check } from 'testwitness';
 import { downloadBaseHistory, HISTORY_FILE, isDefaultBranchPush, uploadHistory } from './history.js';
+import { emitAnnotations, findOwnComment, info } from './annotations.js';
 import { pullRequestFromEvent, type EventPayload, type PullRequestPayload } from './pull-request.js';
-import { renderJson, renderMarkdown, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Finding, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
-
-function annotationLevel(f: Finding, strict: boolean): 'error' | 'warning' | 'notice' {
-  if (f.severity === 'high') return strict ? 'error' : 'warning';
-  if (f.severity === 'medium') return 'warning';
-  return 'notice';
-}
+import { renderJson, renderMarkdown, writeFileNoFollow, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
 
 export async function run(): Promise<void> {
   const cwd = process.env['GITHUB_WORKSPACE'] ?? process.cwd();
@@ -29,7 +24,7 @@ export async function run(): Promise<void> {
     core.info('testwitness: issue_comment event without a /testwitness mutate command; nothing to do.');
     return;
   }
-  const pr = await pullRequestFromEvent(ctx.eventName, ctx.payload as EventPayload, token ? (n) => fetchPullRequest(token, n) : undefined, (s) => core.info(s));
+  const pr = await pullRequestFromEvent(ctx.eventName, ctx.payload as EventPayload, token ? (n) => fetchPullRequest(token, n) : undefined, (s) => info(s));
   const baseInput = core.getInput('base');
   const headInput = core.getInput('head');
   const defaultPush = isDefaultBranchPush();
@@ -50,13 +45,14 @@ export async function run(): Promise<void> {
   const historyArtifact = core.getInput('history_artifact');
   const historyWrite = core.getInput('history_write') === 'true' || defaultPush;
 
-  // PR text comes from the event payload file, read as data.
+  // PR text comes from the event payload file, read as data. It is handed to the check in memory: it used to be
+  // written to .testwitness-pr-body.txt in the checkout, where a link committed under that name would have been
+  // written through.
   let prTitle: string | undefined;
-  let prBodyFile: string | undefined;
+  let prBody: string | undefined;
   if (pr) {
     prTitle = String(pr['title'] ?? '');
-    prBodyFile = resolve(cwd, '.testwitness-pr-body.txt');
-    await writeFile(prBodyFile, String(pr['body'] ?? ''));
+    prBody = String(pr['body'] ?? '');
   }
 
   // Author comes from the payload as data, used for provenance display only.
@@ -72,7 +68,9 @@ export async function run(): Promise<void> {
   }
 
   const { report, config, history: updatedHistory, files, evidence } = await check({
-    cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, format: 'json', prTitle, prBodyFile, author, authorType, quiet: false,
+    cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
+    // Log lines name files and quote results files of the pull request; they are made safe for the step log.
+    log: (s) => info(s),
     history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
   });
 
@@ -84,7 +82,7 @@ export async function run(): Promise<void> {
       applyAcknowledgements(report.findings, parseAckCommands(comments, prAuthor), label);
       recomputeAfterAcknowledgements(report, config, files, evidence);
     } catch (err) {
-      core.info(`Could not read PR comments or labels for acknowledgements: ${(err as Error).message}`);
+      info(`Could not read PR comments or labels for acknowledgements: ${(err as Error).message}`);
     }
   }
   const exitCode = exitCodeFor(report, config);
@@ -92,36 +90,28 @@ export async function run(): Promise<void> {
   const jsonPath = resolve(cwd, outDir, 'testwitness.json');
   const mdPath = resolve(cwd, outDir, 'testwitness.md');
   const markdown = renderMarkdown(report, { collapseLow: config.comment.collapseLow, marker: true });
-  await writeFile(jsonPath, renderJson(report));
-  await writeFile(mdPath, markdown);
+  // The checkout belongs to the pull request: never write through a link it committed at an output path.
+  await writeFileNoFollow(jsonPath, renderJson(report));
+  await writeFileNoFollow(mdPath, markdown);
   core.setOutput('state', report.state);
   core.setOutput('report', jsonPath);
   core.setOutput('findings_high', String(report.summary.findings.high));
   core.setOutput('findings_medium', String(report.summary.findings.medium));
   if (updatedHistory) {
     const historyPath = resolve(cwd, outDir, HISTORY_FILE);
-    await writeFile(historyPath, serializeHistory(updatedHistory));
+    await writeFileNoFollow(historyPath, serializeHistory(updatedHistory));
     core.setOutput('history', historyPath);
     if (historyWrite && historyArtifact) await uploadHistory(historyArtifact, historyPath);
     else if (historyWrite) core.info('History: history_artifact is empty, so the history was written but not uploaded.');
   }
 
   // Annotations render on the Files tab without any token.
-  const strict = config.mode === 'strict';
-  for (const f of report.findings.slice(0, 200)) {
-    if (f.acknowledged) continue;
-    const props = { file: f.location.path, startLine: f.location.line ?? 1, title: `testwitness ${f.ruleId}` };
-    const msg = `${f.message}${f.label ? ` (${f.label})` : ''}`;
-    const level = annotationLevel(f, strict);
-    if (level === 'error') core.error(msg, props);
-    else if (level === 'warning') core.warning(msg, props);
-    else core.notice(msg, props);
-  }
+  emitAnnotations(report.findings, config.mode === 'strict');
 
   try {
     await core.summary.addRaw(markdown.replace(COMMENT_MARKER, '')).write();
   } catch (err) {
-    core.info(`Could not write the job summary: ${(err as Error).message}`);
+    info(`Could not write the job summary: ${(err as Error).message}`);
   }
 
   if (commentEnabled && pr && config.comment.enabled) {
@@ -129,7 +119,7 @@ export async function run(): Promise<void> {
       try {
         await upsertComment(token, pr['number'] as number, markdown);
       } catch (err) {
-        core.info(`Could not post the PR comment (read only token on a fork PR is expected): ${(err as Error).message}`);
+        info(`Could not post the PR comment (read only token on a fork PR is expected): ${(err as Error).message}`);
       }
     } else {
       core.info('No token: skipping the PR comment. The report is in the job summary and the artifact.');
@@ -157,7 +147,11 @@ async function readAcknowledgementSources(token: string, prNumber: number, prAut
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const raw = await octokit.paginate(octokit.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
-  const comments: PullRequestComment[] = raw.map((c) => ({ author: c.user?.login ?? '', association: c.author_association ?? 'NONE', body: c.body ?? '', createdAt: c.created_at }));
+  const comments = await withWriteAccessOnly(
+    raw.map((c) => ({ author: c.user?.login ?? '', association: c.author_association ?? 'NONE', body: c.body ?? '', createdAt: c.created_at })),
+    async (login) => (await octokit.rest.repos.getCollaboratorPermissionLevel({ owner, repo, username: login })).data.permission,
+    (s) => info(s),
+  );
   const labels = await octokit.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber, per_page: 100 });
   const present = labels.data.some((l) => l.name === ACK_LABEL);
   if (!present) return { comments, label: { present: false } };
@@ -167,7 +161,7 @@ async function readAcknowledgementSources(token: string, prNumber: number, prAut
     const events = await octokit.paginate(octokit.rest.issues.listEvents, { owner, repo, issue_number: prNumber, per_page: 100 });
     actor = await trustedLabelActor(events as LabelEvent[], prAuthor, async (login) => (await octokit.rest.repos.getCollaboratorPermissionLevel({ owner, repo, username: login })).data.permission);
   } catch (err) {
-    core.info(`Could not read who applied the ${ACK_LABEL} label, so it is ignored: ${(err as Error).message}`);
+    info(`Could not read who applied the ${ACK_LABEL} label, so it is ignored: ${(err as Error).message}`);
     return { comments, label: { present: false } };
   }
   if (!actor) {
@@ -180,6 +174,37 @@ async function readAcknowledgementSources(token: string, prNumber: number, prAut
 }
 
 export const ACK_LABEL = 'testwitness:acknowledged';
+
+/**
+ * Comments whose acknowledgement commands may count. The comment's author_association is not enough: MEMBER is any
+ * member of the organisation, with or without access to this repository, and COLLABORATOR includes people invited
+ * with read access. An acknowledgement needs write or admin permission on the repository, as the label does, so the
+ * permission of everyone who wrote a `/testwitness ack` command is looked up, and a commenter without it (or whose
+ * lookup fails) is treated as an outsider. Comments without a command are passed through untouched.
+ */
+export async function withWriteAccessOnly(comments: PullRequestComment[], permissionOf: (login: string) => Promise<string>, log: (s: string) => void = () => {}): Promise<PullRequestComment[]> {
+  const verdict = new Map<string, boolean>();
+  const out: PullRequestComment[] = [];
+  for (const c of comments) {
+    if (!/^[^\S\r\n\u2028\u2029]*\/testwitness\s+ack\b/im.test(c.body) || !['OWNER', 'MEMBER', 'COLLABORATOR'].includes(c.association.toUpperCase())) {
+      out.push(c);
+      continue;
+    }
+    const key = c.author.toLowerCase();
+    if (!verdict.has(key)) {
+      let ok = false;
+      try {
+        ok = ['admin', 'write'].includes(await permissionOf(c.author));
+        if (!ok) log(`The acknowledgement by ${c.author} is ignored: no write access to this repository.`);
+      } catch (err) {
+        log(`Could not read the permission of ${c.author}, so the acknowledgement is ignored: ${(err as Error).message}`);
+      }
+      verdict.set(key, ok);
+    }
+    out.push(verdict.get(key) ? c : { ...c, association: 'NONE' });
+  }
+  return out;
+}
 
 export interface LabelEvent {
   event?: string;
@@ -214,7 +239,7 @@ async function upsertComment(token: string, prNumber: number, body: string): Pro
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const existing = await octokit.paginate(octokit.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
-  const mine = existing.find((c) => c.body?.includes(COMMENT_MARKER));
+  const mine = findOwnComment(existing, COMMENT_MARKER);
   const capped = body.length > 60_000 ? body.slice(0, 60_000) + '\n\n(truncated; see the testwitness.json artifact)' : body;
   if (mine) await octokit.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body: capped });
   else await octokit.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: capped });

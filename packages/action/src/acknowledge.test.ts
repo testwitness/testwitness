@@ -1,7 +1,7 @@
 // Review decisions 6 and 7: the state after acknowledgements, and who may acknowledge with the label.
 import { describe, expect, it } from 'vitest';
-import { defaultConfig, exitCodeFor, type ChangedFile, type Report } from '@testwitness/core';
-import { recomputeAfterAcknowledgements, trustedLabelActor, type LabelEvent } from './main.js';
+import { defaultConfig, exitCodeFor, parseAckCommands, type ChangedFile, type PullRequestComment, type Report } from '@testwitness/core';
+import { recomputeAfterAcknowledgements, trustedLabelActor, withWriteAccessOnly, type LabelEvent } from './main.js';
 
 function report(): Report {
   return { state: 'unreadable', findings: [], summary: { findings: { high: 0, medium: 0, low: 0 } }, evidence: { state: 'unreadable' }, files: { tests: 0 } } as unknown as Report;
@@ -40,5 +40,47 @@ describe('who applied the acknowledgement label', () => {
 
   it('lets a failed permission lookup throw, so the caller ignores the label', async () => {
     await expect(trustedLabelActor([labeled('river')], 'author', async () => { throw new Error('403'); })).rejects.toThrow('403');
+  });
+});
+
+describe('withWriteAccessOnly', () => {
+  const comment = (author: string, association: string, body: string): PullRequestComment => ({ author, association, body, createdAt: '2026-11-13T00:00:00Z' });
+
+  it('an organisation member or a read only collaborator without write access cannot acknowledge', async () => {
+    const asked: string[] = [];
+    const permissions: Record<string, string> = { maintainer: 'write', owner: 'admin', orgmember: 'read', reader: 'triage' };
+    const out = await withWriteAccessOnly(
+      [
+        comment('maintainer', 'MEMBER', '/testwitness ack R001 reason: moved'),
+        comment('orgmember', 'MEMBER', 'looks fine\n/testwitness ack all reason: trust me'),
+        comment('reader', 'COLLABORATOR', '/testwitness ack W006 reason: ok'),
+        comment('owner', 'OWNER', '  /TESTWITNESS ACK all reason: reviewed'),
+        comment('orgmember', 'MEMBER', '/testwitness ack R003 reason: again'),
+        comment('orgmember', 'MEMBER', 'no command here'),
+        comment('stranger', 'NONE', '/testwitness ack all reason: please'),
+      ],
+      async (login) => {
+        asked.push(login);
+        return permissions[login] ?? 'none';
+      },
+    );
+    expect(out.map((c) => c.association)).toEqual(['MEMBER', 'NONE', 'NONE', 'OWNER', 'NONE', 'MEMBER', 'NONE']);
+    // One lookup per commenter with a command; none for a stranger, whose command never counted.
+    expect(asked).toEqual(['maintainer', 'orgmember', 'reader', 'owner']);
+    const commands = parseAckCommands(out, 'author');
+    expect(commands.filter((c) => c.trusted).map((c) => c.by)).toEqual(['maintainer', 'owner']);
+  });
+
+  it('a failed permission lookup ignores the acknowledgement', async () => {
+    const logs: string[] = [];
+    const out = await withWriteAccessOnly([comment('maintainer', 'MEMBER', '/testwitness ack all reason: x')], () => Promise.reject(new Error('403')), (s) => logs.push(s));
+    expect(out[0]!.association).toBe('NONE');
+    expect(logs.join('\n')).toMatch(/Could not read the permission of maintainer/);
+  });
+
+  it('reads a comment of blank lines or line separators in linear time', async () => {
+    const t0 = performance.now();
+    for (const filler of ['\n', '\u2028']) await withWriteAccessOnly([comment('maintainer', 'MEMBER', filler.repeat(100_000))], async () => 'write');
+    expect(performance.now() - t0).toBeLessThan(2000);
   });
 });

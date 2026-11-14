@@ -31,7 +31,7 @@ inputs:
     description: high, medium or low (overrides .testwitness.yml)
     required: false
   config:
-    description: Path to .testwitness.yml (default reads it from the base ref)
+    description: Path to .testwitness.yml (default reads it from the base ref). A path inside the repository is read at the base ref too, never from the pull request
     required: false
   comment:
     description: Post or update one PR comment when the token can write (true or false)
