@@ -166,11 +166,11 @@ describe('runEngine', () => {
       medium: open.filter((f) => f.severity === 'medium').length,
       low: open.filter((f) => f.severity === 'low').length,
     });
-    const nonLow = (pred: (id: string) => boolean) => report.findings.filter((f) => pred(f.ruleId) && f.severity !== 'low').length;
+    // The counts use the rule's own severity: a deletion still counts when v0.1 caps R001 at low.
+    const nonLow = (pred: (id: string) => boolean) => report.findings.filter((f) => pred(f.ruleId) && (f.uncappedSeverity ?? f.severity) !== 'low').length;
     expect(report.summary.testsDeleted).toBe(nonLow((id) => id === 'R001' || id === 'R002'));
-    // R001 and R002 are not proven rules: their findings are capped at low, so no deletion counts in v0.1.
-    expect(report.summary.testsDeleted).toBe(0);
     expect(report.findings.some((f) => f.ruleId === 'R001' && f.severity === 'low' && f.uncappedSeverity !== undefined)).toBe(true);
+    expect(report.summary.testsDeleted).toBeGreaterThanOrEqual(1);
     expect(report.summary.testsSkipped).toBe(nonLow((id) => id === 'R003' || id === 'R004'));
     expect(report.summary.testsSkipped).toBeGreaterThanOrEqual(1);
     expect(report.summary.assertionsWeakened).toBe(nonLow((id) => id.startsWith('A')));

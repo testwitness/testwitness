@@ -24,7 +24,7 @@ import { classifyFiles, classifyPath } from './diff/classify.js';
 import { applyConfiguredSeverity, effectiveSeverity, SEVERITY_RANK } from './config.js';
 import { fingerprint as makeFingerprint } from './hash.js';
 import { builtinRules } from './rules/index.js';
-import { capUnproven } from './proven.js';
+import { capUnproven, measuredSeverity } from './proven.js';
 import { detectProvenance } from './provenance.js';
 import { HelperIndex, namesToIndex, resolveHelperCalls, secondLevelNames } from './helper-index.js';
 import { diffInventories } from './inventory.js';
@@ -309,10 +309,12 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
     state,
     mode: opts.config.mode,
     ...(failures.size ? { notes: [...failures].slice(0, 10) } : {}),
+    // The counts state what the change did, so they use the rule's own severity: a rule capped at low in v0.1 still
+    // saw a deleted test. Moved, parameterised and other benign shapes stay low at their source and are not counted.
     summary: {
-      testsDeleted: findings.filter((f) => (f.ruleId === 'R001' || f.ruleId === 'R002') && f.severity !== 'low').length,
-      testsSkipped: findings.filter((f) => (f.ruleId === 'R003' || f.ruleId === 'R004') && f.severity !== 'low').length,
-      assertionsWeakened: findings.filter((f) => f.ruleId.startsWith('A') && f.severity !== 'low').length,
+      testsDeleted: findings.filter((f) => (f.ruleId === 'R001' || f.ruleId === 'R002') && measuredSeverity(f) !== 'low').length,
+      testsSkipped: findings.filter((f) => (f.ruleId === 'R003' || f.ruleId === 'R004') && measuredSeverity(f) !== 'low').length,
+      assertionsWeakened: findings.filter((f) => f.ruleId.startsWith('A') && measuredSeverity(f) !== 'low').length,
       changedTestsNotRun: findings.filter((f) => f.ruleId === 'V003').length,
       findings: counts,
     },

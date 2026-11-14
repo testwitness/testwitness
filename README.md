@@ -2,7 +2,7 @@
 
 testwitness reads a pull request's diff and test results and tells the reviewer when tests were deleted, skipped or loosened, or did not run.
 
-![A terminal running git diff on a branch that loosens one assertion, skips one test and deletes another, then testwitness check reporting review with one high finding (A002, assertion loosened) and two medium findings (R001, test deleted; R003, test skipped)](docs/public/demo.gif)
+![A terminal running git diff on a branch that loosens one assertion, skips one test and deletes another, then testwitness check reporting review with one high finding (A002, assertion loosened) and one medium finding (R003, test skipped), and the deleted test counted in the summary and kept among the low findings, since deleted test findings report at low in v0.1](docs/public/demo.gif)
 
 ```bash
 npx testwitness check --base origin/main
