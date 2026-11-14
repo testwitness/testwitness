@@ -1,4 +1,5 @@
 import type { Finding, Report, Severity } from '../types.js';
+import { clipText, oneLine } from './sanitize.js';
 
 /**
  * Plain text for a terminal. The markdown renderer is for PR comments and reads badly in a shell (table pipes,
@@ -23,16 +24,15 @@ type Paint = (code: string, s: string) => string;
 
 /**
  * Untrusted text (test names, PR text, file contents) must not drive the terminal: control characters, including
- * ESC and the C1 range, become a visible placeholder, and line breaks and tabs become spaces.
+ * ESC and the C1 range, bidirectional and invisible characters become a visible placeholder, and line breaks of every
+ * kind and tabs become spaces (sanitize.ts).
  */
 export function plain(s: string): string {
-  return (
-    s
-      .replace(/\r?\n|\t/g, ' ')
-      // eslint-disable-next-line no-control-regex -- matching control characters is the point
-      .replace(/[\u0000-\u001f\u007f-\u009f]/g, '�')
-  );
+  return oneLine(s);
 }
+
+/** Longest message or note line printed; a test name can be megabytes long. */
+const TEXT_MAX = 1000;
 
 function clip(s: string, max: number): string {
   const t = plain(s).trim();
@@ -45,9 +45,9 @@ function sevPaint(s: Severity): string {
 
 function finding(f: Finding, paint: Paint): string[] {
   const loc = f.location.line ? `${f.location.path}:${f.location.line}` : f.location.path;
-  const label = f.label ? ` (${plain(f.label)})` : '';
-  const out = [`  ${paint(sevPaint(f.severity), f.severity.padEnd(6))}  ${paint('1', f.ruleId)}  ${plain(loc)}`];
-  out.push(`          ${plain(f.message)}${label}`);
+  const label = f.label ? ` (${clipText(plain(f.label), 200)})` : '';
+  const out = [`  ${paint(sevPaint(f.severity), plain(f.severity).padEnd(6))}  ${paint('1', plain(f.ruleId))}  ${clipText(plain(loc), TEXT_MAX)}`];
+  out.push(`          ${clipText(plain(f.message), TEXT_MAX)}${label}`);
   if (f.before !== undefined) out.push(paint('2', `          before: ${clip(f.before, 100)}`));
   if (f.after !== undefined) out.push(paint('2', `          after:  ${clip(f.after, 100)}`));
   return out;
@@ -67,7 +67,7 @@ export function renderText(report: Report, opts: TextOptions = {}): string {
   const statePaint = report.state === 'pass' ? '32;1' : report.state === 'review' ? '33;1' : '36;1';
   const lines: string[] = [];
   lines.push(`testwitness: ${paint(statePaint, report.state)}, ${STATE_TEXT[report.state]}`);
-  for (const n of report.notes ?? []) lines.push(`  ${plain(n)}`);
+  for (const n of report.notes ?? []) lines.push(`  ${clipText(plain(n), TEXT_MAX)}`);
 
   const open = report.findings.filter((f) => !f.acknowledged).sort(bySeverity);
   const shown = open.filter((f) => !(opts.collapseLow && f.severity === 'low'));
@@ -93,7 +93,7 @@ export function renderText(report: Report, opts: TextOptions = {}): string {
   } else {
     lines.push(`Results: ${e.total} tests in ${e.sources.length} file${e.sources.length === 1 ? '' : 's'}, ${e.passed} passed, ${e.failed} failed, ${e.errored} errored, ${e.skipped} skipped. Changed tests that did not run: ${s.changedTestsNotRun}.`);
   }
-  for (const n of e.notes) lines.push(paint('2', `  ${plain(n)}`));
+  for (const n of e.notes) lines.push(paint('2', `  ${clipText(plain(n), TEXT_MAX)}`));
   const files = report.files;
   lines.push(
     paint(
