@@ -1,5 +1,0 @@
-[
-  { "ruleId": "O001", "severity": "medium", "subject": "TaxTest#handlesAnExemption", "label": "measured weak" },
-  { "ruleId": "M001", "severity": "medium", "subject": "src/main/java/demo/Tax.java", "label": "measured weak" },
-  { "ruleId": "M002", "severity": "high", "subject": "TaxTest#handlesAnExemption", "label": "measured weak" }
-]

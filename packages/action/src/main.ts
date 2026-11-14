@@ -12,18 +12,13 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { check } from 'testwitness';
 import { emitAnnotations, findOwnComment, info } from './annotations.js';
-import { pullRequestFromEvent, type EventPayload, type PullRequestPayload } from './pull-request.js';
-import { renderJson, renderMarkdown, writeFileNoFollow, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
+import { renderJson, renderMarkdown, writeFileNoFollow, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, computeState, exitCodeFor, type ChangedFile, type Evidence, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
 
 export async function run(): Promise<void> {
   const cwd = process.env['GITHUB_WORKSPACE'] ?? process.cwd();
   const ctx = github.context;
   const token = core.getInput('token') || process.env['GITHUB_TOKEN'];
-  if (ctx.eventName === 'issue_comment' && !parseMutateCommand(String((ctx.payload.comment as { body?: unknown } | undefined)?.body ?? ''))) {
-    core.info('testwitness: issue_comment event without a /testwitness mutate command; nothing to do.');
-    return;
-  }
-  const pr = await pullRequestFromEvent(ctx.eventName, ctx.payload as EventPayload, token ? (n) => fetchPullRequest(token, n) : undefined, (s) => info(s));
+  const pr = ctx.payload.pull_request;
   const baseInput = core.getInput('base');
   const headInput = core.getInput('head');
   const head = headInput || (pr ? (pr['head'] as { sha: string }).sha : 'HEAD');
@@ -32,7 +27,6 @@ export async function run(): Promise<void> {
   const results = core.getInput('results') || undefined;
   const junit = core.getInput('junit') || undefined;
   const coverage = core.getInput('coverage') || undefined;
-  const mutation = core.getInput('mutation') || undefined;
   const mode = (core.getInput('mode') || undefined) as 'report' | 'require-ack' | 'strict' | undefined;
   const failOn = (core.getInput('fail_on') || undefined) as 'high' | 'medium' | 'low' | undefined;
   const configPath = core.getInput('config') || undefined;
@@ -55,7 +49,7 @@ export async function run(): Promise<void> {
   const authorType = typeof user?.type === 'string' ? user.type : undefined;
 
   const { report, config, files, evidence } = await check({
-    cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
+    cwd, base, head, results, junit, coverage, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
     // Log lines name files and quote results files of the pull request; they are made safe for the step log.
     log: (s) => info(s),
   });
@@ -205,13 +199,6 @@ export async function trustedLabelActor(events: LabelEvent[], prAuthor: string |
   if (prAuthor && login.toLowerCase() === prAuthor.toLowerCase()) return undefined;
   const permission = await permissionOf(login);
   return ['admin', 'write'].includes(permission) ? { login, at: last?.created_at ?? '' } : undefined;
-}
-
-async function fetchPullRequest(token: string, prNumber: number): Promise<PullRequestPayload> {
-  const octokit = github.getOctokit(token);
-  const { owner, repo } = github.context.repo;
-  const { data } = await octokit.rest.pulls.get({ owner, repo, pull_number: prNumber });
-  return data as unknown as PullRequestPayload;
 }
 
 async function upsertComment(token: string, prNumber: number, body: string): Promise<void> {

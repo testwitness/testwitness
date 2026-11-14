@@ -87,21 +87,20 @@ describe('applyConfiguredSeverity', () => {
   });
 });
 
-describe('mutation config', () => {
-  it('defaults to no mutation reports', () => {
-    expect(parseConfig(undefined).mutation.paths).toEqual([]);
+describe('keys of features cut from v0.1', () => {
+  it('fails with a ConfigError that names the key and says the feature is not in v0.1', () => {
+    for (const [doc, key] of [
+      ['mutation:\n  paths: ["reports/mutation/mutation.json"]\n', 'mutation'],
+      ['mutation: yes\n', 'mutation'],
+      ['history: history.json\n', 'history'],
+    ] as const) {
+      expect(() => parseConfig(doc, known)).toThrow(ConfigError);
+      expect(() => parseConfig(doc, known)).toThrow(new RegExp(`^${key}: .* is not in v0\\.1`));
+    }
   });
-  it('reads mutation.paths as a list or a comma separated string', () => {
-    expect(parseConfig('mutation:\n  paths: ["reports/mutation/mutation.json", "**/mutations.xml"]\n', known).mutation.paths).toEqual(['reports/mutation/mutation.json', '**/mutations.xml']);
-    expect(parseConfig('mutation:\n  paths: "a.json, b.xml"\n', known).mutation.paths).toEqual(['a.json', 'b.xml']);
-  });
-  it('rejects a mutation value that is not a mapping, and paths that are not strings', () => {
-    expect(() => parseConfig('mutation: yes\n', known)).toThrow(ConfigError);
-    expect(() => parseConfig('mutation:\n  paths: [1]\n', known)).toThrow(ConfigError);
-  });
-  it('accepts severities for M001 and M002', () => {
-    const c = parseConfig('rules:\n  M001: low\n  M002: off\n', known);
-    expect([c.rules['M001']!.severity, c.rules['M002']!.severity]).toEqual(['low', 'off']);
+  it('rejects M001 and M002 as unknown rules', () => {
+    expect(() => parseConfig('rules:\n  M001: low\n', known)).toThrow(/unknown rule M001/);
+    expect(() => parseConfig('rules:\n  M002: off\n', known)).toThrow(/unknown rule M002/);
   });
 });
 

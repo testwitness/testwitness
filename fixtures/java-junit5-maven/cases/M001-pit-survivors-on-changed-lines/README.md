@@ -1,3 +1,0 @@
-Positive for M001 (PIT). Shipping.fee gains a weight surcharge and an express multiplier. The only test checks that the fee for 1 kg is above zero. Mutations on lines 6, 7, 9 and 10 survived or had no coverage, while lines 5 and 12 had killed ones: four weak lines, medium, label measured weak.
-
-mutation/mutations.xml is hand written in the PIT 1.x mutations.xml format (mutation elements with status, sourceFile, mutatedClass, lineNumber and the JUnit 5 unique id in killingTest), because Maven Central is blocked from the build workspace and PIT could not be run. It is minimal and marked for replacement by the maintainer's Maven run; see ../../mutation-PRODUCER.md.

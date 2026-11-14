@@ -3,7 +3,6 @@ import picomatch from 'picomatch';
 import type { Finding, Rule, RuleContext, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
 import { makeFinding } from './util.js';
-import { mutationOracle } from './M.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -21,7 +20,7 @@ export const O001: Rule = {
   docs: {
     summary: 'A test added in this PR has no assertion: no framework assertion, no exception expectation, no snapshot, and no call to an assertion helper defined in the file, in a test support file of the checkout, or configured in assertions.extra.',
     falsePositives:
-      'Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions, whether they are defined in the test file or in a test support file of the checkout (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test), and a helper that calls another helper that asserts counts too. Only helpers outside those locations, or without an assertion the front end can read inside, need assertions.extra. Assertions inside nested scopes of the test body (callbacks, lambdas, anonymous and local classes, inner functions) are counted. The default is low (informational): on public PRs half of the new tests without an assertion were intentional smoke tests (race tests, verbose output tests, does not throw tests), so a static rule cannot carry medium or high here. Raise it per repository with rules: { O001: medium } in .testwitness.yml. With mutation reports from the opt in mutation job (docs/mutation-on-request.md) the oracle is measured instead of guessed: when the changed production lines the test exercises carry mutants and none of them was killed, the finding is medium with the label measured weak; when the test itself killed a mutant on those lines (it notices a wrong result, for example through an exception), the finding is dropped. Which production files a test exercises comes from the coverage the mutation report records, or from the name and imports of the test file when it records none.',
+      'Smoke tests named contextLoads, smoke or DoesNotThrow are reported low with the label smoke. Helpers whose body contains an assertion are counted as assertions, whether they are defined in the test file or in a test support file of the checkout (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test), and a helper that calls another helper that asserts counts too. Only helpers outside those locations, or without an assertion the front end can read inside, need assertions.extra. Assertions inside nested scopes of the test body (callbacks, lambdas, anonymous and local classes, inner functions) are counted. The default is low (informational): on public PRs half of the new tests without an assertion were intentional smoke tests (race tests, verbose output tests, does not throw tests), so a static rule cannot carry medium or high here. Raise it per repository with rules: { O001: medium } in .testwitness.yml.',
     example: '+  @Test\n+  void processesBatch() {\n+    service.process(batch);\n+  }',
   },
   run(ctx) {
@@ -34,12 +33,9 @@ export const O001: Rule = {
       if (t.overrideOnly) continue; // the inherited test carries the oracle
       if (isSkipped(t) || isXfail(t)) continue;
       const smoke = SMOKE_NAME.test(t.name);
-      const measured = mutationOracle(ctx, pair, t);
-      if (measured === 'strong') continue; // it killed a mutant on a changed line: the oracle is measured, not guessed
-      const weak = measured === 'weak';
-      const label = weak ? 'measured weak' : smoke ? 'smoke' : undefined;
+      const label = smoke ? 'smoke' : undefined;
       out.push(
-        makeFinding(ctx, 'O001', weak ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} has no assertion${weak ? ', and no mutant on the changed lines it exercises was killed' : ''}`, {
+        makeFinding(ctx, 'O001', 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} has no assertion`, {
           line: t.startLine,
           endLine: t.endLine,
           ...(label ? { label } : {}),
@@ -74,7 +70,7 @@ export const O002: Rule = {
   docs: {
     summary: 'A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.',
     falsePositives:
-      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test, unless every assertion of the test is a does not throw check (not.toThrow, assertDoesNotThrow, doesNotThrowAnyException): a crash regression is pinned by not throwing, so the claim says nothing against such a test. With mutation reports (docs/mutation-on-request.md) it is measured: medium with the label measured weak when no mutant on the changed lines the test exercises was killed, and dropped when the test itself killed one of them, because then the existence check is measured strong enough for the change. Ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
+      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test, unless every assertion of the test is a does not throw check (not.toThrow, assertDoesNotThrow, doesNotThrowAnyException): a crash regression is pinned by not throwing, so the claim says nothing against such a test. Ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
     example: "+  it('computes the discount', () => {\n+    expect(computeDiscount(cart)).toBeDefined();\n+  });",
   },
   run(ctx) {
@@ -86,17 +82,14 @@ export const O002: Rule = {
       if (!onlySmoke(t)) continue;
       if (isSkipped(t) || isXfail(t)) continue;
       const kinds = [...new Set(t.assertions.map((a) => a.callee))].join(', ');
-      const measured = mutationOracle(ctx, pair, t);
-      if (measured === 'strong') continue; // it killed a mutant on a changed line: the oracle is measured, not guessed
-      const weak = measured === 'weak';
       // A crash regression is pinned by "does not throw": for such a test the PR's regression claim is no evidence of
       // a weak oracle, because not throwing is the whole contract (a validator that accepts its input).
       const raised = regression && !onlyNoThrow(t);
       out.push(
-        makeFinding(ctx, 'O002', raised || weak ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})${weak ? ', and no mutant on the changed lines it exercises was killed' : ''}`, {
+        makeFinding(ctx, 'O002', raised ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})`, {
           line: t.startLine,
           endLine: t.endLine,
-          label: weak ? 'measured weak' : 'smoke',
+          label: 'smoke',
           snippet: t.bodyHash,
         }),
       );

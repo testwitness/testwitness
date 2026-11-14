@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyAcknowledgements, parseAckCommands, parseMutateCommand } from './acknowledge.js';
+import { applyAcknowledgements, parseAckCommands } from './acknowledge.js';
 import type { Finding } from './types.js';
 
 const f = (ruleId: string, subject: string): Finding => ({ ruleId, severity: 'high', message: '', location: { path: 'a' }, fingerprint: `${ruleId}:a:${subject}`, subject });
@@ -33,19 +33,5 @@ describe('applyAcknowledgements', () => {
     const findings = [f('R003', 'x')];
     applyAcknowledgements(findings, parseAckCommands([c('author', 'OWNER', '/testwitness ack all reason: mine')], 'author'));
     expect(findings[0]!.acknowledged).toBeUndefined();
-  });
-});
-
-describe('mutate command', () => {
-  it('reads /testwitness mutate on a line of its own, with an optional reviewed head sha', () => {
-    expect(parseMutateCommand('/testwitness mutate')).toEqual({});
-    expect(parseMutateCommand('Looks good.\r\n  /testwitness mutate  \nthanks')).toEqual({});
-    expect(parseMutateCommand('/testwitness mutate 1A2B3C4D')).toEqual({ sha: '1a2b3c4d' });
-    expect(parseMutateCommand('/TESTWITNESS MUTATE')).toEqual({});
-  });
-  it('ignores other commands, quotes, short or non hex shas, and trailing words', () => {
-    for (const body of ['/testwitness ack all reason: x', '> /testwitness mutate', 'please /testwitness mutate', '/testwitness mutate 1a2b3c', '/testwitness mutate main', '/testwitness mutate now please', '/testwitness mutated', '']) {
-      expect(parseMutateCommand(body)).toBeUndefined();
-    }
   });
 });

@@ -128,33 +128,10 @@ describe('report schema', () => {
     expect(validate({ ...base, schemaVersion: '2' })).toBe(false);
     expect(validate({ ...base, history: { source: 'history.json', runs: 5, tests: 9, adjusted: 1, notes: [] } })).toBe(false);
     expect(validate(withFinding({ label: 'hides failure' }))).toBe(false);
-    const mutation = { sources: ['reports/mutation/mutation.json'], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] };
-    expect(validate({ ...base, mutation })).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M001', label: 'measured weak' }))).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M002', label: 'measured weak', severity: 'high' }))).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M003' }))).toBe(false);
-    expect(validate(withFinding({ label: 'measured strong' }))).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, extra: 1 } })).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, survived: -1 } })).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, killed: 1.5 } })).toBe(false);
-    const withoutNoCoverage: Record<string, unknown> = { ...mutation };
-    delete withoutNoCoverage['noCoverage'];
-    expect(validate({ ...base, mutation: withoutNoCoverage })).toBe(false);
+    expect(validate({ ...base, mutation: { sources: [], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] } })).toBe(false);
+    expect(validate(withFinding({ ruleId: 'M001' }))).toBe(false);
+    expect(validate(withFinding({ label: 'measured weak' }))).toBe(false);
   });
-
-  const mutationCases = discoverCases(join(root, 'fixtures'), (c) => c.mutation !== undefined);
-  it('has golden cases with mutation reports from Stryker and PIT', () => {
-    expect(new Set(mutationCases.map((c) => c.project))).toEqual(new Set(['ts-vitest', 'java-junit5-maven']));
-  });
-  for (const c of mutationCases.filter((x) => x.name.startsWith('O001-') && x.name.includes('upgrade'))) {
-    it(`validates the JSON output of mutation case ${c.project}/${c.name}`, async () => {
-      const { report } = await runCase(c);
-      const json = JSON.parse(render(report, 'json', false));
-      expect(json.mutation.mutants).toBeGreaterThan(0);
-      expect(json.findings.map((f: { ruleId: string }) => f.ruleId)).toEqual(expect.arrayContaining(['M001', 'M002', 'O001']));
-      expectValid(json);
-    }, 60_000);
-  }
 });
 
 /** Finding labels assigned in rule sources: `label: 'x'`, `label = 'x'`, `label ?? 'x'`, `let label: T = c ? undefined : 'x'`. */

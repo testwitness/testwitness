@@ -5,7 +5,6 @@ import type {
   CoverageEvidence,
   Evidence,
   Finding,
-  MutationEvidence,
   FrameworkProfile,
   InventoryPair,
   LanguageFrontEnd,
@@ -53,11 +52,6 @@ export interface EngineOptions {
   evidence?: Evidence | undefined;
   /** Line coverage of the head run, read from lcov, Cobertura or JaCoCo reports. */
   coverage?: CoverageEvidence | undefined;
-  /**
-   * Mutation testing results of the head, read from Stryker JSON or PIT mutations.xml reports that an opt in job wrote.
-   * The engine only reads them; it never runs a mutation tool (docs/mutation-on-request.md).
-   */
-  mutation?: MutationEvidence | undefined;
   /** Why evidence is missing or partial, for the report. */
   evidenceNotes?: string[];
   prText?: PullRequestText | undefined;
@@ -255,7 +249,6 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
     readHead: (p) => read(headSha, p),
     ...(opts.evidence ? { evidence: opts.evidence } : {}),
     ...(opts.coverage ? { coverage: opts.coverage } : {}),
-    ...(opts.mutation ? { mutation: opts.mutation } : {}),
     ...(opts.prText ? { prText: opts.prText } : {}),
     profile,
     config: opts.config,
@@ -272,7 +265,6 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
     if (configured === 'off') continue;
     if (rule.needs.includes('junit') && !opts.evidence) continue;
     if (rule.needs.includes('coverage') && !opts.coverage) continue;
-    if (rule.needs.includes('mutation') && !opts.mutation) continue;
     const options = { ...(rule.defaultOptions ?? {}), ...(opts.config.rules[rule.id]?.options ?? {}) };
     let result: Finding[];
     try {
@@ -352,19 +344,6 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
     ...(helperIndex ? { helperIndex } : {}),
     ...(opts.coverage
       ? { coverage: { sources: opts.coverage.sources, files: opts.coverage.files, linesInstrumented: opts.coverage.linesInstrumented, linesExecuted: opts.coverage.linesExecuted, notes: opts.coverage.warnings.slice(0, 10) } }
-      : {}),
-    ...(opts.mutation
-      ? {
-          mutation: {
-            sources: opts.mutation.sources,
-            files: opts.mutation.files,
-            mutants: opts.mutation.mutants,
-            killed: opts.mutation.killed,
-            survived: opts.mutation.survived,
-            noCoverage: opts.mutation.noCoverage,
-            notes: opts.mutation.warnings.slice(0, 10),
-          },
-        }
       : {}),
     base: baseSha,
     head: headCommit,

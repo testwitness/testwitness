@@ -9,7 +9,6 @@ import { CONFIG_MAX_NESTING, nestsTooDeep, parseXml, parseYamlOrJson } from './c
 import { looksLikeTestSource } from './diff/classify.js';
 import { findClaims, stripChecklist, stripNonProse } from './evidence/claims.js';
 import { regexLines, replaceDelimited, trimEndChars } from './linear.js';
-import { javaClassName } from './mutation/plan.js';
 import { isGeneratedPattern, selectorsOf, thresholdsOf } from './rules/C.js';
 import { claimsRegression } from './rules/O.js';
 import { definedSymbols, testTokens } from './rules/util.js';
@@ -64,14 +63,6 @@ describe('linear replacements read the same language as the regular expressions 
     }), RUNS);
   });
 
-  it('the package declaration of a Java source', () => {
-    const old = (source: string): string | undefined => /^\s*package\s+([\w.]+)\s*;/m.exec(source.replace(/\/\*[\s\S]*?\*\//g, ''))?.[1];
-    fc.assert(fc.property(made(['package ', 'a.b', ';', '\n', ' ', '\t', '/*', '*/', 'x', '\r']), (s) => {
-      const pkg = old(s);
-      expect(javaClassName('src/Foo.java', s)).toBe(pkg ? `${pkg}.Foo` : 'Foo');
-    }), RUNS);
-  });
-
   it('the key in front of a workflow or package.json command', () => {
     const old = (line: string): string => line.replace(/^\s*-?\s*(run|script|cmd|command|"test"|test|"[\w:-]+")\s*:\s*/, '').replace(/^\s*"[^"]*"\s*:\s*"/, '').replace(/",?\s*$/, '').replace(/\\"/g, '"');
     fc.assert(fc.property(made(['-', ' ', '\t', 'run', 'test', '"test"', '"a:b"', ':', 'npm test', '"', ',', '\\"', 'x']), (s) => {
@@ -106,7 +97,6 @@ describe('100 kB of the input each pattern was slow on', () => {
     // U+2028 is whitespace and a line start for `^`: indentation must not include it.
     fast('python line separators', () => looksLikeTestSource('python', '\u2028'.repeat(N)));
     fast('checklist line separators', () => stripChecklist(stripNonProse('\u2028'.repeat(N))));
-    fast('java line separators', () => javaClassName('A.java', '\u2029'.repeat(N)));
   });
 
   it('PR text: checklists, comments, fences and the regression claim', () => {
@@ -128,8 +118,6 @@ describe('100 kB of the input each pattern was slow on', () => {
   });
 
   it('Java sources and symbols', () => {
-    fast('blank lines', () => javaClassName('A.java', '\n'.repeat(N)));
-    fast('comment openers', () => javaClassName('A.java', '/* '.repeat(N / 3)));
     fast('public public public', () => definedSymbols('public '.repeat(N / 7), 'java'));
     expect([...definedSymbols('public static <T> Map<String, List<T>> groupByName(List<T> in) {', 'java')]).toEqual(['groupByName']);
     fast('comment openers, normalise', () => normaliseText('/* '.repeat(N / 3)));

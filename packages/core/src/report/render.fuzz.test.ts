@@ -51,7 +51,6 @@ const report: fc.Arbitrary<Report> = fc.record(
     timing: fc.constant({ totalMs: 12, parseMs: 1, rulesMs: 1, evidenceMs: 1 }),
     helperIndex: fc.record({ files: count, parsed: count, cached: count, helpers: count, capped: fc.boolean(), warnings: fc.array(text, { maxLength: 2 }), resolved: fc.array(fc.record({ path: text, test: text, line: count, helper: text, definedIn: text, definedLine: count }), { maxLength: 2 }) }),
     coverage: fc.record({ sources: fc.array(text, { maxLength: 2 }), files: count, linesInstrumented: count, linesExecuted: count, notes: fc.array(text, { maxLength: 2 }) }),
-    mutation: fc.record({ sources: fc.array(text, { maxLength: 2 }), files: count, mutants: count, killed: count, survived: count, noCoverage: count, notes: fc.array(text, { maxLength: 2 }) }),
     base: fc.constant('b'.repeat(40)),
     head: fc.constant('h'.repeat(40)),
   },

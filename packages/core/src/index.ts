@@ -23,5 +23,3 @@ export * from './evidence/claims.js';
 export * from './acknowledge.js';
 export * from './config-text.js';
 export * from './coverage/reader.js';
-export * from './mutation/reader.js';
-export * from './mutation/plan.js';
