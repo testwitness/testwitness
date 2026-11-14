@@ -53,11 +53,14 @@ export interface EntryReplay {
   };
 }
 
+/** A path as it appears inside a JSON string: Windows backslashes escaped, as an agent writes them. */
+const jsonText = (s: string): string => JSON.stringify(s).slice(1, -1);
+
 export async function replayWithHook(e: CorpusEntry): Promise<EntryReplay> {
   const replay = await replayEntry(e, async (repo, wt) => {
     const stateDir = mkdtempSync(join(tmpdir(), 'tw-replay-state-'));
     try {
-      const r = await runHook({ agent: 'claude', input: STOP.replaceAll('__REPO__', repo).replace('"abc123"', JSON.stringify(`replay-${e.slug}`)), stateDir, base: 'main' });
+      const r = await runHook({ agent: 'claude', input: STOP.replaceAll('__REPO__', jsonText(repo)).replace('"abc123"', JSON.stringify(`replay-${e.slug}`)), stateDir, base: 'main' });
       return {
         blocked: r.decision.block,
         blocking: (r.evaluation?.blocking ?? []).map((f) => f.fingerprint),
