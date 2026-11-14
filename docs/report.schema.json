@@ -484,61 +484,6 @@
         }
       }
     },
-    "mutation": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sources",
-        "files",
-        "mutants",
-        "killed",
-        "survived",
-        "noCoverage",
-        "notes"
-      ],
-      "description": "Mutation testing reports (Stryker JSON or PIT mutations.xml) from the opt in mutation job that M001, M002 and the O001 and O002 adjustment read (see https://testwitness.github.io/testwitness/mutation-on-request). testwitness never runs a mutation tool itself. Absent when no mutation report was attached.",
-      "properties": {
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Paths of the mutation reports that were read."
-        },
-        "files": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Source files with mutants."
-        },
-        "mutants": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Mutants that ran to an outcome: killed (including timed out), survived or not covered. Compile errors, runtime errors, ignored and pending mutants are not counted."
-        },
-        "killed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Mutants that a test killed, or that timed out."
-        },
-        "survived": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Mutants that tests executed and did not notice."
-        },
-        "noCoverage": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Mutants that no test executed."
-        },
-        "notes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Reader warnings, caps that were hit, and why M002 could not run (no killing tests in the reports), as plain sentences."
-        }
-      }
-    },
     "base": {
       "type": "string",
       "description": "Commit sha of the merge base between the base ref and head. Findings compare this commit with head."
@@ -587,8 +532,6 @@
         "O001",
         "O002",
         "O006",
-        "M001",
-        "M002",
         "E001",
         "W002",
         "W003",
@@ -618,7 +561,6 @@
         "in helper",
         "maintainer only",
         "matches nothing",
-        "measured weak",
         "moved",
         "narrowed",
         "near duplicate removed",

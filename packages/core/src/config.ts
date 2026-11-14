@@ -39,7 +39,6 @@ export function defaultConfig(): ResolvedConfig {
     paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'], followSymlinks: false },
     junit: { head: DEFAULT_JUNIT_GLOB, base: '' },
     coverage: { paths: [] },
-    mutation: { paths: [] },
     assertions: { extra: [] },
     rules: {},
     acknowledge: [],
@@ -50,6 +49,15 @@ export function defaultConfig(): ResolvedConfig {
     hook: { timeoutSeconds: HOOK_DEFAULT_TIMEOUT_SECONDS, maxBlocks: HOOK_DEFAULT_MAX_BLOCKS, blocking: [...HOOK_BLOCKING], adviceOnly: [] },
   };
 }
+
+/**
+ * Top level keys of features cut from v0.1 (they live on the experimental branch). A config that still sets one fails
+ * with a ConfigError that names the key, so a maintainer learns the setting does nothing instead of trusting it.
+ */
+export const REMOVED_KEYS: Readonly<Record<string, string>> = {
+  history: 'run history',
+  mutation: 'mutation on request (M001, M002)',
+};
 
 const SEVERITIES = new Set<string>(['high', 'medium', 'low', 'off']);
 const MODES = new Set<string>(['report', 'require-ack', 'strict']);
@@ -85,6 +93,9 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
   if (doc === null || doc === undefined) return cfg;
   if (!isRecord(doc)) throw new ConfigError('config must be a mapping');
 
+  for (const [key, feature] of Object.entries(REMOVED_KEYS)) {
+    if (doc[key] !== undefined) throw new ConfigError(`${key}: ${feature} is not in v0.1; remove the ${key} key from .testwitness.yml (docs/configuration.md)`);
+  }
   if (doc['version'] !== undefined && doc['version'] !== 1) throw new ConfigError(`unsupported config version ${String(doc['version'])}`);
   if (doc['mode'] !== undefined) {
     if (typeof doc['mode'] !== 'string' || !MODES.has(doc['mode'])) throw new ConfigError(`mode must be one of report, require-ack, strict`);
@@ -133,11 +144,6 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
     if (!isRecord(doc['coverage'])) throw new ConfigError('coverage must be a mapping');
     const p = doc['coverage']['paths'];
     cfg.coverage.paths = typeof p === 'string' ? p.split(',').map((s) => s.trim()).filter(Boolean) : stringList(p, 'coverage.paths');
-  }
-  if (doc['mutation'] !== undefined) {
-    if (!isRecord(doc['mutation'])) throw new ConfigError('mutation must be a mapping');
-    const p = doc['mutation']['paths'];
-    cfg.mutation.paths = typeof p === 'string' ? p.split(',').map((s) => s.trim()).filter(Boolean) : stringList(p, 'mutation.paths');
   }
   if (doc['assertions'] !== undefined) {
     if (!isRecord(doc['assertions'])) throw new ConfigError('assertions must be a mapping');

@@ -5,7 +5,7 @@
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
 //      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
-//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan,
+//      then --coverage, the refusal of the flags cut from v0.1,
 //      and --results with real Node TAP (and --junit, its older name)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
@@ -223,20 +223,12 @@ try {
   if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
   else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
 
-  // 4f. --mutation reads a real StrykerJS report (the golden fixture's) and M001 reports the changed lines whose mutants survived
-  const mutCase = join(root, 'fixtures/ts-vitest/cases/M001-survivors-on-changed-lines');
-  writeFileSync(join(repo, 'src/shipping.ts'), readFileSync(join(mutCase, 'head/src/shipping.ts'), 'utf8'));
-  gitIn('add', '-A');
-  gitIn('commit', '-q', '-m', 'shipping fee');
-  const mut = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--mutation', join(mutCase, 'mutation/mutation.json'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  const mutReport = mut.status === 0 ? JSON.parse(mut.stdout) : undefined;
-  const m001 = mutReport?.findings.find((f) => f.ruleId === 'M001');
-  if (m001?.label === 'measured weak' && m001.location?.path === 'src/shipping.ts' && mutReport.mutation?.mutants === 18) ok(`--mutation read the Stryker report and M001 reported: ${m001.message}`);
-  else fail(`--mutation did not produce M001 and a mutation section (exit ${mut.status}, stderr ${mut.stderr.trim()})`);
-  const plan = spawnSync(bin, [binJs, 'mutate-plan', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json'], { encoding: 'utf8', env: cleanEnv });
-  const planJson = plan.status === 0 ? JSON.parse(plan.stdout) : undefined;
-  if (planJson?.stryker?.mutate?.includes('src/shipping.ts:1-10')) ok(`mutate-plan planned ${planJson.stryker.mutate.join(', ')}`);
-  else fail(`mutate-plan did not plan src/shipping.ts (exit ${plan.status}, stderr ${plan.stderr.trim()})`);
+  // 4f. features cut from v0.1 are gone from the CLI: the flags and the mutate-plan command are refused
+  for (const args of [['check', '--mutation', 'm.json'], ['check', '--history', 'h.json'], ['check', '--history-out', 'h.json'], ['mutate-plan']]) {
+    const r = spawnSync(bin, [binJs, ...args, '--cwd', repo], { encoding: 'utf8', env: cleanEnv });
+    if (r.status !== 0 && /unknown (option|command)/.test(r.stderr)) ok(`${args.join(' ')} is refused: ${r.stderr.trim().split('\n')[0]}`);
+    else fail(`${args.join(' ')} was not refused (exit ${r.status}, stderr ${r.stderr.trim()})`);
+  }
 
   // 4h. --results reads real TAP from Node's test runner (the ts-node-test golden pair): the derived file that lacks a
   // modified test gives V003, and the real file read through the older --junit name gives none.

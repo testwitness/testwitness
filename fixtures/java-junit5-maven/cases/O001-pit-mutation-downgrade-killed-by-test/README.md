@@ -1,3 +1,0 @@
-O001 downgrade (PIT). The PR adds Qty.parse and parsesAQuantity, which calls parse("3") without an assertion. The negated guard throws for 3 and the report names parsesAQuantity as its killingTest, so O001 is dropped and M002 is silent. M001 reports line 9, whose return mutation survived: one weak line of two mutated changed lines, low.
-
-mutation/mutations.xml is hand written in the PIT 1.x mutations.xml format (mutation elements with status, sourceFile, mutatedClass, lineNumber and the JUnit 5 unique id in killingTest), because Maven Central is blocked from the build workspace and PIT could not be run. It is minimal and marked for replacement by the maintainer's Maven run; see ../../mutation-PRODUCER.md.

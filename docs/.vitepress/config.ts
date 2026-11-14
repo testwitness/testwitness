@@ -33,7 +33,6 @@ export default defineConfig({
       { text: 'Precision', link: '/precision' },
       { text: 'How we measure precision', link: '/how-we-measure-precision' },
       { text: 'Design', link: '/design' },
-      { text: 'Mutation on request', link: '/mutation-on-request' },
       { text: 'Mutation testing (our own)', link: '/mutation' },
       { text: 'Contributing', link: 'https://github.com/testwitness/testwitness/blob/main/CONTRIBUTING.md' },
     ],

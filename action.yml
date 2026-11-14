@@ -15,9 +15,6 @@ inputs:
   coverage:
     description: Comma separated globs of lcov, Cobertura or JaCoCo coverage reports from the head run (optional; enables V008)
     required: false
-  mutation:
-    description: Comma separated globs of Stryker JSON or PIT mutations.xml reports written by the opt in mutation job (optional; enables M001 and M002 and measures O001 and O002). The Action never runs a mutation tool itself; see docs/mutation-on-request.md
-    required: false
   base:
     description: Base ref or sha (default is the pull request base)
     required: false

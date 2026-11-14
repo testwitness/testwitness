@@ -250,12 +250,3 @@ describe('coverage line', () => {
     expect(renderMarkdown(report())).not.toContain('Coverage:');
   });
 });
-
-describe('mutation line', () => {
-  it('shows a short Mutation line in the evidence section when mutation reports were read, and nothing otherwise', () => {
-    const md = renderMarkdown(report({ mutation: { sources: ['reports/mutation/mutation.json'], files: 2, mutants: 30, killed: 21, survived: 6, noCoverage: 3, notes: ['The mutation reports name no killing tests, so M002 is silent.'] } }));
-    expect(md).toContain('- Mutation: 1 report, 2 source files, 30 mutants: 21 killed, 6 survived, 3 not covered');
-    expect(md).toContain('M002 is silent');
-    expect(renderMarkdown(report())).not.toContain('Mutation:');
-  });
-});

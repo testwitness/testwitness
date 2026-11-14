@@ -71,17 +71,3 @@ function subjectMatches(wanted: string, f: Finding): boolean {
   // Allow `Class#method`, `test_name`, or the tail of a describe path.
   return s.endsWith(`#${wanted}`) || s.endsWith(`::${wanted}`) || s.endsWith(` › ${wanted}`) || s.endsWith(`/${wanted}`);
 }
-
-/**
- * The comment that asks for a mutation run: `/testwitness mutate` on a line of its own, optionally followed by the head
- * commit the maintainer reviewed (`/testwitness mutate 1a2b3c4`, at least 7 hex digits), which the mutation workflow
- * requires on pull requests from forks. Returns undefined for any other comment. Who may ask is not decided here: the
- * workflow checks the commenter's permission through the REST API (docs/mutation-on-request.md).
- */
-export function parseMutateCommand(body: string): { sha?: string } | undefined {
-  for (const line of body.split(/\r?\n/)) {
-    const m = /^\s*\/testwitness\s+mutate(?:\s+([0-9a-f]{7,40}))?\s*$/i.exec(line);
-    if (m) return m[1] ? { sha: m[1].toLowerCase() } : {};
-  }
-  return undefined;
-}
