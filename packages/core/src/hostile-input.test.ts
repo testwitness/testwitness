@@ -54,8 +54,9 @@ describe('linear replacements read the same language as the regular expressions 
   });
 
   it('the describe and it sniff, and the def sniff', () => {
-    const oldDescribe = /\b(describe|context|suite)\s*(\.\w+)?\s*\(/;
-    const oldIt = /\b(it|test|specify)\s*(\.\w+)?\s*\(/;
+    // A member call (`schema.describe(`, `pattern.test(`) is not a declaration; `test.describe(` is.
+    const oldDescribe = /(?<![.\w$])(test\.)?(describe|context|suite)\s*(\.\w+)?\s*\(/;
+    const oldIt = /(?<![.\w$])(it|test|specify)\s*(\.\w+)?\s*\(/;
     const oldDef = /^\s*(async\s+)?def\s+test_?\w*\s*\(/m;
     fc.assert(fc.property(made(['describe', 'it', 'test', '.only', '.', ' ', '\n', '\t', '(', 'x', 'async ', 'def ', 'test_a', '\r', '#']), (s) => {
       expect(looksLikeTestSource('typescript', s)).toBe(s !== '' && oldDescribe.test(s) && oldIt.test(s));
