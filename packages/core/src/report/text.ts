@@ -36,7 +36,7 @@ const TEXT_MAX = 1000;
 
 function clip(s: string, max: number): string {
   const t = plain(s).trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+  return clipText(t, max);
 }
 
 function sevPaint(s: Severity): string {
