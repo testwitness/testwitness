@@ -1,6 +1,6 @@
 # Precision on the false positive corpus
 
-Measured 2026-11-13 on 347 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
+Measured 2026-11-14 on 347 public pull requests (corpus/). Precision counts medium and high findings: true positives over true positives plus false positives. Low findings are informational by design (moved, parameterised, refactored, conditional) and are listed but never counted against precision. The held out half was never used to tune a rule. A missed finding is one the label expected and the tool did not emit.
 
 | Rule | Split | True positives | Low (informational) | False positives (medium or high) | Missed | Precision | High severity false positives |
 |---|---|---|---|---|---|---|---|
@@ -94,34 +94,34 @@ Regenerate with `pnpm corpus:report`.
 
 ## Agent hook replay
 
-Measured 2026-11-13 on the same 347 pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (`testwitness hook --agent claude`) runs on it with the default settings: it blocks on open high findings only. A block is wrongful when the finding it rests on is not a true positive in the labels above.
+Measured 2026-11-14 on the same 347 pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (`testwitness hook --agent claude`) runs on it with the default settings: it blocks on open high findings of the rules on its blocking list. A block is wrongful when the finding it rests on is not a true positive in the labels above. Severities in the columns about every high finding are what each rule says before the v0.1 cap; the hook itself sees the capped severity.
 
-* 130 pull requests have at least one true positive finding. The hook blocks 25 of them (19%). 43 have a true positive at high severity; the others carry medium or low findings only, which the hook shows as advice.
-* 217 pull requests have no true positive finding. The hook blocks 0 of them. If every high finding blocked, it would block 10.
+* 130 pull requests have at least one true positive finding. The hook blocks 20 of them (15%). 43 have a true positive that its rule grades high; the others carry medium or low findings only, or high findings of rules that are capped at low in v0.1.
+* 217 pull requests have no true positive finding. The hook blocks 0 of them. If every rule could block at the severity it gives before the cap, it would block 10.
 * Second set, the real world trial of 2026-11-13: the 15 most recent merged pull requests that touch tests in each of 20 popular open source repositories, 300 in all, every medium and high finding judged by hand. Their authors and reviewers accepted them, so nearly every block there is wrongful. If every high finding blocked, the hook would block 12 of them, 9 wrongly. At the default setting it blocks 1, 0 wrongly. These trial numbers are computed from the judged findings of the commit check, which the working tree check reproduces; the hook was not rerun on those repositories.
-* The hook blocks on a small proven set and treats every other rule as advice. A rule is on the default list when it has at least one true positive at high severity on the corpus and no wrongful block at high on either set: A002, C001, C002, R004, R005, W003. W006 is on the list without a measurement because it is the gate protecting itself. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block; rules that were wrong at least once (A001, A009, E001, R001, R002 today) and rules that were never seen at high do not block until the replay proves them. A maintainer can widen the list with `hook.blocking` in `.testwitness.yml`, or narrow it with `hook.advice_only`.
-* On the corpus, with `fail_on: medium` in the base config the hook blocks 45 of the 130 pull requests with a true positive (35%) and 1 of the 217 without one; the last two columns give that setting per rule (the blocking list stays the same, so only its rules can block).
+* The hook blocks on the proven rules only, the same set v0.1 reports at medium or high: A002, R003, R004, R005. W006 is the one exception: it is the gate protecting itself, and it has no wrongful block on either set (it never fired on them). None of the listed rules has a wrongful block at high on either set. R003 grades a newly skipped test medium, so it blocks only when the base config sets `fail_on: medium`. Every other rule is capped at low and is not shown by the hook. C001, C002, W003 have a true positive at high on the corpus and no wrongful block at high on either set, but the rules were tuned on part of the corpus, so that is not proof; they block only after passing an untuned replay (docs/how-we-measure-precision.md). A maintainer can opt a rule back in with a severity in `rules` and add it to `hook.blocking` in `.testwitness.yml`, or take a rule off with `hook.advice_only`.
+* On the corpus, with `fail_on: medium` in the base config the hook blocks 59 of the 130 pull requests with a true positive (45%) and 1 of the 217 without one; the last two columns give that setting per rule (the blocking list stays the same, so only its rules can block).
 
 | Rule | True positives (corpus) | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked (corpus) | High findings judged true in the trial | Wrongful blocks if every high finding blocked (trial) | Wrongful blocks at the default, both sets | In the hook | Blocked with fail_on: medium (corpus) | Wrongful blocks with fail_on: medium (corpus) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| A001 | 14 | 0 | 0 | 0% | 0 | 1 | 1 | 0 | advice only | 0 | 0 |
-| A002 | 27 | 2 | 2 | 7% | 0 | 1 | 0 | 0 | blocks on high | 27 | 1 |
-| A009 | 3 | 0 | 0 | 0% | 0 | 0 | 1 | 0 | advice only | 0 | 0 |
-| C001 | 7 | 7 | 7 | 100% | 0 | 0 | 0 | 0 | blocks on high | 7 | 0 |
-| C002 | 10 | 4 | 4 | 40% | 0 | 0 | 0 | 0 | blocks on high | 10 | 1 |
-| C003 | 1 | 1 | 0 | 0% | 2 | 0 | 0 | 0 | advice only | 0 | 0 |
-| E001 | 3 | 3 | 0 | 0% | 0 | 0 | 9 | 0 | advice only | 0 | 0 |
-| O001 | 5 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| O002 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| R001 | 32 | 2 | 0 | 0% | 7 | 1 | 7 | 0 | advice only | 0 | 0 |
-| R002 | 12 | 12 | 0 | 0% | 3 | 1 | 6 | 0 | advice only | 0 | 0 |
-| R003 | 64 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| R004 | 28 | 22 | 22 | 79% | 0 | 0 | 0 | 0 | blocks on high | 23 | 0 |
-| R005 | 15 | 15 | 15 | 100% | 0 | 0 | 0 | 0 | blocks on high | 15 | 0 |
-| R010 | 13 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| V004 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | advice only | 0 | 0 |
-| W002 | 9 | 9 | 0 | 0% | 2 | 0 | 0 | 0 | advice only | 0 | 0 |
-| W003 | 1 | 1 | 1 | 100% | 0 | 0 | 0 | 0 | blocks on high | 1 | 0 |
+| A001 | 14 | 0 | 0 | 0% | 0 | 1 | 1 | 0 | capped at low | 0 | 0 |
+| A002 | 27 | 2 | 2 | 7% | 0 | 1 | 0 | 0 | blocks | 27 | 1 |
+| A009 | 3 | 0 | 0 | 0% | 0 | 0 | 1 | 0 | capped at low | 0 | 0 |
+| C001 | 7 | 7 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| C002 | 10 | 4 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| C003 | 1 | 1 | 0 | 0% | 2 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| E001 | 3 | 3 | 0 | 0% | 0 | 0 | 9 | 0 | capped at low | 0 | 0 |
+| O001 | 5 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| O002 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| R001 | 32 | 2 | 0 | 0% | 7 | 1 | 7 | 0 | capped at low | 0 | 0 |
+| R002 | 12 | 12 | 0 | 0% | 3 | 1 | 6 | 0 | capped at low | 0 | 0 |
+| R003 | 64 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | blocks | 64 | 0 |
+| R004 | 28 | 22 | 22 | 79% | 0 | 0 | 0 | 0 | blocks | 23 | 0 |
+| R005 | 15 | 15 | 15 | 100% | 0 | 0 | 0 | 0 | blocks | 15 | 0 |
+| R010 | 13 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| V004 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| W002 | 9 | 9 | 0 | 0% | 2 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| W003 | 1 | 1 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
 
 In the trial, `fail_on: medium` with the default blocking list would block 2 of the 300 pull requests, 1 of them wrongly.
 

@@ -2,6 +2,7 @@ import picomatch from 'picomatch';
 import { parse as parseYaml } from 'yaml';
 import { CONFIG_MAX_NESTING, nestsTooDeep } from './config-text.js';
 import type { LanguageId, Mode, ResolvedConfig, Rule, RuleConfigEntry, Severity, SeveritySetting } from './types.js';
+import { GATE_RULES, PROVEN_RULES } from './proven.js';
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -17,17 +18,15 @@ export const HOOK_DEFAULT_TIMEOUT_SECONDS = 20;
 /** How often the same finding blocks in one agent session before the hook steps aside. */
 export const HOOK_DEFAULT_MAX_BLOCKS = 2;
 /**
- * The rules the agent hook blocks on by default: an allowlist. A rule is on it when the replay has proven it: at
- * least one true positive at high severity on the corpus, and no wrongful block at high on the corpus or on the 300
- * pull request trial of November 2026 (docs/precision.md, "Agent hook replay"). W006 is on it without a measurement
- * because it is the gate protecting itself. Every other rule, measured or not, is advice in the hook.
- * corpus/runner/replay.test.ts derives the list from both measurements and fails when this constant differs: when a
- * listed rule gains a wrongful block, or when another rule now qualifies (it prints which), so the list is only ever
- * widened on purpose.
+ * The rules the agent hook blocks on by default: the proven rules (PROVEN_RULES in proven.ts, the only rules reported
+ * at medium or high) plus W006, the gate protecting itself, which is the one documented exception. Every other rule is
+ * advice in the hook, and its findings are capped at low anyway. corpus/runner/replay.test.ts checks this list against
+ * the replay: it must be exactly PROVEN_RULES plus W006, and none of them may block wrongly at high on the corpus or on
+ * the 300 pull request trial of November 2026 (docs/precision.md, "Agent hook replay").
  */
-export const HOOK_BLOCKING: readonly string[] = ['A002', 'C001', 'C002', 'R004', 'R005', 'W003', 'W006'];
-/** Rules on HOOK_BLOCKING without a replay measurement, and why: W006 is the gate protecting itself. */
-export const HOOK_BLOCKING_UNMEASURED: readonly string[] = ['W006'];
+export const HOOK_BLOCKING: readonly string[] = [...PROVEN_RULES, ...GATE_RULES].sort();
+/** Rules on HOOK_BLOCKING that are not proven rules, and why: W006 is the gate protecting itself. */
+export const HOOK_BLOCKING_UNMEASURED: readonly string[] = [...GATE_RULES];
 
 export function defaultConfig(): ResolvedConfig {
   return {
@@ -153,11 +152,13 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
       if (typeof value === 'string') {
         if (!SEVERITIES.has(value)) throw new ConfigError(`rule ${id}: severity must be high, medium, low or off`);
         entry.severity = value as SeveritySetting;
+        entry.explicitSeverity = true;
       } else if (isRecord(value)) {
         const { severity, ...rest } = value;
         if (severity !== undefined) {
           if (typeof severity !== 'string' || !SEVERITIES.has(severity)) throw new ConfigError(`rule ${id}: severity must be high, medium, low or off`);
           entry.severity = severity as SeveritySetting;
+          entry.explicitSeverity = true;
         }
         const schema = knownRules?.get(id)?.optionsSchema;
         if (knownRules && schema) {

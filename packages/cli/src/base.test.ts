@@ -64,7 +64,9 @@ describe('base ref and empty comparisons', () => {
       expect(report.findings.some((f) => f.ruleId === 'V005')).toBe(false);
       expect(report.evidence.sources).toEqual([]);
       expect(report.evidence.notes[0]).toMatch(/diff only/i);
-      expect(report.state).toBe('review');
+      // The state is graded on the diff alone: pass, not unreadable. R001 is not proven yet, so its finding is capped at low.
+      expect(report.findings.find((f) => f.ruleId === 'R001')).toMatchObject({ severity: 'low', uncappedSeverity: 'medium' });
+      expect(report.state).toBe('pass');
       expect(logs.some((l) => /no test results found/.test(l))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });

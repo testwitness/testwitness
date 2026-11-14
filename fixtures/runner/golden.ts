@@ -19,6 +19,10 @@
  *   The temporary repository sets core.autocrlf false so git stores the CRLF bytes as written.
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
+ *
+ * Severities in expected.json are what the rule itself says: for a rule that is not proven yet the report caps the
+ * severity at low and keeps the rule's own in `uncappedSeverity` (packages/core/src/proven.ts), and the cases compare
+ * against that, so they keep testing each rule's grading. The cap itself is tested in packages/core/src/proven.test.ts.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -26,7 +30,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, sep } from 'node:path';
 import { check } from 'testwitness';
-import type { Finding, Report } from '@testwitness/core';
+import { measuredSeverity, type Finding, type Report } from '@testwitness/core';
 
 export interface ExpectedFinding {
   ruleId: string;
@@ -224,11 +228,11 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
 
 /** Everything a finding says, for comparing a CRLF case with its LF twin. */
 export function fullFinding(f: Finding): Record<string, unknown> {
-  return { ruleId: f.ruleId, severity: f.severity, subject: f.subject, label: f.label, message: f.message, location: f.location, fingerprint: f.fingerprint, before: f.before, after: f.after };
+  return { ruleId: f.ruleId, severity: f.severity, uncappedSeverity: f.uncappedSeverity, subject: f.subject, label: f.label, message: f.message, location: f.location, fingerprint: f.fingerprint, before: f.before, after: f.after };
 }
 
 export function summarise(f: Finding): ExpectedFinding {
-  const e: ExpectedFinding = { ruleId: f.ruleId, severity: f.severity };
+  const e: ExpectedFinding = { ruleId: f.ruleId, severity: measuredSeverity(f) };
   if (f.subject) e.subject = f.subject;
   if (f.label) e.label = f.label;
   return e;
@@ -242,7 +246,7 @@ export function diffFindings(expected: ExpectedFinding[], actual: Finding[]): { 
   const missing: ExpectedFinding[] = [];
   for (const e of expected) {
     const i = remaining.findIndex(
-      (f) => f.ruleId === e.ruleId && (e.severity === undefined || f.severity === e.severity) && (e.subject === undefined || f.subject === e.subject) && (e.label === undefined || f.label === e.label),
+      (f) => f.ruleId === e.ruleId && (e.severity === undefined || measuredSeverity(f) === e.severity) && (e.subject === undefined || f.subject === e.subject) && (e.label === undefined || f.label === e.label),
     );
     if (i === -1) missing.push(e);
     else remaining.splice(i, 1);

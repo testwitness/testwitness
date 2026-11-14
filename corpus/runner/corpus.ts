@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { check } from 'testwitness';
-import type { Finding, Report } from '@testwitness/core';
+import { measuredSeverity, type Finding, type Report } from '@testwitness/core';
 
 export interface CorpusEntry {
   slug: string;
@@ -127,8 +127,14 @@ export function judge(e: CorpusEntry, findings: Finding[]): Verdict[] {
   return judgeFindings(e, findings).map((j) => j.verdict);
 }
 
-/** judge(), keeping each verdict next to its finding (the hook replay needs the fingerprint). */
-export function judgeFindings(e: CorpusEntry, findings: Finding[]): Judged[] {
+/**
+ * judge(), keeping each verdict next to its finding (the hook replay needs the fingerprint). Findings are judged at
+ * what the rule itself said: v0.1 caps the reported severity of rules that are not proven yet at low and keeps the
+ * rule's own in `uncappedSeverity` (packages/core/src/proven.ts), so the precision of every rule stays measurable.
+ * The judged findings carry that severity in `severity`.
+ */
+export function judgeFindings(e: CorpusEntry, reported: Finding[]): Judged[] {
+  const findings = reported.map((f) => (f.uncappedSeverity ? { ...f, severity: measuredSeverity(f) } : f));
   const out: Judged[] = [];
   // V004 is judged only on entries that carry the PR body (pr-body.md); title only entries cannot support or refute a claim.
   const hasBody = existsSync(join(e.dir, 'pr-body.md'));

@@ -24,6 +24,7 @@ import { classifyFiles, classifyPath } from './diff/classify.js';
 import { applyConfiguredSeverity, effectiveSeverity, SEVERITY_RANK } from './config.js';
 import { fingerprint as makeFingerprint } from './hash.js';
 import { builtinRules } from './rules/index.js';
+import { capUnproven } from './proven.js';
 import { detectProvenance } from './provenance.js';
 import { HelperIndex, namesToIndex, resolveHelperCalls, secondLevelNames } from './helper-index.js';
 import { diffInventories } from './inventory.js';
@@ -274,6 +275,8 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
       findings.push(f);
     }
   }
+  // The one place severities are capped: findings of rules that are not proven yet never exceed low (proven.ts).
+  capUnproven(findings, opts.config);
   const rulesMs = performance.now() - tRules0;
 
   // Acknowledgements from config
