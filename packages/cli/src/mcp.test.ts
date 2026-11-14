@@ -150,3 +150,34 @@ describe('testwitness mcp server', () => {
     }
   });
 });
+
+describe('testwitness mcp: what a client cannot make it do (docs/threat-model.md, "The MCP server")', () => {
+  it('report globs must stay inside the repository', async () => {
+    const { staysInside } = await import('./mcp.js');
+    for (const ok of ['junit.xml', 'out/**/*.xml, reports/*.json', 'a..b/x.xml', '**/TEST-*.xml']) expect(staysInside(ok), ok).toBe(true);
+    for (const bad of ['/etc/passwd', '../secrets/*.json', 'out/../../x.xml', 'ok.xml, /root/.ssh/*', '~/x.json', 'C:\\Users\\x\\*.json', 'a\\..\\..\\x.xml', '\\\\server\\share\\*.xml']) expect(staysInside(bad), bad).toBe(false);
+    for (const key of ['results', 'junit', 'coverage', 'mutation']) {
+      const r = await client.callTool({ name: 'testwitness_check', arguments: { cwd: repo, base: 'main', [key]: '/etc/*.conf' } });
+      expect(r.isError, key).toBe(true);
+      expect(text(r)).toMatch(/no absolute path and no \.\./);
+    }
+  });
+
+  it('refs that would read as git flags are refused', async () => {
+    for (const base of ['--output=/tmp/x', '-n', 'a b', '']) {
+      const r = await client.callTool({ name: 'testwitness_check', arguments: { cwd: repo, base } });
+      expect(r.isError, JSON.stringify(base)).toBe(true);
+    }
+  });
+
+  it('the summary for the model is safe, bounded text', async () => {
+    const { summarise } = await import('./mcp.js');
+    const f = { ruleId: 'R001', severity: 'high', message: `Test gone \u001b[2J \u202e ${'x'.repeat(5000)}`, location: { path: 'a\nb.ts', line: 1 }, fingerprint: 'f' };
+    const out = summarise({ state: 'review', summary: { findings: { high: 1, medium: 0, low: 0 } }, findings: [f], evidence: { state: 'unreadable' } } as never);
+    const lines = out.split('\n');
+    expect(lines).toHaveLength(2);
+    expect(lines[1]!.length).toBeLessThanOrEqual(1000);
+    // eslint-disable-next-line no-control-regex -- matching control characters is the point
+    expect(out).not.toMatch(/[\u0000-\u0009\u000b-\u001f\u202e]/);
+  });
+});

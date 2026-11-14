@@ -109,7 +109,7 @@ const MAX_TEXT_LINES = 30;
 const MAX_REASON_CHARS = 9000; // Claude Code caps hook text at 10,000 characters.
 
 function clip(text: string): string {
-  const lines = text.replace(/\s+$/, '').split('\n');
+  const lines = text.trimEnd().split('\n'); // trimEnd, not /\s+$/: the regex is quadratic on a long run of inner whitespace
   const shown = lines.slice(0, MAX_TEXT_LINES).map((l) => (l.length > 200 ? `${l.slice(0, 200)} ...` : l));
   if (lines.length > MAX_TEXT_LINES) shown.push(`... (${lines.length - MAX_TEXT_LINES} more lines)`);
   return shown.map((l) => `      ${l}`).join('\n');
