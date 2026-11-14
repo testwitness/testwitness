@@ -675,8 +675,78 @@ function literalPerCase(n: Node): boolean {
   return !!body && !!alternative && (isLiteral(unwrap(body)) || literalPerCase(body)) && (isLiteral(unwrap(alternative)) || literalPerCase(alternative));
 }
 
+/** Calls whose truth says only that a value exists, has a type or is not empty. */
+const TYPE_OR_EXISTENCE_CALLS = new Set(['isinstance', 'issubclass', 'hasattr', 'callable', 'bool', 'len', 'getattr', 'type', 'id', 'list', 'tuple', 'dict', 'set', 'frozenset', 'str', 'repr', 'iter', 'sorted']);
+/** A function or method named like a question about its receiver or arguments. */
+const PREDICATE_NAME = /^_*(is|has|can|should|was|did|does|contains|exists|startswith|endswith|matches|equals)/i;
+
+/** A comprehension or generator whose elements pass a filter: `[x for x in rows if x.bad]`. */
+function filteredComprehension(e: Node): boolean {
+  return /^(generator_expression|list_comprehension|set_comprehension|dictionary_comprehension)$/.test(e.type) && e.namedChildren.some((c) => c.type === 'if_clause');
+}
+
+/**
+ * Does the truth of this expression say only that a value exists, has a type or is empty? `x`, `x.attr`, `not x`,
+ * `x is not None`, `isinstance(x, T)` and `len(x)` do. A comparison does not, and neither does a predicate computed
+ * from the subject: a call relating two or more arguments (`has_edge(result, a, b)`), a function named like a question
+ * (`registry.is_installed(name)`), `any(...)` or `all(...)` over a condition, `not any(...)`, and `not [x for x in rows if x.bad]`
+ * (no element passes the filter). `negated` reads the expression under a `not`.
+ */
+function existenceOnly(node: Node, aliases: Map<string, string>, negated = false): boolean {
+  const e = unwrap(node);
+  if (e.type === 'not_operator') {
+    const inner = e.namedChildren.find((c) => c.type !== 'comment');
+    return inner ? existenceOnly(inner, aliases, !negated) : true;
+  }
+  if (e.type === 'boolean_operator') {
+    const operands = [e.childForFieldName('left'), e.childForFieldName('right')].filter((c): c is Node => !!c);
+    const every = (e.childForFieldName('operator')?.type ?? 'and') === 'and';
+    // `a and b` checks what its strongest operand checks; `a or b` passes on its weakest. A negation swaps the two.
+    return every !== negated ? operands.every((o) => existenceOnly(o, aliases, negated)) : operands.some((o) => existenceOnly(o, aliases, negated));
+  }
+  if (e.type === 'comparison_operator') {
+    const ops = e.children.filter((c) => !c.isNamed).map((c) => c.type);
+    const right = e.namedChildren[1];
+    // `x is not None` is existence; under a negation `x is None` and `x == None` are.
+    const existence = negated ? ['is', '=='] : ['is not', '!='];
+    return ops.length === 1 && right?.type === 'none' && existence.includes(ops[0]!);
+  }
+  // Nothing in the collection passes the filter: a check on every element.
+  if (negated && filteredComprehension(e)) return false;
+  if (e.type === 'call') {
+    const parts = callParts(e, aliases);
+    if (!parts) return true;
+    if (TYPE_OR_EXISTENCE_CALLS.has(parts.chain)) return true;
+    if (parts.chain === 'any' || parts.chain === 'all') {
+      // `not any(x == v for x in xs)` and `all(x > 0 for x in xs)` check each element; `any(xs)` alone is existence.
+      // `any(x for x in xs)` has the generator as its whole argument list.
+      const args = e.childForFieldName('arguments');
+      const first = args?.type === 'generator_expression' ? args : parts.positional[0];
+      const arg = first ? unwrap(first) : undefined;
+      if (!arg || !/^(generator_expression|list_comprehension|set_comprehension)$/.test(arg.type)) return true;
+      if (filteredComprehension(arg)) return false;
+      const element = arg.childForFieldName('body') ?? arg.namedChildren[0];
+      return element ? existenceOnly(element, aliases) : true;
+    }
+    // A relation between two or more arguments (`linked(graph, a, b)`) or a function named like a question is a
+    // predicate. One argument (`assertTrue(charge(1))`) is still only the truthiness of a computed value.
+    const tail = parts.chain.split('.').pop() ?? parts.chain;
+    return !(parts.positional.length + parts.keywords.size >= 2 || PREDICATE_NAME.test(tail));
+  }
+  // A plain value or its negation: true or false only by being present, empty or missing.
+  return true;
+}
+
 /** Classify a bare `assert` statement. */
 function bareAssert(stmt: Node, aliases: Map<string, string>, literalParams?: Set<string>): Assertion {
+  const a = bareAssertShape(stmt, aliases, literalParams);
+  const expr = stmt.namedChildren.find((c) => c.type !== 'comment');
+  // The shape reads the first operand for pairing. Whether the statement is only an existence check is read from all of it.
+  if (a.kind === 'smoke' && expr && !existenceOnly(expr, aliases)) a.kind = 'value';
+  return a;
+}
+
+function bareAssertShape(stmt: Node, aliases: Map<string, string>, literalParams?: Set<string>): Assertion {
   const expr = stmt.namedChildren.find((c) => c.type !== 'comment');
   const a: Assertion = { callee: 'assert', text: headerText(stmt), line: line(stmt), kind: 'value' };
   if (!expr) return a;
@@ -824,6 +894,8 @@ function callAssertion(stmt: Node, call: Node, ctx: FileContext): Assertion | un
     // Two operand assertions (assertEqual, assertIn, assertGreater) carry the expected operand second.
     const secondArg = parts.positional[1];
     if (secondArg && base.kind === 'value') base.expected = secondArg.text;
+    // assertTrue(a == b), assertTrue(has_edge(g, a, b)), assertFalse(errors): a condition or a predicate, not existence.
+    if ((tail === 'assertTrue' || tail === 'assertFalse') && firstArg && !existenceOnly(firstArg, ctx.aliases, tail === 'assertFalse')) base.kind = 'value';
     return withLattice(base, tail);
   }
   // Custom helper defined in the same file: bare name, or self/cls method.
