@@ -1,1 +1,1 @@
-[{"ruleId":"O002","severity":"medium","subject":"cart › snapshots the receipt","label":"smoke"}]
+[{"ruleId":"O002","severity":"low","subject":"cart › snapshots the receipt","label":"smoke"}]

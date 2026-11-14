@@ -45,6 +45,29 @@ describe('A001 assertion removed', () => {
   });
 });
 
+describe('A001 never called checks on a removed test double', () => {
+  const never = { callee: 'expect.not.toHaveBeenCalled', subject: 'sendInvoice', kind: 'interaction' as const, text: 'expect(sendInvoice).not.toHaveBeenCalled()' };
+  const run = async (headSource: string) => {
+    const base = t({ name: 'closes the batch', body: 'b', assertions: [eq('batch.state', "'closed'"), never] });
+    const head = t({ name: 'closes the batch', body: 'h', assertions: [eq('batch.state', "'closed'")] });
+    const ctx = context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }], changedProduction: ['src/billing.ts'] });
+    ctx.readHead = async () => headSource;
+    ctx.readBase = async () => '';
+    return A001.run(ctx, {});
+  };
+
+  it('reports the lost check low when the head of the file no longer has the double at all', async () => {
+    expect(await run("it('closes the batch', () => {\n  expect(batch.state).toBe('closed')\n})")).toMatchObject([{ severity: 'low', label: 'double removed' }]);
+  });
+
+  it('still reports it when the double stays in the file', async () => {
+    const out = await run("const sendInvoice = vi.fn()\nit('closes the batch', () => {\n  expect(batch.state).toBe('closed')\n})");
+    expect(out).toHaveLength(1);
+    expect(out[0]!.label).not.toBe('double removed');
+    expect(out[0]!.severity).toBe('medium');
+  });
+});
+
 describe('A001 inside an exception expectation', () => {
   const raises = { callee: 'pytest.raises', kind: 'exception' as const, text: 'with pytest.raises(AttributeError):', subject: 'cfg.timeout' };
   const touch = { callee: 'assert', kind: 'smoke' as const, text: 'assert cfg.timeout', subject: 'cfg.timeout', guarded: true };
@@ -228,11 +251,12 @@ describe('O002 smoke oracle', () => {
     const out = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [smoke, snap, mixed]) }] }), {});
     expect(out.map((f) => f.subject)).toEqual(['a', 'b']);
     expect(out[0]!.severity).toBe('low');
+    // The PR text does not grade the oracle: a regression claim leaves the finding low.
     const reg = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [smoke]) }], prText: { title: 'Add regression test for #9', body: '' } }), {});
-    expect(reg[0]!.severity).toBe('medium');
+    expect(reg[0]!.severity).toBe('low');
   });
 
-  it('keeps a does not throw test low under a regression claim, and still raises other smoke tests', async () => {
+  it('keeps every smoke test low under a regression claim, a does not throw test included', async () => {
     const noThrow = t({ name: 'accepts a valid header', body: 'x', assertions: [{ callee: 'expect.not.toThrow', kind: 'smoke', family: 'exception', strength: 0, text: 'expect(() => validate(h)).not.toThrow()' }] });
     const java = t({ name: 'acceptsValidHeader', body: 'y', assertions: [{ callee: 'assertDoesNotThrow', kind: 'smoke', text: 'assertDoesNotThrow(() -> validate(h))' }] });
     const defined1 = t({ name: 'returns a header', body: 'z', assertions: [defined('validate(h)')] });
@@ -242,8 +266,8 @@ describe('O002 smoke oracle', () => {
     expect(out.map((f) => [f.subject, f.severity])).toEqual([
       ['accepts a valid header', 'low'],
       ['acceptsValidHeader', 'low'],
-      ['returns a header', 'medium'],
-      ['mixed', 'medium'],
+      ['returns a header', 'low'],
+      ['mixed', 'low'],
     ]);
   });
 });

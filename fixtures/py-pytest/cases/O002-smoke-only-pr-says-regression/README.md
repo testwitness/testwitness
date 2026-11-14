@@ -1,1 +1,1 @@
-The same smoke only test, but the PR text calls it a regression test. A regression test that only checks existence cannot catch the regression, so the finding rises to medium as documented.
+The same smoke only test, but the PR text calls it a regression test. The PR text does not grade the oracle, so the finding stays low.

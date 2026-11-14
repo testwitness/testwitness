@@ -8,7 +8,7 @@ describe('parseConfig', () => {
   it('returns defaults for empty input', () => {
     const c = parseConfig(undefined);
     expect(c.mode).toBe('report');
-    expect(c.failOn).toBe('high');
+    expect(c.failOn).toBe('medium');
     expect(c.languages).toBe('auto');
   });
 
@@ -87,39 +87,30 @@ describe('applyConfiguredSeverity', () => {
   });
 });
 
-describe('mutation config', () => {
-  it('defaults to no mutation reports', () => {
-    expect(parseConfig(undefined).mutation.paths).toEqual([]);
+describe('keys of features cut from v0.1', () => {
+  it('fails with a ConfigError that names the key and says the feature is not in v0.1', () => {
+    for (const [doc, key] of [
+      ['mutation:\n  paths: ["reports/mutation/mutation.json"]\n', 'mutation'],
+      ['mutation: yes\n', 'mutation'],
+      ['history: history.json\n', 'history'],
+      ['coverage:\n  paths: ["coverage/lcov.info"]\n', 'coverage'],
+      ['coverage: yes\n', 'coverage'],
+    ] as const) {
+      expect(() => parseConfig(doc, known)).toThrow(ConfigError);
+      expect(() => parseConfig(doc, known)).toThrow(new RegExp(`^${key}: .* is not in v0\\.1`));
+    }
   });
-  it('reads mutation.paths as a list or a comma separated string', () => {
-    expect(parseConfig('mutation:\n  paths: ["reports/mutation/mutation.json", "**/mutations.xml"]\n', known).mutation.paths).toEqual(['reports/mutation/mutation.json', '**/mutations.xml']);
-    expect(parseConfig('mutation:\n  paths: "a.json, b.xml"\n', known).mutation.paths).toEqual(['a.json', 'b.xml']);
-  });
-  it('rejects a mutation value that is not a mapping, and paths that are not strings', () => {
-    expect(() => parseConfig('mutation: yes\n', known)).toThrow(ConfigError);
-    expect(() => parseConfig('mutation:\n  paths: [1]\n', known)).toThrow(ConfigError);
-  });
-  it('accepts severities for M001 and M002', () => {
-    const c = parseConfig('rules:\n  M001: low\n  M002: off\n', known);
-    expect([c.rules['M001']!.severity, c.rules['M002']!.severity]).toEqual(['low', 'off']);
+  it('rejects M001, M002 and V008 as unknown rules', () => {
+    expect(() => parseConfig('rules:\n  V008: medium\n', known)).toThrow(/unknown rule V008/);
+    expect(() => parseConfig('rules:\n  M001: low\n', known)).toThrow(/unknown rule M001/);
+    expect(() => parseConfig('rules:\n  M002: off\n', known)).toThrow(/unknown rule M002/);
   });
 });
 
-describe('coverage config', () => {
-  it('defaults to no coverage reports', () => {
-    expect(parseConfig(undefined).coverage.paths).toEqual([]);
-  });
-  it('reads coverage.paths as a list or a comma separated string', () => {
-    expect(parseConfig('coverage:\n  paths: ["coverage/lcov.info", "**/jacoco.xml"]\n', known).coverage.paths).toEqual(['coverage/lcov.info', '**/jacoco.xml']);
-    expect(parseConfig('coverage:\n  paths: "coverage.xml, lcov.info"\n', known).coverage.paths).toEqual(['coverage.xml', 'lcov.info']);
-  });
-  it('rejects a coverage value that is not a mapping, and paths that are not strings', () => {
-    expect(() => parseConfig('coverage: yes\n', known)).toThrow(ConfigError);
-    expect(() => parseConfig('coverage:\n  paths: [1, 2]\n', known)).toThrow(ConfigError);
-  });
-  it('accepts severities for the C rules and V008', () => {
-    const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n  V008: medium\n', known);
-    expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity, c.rules['V008']!.severity]).toEqual(['medium', 'off', 'low', 'medium']);
+describe('configuration rule severities', () => {
+  it('accepts severities for the C rules', () => {
+    const c = parseConfig('rules:\n  C001: medium\n  C002: off\n  C003: low\n', known);
+    expect([c.rules['C001']!.severity, c.rules['C002']!.severity, c.rules['C003']!.severity]).toEqual(['medium', 'off', 'low']);
   });
 });
 
@@ -127,7 +118,7 @@ describe('agent hook config', () => {
   it('defaults: nothing protected, 20 s, two blocks, the proven blocking list', () => {
     const c = parseConfig(undefined);
     expect(c.protect).toEqual([]);
-    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, blocking: ['A002', 'C001', 'C002', 'R004', 'R005', 'W003', 'W006'], adviceOnly: [] });
+    expect(c.hook).toEqual({ timeoutSeconds: 20, maxBlocks: 2, blocking: ['A002', 'R003', 'R004', 'R005', 'W006'], adviceOnly: [] });
   });
   it('reads protect, hook.timeout, hook.max_blocks, hook.blocking and hook.advice_only', () => {
     const c = parseConfig('protect:\n  - "tests/golden/**"\n  - ".github/workflows/test.yml"\nhook:\n  timeout: 5\n  max_blocks: 3\n  blocking: [A002, R001, R002]\n  advice_only: [A002]\n', known);

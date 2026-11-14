@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.028" timestamp="2026-11-04T09:51:26.018229-06:00" hostname="vm"><testcase classname="tests.test_rerun" name="test_flaky_passes_on_rerun" time="0.001"><failure message="AssertionError: attempt 1 fails on purpose&#10;assert 0 &gt;= 1">def test_flaky_passes_on_rerun():
-        attempts = int(COUNTER.read_text()) if COUNTER.exists() else 0
-        COUNTER.write_text(str(attempts + 1))
-&gt;       assert attempts &gt;= 1, f"attempt {attempts + 1} fails on purpose"
-E       AssertionError: attempt 1 fails on purpose
-E       assert 0 &gt;= 1
-
-tests/test_rerun.py:9: AssertionError</failure></testcase></testsuite></testsuites>

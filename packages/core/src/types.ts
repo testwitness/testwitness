@@ -12,7 +12,7 @@ export type LanguageId = 'java' | 'typescript' | 'javascript' | 'python';
 
 export type RuleGroup = 'R' | 'A' | 'O' | 'E' | 'S' | 'M' | 'T' | 'C' | 'W' | 'X' | 'V' | 'Q';
 
-export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext' | 'coverage' | 'mutation';
+export type Need = 'diff' | 'ast' | 'junit' | 'config' | 'workflow' | 'prtext';
 
 /** File status in the diff. */
 export type FileStatus = 'added' | 'modified' | 'deleted' | 'renamed';
@@ -229,7 +229,13 @@ export interface Location {
 
 export interface Finding {
   ruleId: string;
+  /** The severity the report gives: for a rule that is not proven yet, capped at low (proven.ts). */
   severity: Severity;
+  /**
+   * What the rule itself said, before the cap on unproven rules (proven.ts). Present on every finding of a capped
+   * rule, absent otherwise. For measurement only (the corpus report); gating, the comment and the hook use `severity`.
+   */
+  uncappedSeverity?: Severity;
   message: string;
   location: Location;
   /** Stable fingerprint: survives line shifts and rebases. */
@@ -265,8 +271,6 @@ export interface Rule<Options = Record<string, unknown>> {
     summary: string;
     falsePositives: string;
     example: string;
-    /** How run history changes the severity, when it does (docs/history.md). */
-    history?: string;
   };
 }
 
@@ -295,97 +299,6 @@ export interface Evidence {
   keysForClass(classKey: string): string[];
   /** Every key, for template matching (test.each titles). */
   keys(): Iterable<string>;
-  /** Rerun and flaky child elements recorded for a key, for the run history. Optional; 0 when absent. */
-  rerunsOf?(key: string): number;
-}
-
-/** Line coverage of one source file: lines the tool instrumented and the subset some test executed. */
-export interface FileCoverage {
-  instrumented: ReadonlySet<number>;
-  executed: ReadonlySet<number>;
-}
-
-/**
- * Line coverage read from lcov, Cobertura or JaCoCo reports of the head run. Paths are matched against repository
- * relative paths: exactly when the report path could be made relative to the root, otherwise by path suffix.
- */
-export interface CoverageEvidence {
-  /** Report files that were read. */
-  sources: string[];
-  /** Source files with coverage data. */
-  files: number;
-  linesInstrumented: number;
-  linesExecuted: number;
-  /** Reader warnings and caps that were hit. */
-  warnings: string[];
-  /** Coverage of a repository relative path, if the reports cover it. */
-  lookup(path: string): FileCoverage | undefined;
-}
-
-/** The coverage section of the report. Present only when coverage reports were attached. */
-export interface CoverageSummary {
-  sources: string[];
-  files: number;
-  linesInstrumented: number;
-  linesExecuted: number;
-  notes: string[];
-}
-
-/** Mutants that start on one source line, by outcome. Timeout counts as killed: the tests noticed the change. */
-export interface LineMutation {
-  /** Mutants that ran to an outcome (killed, timed out, survived or not covered). Compile errors, runtime errors, ignored and pending mutants are not counted. */
-  total: number;
-  /** Killed or timed out. */
-  killed: number;
-  survived: number;
-  noCoverage: number;
-  /** Normalised test keys (`classKey::nameKey`, as the JUnit reader builds them) of the tests that killed a mutant on the line. Empty when the report names no tests. */
-  killedBy: ReadonlySet<string>;
-  /** Normalised keys of the tests that executed a mutant on the line, when the report records it (Stryker coveredBy). */
-  coveredBy: ReadonlySet<string>;
-}
-
-/** Mutation results of one production file, by 1-based line. */
-export interface FileMutation {
-  lines: ReadonlyMap<number, LineMutation>;
-}
-
-/**
- * Mutation testing results read from Stryker JSON or PIT mutations.xml reports. The engine never runs a mutation tool;
- * it reads what an opt in job produced (docs/mutation-on-request.md). Paths are matched like coverage paths.
- */
-export interface MutationEvidence {
-  /** Report files that were read. */
-  sources: string[];
-  /** Tools whose reports were read: stryker, pit. */
-  tools: string[];
-  /** Production files with mutants. */
-  files: number;
-  mutants: number;
-  killed: number;
-  survived: number;
-  noCoverage: number;
-  /** True when the reports name the tests that killed mutants (Stryker killedBy with testFiles, PIT killingTest). M002 needs it. */
-  testIds: boolean;
-  /** Keys of every test the mutation run knew about, when the report lists them (Stryker testFiles). */
-  tests?: ReadonlySet<string>;
-  /** Keys of every test that killed at least one mutant anywhere in the reports. */
-  killers: ReadonlySet<string>;
-  /** Reader warnings, caps that were hit, and why a rule could not use the data. */
-  warnings: string[];
-  /** Mutation results of a repository relative path, if the reports cover it. */
-  lookup(path: string): FileMutation | undefined;
-}
-
-/** The mutation section of the report. Present only when mutation reports were attached. */
-export interface MutationSummary {
-  sources: string[];
-  files: number;
-  mutants: number;
-  killed: number;
-  survived: number;
-  noCoverage: number;
-  notes: string[];
 }
 
 export type TestStatus = 'passed' | 'failed' | 'error' | 'skipped' | 'flaky';
@@ -406,10 +319,6 @@ export interface RuleContext {
   readBase(path: string): Promise<string | undefined>;
   readHead(path: string): Promise<string | undefined>;
   evidence?: Evidence;
-  /** Line coverage of the head run, when reports were attached. */
-  coverage?: CoverageEvidence;
-  /** Mutation testing results of the head, when an opt in mutation job attached its reports. */
-  mutation?: MutationEvidence;
   prText?: PullRequestText;
   profile: FrameworkProfile;
   config: ResolvedConfig;
@@ -422,6 +331,11 @@ export interface RuleContext {
 export interface RuleConfigEntry {
   severity: SeveritySetting;
   options: Record<string, unknown>;
+  /**
+   * True when the config names a severity for the rule (`R001: medium`, or `R001: { severity: medium }`). For a rule
+   * that is not proven yet this opts it back in: its findings are no longer capped at low (proven.ts).
+   */
+  explicitSeverity?: boolean;
 }
 
 export interface ResolvedConfig {
@@ -431,17 +345,13 @@ export interface ResolvedConfig {
   requireEvidence: boolean;
   languages: LanguageId[] | 'auto';
   /**
-   * `followSymlinks`: whether the results, coverage, mutation and history globs follow symbolic links. Off by
+   * `followSymlinks`: whether the results globs follow symbolic links. Off by
    * default, so a link committed by a pull request cannot make the check read a file outside the repository; turn it
    * on for layouts that link their outputs into the checkout (Bazel's bazel-testlogs).
    */
   paths: { tests: string[]; ignore: string[]; followSymlinks: boolean };
   /** Globs of the test results of the head run (config key `results`, or its older name `junit`). Any supported format; told apart by content. */
   junit: { head: string; base: string };
-  /** Globs of lcov, Cobertura or JaCoCo coverage reports of the head run. Empty: no coverage is read. */
-  coverage: { paths: string[] };
-  /** Globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job. Empty: no mutation data is read. */
-  mutation: { paths: string[] };
   assertions: { extra: string[] };
   rules: Record<string, RuleConfigEntry>;
   acknowledge: Array<{ fingerprint: string; reason: string; by: string; date: string }>;
@@ -505,30 +415,10 @@ export interface Report {
   timing: { totalMs: number; parseMs: number; rulesMs: number; evidenceMs: number; helperIndexMs?: number };
   /** The helper index, when a changed test called a function the file could not resolve. Absent when it was not needed. */
   helperIndex?: HelperIndexSummary;
-  /** Coverage reports read for V008. Absent when none were attached. */
-  coverage?: CoverageSummary;
-  /** Mutation reports read for M001, M002 and the O001 and O002 adjustment. Absent when none were attached. */
-  mutation?: MutationSummary;
-  /** Run history used for dynamic severity. Absent when no history input was given. */
-  history?: HistorySummary;
   base: string;
   head: string;
   /** Git tree id of the working tree snapshot, when the check compared the working tree (--worktree) instead of the head commit. */
   headTree?: string;
-}
-
-/** The history section of the report. */
-export interface HistorySummary {
-  /** Where the history came from: a file path, or the artifact name and run id in the Action. */
-  source: string;
-  /** Earlier runs in the history that was read (0 when it could not be read or was empty). */
-  runs: number;
-  /** Test keys tracked in the history that was read. */
-  tests: number;
-  /** Findings whose severity or label the history changed. */
-  adjusted: number;
-  /** Why the history could not be read, and caps that were hit. */
-  notes: string[];
 }
 
 export interface HelperIndexSummary {

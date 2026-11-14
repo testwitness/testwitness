@@ -2,11 +2,7 @@
 
 ## What the Action needs
 
-`permissions: contents: read` on `pull_request`. No secrets. The engine makes no network calls (grammars and parsers are bundled) and never executes the repository's code: no install, no test run, no `require` of config files. The Action calls the GitHub REST API with the job token for the optional comment, the acknowledgements and the [run history](./history) artifact (`actions: read`); fork pull requests may run without the history because their read only token may not reach the base repository's artifacts. The history artifact is uploaded only on pushes to the default branch (or with `history_write: true`), never by default from a pull request.
-
-## Mutation on request is the exception
-
-Mutation testing has to run the tests, so testwitness never does it in the check. The optional workflow in [mutation on request](./mutation-on-request) does: you add it yourself, it starts only on a `/testwitness mutate` comment by someone with write permission, and on a pull request from a fork only when the comment names the head commit the maintainer reviewed. The protection is that maintainer gate: nobody's code runs until someone with write permission has asked for it, and on a fork for a commit they reviewed. The job that runs the code also has a read only token, no secrets and no persisted git credentials, and the job that writes the comment runs no code from the pull request and only reads the report with the Action. Leaving caching out of that job does not stop cache poisoning on its own: code that runs in an `issue_comment` workflow runs in the default branch's cache scope and can reach the cache service through the runner's own credentials whatever the setup steps say. Only ask for a mutation run on code you would be willing to run in your default branch's CI.
+`permissions: contents: read` on `pull_request`. No secrets. The engine makes no network calls (grammars and parsers are bundled) and never executes the repository's code: no install, no test run, no `require` of config files. The Action calls the GitHub REST API with the job token for the optional comment and the acknowledgements, and for nothing else.
 
 ## Fork PRs
 
@@ -14,7 +10,7 @@ On a `pull_request` event from a fork the token is read only. testwitness still 
 
 ## Report paths and symbolic links
 
-The report, the Markdown file and the history are never written through a symbolic link at the output path. The results, coverage, mutation and history globs do not follow symbolic links by default: a matched file that is a link, or that lies outside the repository through a linked directory, is skipped with a note. A pull request can commit links, so following them would let it point the check at any file on the runner. For Bazel, whose `bazel-testlogs` is a link made by the build, set `paths.followSymlinks: true` in `.testwitness.yml` (read from the base ref, so a pull request cannot turn it on) or pass `--follow-symlinks`:
+The report and the Markdown file are never written through a symbolic link at the output path. The results globs do not follow symbolic links by default: a matched file that is a link, or that lies outside the repository through a linked directory, is skipped with a note. A pull request can commit links, so following them would let it point the check at any file on the runner. For Bazel, whose `bazel-testlogs` is a link made by the build, set `paths.followSymlinks: true` in `.testwitness.yml` (read from the base ref, so a pull request cannot turn it on) or pass `--follow-symlinks`:
 
 ```yaml
 paths:
@@ -23,7 +19,7 @@ results:
   head: "bazel-testlogs/**/test.xml"
 ```
 
-Results files are read up to 1,000 files and 500 MB, coverage and mutation reports up to 200 files and 50 MB, and a changed runner or coverage config up to 1 MB (a larger one is reported at high without being read).
+Results files are read up to 1,000 files and 500 MB, and a changed runner or coverage config up to 1 MB (a larger one is reported at high without being read).
 
 ## PR text is data
 
@@ -44,6 +40,24 @@ A PR cannot relax its own check: `.testwitness.yml` is read from the merge base,
 * The loop guard's counts are in a per user directory under the OS temp dir (mode 0700, ownership checked, not used when anyone else can write to it), never in the repository.
 * It fails open: a crash, the timeout and the loop guard all allow the action and say so. It is an early warning, not a sandbox; the [threat model](./threat-model#the-hook) lists what it does not stop.
 * `testwitness init` writes one config file and never runs anything from the repository. The hook command it writes never downloads a package (`npx --no-install` at most).
+
+## The PR trial
+
+`testwitness check --pr <url>` is the one path that uses the network, and the only code that does lives in the CLI package (`packages/cli/src/pr.ts`). It runs before the engine and only when `--pr` is given. Every other path keeps the promise above; a test runs the plain `check` under the network guard and the process trace and asserts that no socket, DNS lookup, fetch or remote git command happened.
+
+What it fetches:
+
+* With git, from `https://github.com/<owner>/<repo>.git`: the pull request head (`refs/pull/<n>/head`) and the base branch. Outside a clone of that repository it first makes a blobless clone of the default branch, so commits and trees come down but file contents do not. Before the engine runs, it fetches by object id only the files the engine reads: the changed files at both sides, the other files in their directories and files of the same name (for move and refactor detection), the files at the root and the agent hook configs.
+* At most one unauthenticated `GET https://api.github.com/repos/<owner>/<repo>/pulls/<n>`, for the title, body, base branch and head commit. Redirects are not followed. If it fails, nothing else is tried.
+
+Why it stays safe:
+
+* The URL is untrusted input. Only `https://github.com/<owner>/<repo>/pull/<number>` is accepted, with an optional trailing path such as `/files`. Owner and repository must match GitHub's own name rules, the input must be printable ASCII and at most 512 characters, and encoded characters, `..`, other hosts, user info, ports and ssh URLs are refused before any git or network call. The URLs testwitness fetches are rebuilt from the parsed parts, never copied from the input.
+* No token is read, asked for or stored, and `gh` is not used. Every git call runs with credential helpers off, configured extra HTTP headers (where a CI checkout keeps its token) cleared, `GIT_TERMINAL_PROMPT=0`, and only the `https` transport allowed.
+* Nothing from the fetched repository runs. Nothing is checked out; files are read as blobs (`git cat-file --batch`), and the diff runs with `--no-ext-diff --no-textconv`. Every git call sets `core.hooksPath=/dev/null` and `core.fsmonitor=false`, clears the LFS filter (`filter.lfs.smudge=`, `filter.lfs.process=`, `filter.lfs.required=false`), and does not fetch submodules. A test fetches a repository whose `.gitattributes` selects a filter and a diff driver and asserts that git started nothing but its own transport (`upload-pack`, `pack-objects`, `index-pack`).
+* The engine stays offline. It runs on a read only view: a new, empty bare repository in the temp directory that borrows the fetched objects through `objects/info/alternates`. The view has no remote, so git cannot fetch a missing file from inside the engine; a file that was not fetched up front reads as absent. The view is deleted after the run.
+* The cached clone lives in a per user directory under the temp directory (mode 0700, ownership checked, never a link). A clone is made in a temporary directory and renamed into place when complete, so an interrupted clone is never reused. A cached clone whose `origin` is not the expected URL is refused, not reused.
+* The title and body are data, as in the Action: they feed the claim rules and are escaped in the output.
 
 ## Supply chain
 

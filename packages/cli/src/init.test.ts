@@ -261,8 +261,8 @@ describe('init leaves a weakened tree to the hook', () => {
     const state = mkdtempSync(join(TMP, 'tw-init-state-'));
     try {
       const r = await runHook({ agent: 'cursor', input: JSON.stringify({ conversation_id: 'c1', hook_event_name: 'stop', status: 'completed', loop_count: 0, workspace_roots: [repo.dir] }), stateDir: state });
-      expect(r.evaluation!.blocking.map((f) => f.ruleId)).toEqual(['A002']);
-      expect(r.evaluation!.advice.map((f) => f.ruleId).sort()).toEqual(['R003', 'W006']);
+      expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R003']);
+      expect(r.evaluation!.advice.map((f) => f.ruleId)).toEqual(['W006']);
     } finally {
       rmSync(state, { recursive: true, force: true });
     }

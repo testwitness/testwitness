@@ -58,7 +58,7 @@ These shapes were checked against the Claude Code, Cursor and Codex documentatio
 
 | Tool | Input | Returns |
 |---|---|---|
-| `testwitness_check` | `cwd` (required), `base`, `head`, `results`, `junit`, `coverage`, `mutation`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
+| `testwitness_check` | `cwd` (required), `base`, `head`, `results`, `junit`, `prTitle`, `prBody`, `mode` | The report and a short text summary |
 | `testwitness_explain_rule` | `ruleId` | The rule's summary, false positive controls and an example |
 | `testwitness_rules` | none | Every rule id with its name and default severity |
 
@@ -73,19 +73,17 @@ Inputs:
 | `head` | Head ref | `HEAD` |
 | `results` | Comma separated globs of test results, relative to the repository root: JUnit XML, TAP, or Jest, Vitest, pytest-json-report or Playwright JSON, told apart by content ([evidence](./evidence)) | from `.testwitness.yml` |
 | `junit` | Older name of `results`, used when `results` is not given | |
-| `coverage` | Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to the repository root | from `.testwitness.yml` `coverage.paths` |
-| `mutation` | Comma separated globs of Stryker JSON or PIT mutations.xml reports, relative to the repository root; read only, the server never runs a mutation tool ([mutation on request](./mutation-on-request)) | from `.testwitness.yml` `mutation.paths` |
 | `prTitle`, `prBody` | Pull request text, for claim checks such as "all tests pass" | none |
 | `mode` | `report`, `require-ack` or `strict` | from `.testwitness.yml` |
 
 The MCP check compares commits, so uncommitted changes are not seen; `testwitness check --worktree` and the [agent guard](./agent-guard) compare the working tree. Configuration is read from the base ref, the same as in CI, so a branch cannot relax its own check.
 
-The structured result is the full JSON report, `schemaVersion` 1, described by the JSON Schema at `https://testwitness.github.io/testwitness/report.schema.json` (source: `docs/report.schema.json` in the repository). The text content is a summary for the agent to read first:
+R001 is not a proven rule, so its finding is capped at low; the JSON report keeps the rule's own severity in `uncappedSeverity`. The structured result is the full JSON report, `schemaVersion` 1, described by the JSON Schema at `https://testwitness.github.io/testwitness/report.schema.json` (source: `docs/report.schema.json` in the repository). The text content is a summary for the agent to read first:
 
 ```text
-testwitness review: 1 high, 1 medium, 1 low open findings (0 acknowledged). Evidence: unreadable.
+testwitness review: 1 high, 0 medium, 2 low open findings (0 acknowledged). Evidence: unreadable.
 high A002 src/math.test.ts:6: Test add › adds two numbers: expect.toBe on add(1, 2) became expect.toBeDefined
-medium R001 src/math.test.ts:9: Test add › handles negatives was deleted
+low R001 src/math.test.ts:9: Test add › handles negatives was deleted
 low V005 results: No test results found for this run. Add a reporter (...) so changed tests can be checked against what ran. (unreadable)
 ```
 

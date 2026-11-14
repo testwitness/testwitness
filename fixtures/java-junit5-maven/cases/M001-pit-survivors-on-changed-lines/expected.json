@@ -1,3 +1,0 @@
-[
-  { "ruleId": "M001", "severity": "medium", "subject": "src/main/java/demo/Shipping.java", "label": "measured weak" }
-]

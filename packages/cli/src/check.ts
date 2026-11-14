@@ -1,11 +1,10 @@
-import { mkdir, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { existsSync, lstatSync, realpathSync } from 'node:fs';
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import fg from 'fast-glob';
 import {
   exitCodeFor,
   parseConfig,
-  writeFileNoFollow,
   renderJson,
   renderMarkdown,
   renderText,
@@ -17,16 +16,7 @@ import {
   mergeBase,
   revParse,
   ConfigError,
-  readCoverageFiles,
-  readMutationFiles,
-  readHistoryFile,
-  serializeHistory,
-  toCoverageEvidence,
-  toMutationEvidence,
-  type HistoryDocument,
   type InventoryPair,
-  type MutationEvidence,
-  type CoverageEvidence,
   type ChangedFile,
   type Evidence,
   type PullRequestText,
@@ -40,6 +30,8 @@ export interface CheckOptions {
   cwd: string;
   /** Check the diff only: read no test results, drop V005, and grade the state on the diff and claim rules alone. */
   diffOnly?: boolean;
+  /** With diffOnly: the evidence notes to show in place of the standard diff only note (the --pr trial says why). */
+  diffOnlyNotes?: string[] | undefined;
   /** Base ref; the merge base with head is compared. Default: the default branch (origin/HEAD's target). */
   base?: string;
   head: string;
@@ -60,10 +52,6 @@ export interface CheckOptions {
   results?: string | undefined;
   /** Older name of `results`; used when `results` is not given. */
   junit?: string | undefined;
-  /** Comma separated globs of lcov, Cobertura or JaCoCo reports; default from config coverage.paths. */
-  coverage?: string | undefined;
-  /** Comma separated globs of Stryker JSON or PIT mutations.xml reports; default from config mutation.paths. */
-  mutation?: string | undefined;
   /** Path to .testwitness.yml; default reads it from the base ref, then the working tree. */
   config?: string | undefined;
   format: 'json' | 'markdown' | 'both' | 'text';
@@ -79,20 +67,8 @@ export interface CheckOptions {
   mode?: ResolvedConfig['mode'] | undefined;
   failOn?: ResolvedConfig['failOn'] | undefined;
   quiet?: boolean;
-  /** Run history JSON to read (docs/history.md). No default: without it severities do not depend on earlier runs. */
-  history?: string | undefined;
-  /** How to name the history source in the report; default the history path. */
-  historySource?: string | undefined;
-  /** Notes about the history to carry into the report (the Action explains why none was downloaded). */
-  historyNotes?: string[] | undefined;
-  /** Write the history with this run merged in. No default. */
-  historyOut?: string | undefined;
-  /** Return the history with this run merged in as CheckResult.history, without writing it (the Action writes it). */
-  recordHistory?: boolean;
-  /** Id of this run in the history; default GITHUB_RUN_ID, then local-<head sha>. */
-  runId?: string | undefined;
   /**
-   * Follow symbolic links in the results, coverage, mutation and history paths (default from config
+   * Follow symbolic links in the results paths (default from config
    * paths.followSymlinks, false). Off, a matched file that is a link, or whose real path is outside the repository
    * (or outside the directory an absolute glob names), is skipped with a note.
    */
@@ -106,8 +82,6 @@ export interface CheckResult {
   report: Report;
   exitCode: number;
   config: ResolvedConfig;
-  /** The history with this run merged in, when a history was read or results were read. */
-  history?: HistoryDocument;
   /** The changed files and the evidence the engine graded with, so a caller that changes findings afterwards (the Action's acknowledgements) recomputes the state from the same inputs. */
   files: ChangedFile[];
   evidence?: Evidence;
@@ -309,18 +283,6 @@ export function windowsGlobToPattern(p: string): string {
   return pattern.startsWith('!') ? `\\${pattern}` : pattern;
 }
 
-/**
- * A literal file path (not a glob) as a fast-glob pattern that matches only that file: on Windows the path is
- * converted (backslashes to slashes, glob characters escaped), elsewhere glob characters are escaped. The history
- * path is one: on a Windows runner it is C:\\...\\history.json, and fg.escapePath kept its backslashes, which
- * fast-glob then reads as escapes, so a history outside the repository (the Action downloads it to the temp
- * directory) was reported as a symbolic link or outside the repository and not read.
- */
-export function pathToPattern(p: string, platform: NodeJS.Platform = process.platform): string {
-  // Windows file names cannot hold * or ?, so the glob conversion is exact for a path.
-  return platform === 'win32' ? windowsGlobToPattern(p) : fg.posix.escapePath(p);
-}
-
 export async function loadEvidence(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<{ evidence: Evidence | undefined; notes: string[] }> {
   const patterns = splitGlobs(globs);
   if (!patterns.length) return { evidence: undefined, notes: [] };
@@ -341,38 +303,6 @@ export async function loadEvidence(cwd: string, globs: string, log: (s: string) 
     return { evidence: undefined, notes };
   }
   return { evidence: toEvidence(data), notes };
-}
-
-export async function loadCoverage(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<CoverageEvidence | undefined> {
-  const patterns = splitGlobs(globs);
-  if (!patterns.length) return undefined;
-  const matched = await matchReportFiles(cwd, patterns, followSymlinks);
-  for (const n of matched.notes) log(n);
-  if (!matched.files.length) {
-    log(`no coverage report matched ${globs}`);
-    return undefined;
-  }
-  const data = await readCoverageFiles(matched.files, cwd);
-  data.warnings.unshift(...matched.notes);
-  for (const w of data.warnings.slice(0, 10)) log(w);
-  if (!data.sources.length) return undefined;
-  return toCoverageEvidence(data);
-}
-
-export async function loadMutation(cwd: string, globs: string, log: (s: string) => void, followSymlinks = false): Promise<MutationEvidence | undefined> {
-  const patterns = splitGlobs(globs);
-  if (!patterns.length) return undefined;
-  const matched = await matchReportFiles(cwd, patterns, followSymlinks);
-  for (const n of matched.notes) log(n);
-  if (!matched.files.length) {
-    log(`no mutation report matched ${globs}`);
-    return undefined;
-  }
-  const data = await readMutationFiles(matched.files, cwd);
-  data.warnings.unshift(...matched.notes);
-  for (const w of data.warnings.slice(0, 10)) log(w);
-  if (!data.sources.length) return undefined;
-  return toMutationEvidence(data);
 }
 
 /** Base ref when the caller gives none: origin's default branch, then origin/main, origin/master, main, master. */
@@ -423,29 +353,14 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   const follow = opts.followSymlinks ?? config.paths.followSymlinks;
   if (opts.diffOnly) config.rules['V005'] = { severity: 'off', options: config.rules['V005']?.options ?? {} };
   const { evidence, notes } = opts.diffOnly
-    ? { evidence: undefined, notes: ['Diff only: test results were not read (--diff-only), so the state reflects the diff and claim rules alone.'] }
+    ? { evidence: undefined, notes: opts.diffOnlyNotes ?? ['Diff only: test results were not read (--diff-only), so the state reflects the diff and claim rules alone.'] }
     : await loadEvidence(opts.cwd, opts.results ?? opts.junit ?? config.junit.head, log, follow);
-  const coverage = await loadCoverage(opts.cwd, opts.coverage ?? config.coverage.paths.join(','), log, follow);
-  const mutation = await loadMutation(opts.cwd, opts.mutation ?? config.mutation.paths.join(','), log, follow);
   let prText: PullRequestText | undefined;
   if (opts.prTitle !== undefined || opts.prBodyFile || opts.prBody !== undefined) {
     const body = opts.prBody ?? (opts.prBodyFile ? await readFile(resolve(opts.cwd, opts.prBodyFile), 'utf8') : '');
     prText = { title: opts.prTitle ?? '', body };
   }
-  let history: HistoryDocument | undefined;
-  const historyNotes = [...(opts.historyNotes ?? [])];
-  if (opts.history) {
-    const allowed = (await matchReportFiles(opts.cwd, [pathToPattern(opts.history)], follow)).files.length > 0 || !existsSync(resolve(opts.cwd, opts.history));
-    const read = allowed ? await readHistoryFile(resolve(opts.cwd, opts.history)) : { doc: undefined, error: `history ${opts.history} is a symbolic link or outside the repository; set paths.followSymlinks or --follow-symlinks to read it` };
-    if (read.doc) history = read.doc;
-    else {
-      historyNotes.push(`${read.error}; severities do not use history in this run.`);
-      log(read.error!);
-    }
-  }
-  const runAttempt = process.env['GITHUB_RUN_ATTEMPT'];
-  const runId = opts.runId ?? (process.env['GITHUB_RUN_ID'] ? `${process.env['GITHUB_RUN_ID']}${runAttempt && runAttempt !== '1' ? `.${runAttempt}` : ''}` : undefined);
-  const { report, files, pairs, history: updated } = await runEngine({
+  const { report, files, pairs } = await runEngine({
     cwd: opts.cwd,
     base,
     head: opts.head,
@@ -454,16 +369,9 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     config,
     evidence,
     evidenceNotes: notes,
-    coverage,
-    mutation,
     prText,
     ...(opts.author ? { author: { login: opts.author, type: opts.authorType } } : {}),
     ...(opts.helperIndex === false || process.env['TESTWITNESS_HELPER_INDEX'] === 'off' ? { helperIndex: false as const } : {}),
-    history,
-    historySource: opts.history || opts.historySource !== undefined || historyNotes.length ? (opts.historySource ?? opts.history ?? 'none') : undefined,
-    historyNotes,
-    historyRun: { id: runId },
-    recordHistory: opts.recordHistory === true || opts.historyOut !== undefined,
     log,
   });
   if (opts.diffOnly) {
@@ -479,15 +387,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     report.notes = [note, ...(report.notes ?? [])];
     log(note);
   }
-  if (opts.historyOut && updated) {
-    const out = resolve(opts.cwd, opts.historyOut);
-    await mkdir(dirname(out), { recursive: true });
-    await writeFileNoFollow(out, serializeHistory(updated));
-    log(`history: ${updated.runs.length} runs, ${Object.keys(updated.tests).length} tests written to ${opts.historyOut}`);
-  } else if (opts.historyOut) {
-    log('history: no results were read and no history was given, so no history was written');
-  }
-  return { report, exitCode: exitCodeFor(report, config), config, files, pairs, ...(evidence ? { evidence } : {}), ...(updated ? { history: updated } : {}) };
+  return { report, exitCode: exitCodeFor(report, config), config, files, pairs, ...(evidence ? { evidence } : {}) };
 }
 
 export function render(report: Report, format: CheckOptions['format'], collapseLow: boolean, color = false): string {

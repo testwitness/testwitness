@@ -3,9 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { mkdtempSync, mkdirSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
-import { mergeHistory, serializeHistory } from '@testwitness/core';
-import { check, loadEvidence, matchReportFiles } from './check.js';
+import { loadEvidence, matchReportFiles } from './check.js';
 import { TMP } from './testing/repo.js';
 
 const xml = (name: string) => `<testsuite name="s"><testcase classname="C" name="${name}"/></testsuite>`;
@@ -58,26 +56,5 @@ describe('8.3 short paths on Windows', () => {
     const short = join(tmpdir(), outside.slice(TMP.length));
     const m = await matchReportFiles(repo, [`${short.replace(/\\/g, '/')}/*.xml`], false);
     expect(m.files.map((f) => realpathSync.native(f))).toEqual([join(outside, 'secret.xml')]);
-  });
-});
-
-describe('history path and symbolic links', () => {
-  const ENV = { ...process.env, GIT_AUTHOR_NAME: 'Maple Ridge', GIT_AUTHOR_EMAIL: 'maple@example.test', GIT_COMMITTER_NAME: 'Maple Ridge', GIT_COMMITTER_EMAIL: 'maple@example.test' };
-  const git = (cwd: string, ...args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8', env: ENV }).trim();
-
-  it('does not read a history file that is a link out of the repository, unless links are followed', async () => {
-    const { repo, outside } = layout();
-    writeFileSync(join(outside, 'history.json'), serializeHistory(mergeHistory(undefined, { id: '1', date: '2026-11-01' }, [{ key: 'c::real', status: 'passed', reruns: 0 }])));
-    symlinkSync(join(outside, 'history.json'), join(repo, 'history.json'));
-    git(repo, 'init', '-q', '-b', 'main');
-    writeFileSync(join(repo, 'README.md'), 'x\n');
-    git(repo, 'add', 'README.md');
-    git(repo, 'commit', '-q', '-m', 'base');
-    const run = (followSymlinks: boolean) => check({ cwd: repo, base: 'HEAD', head: 'HEAD', format: 'json', results: 'none.xml', history: 'history.json', quiet: true, followSymlinks, helperIndex: false });
-    const refused = await run(false);
-    expect(refused.report.history?.runs).toBe(0);
-    expect(refused.report.history?.notes.join(' ')).toMatch(/symbolic link or outside the repository/);
-    const followed = await run(true);
-    expect(followed.report.history?.runs).toBe(1);
   });
 });

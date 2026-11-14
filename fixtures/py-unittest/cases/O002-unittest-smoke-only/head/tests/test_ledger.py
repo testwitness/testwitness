@@ -21,4 +21,4 @@ class LedgerTest(unittest.TestCase):
     def test_balance_is_available(self):
         ledger = Ledger(opening=10)
         self.assertIsNotNone(ledger.balance())
-        self.assertTrue(ledger.entries == [])
+        self.assertTrue(ledger.entries)

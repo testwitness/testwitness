@@ -1,5 +1,0 @@
-[
-  { "ruleId": "O001", "severity": "medium", "subject": "handles an exemption", "label": "measured weak" },
-  { "ruleId": "M001", "severity": "medium", "subject": "src/tax.ts", "label": "measured weak" },
-  { "ruleId": "M002", "severity": "high", "subject": "handles an exemption", "label": "measured weak" }
-]

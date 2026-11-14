@@ -2,19 +2,13 @@
 // backtrack quadratically or worse, and the equivalence of the linear replacements with the patterns they replace.
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { blockBodies, jsValuesForKey, parseIni } from './config-text.js';
 import { parseConfig } from './config.js';
-import { readCoverageFiles } from './coverage/reader.js';
-import { readMutationFiles } from './mutation/reader.js';
 import { esc } from './report/markdown.js';
 import { C001, C002, CONFIG_TEXT_MAX_BYTES } from './rules/C.js';
 import { templateRegex } from './rules/V.js';
 import { context } from './rules/testkit.js';
 import { classKey, nameKey } from './evidence/normalise.js';
-import { pitTestKey } from './mutation/reader.js';
 import { safeRegExp, selectorMatches, selectorsOf, thresholdsOf, wildcardMatch } from './rules/C.js';
 import { stripQuoted, S004, W003 } from './rules/W.js';
 import type { ChangedFile, RuleContext } from './types.js';
@@ -157,15 +151,6 @@ describe('test name keys on hostile result names', () => {
   });
 });
 
-describe('PIT test names', () => {
-  it('skips a hostile 100 kB name instead of scanning it quadratically, and still keys real unique ids', () => {
-    const r = timed(() => pitTestKey(`[engine:${'[a:'.repeat(N / 3)}`));
-    expect(r.value).toBeUndefined();
-    expect(r.ms).toBeLessThan(BUDGET_MS);
-    expect(pitTestKey('demo.CartTest.[engine:junit-jupiter]/[class:demo.CartTest]/[method:adds()]')).toBe('carttest::adds');
-  });
-});
-
 // ---------------------------------------------------------------------------------------------------------------
 // Decisions on the open items of the review.
 
@@ -244,21 +229,6 @@ describe('esc on user controlled text', () => {
 
   it('leaves ordinary text alone', () => {
     expect(esc('rounds up to 1:30 in http mode')).toBe('rounds up to 1:30 in http mode');
-  });
-});
-
-describe('coverage and mutation readers never fail the check', () => {
-  it('turns a missing file and a directory into notes', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'tw-readers-'));
-    mkdirSync(join(dir, 'lcov.info'));
-    writeFileSync(join(dir, 'ok.info'), 'SF:src/a.ts\nDA:1,1\nend_of_record\n');
-    const paths = [join(dir, 'gone.info'), join(dir, 'lcov.info'), join(dir, 'ok.info')];
-    const cov = await readCoverageFiles(paths, dir);
-    expect(cov.sources).toEqual([join(dir, 'ok.info')]);
-    expect(cov.warnings.filter((w) => /not read/.test(w))).toHaveLength(2);
-    const mut = await readMutationFiles([join(dir, 'gone.json'), join(dir, 'lcov.info')], dir);
-    expect(mut.sources).toEqual([]);
-    expect(mut.warnings.filter((w) => /not read/.test(w))).toHaveLength(2);
   });
 });
 

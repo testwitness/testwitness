@@ -1,3 +1,0 @@
-O001 upgrade (PIT). Tax gains exemptTax and the PR adds handlesAnExemption, which calls it without an assertion. TaxTest maps to Tax.java by name (PIT without fullMutationMatrix records no covering tests), and no mutation on the changed lines 9 and 12 was killed, so O001 is medium with the label measured weak. M001 reports the two weak lines and M002 the test, which killed nothing.
-
-mutation/mutations.xml is hand written in the PIT 1.x mutations.xml format (mutation elements with status, sourceFile, mutatedClass, lineNumber and the JUnit 5 unique id in killingTest), because Maven Central is blocked from the build workspace and PIT could not be run. It is minimal and marked for replacement by the maintainer's Maven run; see ../../mutation-PRODUCER.md.

@@ -166,8 +166,10 @@ describe('runEngine', () => {
       medium: open.filter((f) => f.severity === 'medium').length,
       low: open.filter((f) => f.severity === 'low').length,
     });
-    const nonLow = (pred: (id: string) => boolean) => report.findings.filter((f) => pred(f.ruleId) && f.severity !== 'low').length;
+    // The counts use the rule's own severity: a deletion still counts when v0.1 caps R001 at low.
+    const nonLow = (pred: (id: string) => boolean) => report.findings.filter((f) => pred(f.ruleId) && (f.uncappedSeverity ?? f.severity) !== 'low').length;
     expect(report.summary.testsDeleted).toBe(nonLow((id) => id === 'R001' || id === 'R002'));
+    expect(report.findings.some((f) => f.ruleId === 'R001' && f.severity === 'low' && f.uncappedSeverity !== undefined)).toBe(true);
     expect(report.summary.testsDeleted).toBeGreaterThanOrEqual(1);
     expect(report.summary.testsSkipped).toBe(nonLow((id) => id === 'R003' || id === 'R004'));
     expect(report.summary.testsSkipped).toBeGreaterThanOrEqual(1);
@@ -182,7 +184,9 @@ describe('runEngine', () => {
       stubRule('X002', 'medium'),
       stubRule('X000', 'high'),
     ];
-    const { report } = await runEngine(opts({ rules }));
+    // Custom rules are not proven: opt them in with a severity so the cap leaves their findings alone.
+    const config = cfg({ rules: Object.fromEntries(rules.map((r) => [r.id, { severity: r.defaultSeverity, options: {}, explicitSeverity: true }])) });
+    const { report } = await runEngine(opts({ rules, config }));
     expect(report.findings.map((f) => f.ruleId)).toEqual(['X000', 'X001', 'X002', 'X003']);
     expect(report.findings.map((f) => f.severity)).toEqual(['high', 'high', 'medium', 'low']);
   });
@@ -354,8 +358,9 @@ describe('computeState', () => {
     expect(computeState([fakeFinding('high')], c, evidence(), [fakeFile('test')])).toBe('review');
   });
   it('ignores findings below failOn and acknowledged ones', () => {
-    expect(computeState([fakeFinding('medium')], c, evidence(), [])).toBe('pass');
-    expect(computeState([fakeFinding('medium')], { ...c, failOn: 'medium' }, evidence(), [])).toBe('review');
+    expect(computeState([fakeFinding('low')], c, evidence(), [])).toBe('pass');
+    expect(computeState([fakeFinding('medium')], c, evidence(), [])).toBe('review');
+    expect(computeState([fakeFinding('medium')], { ...c, failOn: 'high' }, evidence(), [])).toBe('pass');
     expect(computeState([fakeFinding('low')], { ...c, failOn: 'low' }, evidence(), [])).toBe('review');
     const acked = fakeFinding('high', { acknowledged: { by: 'a', reason: 'r', at: 'd', via: 'config' } });
     expect(computeState([acked], c, evidence(), [])).toBe('pass');

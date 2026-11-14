@@ -31,12 +31,11 @@ on: pull_request
 permissions:
   contents: read
   pull-requests: write   # optional, for the comment
-  actions: read          # optional, for the run history artifact
 ```
 
 No secrets. On a pull request from a fork GitHub gives the job a read only token whatever the workflow asks for. The check still runs: findings become annotations, the job summary and `testwitness.json`. The comment cannot be posted, and the Action says so in the log and does not fail (`packages/action/src/main.ts`, the `upsertComment` call is inside a `try`).
 
-The Action calls the GitHub API for four things only: the pull request of an `issue_comment` event, the comments, labels and label events used for acknowledgements, the comment itself, and the history artifact. The engine makes no network call at all.
+The Action calls the GitHub API for two things only: the comments, labels and label events used for acknowledgements, and the comment itself. The engine makes no network call at all.
 
 **`pull_request_target`.** Do not use it for the check. If someone does:
 
@@ -96,24 +95,24 @@ Verified, unchanged from the earlier review (tests: `symlinks.test.ts`, `paths.t
 
 New in this review:
 
-* **Writing.** `testwitness.json`, `testwitness.md`, the history file and the CLI's `--out` and `--history-out` are no longer written through a symbolic link at the destination. A pull request could commit `testwitness.json` as a link to any file the runner user can write (F5). The Action also no longer writes the PR body to `.testwitness-pr-body.txt` in the checkout; it is passed in memory. Tests: `safe-write.test.ts`, `hostile-repo.test.ts`.
+* **Writing.** `testwitness.json`, `testwitness.md` and the CLI's `--out` (and, before they were cut from v0.1, the history file and `--history-out`) are no longer written through a symbolic link at the destination. A pull request could commit `testwitness.json` as a link to any file the runner user can write (F5). The Action also no longer writes the PR body to `.testwitness-pr-body.txt` in the checkout; it is passed in memory. Tests: `safe-write.test.ts`, `hostile-repo.test.ts`.
 * **MCP.** Globs passed by an MCP client must be relative and may not contain `..` (F17; test: `mcp.test.ts`).
 
 ## Oversized or malicious XML and JSON
 
 | Input | What was tried | Result | Test |
 |---|---|---|---|
-| XML (JUnit, Cobertura, JaCoCo, PIT) | Entity expansion (billion laughs) | saxes knows the five XML entities only. Others are left as written and reported as an error. Nothing is expanded. | `readers.fuzz.test.ts`, `evidence-readers.fuzz.test.ts` |
+| XML (JUnit, and runner configs such as pom.xml) | Entity expansion (billion laughs) | saxes knows the five XML entities only. Others are left as written and reported as an error. Nothing is expanded. | `readers.fuzz.test.ts` |
 | | External entities, DOCTYPE with SYSTEM | Never resolved. No file or URL is opened. | same |
 | | 100,000 levels of nesting | Read. The readers keep a counter or a stack, no recursion. | `readers.fuzz.test.ts` |
 | | A 5 MB attribute, `time="1e999"`, a 400 digit number | Read. A time that is not finite or is negative is dropped (F15). | same |
 | | One XML error every three bytes | Was one warning per error: 900 kB gave 300,000 warnings, and a file at the 500 MB cap would have exhausted memory. Now five notes per file and a count (F11). | same |
-| JSON (Jest, Vitest, pytest, Playwright, Stryker, history) | 200,000 levels of nesting | `JSON.parse` throws, which becomes a note. Playwright suites are walked to 100 levels. | same |
-| | Keys named `__proto__`, `constructor`; wrong types everywhere | Read as data. Lookup tables are read with own keys only (F15). `Object.prototype` is checked after every fuzz case. | `evidence-readers.fuzz.test.ts` |
-| | Size | Results: 1,000 files and 500 MB, JSON 50 MB each. Coverage and mutation: 200 files and 50 MB. History: 10 MB. Over the cap is a note, not a read. | `reader.test.ts`, `review-hardening.test.ts` |
+| JSON (Jest, Vitest, pytest, Playwright) | 200,000 levels of nesting | `JSON.parse` throws, which becomes a note. Playwright suites are walked to 100 levels. | same |
+| | Keys named `__proto__`, `constructor`; wrong types everywhere | Read as data. Lookup tables are read with own keys only (F15). `Object.prototype` is checked after every fuzz case. | `config.fuzz.test.ts` |
+| | Size | Results: 1,000 files and 500 MB, JSON 50 MB each. Over the cap is a note, not a read. | `reader.test.ts`, `review-hardening.test.ts` |
 | TAP | A 1 MB line, a line of spaces with U+2028 in it | Lines over 1 MB are skipped. The four line patterns were cubic or quadratic on the second input and are linear now (F7). | `readers.fuzz.test.ts` |
 | Runner config in the pull request (YAML, JSON, XML, TOML, JS) | 200,000 open brackets in `.mocharc.yml` | **Aborted the process** (exit 134) inside the YAML parser, which no `try` can catch. Now nesting is counted before parsing, and a changed config nested deeper than 200 levels is reported at high without being read, like one over 1 MB (F6). | `hostile-input.test.ts`, `hostile-repo.test.ts` |
-| `.testwitness.yml` | YAML alias bomb, tags, syntax errors, deep nesting | The parser's own alias limit refuses the bomb. Every failure is a `ConfigError` now; it used to be the parser's own error type, which the CLI did not expect (F12). | `evidence-readers.fuzz.test.ts` |
+| `.testwitness.yml` | YAML alias bomb, tags, syntax errors, deep nesting | The parser's own alias limit refuses the bomb. Every failure is a `ConfigError` now; it used to be the parser's own error type, which the CLI did not expect (F12). | `config.fuzz.test.ts` |
 
 ## ReDoS
 
@@ -140,15 +139,11 @@ Three patterns stay as they are because their input is bounded where they are us
 
 The scan is a search, not a proof. A regular expression it did not flag can still be slow on an input it did not try.
 
-## History and mutation artifacts: who can forge them
+## Test results: who can forge them
 
-**History.** Verified, unchanged from the earlier review (`packages/action/src/history.ts`, test: `history.test.ts`). The artifact is read only from successful runs of the same workflow that were started by `push`, `schedule` or `workflow_dispatch` in this repository. A pull request run, from a fork or not, cannot supply it, even from a branch named like the base branch. It is uploaded only on a push to the default branch or with `history_write: true`. The file is validated and capped at 10 MB. It holds test keys and one character per run, nothing else.
+**Test results.** These are written by the pull request's own test run. A pull request can make that run write any report it likes: tests that never ran can be listed as passed. testwitness cannot tell a forged report from a real one, and no code change can fix that. What limits the damage: the diff rules (R, A, W, C, S, E) do not use evidence at all, so a forged report cannot remove their findings. Evidence only adds findings (V rules). If your threat is a contributor who forges reports, produce them in a job the pull request cannot edit.
 
-Who can forge it: anyone who can push to the default branch or start those workflows, which means write access. A maintainer who sets `history_write: true` on pull requests opens it to every pull request; do not.
-
-**Test results, coverage and mutation reports.** These are written by the pull request's own test run. A pull request can make that run write any report it likes: tests that never ran can be listed as passed, a survived mutant as killed. testwitness cannot tell a forged report from a real one, and no code change can fix that. What limits the damage: the diff rules (R, A, W, C, S, E) do not use evidence at all, so a forged report cannot remove their findings. Evidence only adds findings (V rules, M rules) or grades O001 and O002. If your threat is a contributor who forges reports, produce them in a job the pull request cannot edit.
-
-The mutation workflow is the one place where pull request code runs on request. Its gate is in [mutation on request](./mutation-on-request): a comment by someone with write access, on a fork for a named head commit.
+The run history artifact, coverage reports and the mutation workflow that this review also covered were cut from v0.1; they are kept on the `experimental` branch.
 
 ## The hook
 
@@ -205,13 +200,7 @@ Each target runs 10,000 generated cases from a fixed seed (20261113) inside the 
 | diff rename and quoted paths | 10,000 | 1.5 | `packages/core/src/diff/parse.fuzz.test.ts` |
 | diff unquote | 10,000 | 0.3 | `packages/core/src/diff/parse.fuzz.test.ts` |
 | unified diff parser | 10,000 | 0.6 | `packages/core/src/diff/parse.fuzz.test.ts` |
-| cobertura reader | 10,000 | 1.9 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| config loader (YAML) | 10,000 | 2.9 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| history reader | 10,000 | 0.4 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| jacoco reader | 10,000 | 1.7 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| lcov reader | 10,000 | 1.9 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| pit reader | 10,000 | 1.9 | `packages/core/src/evidence-readers.fuzz.test.ts` |
-| stryker reader | 10,000 | 0.7 | `packages/core/src/evidence-readers.fuzz.test.ts` |
+| config loader (YAML) | 10,000 | 2.9 | `packages/core/src/config.fuzz.test.ts` |
 | json report | 10,000 | 3.6 | `packages/core/src/report/render.fuzz.test.ts` |
 | markdown codeCell | 10,000 | 2.0 | `packages/core/src/report/render.fuzz.test.ts` |
 | markdown esc | 10,000 | 4.4 | `packages/core/src/report/render.fuzz.test.ts` |
@@ -226,7 +215,7 @@ Each target runs 10,000 generated cases from a fixed seed (20261113) inside the 
 | tap reader | 10,000 | 1.8 | `packages/junit/src/readers.fuzz.test.ts` |
 | vitest json reader | 10,000 | 0.7 | `packages/junit/src/readers.fuzz.test.ts` |
 
-Total: 310,000 cases in 78 seconds on the review machine.
+Total at the review: 310,000 cases in 78 seconds on the review machine, over 31 targets. Six of them, the lcov, Cobertura, JaCoCo, Stryker, PIT and history readers, belonged to features cut from v0.1 and are no longer in the code, so the table lists the 25 that remain.
 
 What the fuzzers found, each now a regression test next to the code:
 
@@ -235,7 +224,7 @@ What the fuzzers found, each now a regression test next to the code:
 * The config loader threw the YAML parser's own error types instead of `ConfigError` (F12).
 * The Markdown structure property (same document shape as with harmless text, checked with an independent CommonMark parser) caught that a note could start a list or a rule, part of F3.
 
-What they did not find: no crash or hang in any results, coverage, mutation or history reader, and no way to inject a line or a command through the annotation writer.
+What they did not find: no crash or hang in any results, coverage, mutation or history reader (the last three since cut), and no way to inject a line or a command through the annotation writer.
 
 The fuzzers do not cover the tree-sitter front ends (they have their own edge tests, and L1 below was found by hand), the rules themselves, or GitHub's real Markdown renderer. The Markdown properties are checked against the escaping rules and against markdown-it, not against github.com.
 
@@ -255,11 +244,11 @@ Severity is for a repository that runs the Action on pull requests from forks, o
 | F8 | medium | An acknowledgement comment counted from any organisation member or read only collaborator. | fixed | `packages/action/src/acknowledge.test.ts` |
 | F9 | low | The Action adopted any comment that contained its marker and wrote the report into it. | fixed | `packages/action/src/annotations.fuzz.test.ts` |
 | F10 | low | A rule or a parser that threw left only a log line; the report read as if nothing was wrong. It is a note at the top of the report now. | fixed | `packages/cli/src/hostile-repo.test.ts` |
-| F11 | low | One warning per XML error without a cap: memory grew with the file. | fixed | `packages/junit/src/readers.fuzz.test.ts`, `packages/core/src/evidence-readers.fuzz.test.ts` |
-| F12 | low | Invalid YAML in the config, or an alias bomb, threw the parser's error types instead of `ConfigError`. | fixed | `packages/core/src/evidence-readers.fuzz.test.ts` |
+| F11 | low | One warning per XML error without a cap: memory grew with the file. | fixed | `packages/junit/src/readers.fuzz.test.ts` |
+| F12 | low | Invalid YAML in the config, or an alias bomb, threw the parser's error types instead of `ConfigError`. | fixed | `packages/core/src/config.fuzz.test.ts` |
 | F13 | low | `unquote` threw on a trailing backslash. | fixed | `packages/core/src/diff/parse.fuzz.test.ts` |
 | F14 | low | Bidirectional and invisible characters reached the terminal, the hook answer and the MCP summary; the git pre-push reason reached the terminal with raw escape sequences; JSON held raw C1 and bidirectional characters. | fixed | `packages/core/src/report/render.fuzz.test.ts`, `packages/cli/src/hook/events.fuzz.test.ts`, `packages/cli/src/mcp.test.ts` |
-| F15 | low | Readers: `time="1e999"` became Infinity; a fractional Jest invocation count became fractional reruns; a Stryker status named `constructor` counted as a mutant. | fixed | `packages/junit/src/readers.fuzz.test.ts`, `packages/core/src/evidence-readers.fuzz.test.ts` |
+| F15 | low | Readers: `time="1e999"` became Infinity; a fractional Jest invocation count became fractional reruns; a Stryker status named `constructor` counted as a mutant (the Stryker reader has since been cut). | fixed | `packages/junit/src/readers.fuzz.test.ts` |
 | F16 | low | Hook state directory: a directory writable by others was accepted. | fixed | `packages/cli/src/hostile-repo.test.ts` |
 | F17 | low | MCP: report globs could be absolute or climb with `..`. | fixed | `packages/cli/src/mcp.test.ts` |
 | F18 | low | A report rendered from a JSON file (the `workflow_run` pattern) was not escaped in its non text fields. | fixed | `packages/core/src/report/render.fuzz.test.ts` |
@@ -271,7 +260,7 @@ Severity is for a repository that runs the Action on pull requests from forks, o
 These are not bugs to be fixed in the code. They are where the model stops.
 
 * **L1** above.
-* **Evidence is self reported.** Test results, coverage and mutation reports are written by the pull request's own run and can be forged. See "History and mutation artifacts".
+* **Evidence is self reported.** Test results are written by the pull request's own run and can be forged. See "Test results: who can forge them".
 * **The workflow file belongs to the pull request** on `pull_request` events. See "Fork pull requests".
 * **Self hosted runners that are reused between jobs.** An earlier job that ran pull request code can leave anything in the temp directory, including a forged helper index cache (`$TMPDIR/testwitness-helper-index-<uid>`), which decides which helper calls count as assertions. Use ephemeral runners, or set `TESTWITNESS_HELPER_INDEX=off`.
 * **The hook fails open** and is not a sandbox. See "The hook".

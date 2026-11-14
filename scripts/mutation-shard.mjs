@@ -19,9 +19,9 @@ export const SHARDS = {
     `${core}/diff/**/*.ts`,
     `${core}/treesitter.ts`,
   ],
-  "core-rules-other": [`${core}/rules/{W,V,O,M,E,util,history,index}.ts`],
+  "core-rules-other": [`${core}/rules/{W,V,O,E,util,index}.ts`],
   "core-readers": [
-    `${core}/{mutation,coverage,history,evidence,report}/**/*.ts`,
+    `${core}/{evidence,report}/**/*.ts`,
     `${core}/{config,acknowledge,provenance,hash,eol,types,index}.ts`,
   ],
   junit: ["packages/junit/src/**/*.ts"],

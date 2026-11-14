@@ -1,7 +1,7 @@
 import type { Finding, Rule, RuleContext, Severity, TestCase } from '../types.js';
 import { allChanges, isFocused, isSkipped, isXfail, lower, reasonReferencesIssue, markersKey } from '../inventory.js';
 import { stripChecklist, stripNonProse } from '../evidence/claims.js';
-import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, nearDuplicateOf, removedSubjectOf, subjectRemoved, versionGated, type HeadIndex } from './util.js';
+import { assertionKeyOf, exercisesChangedProduction, headIndex, makeFinding, movedByName, nearDuplicateOf, removedSubjectOf, renamedWithEdits, subjectRemoved, versionGated, type HeadIndex } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -43,10 +43,8 @@ export const R001: Rule = {
   docs: {
     summary: 'A test present in the base is absent in the head and no test with the same body exists elsewhere in the head tree.',
     falsePositives:
-      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Reported low with the label production removed when its production file was deleted, or when a class or function the test names was removed from a production file that stays (and is defined in no other changed file). Reported low with the label near duplicate removed when a test that stays in the same file or in another changed test file contains the deleted test token for token (whitespace, comments and the test names ignored, string literals compared without letter case, at most one literal differing only in case), is at most half as long again, and adds only checks (each run of added tokens holds expect, assert, should, verify or a toBe style matcher): the same setup and checks still run. A deleted test that differs in any identifier, number or literal value, whose copy adds input (another event, argument or field) rather than a check, or that is shorter than 25 tokens, is not a near duplicate. Reported low with the label version dropped when the test was gated on a language version (skipif on sys.version_info, process.versions, @EnabledOnJre) and the PR raises the minimum version (requires-python, python_requires, engines.node, the Java release). Precision over recall: a deletion is medium or high only when none of those signals is present.',
+      'Renamed tests with the same body are not reported. Reported low with a label when the test was moved to another file (same body, same name added elsewhere in the PR, or same name in a file with the same name in another directory), folded into a parameterised test whose case count covers the removed tests, rewritten (other changed test files gained at least as many tests as the PR deleted), replaced (its class or group gained as many new tests as it lost) or refactored (every assertion survives in a changed file). Reported low with the label renamed when a new test of the same file shares at least 80 percent of its tokens in order (test names ignored, at least 20 tokens), and low as replaced when its class or describe block is gone from the head and the groups that are new in the same file hold at least as many new tests as the vanished groups lost (a group renamed and its tests rewritten in place). A test whose class or group was renamed keeps its pairing by its own name when exactly one test on each side carries that name. Reported low with the label production removed when its production file was deleted, when a class or function the test names was removed from a production file that stays (and is defined in no other changed file; a definition commented out line by line counts as removed), when the test, or a helper of the test file that went away with it, uses a name the PR removed from the production code (a method, field, config key or import bound in the base of a changed production file and mentioned in the head of none), or when it uses a name its file imported from a module the PR deletes. A name the test only declares itself does not count. Reported low with the label near duplicate removed when a test that stays in the same file or in another changed test file contains the deleted test token for token (whitespace, comments and the test names ignored, string literals compared without letter case, at most one literal differing only in case), is at most half as long again, and adds only checks (each run of added tokens holds expect, assert, should, verify or a toBe style matcher): the same setup and checks still run. A deleted test that differs in any identifier, number or literal value, whose copy adds input (another event, argument or field) rather than a check, or that is shorter than 25 tokens, is not a near duplicate. Reported low with the label version dropped when the test was gated on a language version (skipif on sys.version_info, process.versions, @EnabledOnJre) and the PR raises the minimum version (requires-python, python_requires, engines.node, the Java release). Precision over recall: a deletion is medium or high only when none of those signals is present.',
     example: '-  @Test\n-  void rejectsNegativeAmount() {\n-    assertThrows(IllegalArgumentException.class, () -> svc.charge(-1));\n-  }',
-    history:
-      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with one of the labels moved, parameterised, rewritten, replaced, refactored, production removed, version dropped or near duplicate removed are left alone, because the test still runs somewhere or only partly stopped running.',
   },
   async run(ctx) {
     const out: Finding[] = [];
@@ -58,6 +56,7 @@ export const R001: Rule = {
       if (change.kind === 'added') addedByFile.set(pair.file.path, (addedByFile.get(pair.file.path) ?? 0) + 1);
       if (change.kind === 'deleted' && pair.file.status !== 'deleted') deletedTotal++;
     }
+    const takenRenames = new Set<TestCase>();
     for (const { pair, change } of prChanges) {
       if (change.kind !== 'deleted') continue;
       // Deleted files are reported by R002; skip here unless the file is only modified/renamed.
@@ -147,6 +146,39 @@ export const R001: Rule = {
           }),
         );
         continue;
+      }
+      // Renamed with edits: a new test of the same file is this test under another name, most of its tokens unchanged.
+      const fileChanges = allChanges([pair]);
+      const addedHere = fileChanges.flatMap((c) => (c.change.kind === 'added' ? [c.change.head] : []));
+      const renamedTo = await renamedWithEdits(ctx, pair.file.path, t, addedHere, pair.file.language, takenRenames);
+      if (renamedTo) {
+        out.push(
+          makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was renamed to ${renamedTo.qualifiedName} with edits`, {
+            label: 'renamed',
+            line: t.startLine,
+            snippet: snippet(t),
+          }),
+        );
+        continue;
+      }
+      // Group renamed or rewritten in place: the class or group of the deleted test has no test left in the head, and
+      // groups that are new in this file hold at least as many new tests as the vanished groups lost.
+      const key = (x: TestCase): string => x.container.join('/');
+      const headGroups = new Set((pair.head?.tests ?? []).map(key));
+      if (!headGroups.has(key(t))) {
+        const baseGroups = new Set((pair.base?.tests ?? []).map(key));
+        const lostInVanished = fileChanges.filter((c) => c.change.kind === 'deleted' && !headGroups.has(key(c.change.base))).length;
+        const addedInNew = addedHere.filter((h) => !baseGroups.has(key(h))).length;
+        if (addedInNew >= lostInVanished && addedInNew > 0) {
+          out.push(
+            makeFinding(ctx, 'R001', 'low', pair.file, t.qualifiedName, `Test ${t.qualifiedName} was removed while its ${t.container.length ? 'class or group' : 'place in the file'} was renamed or rewritten: ${addedInNew} new test${addedInNew === 1 ? '' : 's'} in new groups of the same file`, {
+              label: 'replaced',
+              line: t.startLine,
+              snippet: snippet(t),
+            }),
+          );
+          continue;
+        }
       }
       // Refactor: every assertion of the deleted test survives in a test of a changed file (split, merge, rename with edits).
       const kept = refactoredInto(t, index);
@@ -298,8 +330,6 @@ export const R003: Rule = {
     falsePositives:
       'Conditional skips whose condition is not a constant (platform or optional dependency checks) are reported low. A reason that references an issue number or tracker URL lowers the severity one step.',
     example: '+  @pytest.mark.skip(reason="flaky in CI")\n   def test_batches(n):',
-    history:
-      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with the label conditional are left alone, because the test still runs somewhere or only partly stopped running. A skip whose reason references an issue (label tracked) on a test the history records as flaky (it passed and failed within the last 20 runs, or reran in at least 2 of them) keeps its severity and gets the label flaky in history, and the message states the counts. A skip of a flaky test without an issue reference is unchanged.',
   },
   run(ctx) {
     const out: Finding[] = [];
@@ -379,8 +409,6 @@ export const R004: Rule = {
     summary: 'An xfail, expectedFailure, test.fails or test.fail marker was added to a test that was expected to pass in the base.',
     falsePositives: 'A strict xfail with a reason that references an issue is lowered to medium: the failure is documented and will fail the suite once fixed.',
     example: '+  @pytest.mark.xfail(reason="see later")\n   def test_rounding():',
-    history:
-      'A finding on a test that failed or errored in at least 2 of its last 5 recorded runs becomes high with the label hides failure, and the message states the count (failed in 3 of the last 5 runs). Findings the rule already graded low with the label conditional or one case are left alone, because the test still runs somewhere or only partly stopped running.',
   },
   run(ctx) {
     const out: Finding[] = [];

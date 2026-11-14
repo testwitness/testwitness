@@ -1,7 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "medium",
-    "subject": "Retry \u203a settles the ledger"
-  }
-]

@@ -1,7 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "medium",
-    "subject": "test_add_increases_count"
-  }
-]

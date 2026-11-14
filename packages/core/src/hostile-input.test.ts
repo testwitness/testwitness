@@ -9,9 +9,7 @@ import { CONFIG_MAX_NESTING, nestsTooDeep, parseXml, parseYamlOrJson } from './c
 import { looksLikeTestSource } from './diff/classify.js';
 import { findClaims, stripChecklist, stripNonProse } from './evidence/claims.js';
 import { regexLines, replaceDelimited, trimEndChars } from './linear.js';
-import { javaClassName } from './mutation/plan.js';
 import { isGeneratedPattern, selectorsOf, thresholdsOf } from './rules/C.js';
-import { claimsRegression } from './rules/O.js';
 import { definedSymbols, testTokens } from './rules/util.js';
 import { templateTitle } from './rules/V.js';
 import { INLINE_SUPPRESSORS, stripYamlAndJson, usesTestwitness } from './rules/W.js';
@@ -47,28 +45,14 @@ describe('linear replacements read the same language as the regular expressions 
     }), RUNS);
   });
 
-  it('claimsRegression', () => {
-    const old = /\bregression\b|\bfix(es|ed)?\b.*\btests?\b/i;
-    fc.assert(fc.property(made(['fix', 'fixes', 'Fixed', 'test', 'tests', 'regression', ' ', '\n', '\r', '\u2028', 'x', '-', 'the ', 'prefix', 'contest']), (s) => {
-      expect(claimsRegression(s)).toBe(old.test(s));
-    }), RUNS);
-  });
-
   it('the describe and it sniff, and the def sniff', () => {
-    const oldDescribe = /\b(describe|context|suite)\s*(\.\w+)?\s*\(/;
-    const oldIt = /\b(it|test|specify)\s*(\.\w+)?\s*\(/;
+    // A member call (`schema.describe(`, `pattern.test(`) is not a declaration; `test.describe(` is.
+    const oldDescribe = /(?<![.\w$])(test\.)?(describe|context|suite)\s*(\.\w+)?\s*\(/;
+    const oldIt = /(?<![.\w$])(it|test|specify)\s*(\.\w+)?\s*\(/;
     const oldDef = /^\s*(async\s+)?def\s+test_?\w*\s*\(/m;
     fc.assert(fc.property(made(['describe', 'it', 'test', '.only', '.', ' ', '\n', '\t', '(', 'x', 'async ', 'def ', 'test_a', '\r', '#']), (s) => {
       expect(looksLikeTestSource('typescript', s)).toBe(s !== '' && oldDescribe.test(s) && oldIt.test(s));
       expect(looksLikeTestSource('python', s)).toBe(s !== '' && (oldDef.test(s) || /\bunittest\.TestCase\b/.test(s)));
-    }), RUNS);
-  });
-
-  it('the package declaration of a Java source', () => {
-    const old = (source: string): string | undefined => /^\s*package\s+([\w.]+)\s*;/m.exec(source.replace(/\/\*[\s\S]*?\*\//g, ''))?.[1];
-    fc.assert(fc.property(made(['package ', 'a.b', ';', '\n', ' ', '\t', '/*', '*/', 'x', '\r']), (s) => {
-      const pkg = old(s);
-      expect(javaClassName('src/Foo.java', s)).toBe(pkg ? `${pkg}.Foo` : 'Foo');
     }), RUNS);
   });
 
@@ -106,7 +90,6 @@ describe('100 kB of the input each pattern was slow on', () => {
     // U+2028 is whitespace and a line start for `^`: indentation must not include it.
     fast('python line separators', () => looksLikeTestSource('python', '\u2028'.repeat(N)));
     fast('checklist line separators', () => stripChecklist(stripNonProse('\u2028'.repeat(N))));
-    fast('java line separators', () => javaClassName('A.java', '\u2029'.repeat(N)));
   });
 
   it('PR text: checklists, comments, fences and the regression claim', () => {
@@ -116,7 +99,6 @@ describe('100 kB of the input each pattern was slow on', () => {
     fast('comment openers', () => stripNonProse('<!--'.repeat(N / 4)));
     fast('fence openers', () => stripNonProse('``` a '.repeat(N / 6)));
     fast('claims', () => findClaims(`${'<!-- '.repeat(N / 5)}\n${'\n'.repeat(N)}All tests pass`));
-    expect(fast('fix fix fix', () => claimsRegression('fix '.repeat(N / 4)))).toBe(false);
   });
 
   it('still strips what it stripped', () => {
@@ -128,8 +110,6 @@ describe('100 kB of the input each pattern was slow on', () => {
   });
 
   it('Java sources and symbols', () => {
-    fast('blank lines', () => javaClassName('A.java', '\n'.repeat(N)));
-    fast('comment openers', () => javaClassName('A.java', '/* '.repeat(N / 3)));
     fast('public public public', () => definedSymbols('public '.repeat(N / 7), 'java'));
     expect([...definedSymbols('public static <T> Map<String, List<T>> groupByName(List<T> in) {', 'java')]).toEqual(['groupByName']);
     fast('comment openers, normalise', () => normaliseText('/* '.repeat(N / 3)));

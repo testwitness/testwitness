@@ -7,22 +7,22 @@
  *   junit/ (optional)    JUnit XML of the head run
  *   results/ (optional)  test results of the head run in any supported format (TAP, Jest, Vitest, pytest-json-report or
  *                        Playwright JSON, or JUnit XML), passed as the `results` globs; the reader tells them apart by content
- *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
- *   mutation/ (optional) Stryker JSON or PIT mutations.xml reports of the head, as the opt in mutation job writes them
- *   history/history.json (optional) run history of earlier runs, written by the engine through
- *                         fixtures/runner/make-history.ts from history/runs.json, never by hand
  *   CRLF (optional) write the case with Windows line endings. One directive per line, `#` starts a comment:
- *     twin <case>       take base/, head/, expected.json, pr.json and the result, coverage, mutation and history
+ *     twin <case>       take base/, head/, expected.json, pr.json and the result
  *                       inputs from that LF case of the same project (the case's own copies win when present);
  *                       the suite then also requires the very same findings as the twin, line numbers,
  *                       messages and fingerprints included
  *     from <case>       take only base/ and head/ from that case (no expectations, no comparison)
  *     sides base|head|both  which commit gets CRLF (default both); the head side also converts the PR body
- *                       and the result, coverage, mutation and history inputs
+ *                       and the result inputs
  *     head base         the head commit is the base files again (a PR that only converts line endings)
  *   The temporary repository sets core.autocrlf false so git stores the CRLF bytes as written.
  * The runner builds a temporary git repository with two commits and runs the
  * real engine through the CLI's check() so the whole path is exercised.
+ *
+ * Severities in expected.json are what the rule itself says: for a rule that is not proven yet the report caps the
+ * severity at low and keeps the rule's own in `uncappedSeverity` (packages/core/src/proven.ts), and the cases compare
+ * against that, so they keep testing each rule's grading. The cap itself is tested in packages/core/src/proven.test.ts.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -30,7 +30,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, sep } from 'node:path';
 import { check } from 'testwitness';
-import type { Finding, Report } from '@testwitness/core';
+import { measuredSeverity, type Finding, type Report } from '@testwitness/core';
 
 export interface ExpectedFinding {
   ruleId: string;
@@ -47,9 +47,6 @@ export interface GoldenCase {
   pr?: { title: string; body: string };
   junit?: string;
   results?: string;
-  coverage?: string;
-  mutation?: string;
-  history?: string;
   /** Present when the case directory has a CRLF file. */
   crlf?: CrlfMode;
 }
@@ -117,12 +114,6 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       if (junit) c.junit = junit;
       const results = find('results');
       if (results) c.results = results;
-      const coverage = find('coverage');
-      if (coverage) c.coverage = coverage;
-      const mutation = find('mutation');
-      if (mutation) c.mutation = mutation;
-      const history = find('history', 'history.json');
-      if (history) c.history = history;
       if (!filter || filter(c)) out.push(c);
     }
   }
@@ -213,7 +204,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       writeFileSync(prBodyFile, crlfHead ? toCrlf(Buffer.from(c.pr.body, 'utf8')) : c.pr.body);
     }
     const ev = evidenceDir
-      ? { results: crlfCopy(c.results, evidenceDir, 'results'), junit: crlfCopy(c.junit, evidenceDir, 'junit'), coverage: crlfCopy(c.coverage, evidenceDir, 'coverage'), mutation: crlfCopy(c.mutation, evidenceDir, 'mutation'), history: crlfCopy(c.history, evidenceDir, 'history.json') }
+      ? { results: crlfCopy(c.results, evidenceDir, 'results'), junit: crlfCopy(c.junit, evidenceDir, 'junit') }
       : c;
     const { report } = await check({
       cwd: repo,
@@ -222,12 +213,9 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       // Globs, not paths: always forward slashes, also on Windows.
       results: ev.results ? `${ev.results.split(sep).join('/')}/**/*` : undefined,
       junit: ev.junit ? `${ev.junit.split(sep).join('/')}/**/*.xml` : 'no-xml-for-this-case/**/*.xml',
-      coverage: ev.coverage ? `${ev.coverage.split(sep).join('/')}/**/*` : '',
-      mutation: ev.mutation ? `${ev.mutation.split(sep).join('/')}/**/*.json,${ev.mutation.split(sep).join('/')}/**/*.xml` : '',
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,
-      history: ev.history,
       quiet: true,
       log: () => {},
     });
@@ -240,11 +228,11 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
 
 /** Everything a finding says, for comparing a CRLF case with its LF twin. */
 export function fullFinding(f: Finding): Record<string, unknown> {
-  return { ruleId: f.ruleId, severity: f.severity, subject: f.subject, label: f.label, message: f.message, location: f.location, fingerprint: f.fingerprint, before: f.before, after: f.after };
+  return { ruleId: f.ruleId, severity: f.severity, uncappedSeverity: f.uncappedSeverity, subject: f.subject, label: f.label, message: f.message, location: f.location, fingerprint: f.fingerprint, before: f.before, after: f.after };
 }
 
 export function summarise(f: Finding): ExpectedFinding {
-  const e: ExpectedFinding = { ruleId: f.ruleId, severity: f.severity };
+  const e: ExpectedFinding = { ruleId: f.ruleId, severity: measuredSeverity(f) };
   if (f.subject) e.subject = f.subject;
   if (f.label) e.label = f.label;
   return e;
@@ -258,7 +246,7 @@ export function diffFindings(expected: ExpectedFinding[], actual: Finding[]): { 
   const missing: ExpectedFinding[] = [];
   for (const e of expected) {
     const i = remaining.findIndex(
-      (f) => f.ruleId === e.ruleId && (e.severity === undefined || f.severity === e.severity) && (e.subject === undefined || f.subject === e.subject) && (e.label === undefined || f.label === e.label),
+      (f) => f.ruleId === e.ruleId && (e.severity === undefined || measuredSeverity(f) === e.severity) && (e.subject === undefined || f.subject === e.subject) && (e.label === undefined || f.label === e.label),
     );
     if (i === -1) missing.push(e);
     else remaining.splice(i, 1);

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.testwitness/testwitness",
+  "title": "testwitness",
+  "description": "Checks a change for deleted, skipped or loosened tests and tests that never ran. Read only.",
+  "repository": {
+    "url": "https://github.com/testwitness/testwitness",
+    "source": "github",
+    "subfolder": "packages/cli"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "testwitness",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "packageArguments": [
+        { "type": "positional", "value": "mcp" }
+      ]
+    }
+  ]
+}

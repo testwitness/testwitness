@@ -1,8 +1,7 @@
 node_modules/
 dist/
 *.tsbuildinfo
-# Coverage output of our own test runs, at the root only. Fixture cases and
-# packages/core/src/coverage are source.
+# Coverage output of our own test runs, at the root only.
 /coverage/
 .stryker-tmp/
 /reports/

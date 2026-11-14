@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { Ajv2020 } from 'ajv/dist/2020.js';
-import { builtinRules, emptyHistory, HISTORY_SCHEMA, mergeHistory, parseHistory, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, serializeHistory } from '@testwitness/core';
+import { builtinRules, REPORT_SCHEMA, REPORT_SCHEMA_VERSION } from '@testwitness/core';
 import { RESULT_FORMATS } from '@testwitness/junit';
 import { check, render } from './check.js';
 import { discoverCases, runCase, type GoldenCase } from '../../../fixtures/runner/golden.js';
@@ -126,98 +126,14 @@ describe('report schema', () => {
     expect(validate(withFinding({ severity: 'critical' }))).toBe(false);
     expect(validate({ ...base, extra: true })).toBe(false);
     expect(validate({ ...base, schemaVersion: '2' })).toBe(false);
-    const history = { source: 'history.json', runs: 5, tests: 9, adjusted: 1, notes: [] };
-    expect(validate({ ...base, history })).toBe(true);
-    expect(validate(withFinding({ label: 'hides failure' }))).toBe(true);
-    expect(validate({ ...base, history: { ...history, extra: 1 } })).toBe(false);
-    expect(validate({ ...base, history: { ...history, runs: -1 } })).toBe(false);
-    const withoutAdjusted: Record<string, unknown> = { ...history };
-    delete withoutAdjusted['adjusted'];
-    expect(validate({ ...base, history: withoutAdjusted })).toBe(false);
-    const mutation = { sources: ['reports/mutation/mutation.json'], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] };
-    expect(validate({ ...base, mutation })).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M001', label: 'measured weak' }))).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M002', label: 'measured weak', severity: 'high' }))).toBe(true);
-    expect(validate(withFinding({ ruleId: 'M003' }))).toBe(false);
-    expect(validate(withFinding({ label: 'measured strong' }))).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, extra: 1 } })).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, survived: -1 } })).toBe(false);
-    expect(validate({ ...base, mutation: { ...mutation, killed: 1.5 } })).toBe(false);
-    const withoutNoCoverage: Record<string, unknown> = { ...mutation };
-    delete withoutNoCoverage['noCoverage'];
-    expect(validate({ ...base, mutation: withoutNoCoverage })).toBe(false);
-  });
-
-  const mutationCases = discoverCases(join(root, 'fixtures'), (c) => c.mutation !== undefined);
-  it('has golden cases with mutation reports from Stryker and PIT', () => {
-    expect(new Set(mutationCases.map((c) => c.project))).toEqual(new Set(['ts-vitest', 'java-junit5-maven']));
-  });
-  for (const c of mutationCases.filter((x) => x.name.startsWith('O001-') && x.name.includes('upgrade'))) {
-    it(`validates the JSON output of mutation case ${c.project}/${c.name}`, async () => {
-      const { report } = await runCase(c);
-      const json = JSON.parse(render(report, 'json', false));
-      expect(json.mutation.mutants).toBeGreaterThan(0);
-      expect(json.findings.map((f: { ruleId: string }) => f.ruleId)).toEqual(expect.arrayContaining(['M001', 'M002', 'O001']));
-      expectValid(json);
-    }, 60_000);
-  }
-
-  const historyCases = discoverCases(join(root, 'fixtures'), (c) => c.history !== undefined);
-  it('has golden cases with a run history in three fixture projects', () => {
-    expect(new Set(historyCases.map((c) => c.project))).toEqual(new Set(['java-junit4-gradle', 'ts-jest', 'py-pytest']));
-  });
-  for (const c of historyCases.filter((x) => x.name.includes('hides-failure'))) {
-    it(`validates the JSON output of history case ${c.project}/${c.name}`, async () => {
-      const { report } = await runCase(c);
-      const json = JSON.parse(render(report, 'json', false));
-      expect(json.history).toMatchObject({ runs: 5, adjusted: 1 });
-      expectValid(json);
-    }, 60_000);
-  }
-});
-
-describe('history schema', () => {
-  const historySchema = JSON.parse(readFileSync(join(root, 'docs/history.schema.json'), 'utf8')) as { $id: string };
-  const validateHistory = () => new Ajv2020({ allErrors: true, strict: true }).compile(historySchema);
-
-  it('compiles and matches the engine constant', () => {
-    expect(() => validateHistory()).not.toThrow();
-    expect(historySchema.$id).toBe(HISTORY_SCHEMA);
-  });
-
-  it('validates every history document committed with the golden fixtures, and the engine reads each one', () => {
-    const validate = validateHistory();
-    const docs = discoverCases(join(root, 'fixtures'), (c) => c.history !== undefined).map((c) => readFileSync(c.history!, 'utf8'));
-    expect(docs.length).toBeGreaterThanOrEqual(9);
-    for (const text of docs) {
-      expect(validate(JSON.parse(text)), JSON.stringify(validate.errors)).toBe(true);
-      expect(parseHistory(text).error).toBeUndefined();
-    }
-  });
-
-  it('validates what the engine writes, including empty and truncated documents', () => {
-    const validate = validateHistory();
-    const results = Array.from({ length: 50 }, (_, i) => ({ key: `a::t${i}`, status: i % 7 === 0 ? ('failed' as const) : ('passed' as const), reruns: i % 11 === 0 ? 1 : 0 }));
-    for (const doc of [emptyHistory(), mergeHistory(undefined, { id: '1', date: '2026-11-04' }, results), mergeHistory(undefined, { id: '1', date: '2026-11-04' }, results, { maxBytes: 900 })]) {
-      expect(validate(JSON.parse(serializeHistory(doc))), JSON.stringify(validate.errors)).toBe(true);
-    }
-  });
-
-  it('rejects documents the engine would refuse, and the engine refuses them too', () => {
-    const validate = validateHistory();
-    const ok = JSON.parse(serializeHistory(mergeHistory(undefined, { id: '1', date: '2026-11-04' }, [{ key: 'a::x', status: 'passed', reruns: 0 }])));
-    const bad = [
-      { ...ok, schemaVersion: '2' },
-      { ...ok, tests: { 'a::x': 'X' } },
-      { ...ok, runs: [{ ...ok.runs[0], total: -1 }] },
-      { ...ok, extra: true },
-      { ...ok, window: 0 },
-    ];
-    for (const doc of bad) {
-      expect(validate(doc)).toBe(false);
-    }
-    // The engine is stricter on alignment than JSON Schema can be; the schema rejects every shape error above as well.
-    for (const doc of bad.slice(0, 3)) expect(parseHistory(JSON.stringify(doc)).error).toBeDefined();
+    expect(validate({ ...base, history: { source: 'history.json', runs: 5, tests: 9, adjusted: 1, notes: [] } })).toBe(false);
+    expect(validate(withFinding({ label: 'hides failure' }))).toBe(false);
+    expect(validate({ ...base, mutation: { sources: [], files: 1, mutants: 8, killed: 2, survived: 6, noCoverage: 0, notes: [] } })).toBe(false);
+    expect(validate(withFinding({ ruleId: 'M001' }))).toBe(false);
+    expect(validate(withFinding({ label: 'measured weak' }))).toBe(false);
+    expect(validate({ ...base, coverage: { sources: [], files: 1, linesInstrumented: 3, linesExecuted: 2, notes: [] } })).toBe(false);
+    expect(validate(withFinding({ ruleId: 'V008' }))).toBe(false);
+    expect(validate(withFinding({ label: 'uncovered change' }))).toBe(false);
   });
 });
 

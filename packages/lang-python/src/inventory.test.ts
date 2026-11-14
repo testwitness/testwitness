@@ -451,6 +451,40 @@ def test_a():
     expect(only(i).assertions.every((a) => a.family === 'pytest.assert')).toBe(true);
   });
 
+  it('reads a boolean assert on a predicate or a filtered collection as a value check, and plain truthiness as smoke', async () => {
+    const i = await inv(`
+def test_a():
+    assert linked(graph, "a", "b")
+    assert registry.is_open(name)
+    assert not any(step == "skip" for step in plan)
+    assert not [row for row in rows if row.bad]
+    assert all(n > 0 for n in counts)
+    assert total == 3 and done
+    assert graph
+    assert not cart.items
+    assert result is not None
+    assert isinstance(result, Plan)
+    assert len(rows)
+    assert any(rows)
+    assert not any(rows)
+`);
+    expect(only(i).assertions.map((a) => a.kind)).toEqual(['value', 'value', 'value', 'value', 'value', 'value', 'smoke', 'smoke', 'smoke', 'smoke', 'smoke', 'smoke', 'smoke']);
+  });
+
+  it('reads assertTrue on a condition as a value check and on a bare value as smoke', async () => {
+    const i = await inv(`
+import unittest
+
+class PlanTest(unittest.TestCase):
+    def test_a(self):
+        self.assertTrue(linked(graph, "a", "b"))
+        self.assertFalse(any(step == "skip" for step in plan))
+        self.assertTrue(plan)
+        self.assertFalse(plan.errors)
+`);
+    expect(only(i).assertions.map((a) => a.kind)).toEqual(['value', 'value', 'smoke', 'smoke']);
+  });
+
   it('handles comparison, membership, identity, isinstance and approx shapes', async () => {
     const i = await inv(`
 import pytest

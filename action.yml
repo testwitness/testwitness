@@ -1,5 +1,5 @@
 name: testwitness
-description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the test results (JUnit XML, TAP or a JSON reporter). Java, TypeScript, JavaScript and Python. No model, no secrets. The only network calls go to the GitHub API, for the optional comment and run history.
+description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the test results (JUnit XML, TAP or a JSON reporter). Java, TypeScript, JavaScript and Python. No model, no secrets. The only network calls go to the GitHub API, for the optional comment.
 author: Sajjad Hossain
 branding:
   icon: eye
@@ -12,12 +12,6 @@ inputs:
     description: Older name of the results input, still read when results is empty. Its default globs match the usual JUnit XML locations
     required: false
     default: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml"
-  coverage:
-    description: Comma separated globs of lcov, Cobertura or JaCoCo coverage reports from the head run (optional; enables V008)
-    required: false
-  mutation:
-    description: Comma separated globs of Stryker JSON or PIT mutations.xml reports written by the opt in mutation job (optional; enables M001 and M002 and measures O001 and O002). The Action never runs a mutation tool itself; see docs/mutation-on-request.md
-    required: false
   base:
     description: Base ref or sha (default is the pull request base)
     required: false
@@ -38,23 +32,13 @@ inputs:
     required: false
     default: "true"
   token:
-    description: Token for the PR comment. Optional. Defaults to GITHUB_TOKEN. Never required for the check itself.
+    description: Token for the PR comment. Defaults to the workflow's GITHUB_TOKEN. Never required for the check itself.
     required: false
+    default: ${{ github.token }}
   output_dir:
-    description: Directory for testwitness.json, testwitness.md and testwitness-history.json
+    description: Directory for testwitness.json and testwitness.md
     required: false
     default: "."
-  history:
-    description: Path to a run history JSON file to read instead of downloading the artifact (optional)
-    required: false
-  history_artifact:
-    description: Name of the run history artifact. On pull_request it is downloaded from the latest successful run of this workflow on the base branch (needs actions read permission; fork pull requests may not have it). Empty turns history off.
-    required: false
-    default: "testwitness-history"
-  history_write:
-    description: Upload the updated history as the history_artifact artifact, kept 90 days (true or false). Always true on a push to the default branch.
-    required: false
-    default: "false"
 outputs:
   state:
     description: pass, review or unreadable
@@ -64,8 +48,6 @@ outputs:
     description: Number of open high severity findings
   findings_medium:
     description: Number of open medium severity findings
-  history:
-    description: Path to testwitness-history.json, the run history with this run merged in (set when results or a history were read)
 runs:
   using: node24
   main: dist/index.js

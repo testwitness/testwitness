@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { R001, R002, R003, R004, R005, R006, R010 } from './R.js';
 import { changedFile, context, inventory, test as t } from './testkit.js';
+import { diffInventories } from '../inventory.js';
 import { definedSymbols, isNearDuplicate, minimumVersionRaised, testTokens } from './util.js';
 import type { ChangedFile } from '../types.js';
 
@@ -218,6 +219,59 @@ describe('production symbols removed and version gates', () => {
     ctx.readHead = async (p) => sources[p]?.[1];
     expect(await R001.run(ctx, {})).toMatchObject([{ severity: 'low', label: 'production removed' }]);
   });
+  /** A run of R001 over one test file and one production file with given base and head sources. */
+  const removalRun = async (spec: { testBase: string; testHead: string; prod: Record<string, [string | undefined, string | undefined]>; deleted: ReturnType<typeof t>; kept: ReturnType<typeof t> }) => {
+    const T = 'src/ledger.test.ts';
+    const pair = { file: changedFile(T), base: inventory(T, [spec.kept, spec.deleted]), head: inventory(T, [spec.kept]) };
+    const prod = Object.entries(spec.prod).map(([p, [b, h]]): ChangedFile => ({ ...changedFile(p, b === undefined ? 'added' : h === undefined ? 'deleted' : 'modified'), kind: 'production' }));
+    const ctx = context({ pairs: [pair], files: prod, changedProduction: Object.keys(spec.prod) });
+    const sources: Record<string, [string | undefined, string | undefined]> = { ...spec.prod, [T]: [spec.testBase, spec.testHead] };
+    ctx.readBase = async (p) => sources[p]?.[0];
+    ctx.readHead = async (p) => sources[p]?.[1];
+    return R001.run(ctx, {});
+  };
+  const ledgerBase = 'export function createLedger() {\n  return {\n    add(n: number) { return n; },\n    settle(id: string) { return id; },\n  };\n}\n';
+  const ledgerHead = 'export function createLedger() {\n  return {\n    add(n: number) { return n; },\n  };\n}\n';
+  const testBase = [
+    "test('adds', () => {",
+    '  expect(createLedger().add(1)).toBe(1)',
+    '})',
+    "test('settles', () => {",
+    '  const ledger = createLedger()',
+    "  expect(ledger.settle('a')).toBe('a')",
+    '})',
+  ].join('\n');
+  const testHead = testBase.split('\n').slice(0, 3).join('\n');
+  const kept = t({ name: 'adds', body: 'k', line: 1 });
+  const deleted = t({ name: 'settles', body: 'd', line: 4 });
+
+  it('reports a deleted test of an object method this PR removed as low production removed', async () => {
+    const out = await removalRun({ testBase, testHead, prod: { 'src/ledger.ts': [ledgerBase, ledgerHead] }, deleted, kept });
+    expect(out).toMatchObject([{ severity: 'low', label: 'production removed' }]);
+    expect(out[0]!.message).toContain('settle');
+  });
+
+  it('still reports the deleted test when the method it called stays in the production code', async () => {
+    const out = await removalRun({ testBase, testHead, prod: { 'src/ledger.ts': [ledgerBase, ledgerBase.replace('return id;', 'return id.trim();')] }, deleted, kept });
+    expect(out).toMatchObject([{ severity: 'high' }]);
+  });
+
+  it('reports a deleted test of a module this PR deletes as low production removed, and not when the module stays', async () => {
+    const base = `import { legacyTotal } from './legacy-total';\n${testBase.replace("ledger.settle('a')", 'legacyTotal(ledger)')}`;
+    const head = testHead;
+    const gone = await removalRun({ testBase: base, testHead: head, prod: { 'src/legacy-total.ts': ['export const legacyTotal = (l: unknown) => l;\n', undefined] }, deleted: t({ name: 'settles', body: 'd', line: 5 }), kept: t({ name: 'adds', body: 'k', line: 2 }) });
+    expect(gone).toMatchObject([{ severity: 'low', label: 'production removed' }]);
+    const stays = await removalRun({ testBase: base, testHead: head, prod: { 'src/legacy-total.ts': ['export const legacyTotal = (l: unknown) => l;\n', 'export const legacyTotal = (l: unknown) => l ?? 0;\n'] }, deleted: t({ name: 'settles', body: 'd', line: 5 }), kept: t({ name: 'adds', body: 'k', line: 2 }) });
+    expect(stays).toHaveLength(1);
+    expect(stays[0]!.label).toBeUndefined();
+    expect(stays[0]!.severity).not.toBe('low');
+  });
+
+  it('reads a class commented out line by line as removed', () => {
+    expect([...definedSymbols('// class Folder {\n//   render() {}\n// }\nexport class Cart {}\n', 'typescript')]).toEqual(['Cart']);
+    expect([...definedSymbols('# class Folder:\n#     pass\nclass Cart:\n    pass\n', 'python')]).toEqual(['Cart']);
+  });
+
   it('sees a raised minimum version only when the number goes up', () => {
     const cfg = (before: string, after: string): ChangedFile => ({ ...changedFile('pyproject.toml'), kind: 'runner-config', hunks: [{ baseStart: 1, baseCount: 1, headStart: 1, headCount: 1, removed: [before], added: [after] }] });
     expect(minimumVersionRaised(context({ pairs: [], files: [cfg('requires-python = ">=3.10"', 'requires-python = ">=3.11"')] }))).toBe(true);
@@ -226,6 +280,62 @@ describe('production symbols removed and version gates', () => {
   });
 });
 
+
+describe('R001 group renamed and tests rewritten in place', () => {
+  const T = 'src/queue.test.ts';
+  const group = (name: string, titles: string[]) => titles.map((title, i) => t({ name: title, container: [name], body: `${name} ${title}`, line: 10 * i + 1 }));
+
+  it('reports tests of a renamed group as low replaced when the new groups hold as many tests', async () => {
+    const base = group('queue with a timer', ['drains', 'retries once', 'gives up']);
+    const head = group('queue on fixtures', ['drains the fixture', 'retries the fixture once', 'stops after the fixture fails']);
+    const out = await R001.run(context({ pairs: [{ file: changedFile(T), base: inventory(T, base), head: inventory(T, head) }] }), {});
+    expect(out.map((f) => [f.severity, f.label])).toEqual([['low', 'replaced'], ['low', 'replaced'], ['low', 'replaced']]);
+  });
+
+  it('still reports the deletions when the renamed group holds fewer tests', async () => {
+    const base = group('queue with a timer', ['drains', 'retries once', 'gives up']);
+    const head = group('queue on fixtures', ['drains the fixture']);
+    const out = await R001.run(context({ pairs: [{ file: changedFile(T), base: inventory(T, base), head: inventory(T, head) }] }), {});
+    expect(out).toHaveLength(3);
+    expect(out.every((f) => f.severity !== 'low')).toBe(true);
+  });
+
+  it('pairs a test by its own name when only its class or group was renamed, never two tests that share a title', () => {
+    const before = t({ name: 'test_total', container: ['CartTests'], body: 'a' });
+    const after = t({ name: 'test_total', container: ['BasketTests'], body: 'a and more' });
+    expect(diffInventories(inventory(T, [before]), inventory(T, [after])).map((c) => c.kind)).toEqual(['modified']);
+    const twin = t({ name: 'test_total', container: ['OrderTests'], body: 'b' });
+    expect(diffInventories(inventory(T, [before, twin]), inventory(T, [after])).map((c) => c.kind).sort()).toEqual(['added', 'deleted', 'deleted']);
+  });
+
+  it('reports a test renamed with a small edit as low renamed, and a different deleted test as a deletion', async () => {
+    const body = (title: string, extra: string) => [
+      `it('${title}', () => {`,
+      "  const queue = createQueue({ limit: 3, retry: 'linear', name: 'jobs' })",
+      "  queue.push({ id: 1, payload: 'first' })",
+      "  queue.push({ id: 2, payload: 'second' })",
+      '  expect(queue.size()).toBe(2)',
+      extra,
+      '})',
+    ];
+    const oldLines = [...body('keeps two jobs', '  expect(queue.peek().id).toBe(1)'), "it('rejects a full queue', () => {", '  const queue = createQueue({ limit: 0 })', "  expect(() => queue.push({ id: 9 })).toThrow('full')", '})'];
+    const newLines = body('holds two queued jobs', '');
+    const renamed = t({ name: 'keeps two jobs', body: 'old', line: 1 });
+    renamed.endLine = 7;
+    const dropped = t({ name: 'rejects a full queue', body: 'full', line: 8 });
+    dropped.endLine = 11;
+    const added = t({ name: 'holds two queued jobs', body: 'new', line: 1 });
+    added.endLine = 7;
+    const ctx = context({ pairs: [{ file: changedFile(T), base: inventory(T, [renamed, dropped]), head: inventory(T, [added]) }] });
+    ctx.readBase = async () => oldLines.join('\n');
+    ctx.readHead = async () => newLines.join('\n');
+    const out = await R001.run(ctx, {});
+    expect(out.map((f) => [f.subject, f.severity, f.label])).toEqual([
+      ['keeps two jobs', 'low', 'renamed'],
+      ['rejects a full queue', 'medium', undefined],
+    ]);
+  });
+});
 
 describe('R001 near duplicate removed', () => {
   const kept = [

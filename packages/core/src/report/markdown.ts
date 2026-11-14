@@ -164,25 +164,6 @@ export function renderMarkdown(report: Report, opts: MarkdownOptions = {}): stri
     lines.push(`- Read ${e.sources.length} result file${e.sources.length === 1 ? '' : 's'}${formats}: ${num(e.total)} tests, ${num(e.passed)} passed, ${num(e.failed)} failed, ${num(e.errored)} errored, ${num(e.skipped)} skipped${e.flaky ? `, ${num(e.flaky)} flaky` : ''}`);
   }
   for (const n of e.notes) lines.push(`- ${escBlock(n)}`);
-  const c = report.coverage;
-  if (c) {
-    lines.push(`- Coverage: ${c.sources.length} report${c.sources.length === 1 ? '' : 's'}, ${num(c.files)} source file${c.files === 1 ? '' : 's'}, ${num(c.linesExecuted)} of ${num(c.linesInstrumented)} instrumented lines executed`);
-    for (const n of c.notes) lines.push(`- ${escBlock(n)}`);
-  }
-  const m = report.mutation;
-  if (m) {
-    lines.push(`- Mutation: ${m.sources.length} report${m.sources.length === 1 ? '' : 's'}, ${num(m.files)} source file${m.files === 1 ? '' : 's'}, ${num(m.mutants)} mutant${m.mutants === 1 ? '' : 's'}: ${num(m.killed)} killed, ${num(m.survived)} survived, ${num(m.noCoverage)} not covered`);
-    for (const n of m.notes) lines.push(`- ${escBlock(n)}`);
-  }
-  const h = report.history;
-  if (h) {
-    lines.push(
-      h.runs > 0
-        ? `- History: ${num(h.runs)} earlier run${h.runs === 1 ? '' : 's'}, ${num(h.tests)} test${h.tests === 1 ? '' : 's'} tracked, from ${esc(h.source)}; ${num(h.adjusted)} finding${h.adjusted === 1 ? '' : 's'} graded by history`
-        : `- History: none read from ${esc(h.source)}; severities do not use earlier runs`,
-    );
-    for (const n of h.notes) lines.push(`- ${escBlock(n)}`);
-  }
   lines.push('');
 
   const hi = report.helperIndex;

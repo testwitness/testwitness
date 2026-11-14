@@ -5,7 +5,7 @@
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
 //      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
-//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan, the run history,
+//      then the refusal of the flags cut from v0.1,
 //      and --results with real Node TAP (and --junit, its older name)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
@@ -72,6 +72,15 @@ try {
   else fail(`expected 12 .scm queries, found ${scmCount}`);
   const stray = [...paths].filter((p) => /^(src|dist\/(?!cli\.js$|assets\/))/.test(p) || p.endsWith('.map') || p.endsWith('.d.ts'));
   if (stray.length) fail(`unexpected files in tarball: ${stray.join(', ')}`);
+
+  // Features cut from v0.1 (run history, coverage on changed lines, mutation on request) live on the experimental
+  // branch: none of their code may reach the bundle. These names are distinctive; the REMOVED_KEYS error messages
+  // and C002's reading of JaCoCo thresholds in pom.xml are expected and are not on the list.
+  const bundleText = readFileSync(join(extractDir, 'package', 'dist', 'cli.js'), 'utf8');
+  const cut = ['mutate-plan', 'readMutationFiles', 'readStrykerJson', 'pitTestKey', 'mutationOracle', 'planMutation', 'parseMutateCommand', 'measured weak', 'readCoverageFiles', 'toCoverageEvidence', 'normaliseCoveragePath', 'uncovered change', 'readHistoryFile', 'mergeHistory', 'applyHistory', 'history_artifact', 'testwitness-history', 'hides failure', 'recordHistory'];
+  const leaked = cut.filter((name) => bundleText.includes(name));
+  if (leaked.length) fail(`the bundle still holds code of features cut from v0.1: ${leaked.join(', ')}`);
+  else ok(`the bundle holds none of the ${cut.length} names of the features cut from v0.1`);
 
   const manifestText = run('tar', ['-xOzf', tarball, 'package/package.json']);
   const manifest = JSON.parse(manifestText);
@@ -212,42 +221,12 @@ try {
   if (push.status !== 0 && !pushed && /testwitness blocked this push/.test(push.stderr) && /A002 high src\/math\.test\.ts/.test(push.stderr)) ok('git push is refused by the pre-push hook init --agent git installed');
   else fail(`git push through the pre-push hook: exit ${push.status}, reached the remote ${pushed}, stderr ${push.stderr.slice(0, 400)}`);
 
-  // 4e. --coverage reads an lcov report and V008 reports a changed production line it never executed
-  const gitIn = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: repo });
-  writeFileSync(join(repo, 'src/math.ts'), 'export const add = (a: number, b: number) => a + b;\nexport const sub = (a: number, b: number) =>\n  a - b;\n');
-  gitIn('commit', '-q', '-am', 'add sub');
-  writeFileSync(join(work, 'lcov.info'), 'SF:src/math.ts\nDA:1,3\nDA:2,0\nDA:3,0\nend_of_record\n');
-  const cov = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--coverage', join(work, 'lcov.info'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  const covReport = cov.status === 0 ? JSON.parse(cov.stdout) : undefined;
-  const v008 = covReport?.findings.find((f) => f.ruleId === 'V008');
-  if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
-  else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
-
-  // 4f. --mutation reads a real StrykerJS report (the golden fixture's) and M001 reports the changed lines whose mutants survived
-  const mutCase = join(root, 'fixtures/ts-vitest/cases/M001-survivors-on-changed-lines');
-  writeFileSync(join(repo, 'src/shipping.ts'), readFileSync(join(mutCase, 'head/src/shipping.ts'), 'utf8'));
-  gitIn('add', '-A');
-  gitIn('commit', '-q', '-m', 'shipping fee');
-  const mut = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--mutation', join(mutCase, 'mutation/mutation.json'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  const mutReport = mut.status === 0 ? JSON.parse(mut.stdout) : undefined;
-  const m001 = mutReport?.findings.find((f) => f.ruleId === 'M001');
-  if (m001?.label === 'measured weak' && m001.location?.path === 'src/shipping.ts' && mutReport.mutation?.mutants === 18) ok(`--mutation read the Stryker report and M001 reported: ${m001.message}`);
-  else fail(`--mutation did not produce M001 and a mutation section (exit ${mut.status}, stderr ${mut.stderr.trim()})`);
-  const plan = spawnSync(bin, [binJs, 'mutate-plan', '--cwd', repo, '--base', 'main', '--head', 'HEAD', '--format', 'json'], { encoding: 'utf8', env: cleanEnv });
-  const planJson = plan.status === 0 ? JSON.parse(plan.stdout) : undefined;
-  if (planJson?.stryker?.mutate?.includes('src/shipping.ts:1-10')) ok(`mutate-plan planned ${planJson.stryker.mutate.join(', ')}`);
-  else fail(`mutate-plan did not plan src/shipping.ts (exit ${plan.status}, stderr ${plan.stderr.trim()})`);
-
-  // 4g. --history-out writes a run history and --history reads it back
-  writeFileSync(join(work, 'junit.xml'), '<testsuite name="s"><testcase classname="tests.test_math" name="test_adds"/><testcase classname="tests.test_math" name="test_negatives"><failure/></testcase></testsuite>');
-  const historyPath = join(work, 'history.json');
-  const hist = (id, extra) => spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  hist('1', []);
-  const h2 = hist('2', ['--history', historyPath]);
-  const h2Report = h2.status === 0 ? JSON.parse(h2.stdout) : undefined;
-  const histDoc = JSON.parse(readFileSync(historyPath, 'utf8'));
-  if (histDoc.runs?.length === 2 && histDoc.tests?.['test_math::test_negatives'] === 'FF' && h2Report?.history?.runs === 1) ok('--history-out wrote 2 runs and --history read them back');
-  else fail(`run history round trip failed (exit ${h2.status}, stderr ${h2.stderr.trim()}, runs ${histDoc.runs?.length})`);
+  // 4f. features cut from v0.1 are gone from the CLI: the flags and the mutate-plan command are refused
+  for (const args of [['check', '--coverage', 'lcov.info'], ['check', '--mutation', 'm.json'], ['check', '--history', 'h.json'], ['check', '--history-out', 'h.json'], ['mutate-plan']]) {
+    const r = spawnSync(bin, [binJs, ...args, '--cwd', repo], { encoding: 'utf8', env: cleanEnv });
+    if (r.status !== 0 && /unknown (option|command)/.test(r.stderr)) ok(`${args.join(' ')} is refused: ${r.stderr.trim().split('\n')[0]}`);
+    else fail(`${args.join(' ')} was not refused (exit ${r.status}, stderr ${r.stderr.trim()})`);
+  }
 
   // 4h. --results reads real TAP from Node's test runner (the ts-node-test golden pair): the derived file that lacks a
   // modified test gives V003, and the real file read through the older --junit name gives none.
@@ -271,7 +250,8 @@ try {
   };
   const tapMissing = tapCheck('--results', join(tapCase('V003-tap-modified-test-missing'), 'results/results.tap'));
   const v003 = tapMissing.findings?.find((f) => f.ruleId === 'V003');
-  if (v003?.severity === 'high' && tapMissing.evidence?.formats?.join() === 'tap' && tapMissing.evidence.total === 12) ok(`--results read Node TAP and V003 reported: ${v003.message}`);
+  // V003 is not proven yet: the bundle reports it at low and keeps the rule's own high in uncappedSeverity.
+  if (v003?.severity === 'low' && v003.uncappedSeverity === 'high' && tapMissing.evidence?.formats?.join() === 'tap' && tapMissing.evidence.total === 12) ok(`--results read Node TAP and V003 reported (capped at low, the rule says high): ${v003.message}`);
   else fail(`--results with TAP did not give V003 and evidence.formats [tap]: ${JSON.stringify(tapMissing.error ?? tapMissing.evidence)}`);
   const tapAll = tapCheck('--junit', join(tapCase('V003-tap-all-changed-tests-ran'), 'results/results.tap'));
   if (tapAll.evidence?.formats?.join() === 'tap' && tapAll.evidence.total === 13 && !tapAll.findings?.some((f) => f.ruleId === 'V003')) ok('--junit, the older name, reads the same TAP and every changed test has a record');
@@ -353,10 +333,11 @@ function makeWeakenedRepo(dir) {
   git('add', '-A');
   git('commit', '-q', '-m', 'base');
   git('checkout', '-q', '-b', 'weaken');
-  // Head: delete one test per language.
+  // Head: skip the TypeScript test (R003, a proven rule, medium) and delete one test in Python and Java (R001, capped at
+  // low in v0.1). Each language still gives a finding, and the skip makes require-ack with fail-on medium exit 1.
   write(
     'src/math.test.ts',
-    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it('adds two numbers', () => {", '    expect(add(1, 2)).toBe(3);', '  });', '});', ''].join('\n'),
+    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it('adds two numbers', () => {", '    expect(add(1, 2)).toBe(3);', '  });', '', "  it.skip('handles negatives', () => {", '    expect(add(-1, -2)).toBe(-3);', '  });', '});', ''].join('\n'),
   );
   write('tests/test_math.py', ['def test_add():', '    assert 1 + 2 == 3', ''].join('\n'));
   write(

@@ -1,6 +1,7 @@
 {
   "name": "testwitness",
   "version": "0.1.0",
+  "mcpName": "io.github.testwitness/testwitness",
   "description": "Did this PR weaken its tests, and did they actually run? Flags deleted, skipped and loosened tests and checks the test results (JUnit XML, TAP, Jest, Vitest, pytest-json-report and Playwright JSON).",
   "keywords": [
     "testing",

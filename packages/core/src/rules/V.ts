@@ -68,8 +68,6 @@ export const V003: Rule = {
     falsePositives:
       'Tests in a matrix leg whose results were not uploaded; parametrised or dynamic names the normaliser missed. When no test from the same file ran the finding is medium with the label file not in results. When fewer than half of the changed test files appear in the results at all, every finding in this group is low with the label partial results.',
     example: 'Modified test CartTest#handlesEmpty has no testcase record in 3 result files (42 tests).',
-    history:
-      'A finding on a test recorded in every one of the last 5 runs of the history becomes high with the label ran before, not now. A test the history has never seen, or that is missing from any of those 5 runs, keeps the severity above, and a finding labelled partial results stays low. A history with fewer than 5 runs changes nothing.',
   },
   run(ctx) {
     const ev = ctx.evidence;
@@ -296,48 +294,6 @@ export const V005: Rule = {
   },
 };
 
-/** Changed production files V008 looks at, at most. */
-export const V008_MAX_FILES = 200;
-
-/** V008 Changed production lines not executed. */
-export const V008: Rule = {
-  id: 'V008',
-  name: 'Changed production lines not executed',
-  group: 'V',
-  defaultSeverity: 'low',
-  since: RULE_SINCE,
-  languages: 'any',
-  needs: ['diff', 'coverage'],
-  docs: {
-    summary:
-      'Coverage reports of the head run (lcov, Cobertura such as coverage.py coverage.xml, JaCoCo XML; the coverage input, --coverage or coverage.paths) say that lines this PR added or changed in a production file were instrumented but never executed by any test. One finding per file with the count and the first three line numbers, label uncovered change. Nothing is reported when no coverage report is attached.',
-    falsePositives:
-      'Only lines the coverage tool instrumented count, so comments, blank lines, declarations and files missing from the report are never reported. Reports from a partial run (one matrix leg, a sharded suite) under count execution; attach every shard. At most 200 changed production files are checked and at most 200 report files or 50 MB of coverage data are read.',
-    example: 'src/billing/refund.py: 4 changed lines never executed by the tests (lines 42, 43, 57 and 1 more).',
-  },
-  run(ctx) {
-    const cov = ctx.coverage;
-    if (!cov) return [];
-    const out: Finding[] = [];
-    const files = ctx.files.filter((f) => f.kind === 'production' && f.status !== 'deleted' && !f.binary).slice(0, V008_MAX_FILES);
-    for (const f of files) {
-      const c = cov.lookup(f.path);
-      if (!c || c.instrumented.size === 0) continue;
-      const missed = [...f.addedLines].filter((l) => c.instrumented.has(l) && !c.executed.has(l)).sort((a, b) => a - b);
-      if (!missed.length) continue;
-      const first = missed.slice(0, 3).join(', ');
-      const more = missed.length > 3 ? ` and ${missed.length - 3} more` : '';
-      out.push(
-        makeFinding(ctx, 'V008', 'low', f, f.path, `${missed.length} changed line${missed.length === 1 ? '' : 's'} in ${f.path} never executed by the tests (line${missed.length === 1 ? '' : 's'} ${first}${more})`, {
-          line: missed[0]!,
-          label: 'uncovered change',
-        }),
-      );
-    }
-    return out;
-  },
-};
-
 export function rulesV(): Rule[] {
-  return [V003, V004, V005, V006, V008];
+  return [V003, V004, V005, V006];
 }

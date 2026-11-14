@@ -2,7 +2,7 @@
 
 ## Three states
 
-- `pass`: no open finding at or above `fail_on` (default `high`).
+- `pass`: no open finding at or above `fail_on` (default `medium`).
 - `review`: this PR changed what its tests prove. A reviewer should look.
 - `unreadable`: the diff rules ran and found nothing, but no JUnit XML was available to confirm what ran, and the PR touched tests or test configuration.
 
@@ -14,7 +14,9 @@ testwitness never says a PR lied. A claim it cannot check is reported as unreada
 - `medium`: needs a reviewer's eye. Counted and shown.
 - `low`: informational. Collapsed in the comment. Moved, parameterised, refactored, conditional, smoke, tracked.
 
-Every rule's default can be changed per repository, and any finding can be acknowledged with a reason.
+In v0.1 only the proven rules give medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule still runs, and its findings are shown at low until it passes an untuned replay ([how we measure precision](./how-we-measure-precision#proven-and-unproven-rules)). W006, a change to the gate itself, is the one exception.
+
+Every rule's default can be changed per repository (for a rule that is not proven yet, naming a severity opts it back in; see [configuration](./configuration#proven-rules-and-the-cap-at-low)), and any finding can be acknowledged with a reason.
 
 ## Modes
 

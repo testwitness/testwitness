@@ -1,8 +1,0 @@
-[
-  {
-    "ruleId": "O002",
-    "severity": "medium",
-    "subject": "CartTest#checkoutProducesReceipt",
-    "label": "smoke"
-  }
-]
