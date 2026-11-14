@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { R001, R002, R003, R004, R005, R006, R010 } from './R.js';
 import { changedFile, context, inventory, test as t } from './testkit.js';
+import { diffInventories } from '../inventory.js';
 import { definedSymbols, isNearDuplicate, minimumVersionRaised, testTokens } from './util.js';
 import type { ChangedFile } from '../types.js';
 
@@ -279,6 +280,62 @@ describe('production symbols removed and version gates', () => {
   });
 });
 
+
+describe('R001 group renamed and tests rewritten in place', () => {
+  const T = 'src/queue.test.ts';
+  const group = (name: string, titles: string[]) => titles.map((title, i) => t({ name: title, container: [name], body: `${name} ${title}`, line: 10 * i + 1 }));
+
+  it('reports tests of a renamed group as low replaced when the new groups hold as many tests', async () => {
+    const base = group('queue with a timer', ['drains', 'retries once', 'gives up']);
+    const head = group('queue on fixtures', ['drains the fixture', 'retries the fixture once', 'stops after the fixture fails']);
+    const out = await R001.run(context({ pairs: [{ file: changedFile(T), base: inventory(T, base), head: inventory(T, head) }] }), {});
+    expect(out.map((f) => [f.severity, f.label])).toEqual([['low', 'replaced'], ['low', 'replaced'], ['low', 'replaced']]);
+  });
+
+  it('still reports the deletions when the renamed group holds fewer tests', async () => {
+    const base = group('queue with a timer', ['drains', 'retries once', 'gives up']);
+    const head = group('queue on fixtures', ['drains the fixture']);
+    const out = await R001.run(context({ pairs: [{ file: changedFile(T), base: inventory(T, base), head: inventory(T, head) }] }), {});
+    expect(out).toHaveLength(3);
+    expect(out.every((f) => f.severity !== 'low')).toBe(true);
+  });
+
+  it('pairs a test by its own name when only its class or group was renamed, never two tests that share a title', () => {
+    const before = t({ name: 'test_total', container: ['CartTests'], body: 'a' });
+    const after = t({ name: 'test_total', container: ['BasketTests'], body: 'a and more' });
+    expect(diffInventories(inventory(T, [before]), inventory(T, [after])).map((c) => c.kind)).toEqual(['modified']);
+    const twin = t({ name: 'test_total', container: ['OrderTests'], body: 'b' });
+    expect(diffInventories(inventory(T, [before, twin]), inventory(T, [after])).map((c) => c.kind).sort()).toEqual(['added', 'deleted', 'deleted']);
+  });
+
+  it('reports a test renamed with a small edit as low renamed, and a different deleted test as a deletion', async () => {
+    const body = (title: string, extra: string) => [
+      `it('${title}', () => {`,
+      "  const queue = createQueue({ limit: 3, retry: 'linear', name: 'jobs' })",
+      "  queue.push({ id: 1, payload: 'first' })",
+      "  queue.push({ id: 2, payload: 'second' })",
+      '  expect(queue.size()).toBe(2)',
+      extra,
+      '})',
+    ];
+    const oldLines = [...body('keeps two jobs', '  expect(queue.peek().id).toBe(1)'), "it('rejects a full queue', () => {", '  const queue = createQueue({ limit: 0 })', "  expect(() => queue.push({ id: 9 })).toThrow('full')", '})'];
+    const newLines = body('holds two queued jobs', '');
+    const renamed = t({ name: 'keeps two jobs', body: 'old', line: 1 });
+    renamed.endLine = 7;
+    const dropped = t({ name: 'rejects a full queue', body: 'full', line: 8 });
+    dropped.endLine = 11;
+    const added = t({ name: 'holds two queued jobs', body: 'new', line: 1 });
+    added.endLine = 7;
+    const ctx = context({ pairs: [{ file: changedFile(T), base: inventory(T, [renamed, dropped]), head: inventory(T, [added]) }] });
+    ctx.readBase = async () => oldLines.join('\n');
+    ctx.readHead = async () => newLines.join('\n');
+    const out = await R001.run(ctx, {});
+    expect(out.map((f) => [f.subject, f.severity, f.label])).toEqual([
+      ['keeps two jobs', 'low', 'renamed'],
+      ['rejects a full queue', 'medium', undefined],
+    ]);
+  });
+});
 
 describe('R001 near duplicate removed', () => {
   const kept = [
