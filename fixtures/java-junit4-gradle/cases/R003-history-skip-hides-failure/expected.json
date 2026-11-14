@@ -1,8 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "high",
-    "subject": "StackTest#failsOnPurpose",
-    "label": "hides failure"
-  }
-]

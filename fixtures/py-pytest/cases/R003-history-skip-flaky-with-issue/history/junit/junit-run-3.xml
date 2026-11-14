@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.017" timestamp="2026-11-04T09:51:26.604136-06:00" hostname="vm"><testcase classname="tests.test_rerun" name="test_flaky_passes_on_rerun" time="0.001" /></testsuite></testsuites>

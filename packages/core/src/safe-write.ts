@@ -2,7 +2,7 @@ import { constants, lstatSync, unlinkSync } from 'node:fs';
 import { open } from 'node:fs/promises';
 
 /**
- * Write an output file without following a symbolic link at the destination. The report, the history and the hook
+ * Write an output file without following a symbolic link at the destination. The report and the hook
  * state are written into a checkout that a pull request controls: a committed link named `testwitness.json` that
  * points at a file elsewhere on the runner would otherwise be written through. A link at the destination is removed
  * and a regular file is created in its place; O_NOFOLLOW closes the window between the check and the open where the

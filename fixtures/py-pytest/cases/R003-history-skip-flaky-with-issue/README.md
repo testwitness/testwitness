@@ -1,5 +1,0 @@
-Negative control for run history. The head skips test_flaky_passes_on_rerun with the reason "flaky on CI, tracked in #214". The issue reference makes the skip low (label tracked without history). The history records the test as flaky: it failed in the first and passed in the next four of 5 real pytest runs (history/junit/, see history/junit/PRODUCER.md), so it failed in fewer than 2 of its last 5 runs and the skip keeps its severity, low, with the label flaky in history.
-
-The rerun XML in `fixtures/py-pytest/junit/junit-reruns.xml` could not be used: pytest-rerunfailures 16.7 writes the failed first attempt as a second plain testcase element with no failure child, so the XML carries no trace of the rerun.
-
-history/history.json was written by the engine, not by hand: `fixtures/runner/make-history.ts` runs the bundled CLI (`testwitness check --junit ... --run-id ... --history ... --history-out ...`) once per entry of history/runs.json, in an empty temporary git repository, and copies the final document here. Regenerate with `pnpm bundle:cli && pnpm exec tsx fixtures/runner/make-history.ts <this case dir>`.

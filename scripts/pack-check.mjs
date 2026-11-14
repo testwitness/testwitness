@@ -5,7 +5,7 @@
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
 //      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
-//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan, the run history,
+//      then --coverage, --mutation (a real StrykerJS report from the golden fixtures), mutate-plan,
 //      and --results with real Node TAP (and --junit, its older name)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
@@ -237,17 +237,6 @@ try {
   const planJson = plan.status === 0 ? JSON.parse(plan.stdout) : undefined;
   if (planJson?.stryker?.mutate?.includes('src/shipping.ts:1-10')) ok(`mutate-plan planned ${planJson.stryker.mutate.join(', ')}`);
   else fail(`mutate-plan did not plan src/shipping.ts (exit ${plan.status}, stderr ${plan.stderr.trim()})`);
-
-  // 4g. --history-out writes a run history and --history reads it back
-  writeFileSync(join(work, 'junit.xml'), '<testsuite name="s"><testcase classname="tests.test_math" name="test_adds"/><testcase classname="tests.test_math" name="test_negatives"><failure/></testcase></testsuite>');
-  const historyPath = join(work, 'history.json');
-  const hist = (id, extra) => spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--junit', join(work, 'junit.xml'), '--run-id', id, '--history-out', historyPath, ...extra, '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  hist('1', []);
-  const h2 = hist('2', ['--history', historyPath]);
-  const h2Report = h2.status === 0 ? JSON.parse(h2.stdout) : undefined;
-  const histDoc = JSON.parse(readFileSync(historyPath, 'utf8'));
-  if (histDoc.runs?.length === 2 && histDoc.tests?.['test_math::test_negatives'] === 'FF' && h2Report?.history?.runs === 1) ok('--history-out wrote 2 runs and --history read them back');
-  else fail(`run history round trip failed (exit ${h2.status}, stderr ${h2.stderr.trim()}, runs ${histDoc.runs?.length})`);
 
   // 4h. --results reads real TAP from Node's test runner (the ts-node-test golden pair): the derived file that lacks a
   // modified test gives V003, and the real file read through the older --junit name gives none.

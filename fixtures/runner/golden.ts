@@ -9,16 +9,14 @@
  *                        Playwright JSON, or JUnit XML), passed as the `results` globs; the reader tells them apart by content
  *   coverage/ (optional) lcov, Cobertura or JaCoCo reports of the head run
  *   mutation/ (optional) Stryker JSON or PIT mutations.xml reports of the head, as the opt in mutation job writes them
- *   history/history.json (optional) run history of earlier runs, written by the engine through
- *                         fixtures/runner/make-history.ts from history/runs.json, never by hand
  *   CRLF (optional) write the case with Windows line endings. One directive per line, `#` starts a comment:
- *     twin <case>       take base/, head/, expected.json, pr.json and the result, coverage, mutation and history
+ *     twin <case>       take base/, head/, expected.json, pr.json and the result, coverage and mutation
  *                       inputs from that LF case of the same project (the case's own copies win when present);
  *                       the suite then also requires the very same findings as the twin, line numbers,
  *                       messages and fingerprints included
  *     from <case>       take only base/ and head/ from that case (no expectations, no comparison)
  *     sides base|head|both  which commit gets CRLF (default both); the head side also converts the PR body
- *                       and the result, coverage, mutation and history inputs
+ *                       and the result, coverage and mutation inputs
  *     head base         the head commit is the base files again (a PR that only converts line endings)
  *   The temporary repository sets core.autocrlf false so git stores the CRLF bytes as written.
  * The runner builds a temporary git repository with two commits and runs the
@@ -49,7 +47,6 @@ export interface GoldenCase {
   results?: string;
   coverage?: string;
   mutation?: string;
-  history?: string;
   /** Present when the case directory has a CRLF file. */
   crlf?: CrlfMode;
 }
@@ -121,8 +118,6 @@ export function discoverCases(fixturesRoot: string, filter?: (c: GoldenCase) => 
       if (coverage) c.coverage = coverage;
       const mutation = find('mutation');
       if (mutation) c.mutation = mutation;
-      const history = find('history', 'history.json');
-      if (history) c.history = history;
       if (!filter || filter(c)) out.push(c);
     }
   }
@@ -213,7 +208,7 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       writeFileSync(prBodyFile, crlfHead ? toCrlf(Buffer.from(c.pr.body, 'utf8')) : c.pr.body);
     }
     const ev = evidenceDir
-      ? { results: crlfCopy(c.results, evidenceDir, 'results'), junit: crlfCopy(c.junit, evidenceDir, 'junit'), coverage: crlfCopy(c.coverage, evidenceDir, 'coverage'), mutation: crlfCopy(c.mutation, evidenceDir, 'mutation'), history: crlfCopy(c.history, evidenceDir, 'history.json') }
+      ? { results: crlfCopy(c.results, evidenceDir, 'results'), junit: crlfCopy(c.junit, evidenceDir, 'junit'), coverage: crlfCopy(c.coverage, evidenceDir, 'coverage'), mutation: crlfCopy(c.mutation, evidenceDir, 'mutation') }
       : c;
     const { report } = await check({
       cwd: repo,
@@ -227,7 +222,6 @@ export async function runCase(c: GoldenCase, opts: { keep?: boolean } = {}): Pro
       format: 'json',
       prTitle: c.pr?.title,
       prBodyFile,
-      history: ev.history,
       quiet: true,
       log: () => {},
     });

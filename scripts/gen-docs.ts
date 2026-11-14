@@ -13,7 +13,7 @@ const lines = ['# Rules reference', '', 'Generated from the rule definitions in 
 for (const r of rules) {
   // Angle brackets in prose (XML settings such as <excludes>) would read as HTML tags in the VitePress build.
   const md = (t: string): string => t.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  lines.push(`## ${r.id} ${r.name}`, '', `Default severity: ${r.defaultSeverity}. Since ${r.since}. Languages: ${r.languages === 'any' ? 'all' : r.languages.join(', ')}. Needs: ${r.needs.join(', ')}.`, '', md(r.docs.summary), '', `**False positive controls.** ${md(r.docs.falsePositives)}`, '', ...(r.docs.history ? [`**With run history.** ${md(r.docs.history)} See [run history](history.md).`, ''] : []), '```diff', r.docs.example, '```', '');
+  lines.push(`## ${r.id} ${r.name}`, '', `Default severity: ${r.defaultSeverity}. Since ${r.since}. Languages: ${r.languages === 'any' ? 'all' : r.languages.join(', ')}. Needs: ${r.needs.join(', ')}.`, '', md(r.docs.summary), '', `**False positive controls.** ${md(r.docs.falsePositives)}`, '', '```diff', r.docs.example, '```', '');
 }
 writeFileSync(join(root, 'docs', 'rules.md'), lines.join('\n'));
 

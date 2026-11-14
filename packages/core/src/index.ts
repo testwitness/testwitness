@@ -25,5 +25,3 @@ export * from './config-text.js';
 export * from './coverage/reader.js';
 export * from './mutation/reader.js';
 export * from './mutation/plan.js';
-export * from './history/history.js';
-export * from './rules/history.js';

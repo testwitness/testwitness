@@ -1,1 +1,0 @@
-The LF case R003-history-skip-hides-failure with the base commit kept LF and every head file, the PR body and the result, coverage, mutation and history inputs converted to CRLF, as when a PR converts files while it edits them. The findings must equal the LF case exactly, line numbers, messages and fingerprints included.

@@ -39,8 +39,6 @@ const NOT_WITH_PR: Array<[key: string, flag: string]> = [
   ['junit', '--junit'],
   ['coverage', '--coverage'],
   ['mutation', '--mutation'],
-  ['history', '--history'],
-  ['historyOut', '--history-out'],
 ];
 
 export interface MainDeps {
@@ -73,10 +71,7 @@ export async function main(argv: string[], deps: MainDeps = {}): Promise<number>
     .option('--pr-body-file <path>', 'file holding the pull request body')
     .option('--author <login>', 'pull request author login, shown in provenance')
     .option('--author-type <type>', 'pull request author account type, for example User or Bot')
-    .option('--history <file>', 'run history JSON from earlier runs; severities then depend on what tests did before (docs/history.md)')
-    .option('--history-out <file>', 'write the run history with this run merged in')
-    .option('--run-id <id>', 'id of this run in the history (default GITHUB_RUN_ID, then local-<head sha>)')
-    .option('--follow-symlinks', 'follow symbolic links in the results, coverage, mutation and history paths (for Bazel style layouts; default from config paths.followSymlinks, off)')
+    .option('--follow-symlinks', 'follow symbolic links in the results, coverage and mutation paths (for Bazel style layouts; default from config paths.followSymlinks, off)')
     .option('--pr <url>', 'trial run on a public pull request, https://github.com/<owner>/<repo>/pull/<n>: fetches it with git (into this clone, or a cached blobless clone) and checks the diff only (docs/cli.md)')
     .option('--cwd <dir>', 'repository directory', process.cwd())
     .option('-q, --quiet', 'no progress on stderr', false)
@@ -108,9 +103,6 @@ export async function main(argv: string[], deps: MainDeps = {}): Promise<number>
           mode: o.mode,
           failOn: o.failOn,
           quiet: o.quiet,
-          history: o.history,
-          historyOut: o.historyOut,
-          runId: o.runId,
           ...(o.followSymlinks ? { followSymlinks: true } : {}),
         });
         const text = render(report, format, config.comment.collapseLow, !o.out && useColor(process.env, Boolean(process.stdout.isTTY)));
@@ -252,7 +244,6 @@ async function checkPr(o: Record<string, unknown>, format: ReturnType<typeof def
       mode: o['mode'] as never,
       failOn: o['failOn'] as never,
       quiet,
-      ...(o['runId'] !== undefined ? { runId: String(o['runId']) } : {}),
       log,
     });
     const out = o['out'] === undefined ? undefined : String(o['out']);

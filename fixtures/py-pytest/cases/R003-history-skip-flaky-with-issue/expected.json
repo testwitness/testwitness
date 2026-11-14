@@ -1,8 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "low",
-    "subject": "test_flaky_passes_on_rerun",
-    "label": "flaky in history"
-  }
-]
