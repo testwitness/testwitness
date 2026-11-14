@@ -26,7 +26,7 @@ Every rule's default can be changed per repository, and any finding can be ackno
 
 Three ways, any of which clears it:
 
-1. A comment on the PR by an owner, member or collaborator who is not the PR author:
+1. A comment on the PR by someone with write or admin permission on the repository who is not the PR author (the Action looks the permission up; being a member of the organisation is not enough):
    `/testwitness ack R003 PaymentsIT#pollsSettlement reason: needs a live sandbox, see PAY-412`
    or `/testwitness ack all reason: test only refactor`.
 2. The label `testwitness:acknowledged`, with the reason taken from the most recent comment by a maintainer.

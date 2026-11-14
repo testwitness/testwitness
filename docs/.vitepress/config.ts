@@ -30,6 +30,7 @@ export default defineConfig({
       { text: 'Agent guard (hooks)', link: '/agent-guard' },
       { text: 'MCP server for agents', link: '/mcp' },
       { text: 'Fork PRs and security', link: '/security' },
+      { text: 'Threat model', link: '/threat-model' },
       { text: 'Rules reference', link: '/rules' },
       { text: 'Precision', link: '/precision' },
       { text: 'How we measure precision', link: '/how-we-measure-precision' },
