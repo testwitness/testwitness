@@ -5,7 +5,7 @@
 //   3. npm install the tarball into a fresh temp project (no workspace)
 //   4. run `testwitness --version`, `testwitness check` on a temp git repo whose head
 //      weakens a TypeScript, a Python and a Java test (require findings), and `testwitness mcp` (require its tools),
-//      then --coverage, the refusal of the flags cut from v0.1,
+//      then the refusal of the flags cut from v0.1,
 //      and --results with real Node TAP (and --junit, its older name)
 //
 // Exits non zero on any failure. Used by the release workflow before publish.
@@ -212,19 +212,8 @@ try {
   if (push.status !== 0 && !pushed && /testwitness blocked this push/.test(push.stderr) && /A002 high src\/math\.test\.ts/.test(push.stderr)) ok('git push is refused by the pre-push hook init --agent git installed');
   else fail(`git push through the pre-push hook: exit ${push.status}, reached the remote ${pushed}, stderr ${push.stderr.slice(0, 400)}`);
 
-  // 4e. --coverage reads an lcov report and V008 reports a changed production line it never executed
-  const gitIn = (...a) => run('git', ['-c', 'user.name=pack-check', '-c', 'user.email=pack-check@example.invalid', '-c', 'commit.gpgsign=false', ...a], { cwd: repo });
-  writeFileSync(join(repo, 'src/math.ts'), 'export const add = (a: number, b: number) => a + b;\nexport const sub = (a: number, b: number) =>\n  a - b;\n');
-  gitIn('commit', '-q', '-am', 'add sub');
-  writeFileSync(join(work, 'lcov.info'), 'SF:src/math.ts\nDA:1,3\nDA:2,0\nDA:3,0\nend_of_record\n');
-  const cov = spawnSync(bin, [binJs, 'check', '--cwd', repo, '--base', 'main', '--format', 'json', '--coverage', join(work, 'lcov.info'), '--quiet'], { encoding: 'utf8', env: cleanEnv });
-  const covReport = cov.status === 0 ? JSON.parse(cov.stdout) : undefined;
-  const v008 = covReport?.findings.find((f) => f.ruleId === 'V008');
-  if (v008 && covReport.coverage?.files === 1 && covReport.coverage.linesInstrumented === 3) ok(`--coverage read the lcov report and V008 reported: ${v008.message}`);
-  else fail(`--coverage did not produce V008 and a coverage section (exit ${cov.status}, stderr ${cov.stderr.trim()})`);
-
   // 4f. features cut from v0.1 are gone from the CLI: the flags and the mutate-plan command are refused
-  for (const args of [['check', '--mutation', 'm.json'], ['check', '--history', 'h.json'], ['check', '--history-out', 'h.json'], ['mutate-plan']]) {
+  for (const args of [['check', '--coverage', 'lcov.info'], ['check', '--mutation', 'm.json'], ['check', '--history', 'h.json'], ['check', '--history-out', 'h.json'], ['mutate-plan']]) {
     const r = spawnSync(bin, [binJs, ...args, '--cwd', repo], { encoding: 'utf8', env: cleanEnv });
     if (r.status !== 0 && /unknown (option|command)/.test(r.stderr)) ok(`${args.join(' ')} is refused: ${r.stderr.trim().split('\n')[0]}`);
     else fail(`${args.join(' ')} was not refused (exit ${r.status}, stderr ${r.stderr.trim()})`);

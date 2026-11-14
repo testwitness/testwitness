@@ -26,7 +26,6 @@ export async function run(): Promise<void> {
   // `results` is the preferred input; `junit` is its older name and carries the default globs.
   const results = core.getInput('results') || undefined;
   const junit = core.getInput('junit') || undefined;
-  const coverage = core.getInput('coverage') || undefined;
   const mode = (core.getInput('mode') || undefined) as 'report' | 'require-ack' | 'strict' | undefined;
   const failOn = (core.getInput('fail_on') || undefined) as 'high' | 'medium' | 'low' | undefined;
   const configPath = core.getInput('config') || undefined;
@@ -49,7 +48,7 @@ export async function run(): Promise<void> {
   const authorType = typeof user?.type === 'string' ? user.type : undefined;
 
   const { report, config, files, evidence } = await check({
-    cwd, base, head, results, junit, coverage, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
+    cwd, base, head, results, junit, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
     // Log lines name files and quote results files of the pull request; they are made safe for the step log.
     log: (s) => info(s),
   });

@@ -1,1 +1,0 @@
-Negative. Same production change, but the PR also adds test_half, so every changed line ran. coverage/coverage.xml was written by coverage.py 7.17.1 through pytest cov 7.1.0 running the head tree. Nothing is reported.

@@ -67,7 +67,7 @@ export interface ContextSpec {
   changedProduction?: string[];
   prText?: { title: string; body: string };
   evidence?: Evidence;
-  /** Changed files beyond the test files of `pairs` (production files for the coverage rule). */
+  /** Changed files beyond the test files of `pairs`. */
   files?: ChangedFile[];
 }
 

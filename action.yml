@@ -12,9 +12,6 @@ inputs:
     description: Older name of the results input, still read when results is empty. Its default globs match the usual JUnit XML locations
     required: false
     default: "**/junit*.xml,**/TEST-*.xml,**/test-results/**/*.xml,**/surefire-reports/*.xml,**/failsafe-reports/*.xml"
-  coverage:
-    description: Comma separated globs of lcov, Cobertura or JaCoCo coverage reports from the head run (optional; enables V008)
-    required: false
   base:
     description: Base ref or sha (default is the pull request base)
     required: false

@@ -241,12 +241,3 @@ describe('renderJson', () => {
     expect(text.split('\n')[1]).toBe('  "$schema": "https://testwitness.github.io/testwitness/report.schema.json",');
   });
 });
-
-describe('coverage line', () => {
-  it('shows a short Coverage line in the evidence section when coverage was read, and nothing otherwise', () => {
-    const md = renderMarkdown(report({ coverage: { sources: ['coverage.xml'], files: 12, linesInstrumented: 400, linesExecuted: 310, notes: ['coverage: stopped after 200 report files'] } }));
-    expect(md).toContain('- Coverage: 1 report, 12 source files, 310 of 400 instrumented lines executed');
-    expect(md).toContain('stopped after 200 report files');
-    expect(renderMarkdown(report())).not.toContain('Coverage:');
-  });
-});

@@ -1,1 +1,0 @@
-Negative. Same production change, and the PR adds a test that takes the discount branch. coverage/lcov.info was written by Vitest 5.0.5 with @vitest/coverage-v8 5.0.5 running the head tree. Every changed line ran, so nothing is reported.

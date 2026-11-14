@@ -38,7 +38,6 @@ export function defaultConfig(): ResolvedConfig {
     languages: 'auto',
     paths: { tests: [], ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/target/**', '**/.venv/**'], followSymlinks: false },
     junit: { head: DEFAULT_JUNIT_GLOB, base: '' },
-    coverage: { paths: [] },
     assertions: { extra: [] },
     rules: {},
     acknowledge: [],
@@ -55,6 +54,7 @@ export function defaultConfig(): ResolvedConfig {
  * with a ConfigError that names the key, so a maintainer learns the setting does nothing instead of trusting it.
  */
 export const REMOVED_KEYS: Readonly<Record<string, string>> = {
+  coverage: 'coverage on changed lines (V008, lcov, Cobertura and JaCoCo reports)',
   history: 'run history',
   mutation: 'mutation on request (M001, M002)',
 };
@@ -139,11 +139,6 @@ export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap
       if (typeof section['base'] !== 'string') throw new ConfigError(`${key}.base must be a string`);
       cfg.junit.base = section['base'];
     }
-  }
-  if (doc['coverage'] !== undefined) {
-    if (!isRecord(doc['coverage'])) throw new ConfigError('coverage must be a mapping');
-    const p = doc['coverage']['paths'];
-    cfg.coverage.paths = typeof p === 'string' ? p.split(',').map((s) => s.trim()).filter(Boolean) : stringList(p, 'coverage.paths');
   }
   if (doc['assertions'] !== undefined) {
     if (!isRecord(doc['assertions'])) throw new ConfigError('assertions must be a mapping');

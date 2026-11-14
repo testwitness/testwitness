@@ -86,7 +86,7 @@ describe('testwitness mcp server', () => {
     expect(checkTool.description).toMatch(/never executes repository code/);
     expect(checkTool.description).toMatch(/no network/);
     expect(checkTool.inputSchema.required).toEqual(['cwd']);
-    expect(Object.keys(checkTool.inputSchema.properties ?? {}).sort()).toEqual(['base', 'coverage', 'cwd', 'head', 'junit', 'mode', 'prBody', 'prTitle', 'results']);
+    expect(Object.keys(checkTool.inputSchema.properties ?? {}).sort()).toEqual(['base', 'cwd', 'head', 'junit', 'mode', 'prBody', 'prTitle', 'results']);
   });
 
   it('testwitness_rules lists every built in rule with its default severity', async () => {
@@ -156,7 +156,7 @@ describe('testwitness mcp: what a client cannot make it do (docs/threat-model.md
     const { staysInside } = await import('./mcp.js');
     for (const ok of ['junit.xml', 'out/**/*.xml, reports/*.json', 'a..b/x.xml', '**/TEST-*.xml']) expect(staysInside(ok), ok).toBe(true);
     for (const bad of ['/etc/passwd', '../secrets/*.json', 'out/../../x.xml', 'ok.xml, /root/.ssh/*', '~/x.json', 'C:\\Users\\x\\*.json', 'a\\..\\..\\x.xml', '\\\\server\\share\\*.xml']) expect(staysInside(bad), bad).toBe(false);
-    for (const key of ['results', 'junit', 'coverage']) {
+    for (const key of ['results', 'junit']) {
       const r = await client.callTool({ name: 'testwitness_check', arguments: { cwd: repo, base: 'main', [key]: '/etc/*.conf' } });
       expect(r.isError, key).toBe(true);
       expect(text(r)).toMatch(/no absolute path and no \.\./);

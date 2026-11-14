@@ -441,49 +441,6 @@
         }
       }
     },
-    "coverage": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sources",
-        "files",
-        "linesInstrumented",
-        "linesExecuted",
-        "notes"
-      ],
-      "description": "Line coverage reports of the head run (lcov, Cobertura or JaCoCo) that V008 read. Absent when no coverage report was attached.",
-      "properties": {
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Paths of the coverage reports that were read."
-        },
-        "files": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Source files with coverage data."
-        },
-        "linesInstrumented": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Lines the coverage tool instrumented, over all source files."
-        },
-        "linesExecuted": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Instrumented lines that at least one test executed."
-        },
-        "notes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Reader warnings and caps that were hit, as plain sentences."
-        }
-      }
-    },
     "base": {
       "type": "string",
       "description": "Commit sha of the merge base between the base ref and head. Findings compare this commit with head."
@@ -543,8 +500,7 @@
         "V003",
         "V004",
         "V005",
-        "V006",
-        "V008"
+        "V006"
       ],
       "description": "Id of the rule that produced the finding. See https://testwitness.github.io/testwitness/rules for each rule."
     },
@@ -578,7 +534,6 @@
         "too deep",
         "too large",
         "tracked",
-        "uncovered change",
         "unreadable",
         "unsupported",
         "version dropped"

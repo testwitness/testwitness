@@ -21,7 +21,7 @@ export const SHARDS = {
   ],
   "core-rules-other": [`${core}/rules/{W,V,O,E,util,index}.ts`],
   "core-readers": [
-    `${core}/{coverage,evidence,report}/**/*.ts`,
+    `${core}/{evidence,report}/**/*.ts`,
     `${core}/{config,acknowledge,provenance,hash,eol,types,index}.ts`,
   ],
   junit: ["packages/junit/src/**/*.ts"],
