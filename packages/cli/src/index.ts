@@ -1,12 +1,11 @@
 import { Command } from 'commander';
-import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { check, defaultFormat, loadConfig, render, resolveBase, useColor, ConfigError } from './check.js';
 import { serveStdio } from './mcp.js';
 import { AGENTS } from './hook/events.js';
 import { runHook } from './hook/run.js';
 import { init } from './init.js';
-import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION } from '@testwitness/core';
+import { builtinRules, GitError, planMutation, renderMutationPlanShell, TOOL_VERSION, writeFileNoFollow } from '@testwitness/core';
 
 export { check, render } from './check.js';
 export { allFrontEnds } from './frontends.js';
@@ -45,7 +44,7 @@ export async function main(argv: string[]): Promise<number> {
     .option('--diff-only', 'check the diff and the PR text only: read no test results and skip V005 (for local runs and existing PRs)', false)
     .option('--coverage <globs>', 'comma separated globs of lcov, Cobertura or JaCoCo coverage reports (default from config coverage.paths)')
     .option('--mutation <globs>', 'comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (default from config mutation.paths)')
-    .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
+    .option('--config <path>', 'path to .testwitness.yml (default: the merge base, then a local uncommitted file; never one the change adds)')
     .option('--format <fmt>', 'text | markdown | json | both (default: text at a terminal, markdown otherwise)')
     .option('--out <path>', 'write the output to a file instead of stdout')
     .option('--mode <mode>', 'report | require-ack | strict (overrides config)')
@@ -90,7 +89,7 @@ export async function main(argv: string[]): Promise<number> {
           ...(o.followSymlinks ? { followSymlinks: true } : {}),
         });
         const text = render(report, format, config.comment.collapseLow, !o.out && useColor(process.env, Boolean(process.stdout.isTTY)));
-        if (o.out) await writeFile(resolve(o.cwd, o.out), text);
+        if (o.out) await writeFileNoFollow(resolve(o.cwd, o.out), text);
         else process.stdout.write(text);
         code = exitCode;
       } catch (err) {
@@ -106,7 +105,7 @@ export async function main(argv: string[]): Promise<number> {
     .description('Print the changed production files and the Stryker and PIT settings that mutate only them. Runs nothing.')
     .option('--base <ref>', "base ref (merge base is computed; default: origin's default branch, from origin/HEAD)")
     .option('--head <ref>', 'head ref', 'HEAD')
-    .option('--config <path>', 'path to .testwitness.yml (default: base ref, then working tree)')
+    .option('--config <path>', 'path to .testwitness.yml (default: the merge base, then a local uncommitted file; never one the change adds)')
     .option('--format <fmt>', 'json | shell', 'json')
     .option('--out <path>', 'write the plan to a file instead of stdout')
     .option('--cwd <dir>', 'repository directory', process.cwd())
@@ -118,7 +117,7 @@ export async function main(argv: string[]): Promise<number> {
         const config = await loadConfig({ cwd, base, head: o.head, config: o.config, format: 'json' });
         const plan = await planMutation({ cwd, base, head: o.head, config });
         const text = o.format === 'shell' ? renderMutationPlanShell(plan) : JSON.stringify(plan, null, 2) + '\n';
-        if (o.out) await writeFile(resolve(cwd, o.out), text);
+        if (o.out) await writeFileNoFollow(resolve(cwd, o.out), text);
         else process.stdout.write(text);
       } catch (err) {
         if (err instanceof ConfigError || err instanceof GitError) {

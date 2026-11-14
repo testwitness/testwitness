@@ -32,7 +32,7 @@ On GitHub, prefer the Action, which wraps the same engine and adds the PR commen
 | `--diff-only` | check the diff and the PR text only: read no test results, skip V005, and grade the state on the diff and claim rules alone (`pass` or `review`) | off |
 | `--coverage <globs>` | comma separated globs of lcov, Cobertura or JaCoCo XML coverage reports of the head run (enables V008) | from config `coverage.paths` |
 | `--mutation <globs>` | comma separated globs of Stryker JSON or PIT mutations.xml reports from the opt in mutation job (enables M001 and M002 and measures O001 and O002; see [mutation on request](./mutation-on-request)) | from config `mutation.paths` |
-| `--config <path>` | `.testwitness.yml` path | base ref, then working tree |
+| `--config <path>` | `.testwitness.yml` path, read from disk as given | the merge base; without a config there, a local uncommitted `.testwitness.yml` (never one the change being checked adds) |
 | `--format <fmt>` | `text`, `markdown`, `json` or `both` | `text` when stdout is a terminal, `markdown` when it is a pipe or with `--out` |
 | `--out <path>` | write to a file instead of stdout | |
 | `--mode <mode>` | `report`, `require-ack`, `strict` | from config |

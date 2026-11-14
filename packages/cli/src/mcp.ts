@@ -7,7 +7,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { builtinRules, git, GitError, ruleMap, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, TOOL_VERSION, type Finding, type Report } from '@testwitness/core';
+import { builtinRules, clipText, git, GitError, multiLine, oneLine, ruleMap, REPORT_SCHEMA, REPORT_SCHEMA_VERSION, TOOL_VERSION, type Finding, type Report } from '@testwitness/core';
 import { check, ConfigError, defaultBase } from './check.js';
 
 /** A git ref as an agent may pass it: no leading dash (it would read as a flag), no whitespace, no control characters. */
@@ -16,6 +16,20 @@ const ref = z
   .min(1)
   .max(256)
   .regex(/^[^-\s]\S*$/, 'a git ref: no leading dash, no whitespace');
+
+/**
+ * Report globs as an agent may pass them: relative to the repository, never absolute and never through `..`. The CLI
+ * allows both because a person or a workflow wrote the glob; here it comes from a model that may be acting on text it
+ * read in the repository, and a results reader quotes a little of a file it cannot parse.
+ */
+export function staysInside(globs: string): boolean {
+  return globs.split(',').every((g) => {
+    const p = g.trim().replace(/\\/g, '/');
+    return !p.startsWith('/') && !p.startsWith('~') && !/^[A-Za-z]:/.test(p) && !p.split('/').includes('..');
+  });
+}
+
+const globs = z.string().max(1024).refine(staysInside, 'globs relative to cwd: no absolute path and no ..');
 
 const CHECK_DESCRIPTION = [
   'Run testwitness on a local git repository: compare base and head and report tests that were deleted, skipped, emptied or loosened, assertions removed, failures hidden in CI config, and changed tests missing from the test results (JUnit XML, TAP or a JSON reporter).',
@@ -34,14 +48,15 @@ export function summarise(report: Report): string {
     `testwitness ${report.state}: ${c.high} high, ${c.medium} medium, ${c.low} low open findings (${report.findings.length - open.length} acknowledged). Evidence: ${report.evidence.state}.`,
   ];
   const where = (f: Finding) => `${f.location.path}${f.location.line ? `:${f.location.line}` : ''}`;
-  for (const f of open.slice(0, 5)) lines.push(`${f.severity} ${f.ruleId} ${where(f)}: ${f.message}${f.label ? ` (${f.label})` : ''}`);
+  // Messages and paths quote the repository; the summary is read by a model, so it gets one safe, bounded line each.
+  for (const f of open.slice(0, 5)) lines.push(clipText(oneLine(`${f.severity} ${f.ruleId} ${where(f)}: ${f.message}${f.label ? ` (${f.label})` : ''}`), 1000));
   if (open.length > 5) lines.push(`${open.length - 5} more in the structured report.`);
   if (open.length === 0) lines.push('No open findings.');
   return lines.join('\n');
 }
 
 function errorResult(message: string): CallToolResult {
-  return { isError: true, content: [{ type: 'text', text: `testwitness: ${message}` }] };
+  return { isError: true, content: [{ type: 'text', text: `testwitness: ${clipText(multiLine(message), 4000)}` }] };
 }
 
 const severity = z.enum(['high', 'medium', 'low']);
@@ -59,10 +74,10 @@ export function createServer(): McpServer {
         cwd: z.string().min(1).describe('Absolute path of the git repository to check.'),
         base: ref.optional().describe("Base ref. The merge base with head is compared. Default: origin's default branch, else origin/main, origin/master, main or master."),
         head: ref.optional().describe('Head ref. Default HEAD (the last commit; uncommitted changes are not seen).'),
-        results: z.string().max(1024).optional().describe('Comma separated globs of test results, relative to cwd: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content. Default from .testwitness.yml.'),
-        junit: z.string().max(1024).optional().describe('Older name of results; used when results is not given.'),
-        coverage: z.string().max(1024).optional().describe('Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to cwd. Default from .testwitness.yml coverage.paths.'),
-        mutation: z.string().max(1024).optional().describe('Comma separated globs of Stryker JSON or PIT mutations.xml reports, relative to cwd. Read only; the tool never runs a mutation tool. Default from .testwitness.yml mutation.paths.'),
+        results: globs.optional().describe('Comma separated globs of test results, relative to cwd: JUnit XML, TAP, or the JSON output of Jest, Vitest, pytest-json-report or Playwright, told apart by content. Default from .testwitness.yml.'),
+        junit: globs.optional().describe('Older name of results; used when results is not given.'),
+        coverage: globs.optional().describe('Comma separated globs of lcov, Cobertura or JaCoCo coverage reports, relative to cwd. Default from .testwitness.yml coverage.paths.'),
+        mutation: globs.optional().describe('Comma separated globs of Stryker JSON or PIT mutations.xml reports, relative to cwd. Read only; the tool never runs a mutation tool. Default from .testwitness.yml mutation.paths.'),
         prTitle: z.string().max(10_000).optional().describe('Pull request title, for claim checks such as "all tests pass".'),
         prBody: z.string().max(200_000).optional().describe('Pull request body, for claim checks.'),
         mode: z.enum(['report', 'require-ack', 'strict']).optional().describe('Gate mode. It changes the state and exit decision only, never the findings. Default from .testwitness.yml.'),
@@ -101,10 +116,12 @@ export function createServer(): McpServer {
           prTitle: args.prTitle ?? (args.prBody !== undefined ? '' : undefined),
           prBody: args.prBody,
           mode: args.mode,
+          // As in the hook: the agent can write the working tree, so only the base config counts.
+          configFromBaseOnly: true,
           quiet: true,
           log: (s) => notes.push(s),
         });
-        const text = summarise(report) + (notes.length ? `\nNotes: ${notes.slice(0, 5).join('; ')}` : '');
+        const text = summarise(report) + (notes.length ? `\nNotes: ${notes.slice(0, 5).map((n) => clipText(oneLine(n), 500)).join('; ')}` : '');
         return { content: [{ type: 'text', text }], structuredContent: report as unknown as Record<string, unknown> };
       } catch (err) {
         if (err instanceof ConfigError || err instanceof GitError) return errorResult(err.message);

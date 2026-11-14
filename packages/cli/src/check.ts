@@ -1,10 +1,11 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { existsSync, lstatSync, realpathSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import fg from 'fast-glob';
 import {
   exitCodeFor,
   parseConfig,
+  writeFileNoFollow,
   renderJson,
   renderMarkdown,
   renderText,
@@ -114,28 +115,80 @@ export interface CheckResult {
   pairs: InventoryPair[];
 }
 
+/**
+ * Where `.testwitness.yml` comes from. The rule: a config that is part of the change being judged is never read.
+ *
+ *   1. The merge base of base and head. This is the config of the branch the change targets.
+ *   2. No config at the merge base: a `.testwitness.yml` in the working tree is read only when it is a local,
+ *      uncommitted file, so it is not in the commits being compared. A config the head commit adds is part of the
+ *      change (it used to be read here, which let a pull request against a repository without a config switch every
+ *      rule off, W006 included); so is any working tree file in `--worktree` mode. Those are ignored with a log line,
+ *      the defaults apply, and W006 reports the added file.
+ *   3. `configFromBaseOnly` (the Action, the agent hook, the MCP server): step 2 is skipped altogether.
+ *
+ * An explicit `config` path is the operator's choice and is read from disk, except under `configFromBaseOnly` when it
+ * names a file inside the repository: then it is read at the merge base like the default file, because on a pull
+ * request the checkout holds the pull request's copy of it.
+ */
 export async function loadConfig(opts: CheckOptions): Promise<ResolvedConfig> {
   const rules = ruleMap();
+  const log = opts.log ?? (() => {});
   let source: string | undefined;
-  if (opts.config) {
+  const refs = async (): Promise<{ baseSha: string; headSha: string } | undefined> => {
+    try {
+      const headSha = await revParse(opts.head, { cwd: opts.cwd });
+      return { baseSha: await mergeBase(opts.base ?? (await defaultBase(opts.cwd)), headSha, { cwd: opts.cwd }), headSha };
+    } catch {
+      return undefined;
+    }
+  };
+  const inRepo = opts.config && opts.configFromBaseOnly ? await repoRelative(opts.cwd, opts.config) : undefined;
+  if (opts.config && inRepo === undefined) {
     source = await readFile(resolve(opts.cwd, opts.config), 'utf8');
+  } else if (inRepo !== undefined) {
+    const r = await refs();
+    source = r ? await showFile(r.baseSha, inRepo, { cwd: opts.cwd }).catch(() => undefined) : undefined;
+    if (source === undefined) log(`config ${inRepo} does not exist at the merge base, so the defaults apply; the copy in the checkout is part of the change and is not read`);
   } else {
     // Config is read from the base ref in PR mode so a PR cannot relax its own check.
-    try {
-      const baseSha = await mergeBase(opts.base ?? (await defaultBase(opts.cwd)), await revParse(opts.head, { cwd: opts.cwd }), { cwd: opts.cwd });
-      source = await showFile(baseSha, '.testwitness.yml', { cwd: opts.cwd });
-    } catch {
-      source = undefined;
-    }
+    const r = await refs();
+    source = r ? await showFile(r.baseSha, '.testwitness.yml', { cwd: opts.cwd }).catch(() => undefined) : undefined;
     if (source === undefined && !opts.configFromBaseOnly) {
       const local = resolve(opts.cwd, '.testwitness.yml');
-      if (existsSync(local)) source = await readFile(local, 'utf8');
+      if (existsSync(local)) {
+        const atHead = r ? await showFile(r.headSha, '.testwitness.yml', { cwd: opts.cwd }).catch(() => undefined) : undefined;
+        if (opts.worktree || atHead !== undefined || !r) {
+          log('.testwitness.yml is not on the base branch and is part of the change being checked, so it is not read and the defaults apply (pass --config .testwitness.yml to try it locally)');
+        } else source = await readFile(local, 'utf8');
+      }
     }
   }
   const cfg = parseConfig(source, rules);
   if (opts.mode) cfg.mode = opts.mode;
   if (opts.failOn) cfg.failOn = opts.failOn;
   return cfg;
+}
+
+/** The path of `file` relative to the repository top, with forward slashes, or undefined when it lies outside the repository. */
+async function repoRelative(cwd: string, file: string): Promise<string | undefined> {
+  let top: string;
+  try {
+    top = (await git(['rev-parse', '--show-toplevel'], { cwd })).trim();
+  } catch {
+    return undefined;
+  }
+  const real = (p: string): string => {
+    try {
+      return realpathSync(p);
+    } catch {
+      return resolve(p);
+    }
+  };
+  const abs = resolve(cwd, file);
+  // The directory is resolved through links; the file itself is not, so a linked config inside the repository is still read at the base by its own name.
+  const rel = relative(real(top), resolve(real(dirname(abs)), basename(abs)));
+  if (!rel || rel.startsWith('..') || isAbsolute(rel)) return undefined;
+  return rel.split(sep).join('/');
 }
 
 /**
@@ -366,7 +419,7 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
   const log = opts.log ?? ((s: string) => { if (!opts.quiet) process.stderr.write(`testwitness: ${s}\n`); });
   const base = await resolveBase(opts.cwd, opts.base);
   opts = { ...opts, base };
-  const config = await loadConfig(opts);
+  const config = await loadConfig({ ...opts, log });
   const follow = opts.followSymlinks ?? config.paths.followSymlinks;
   if (opts.diffOnly) config.rules['V005'] = { severity: 'off', options: config.rules['V005']?.options ?? {} };
   const { evidence, notes } = opts.diffOnly
@@ -423,13 +476,13 @@ export async function check(opts: CheckOptions): Promise<CheckResult> {
     // Working tree mode compares the merge base with the snapshot, so a head commit equal to the base is the normal case.
     const note = nothingToCompare(base, opts.head);
     report.state = 'unreadable';
-    report.notes = [note];
+    report.notes = [note, ...(report.notes ?? [])];
     log(note);
   }
   if (opts.historyOut && updated) {
     const out = resolve(opts.cwd, opts.historyOut);
     await mkdir(dirname(out), { recursive: true });
-    await writeFile(out, serializeHistory(updated));
+    await writeFileNoFollow(out, serializeHistory(updated));
     log(`history: ${updated.runs.length} runs, ${Object.keys(updated.tests).length} tests written to ${opts.historyOut}`);
   } else if (opts.historyOut) {
     log('history: no results were read and no history was given, so no history was written');

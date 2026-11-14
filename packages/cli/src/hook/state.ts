@@ -25,13 +25,15 @@ export function stateFile(dir: string, repo: string, session: string): string {
   return join(dir, `${hash(real)}-${hash(session)}.json`);
 }
 
-/** The directory is usable when it is a real directory owned by this user (a shared temp dir can hold a planted link). */
+/** The directory is usable when it is a real directory owned by this user and writable by nobody else (a shared temp dir can hold a planted link or directory). */
 function usable(dir: string): boolean {
   try {
     mkdirSync(dir, { recursive: true, mode: 0o700 });
     const st = lstatSync(dir);
     if (!st.isDirectory() || st.isSymbolicLink()) return false;
     if (typeof process.getuid === 'function' && st.uid !== process.getuid()) return false;
+    // Writable by group or others: someone else could raise the counts and make the guard step aside.
+    if (process.platform !== 'win32' && (st.mode & 0o022) !== 0) return false;
     return true;
   } catch {
     return false;
