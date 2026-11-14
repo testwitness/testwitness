@@ -228,11 +228,12 @@ describe('O002 smoke oracle', () => {
     const out = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [smoke, snap, mixed]) }] }), {});
     expect(out.map((f) => f.subject)).toEqual(['a', 'b']);
     expect(out[0]!.severity).toBe('low');
+    // The PR text does not grade the oracle: a regression claim leaves the finding low.
     const reg = await O002.run(context({ pairs: [{ file: changedFile(P, 'added'), head: inventory(P, [smoke]) }], prText: { title: 'Add regression test for #9', body: '' } }), {});
-    expect(reg[0]!.severity).toBe('medium');
+    expect(reg[0]!.severity).toBe('low');
   });
 
-  it('keeps a does not throw test low under a regression claim, and still raises other smoke tests', async () => {
+  it('keeps every smoke test low under a regression claim, a does not throw test included', async () => {
     const noThrow = t({ name: 'accepts a valid header', body: 'x', assertions: [{ callee: 'expect.not.toThrow', kind: 'smoke', family: 'exception', strength: 0, text: 'expect(() => validate(h)).not.toThrow()' }] });
     const java = t({ name: 'acceptsValidHeader', body: 'y', assertions: [{ callee: 'assertDoesNotThrow', kind: 'smoke', text: 'assertDoesNotThrow(() -> validate(h))' }] });
     const defined1 = t({ name: 'returns a header', body: 'z', assertions: [defined('validate(h)')] });
@@ -242,8 +243,8 @@ describe('O002 smoke oracle', () => {
     expect(out.map((f) => [f.subject, f.severity])).toEqual([
       ['accepts a valid header', 'low'],
       ['acceptsValidHeader', 'low'],
-      ['returns a header', 'medium'],
-      ['mixed', 'medium'],
+      ['returns a header', 'low'],
+      ['mixed', 'low'],
     ]);
   });
 });
