@@ -20,7 +20,8 @@ export type TestChange =
 /**
  * Pair tests between the base and head inventories of one file.
  * Match by qualified name first; then pair leftover deleted and added tests
- * by body hash (a rename); the rest are deletions and additions.
+ * by body hash (a rename), then by their own name when the class or group around them changed (a modification);
+ * the rest are deletions and additions.
  */
 export function diffInventories(base: TestInventory | undefined, head: TestInventory | undefined): TestChange[] {
   const out: TestChange[] = [];
@@ -58,6 +59,24 @@ export function diffInventories(base: TestInventory | undefined, head: TestInven
       out.push({ kind: 'renamed', base: b, head: h });
     } else {
       out.push({ kind: 'deleted', base: b });
+    }
+  }
+  // Same test in a renamed or other group: its class or describe block was renamed, or it moved between blocks of the
+  // file, and its body was edited. Paired only when exactly one leftover test on each side carries the name, so two
+  // tests that merely share a title are never confused.
+  const leftBase = out.filter((c): c is { kind: 'deleted'; base: TestCase } => c.kind === 'deleted');
+  if (leftBase.length && stillHead.size) {
+    const headBySimple = new Map<string, TestCase[]>();
+    for (const h of stillHead) push(headBySimple, h.name, h);
+    const baseBySimple = new Map<string, TestCase[]>();
+    for (const c of leftBase) push(baseBySimple, c.base.name, c.base);
+    for (const c of leftBase) {
+      const heads = headBySimple.get(c.base.name);
+      if (heads?.length !== 1 || baseBySimple.get(c.base.name)!.length !== 1) continue;
+      const h = heads[0]!;
+      if (c.base.container.join('/') === h.container.join('/')) continue;
+      stillHead.delete(h);
+      out[out.indexOf(c)] = { kind: 'modified', base: c.base, head: h };
     }
   }
   for (const h of stillHead) out.push({ kind: 'added', head: h });

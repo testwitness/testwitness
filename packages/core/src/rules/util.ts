@@ -766,6 +766,44 @@ function align(a: string[], b: string[]): Array<[number, number]> {
 
 const foldLiteral = (t: string): string => (t.startsWith('"') ? t.toLowerCase() : t);
 
+/** Share of the longer token list that both lists have in common, in order (0 to 1). */
+export function tokenSimilarity(a: string[], b: string[]): number {
+  const longer = Math.max(a.length, b.length);
+  if (longer === 0) return 0;
+  // The common part cannot exceed the shorter list: skip the alignment when the lengths alone rule a match out.
+  if (Math.min(a.length, b.length) / longer < RENAMED_MIN_SIMILARITY) return 0;
+  return align(a, b).length / longer;
+}
+
+/** A deleted test and a new test of the same file are one test under a new name when they share this much. */
+export const RENAMED_MIN_SIMILARITY = 0.8;
+/** Fewest tokens before a test can be matched by similarity; shorter tests look alike by accident. */
+export const RENAMED_MIN_TOKENS = 20;
+/** Longest test compared by similarity, so one huge test cannot make the comparison slow. */
+const RENAMED_MAX_TOKENS = 1500;
+
+/**
+ * The new test of the same file that is the deleted test under another name with a few edits: a renamed title, an
+ * assertion added or dropped. Compared token for token (names of the tests ignored). `taken` holds new tests already
+ * matched to another deleted test, so two deletions never share one destination.
+ */
+export async function renamedWithEdits(ctx: RuleContext, path: string, t: TestCase, added: TestCase[], language: string | undefined, taken: Set<TestCase>): Promise<TestCase | undefined> {
+  if (added.length === 0) return undefined;
+  const deleted = testTokens(await baseTestText(ctx, path, t), language, t.name);
+  if (deleted.length < RENAMED_MIN_TOKENS || deleted.length > RENAMED_MAX_TOKENS) return undefined;
+  const lines = ((await ctx.readHead(path)) ?? '').split(/\r?\n/);
+  let best: { test: TestCase; score: number } | undefined;
+  for (const h of added.slice(0, 200)) {
+    if (taken.has(h)) continue;
+    const kept = testTokens(testText(lines, h), language, h.name);
+    if (kept.length > RENAMED_MAX_TOKENS) continue;
+    const score = tokenSimilarity(deleted, kept);
+    if (score >= RENAMED_MIN_SIMILARITY && (!best || score > best.score)) best = { test: h, score };
+  }
+  if (best) taken.add(best.test);
+  return best?.test;
+}
+
 /** A token that starts a check: expect, assert, should, verify and their spellings, or a toBe style matcher. */
 const CHECK_TOKEN = /^(expect\w*|assert\w*|should\w*|verify\w*|to[A-Z]\w*)$/;
 
