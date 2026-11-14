@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { GitError, renderMarkdown } from '@testwitness/core';
 import { check, resolveBase } from './check.js';
+import { TMP } from './testing/repo.js';
 
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 'Maple Ridge', GIT_AUTHOR_EMAIL: 'maple@example.test', GIT_COMMITTER_NAME: 'Maple Ridge', GIT_COMMITTER_EMAIL: 'maple@example.test' };
 const git = (cwd: string, ...args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8', env: ENV }).trim();
 
 /** A repository on `master` whose feature branch, deleting a test, was merged with a merge commit. */
 function mergedRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'tw-cli-base-'));
+  const dir = mkdtempSync(join(TMP, 'tw-cli-base-'));
   git(dir, 'init', '-q', '-b', 'master');
   mkdirSync(join(dir, 'test'));
   writeFileSync(join(dir, 'test/a.test.ts'), "import { expect, test } from 'vitest';\ntest('a', () => { expect(1).toBe(1); });\ntest('b', () => { expect(2).toBe(2); });\n");

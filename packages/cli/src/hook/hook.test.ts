@@ -2,14 +2,13 @@
 // to the hook as stdin and the answer is asserted in that agent's documented blocking format.
 // The whole file runs with the network guard installed: any socket, DNS lookup or fetch fails the run.
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { gitAction, parseEvent, patchPaths, type Agent } from './events.js';
 import { realPathOf, runHook, type HookOptions, type HookResult } from './run.js';
 import { stateFile } from './state.js';
-import { makeRepo, MATH_TEST, MATH_TEST_WEAKENED, OTHER_TEST_FOCUSED, type TestRepo } from '../testing/repo.js';
+import { makeRepo, MATH_TEST, MATH_TEST_WEAKENED, TMP, OTHER_TEST_FOCUSED, type TestRepo } from '../testing/repo.js';
 import { installNetworkGuard } from '../testing/no-network.js';
 
 const network = installNetworkGuard();
@@ -18,11 +17,14 @@ afterAll(() => {
   network.restore();
 });
 
+// Every hook call starts git several times; Windows runners are slow at that.
+vi.setConfig({ testTimeout: 30_000 });
+
 const fixtures = join(dirname(fileURLToPath(import.meta.url)), '../../../../fixtures/hooks');
 let repo: TestRepo;
 let stateDir: string;
 beforeEach(() => {
-  stateDir = mkdtempSync(join(tmpdir(), 'tw-hook-state-'));
+  stateDir = mkdtempSync(join(TMP, 'tw-hook-state-'));
 });
 afterEach(() => {
   repo?.dispose();
@@ -501,7 +503,7 @@ describe('a hook that fails allows the action and says so', () => {
     const noBase = await hook('claude', 'stop.json', { base: 'no-such-branch' });
     expect(noBase.decision.block).toBe(false);
     expect(noBase.decision.note).toContain('the hook could not run the check');
-    const outside = mkdtempSync(join(tmpdir(), 'tw-not-a-repo-'));
+    const outside = mkdtempSync(join(TMP, 'tw-not-a-repo-'));
     try {
       const r = await runHook({ agent: 'claude', input: payload('claude', 'stop.json').replaceAll(repo.dir, outside), stateDir });
       expect(r).toMatchObject({ exitCode: 0, stdout: '', stderr: '' });
@@ -525,7 +527,7 @@ describe('protect list through a symbolic link', () => {
     const link = join(stateDir, 'linked');
     mkdirSync(join(stateDir, 'real'));
     symlinkSync(join(stateDir, 'real'), link, process.platform === 'win32' ? 'junction' : 'dir');
-    expect(realPathOf(join(link, 'new', 'file.ts'))).toBe(join(realpathSync(stateDir), 'real', 'new', 'file.ts'));
+    expect(realPathOf(join(link, 'new', 'file.ts'))).toBe(join(realpathSync.native(stateDir), 'real', 'new', 'file.ts'));
   });
 });
 

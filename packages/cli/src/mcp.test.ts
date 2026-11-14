@@ -1,7 +1,6 @@
 // Starts the MCP server in process over the SDK's in memory transport and calls every tool the way an agent would.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -10,6 +9,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { builtinRules } from '@testwitness/core';
 import { createServer, defaultBase } from './mcp.js';
+import { TMP } from './testing/repo.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { 'date-time': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/ } });
@@ -58,7 +58,7 @@ let client: Client;
 let repo: string;
 
 beforeAll(async () => {
-  repo = mkdtempSync(join(tmpdir(), 'tw-mcp-'));
+  repo = mkdtempSync(join(TMP, 'tw-mcp-'));
   weakenedRepo(repo);
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await createServer().connect(serverSide);
@@ -140,7 +140,7 @@ describe('testwitness mcp server', () => {
   });
 
   it('testwitness_check reports a directory that is not a repository as a tool error', async () => {
-    const empty = mkdtempSync(join(tmpdir(), 'tw-mcp-empty-'));
+    const empty = mkdtempSync(join(TMP, 'tw-mcp-empty-'));
     try {
       const r = await client.callTool({ name: 'testwitness_check', arguments: { cwd: empty } });
       expect(r.isError).toBe(true);

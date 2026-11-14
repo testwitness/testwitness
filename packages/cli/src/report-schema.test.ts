@@ -2,7 +2,6 @@
 // the MCP server. These tests validate real engine output against the schema and fail when the engine
 // gains a rule id or a finding label that the schema does not list (or the schema keeps one that is gone).
 import { readdirSync, readFileSync, rmSync, mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -12,7 +11,7 @@ import { RESULT_FORMATS } from '@testwitness/junit';
 import { check, render } from './check.js';
 import { discoverCases, runCase, type GoldenCase } from '../../../fixtures/runner/golden.js';
 import { generate, SMALL } from '../../../bench/generate.js';
-import { makeRepo, MATH_TEST_WEAKENED } from './testing/repo.js';
+import { makeRepo, MATH_TEST_WEAKENED, TMP } from './testing/repo.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const schema = JSON.parse(readFileSync(join(root, 'docs/report.schema.json'), 'utf8')) as {
@@ -90,7 +89,7 @@ describe('report schema', () => {
   });
 
   it('validates the JSON output of the bench small case', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'tw-schema-bench-'));
+    const dir = mkdtempSync(join(TMP, 'tw-schema-bench-'));
     try {
       const gen = generate({ ...SMALL, dir });
       const { report, config } = await check({ cwd: gen.repo, base: gen.baseSha, head: gen.headSha, junit: gen.junitGlob, format: 'json', quiet: true, log: () => {} });

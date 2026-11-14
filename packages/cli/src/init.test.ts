@@ -1,14 +1,13 @@
 // `testwitness init --agent <name>`: writes the hook config only, merges without clobbering, prints what it wrote, and
 // is idempotent. Also the Claude Code plugin directory, which must stay equal to what init writes.
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TOOL_VERSION } from '@testwitness/core';
 import { baseCommand, hookGroups, init, isTestwitnessHook, prePushScript } from './init.js';
 import { runHook } from './hook/run.js';
-import { makeRepo, MATH_TEST_WEAKENED, type TestRepo } from './testing/repo.js';
+import { makeRepo, MATH_TEST_WEAKENED, TMP, type TestRepo } from './testing/repo.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 let repo: TestRepo;
@@ -17,7 +16,7 @@ beforeEach(() => {
 });
 afterEach(() => repo.dispose());
 
-const read = (rel: string): string => readFileSync(join(realpathSync(repo.dir), rel), 'utf8');
+const read = (rel: string): string => readFileSync(join(realpathSync.native(repo.dir), rel), 'utf8');
 const json = (rel: string): Record<string, unknown> => JSON.parse(read(rel)) as Record<string, unknown>;
 const run = (agent: 'claude' | 'cursor' | 'codex' | 'git', extra: { force?: boolean; command?: string } = {}) => init({ agent, cwd: repo.dir, command: 'testwitness', ...extra });
 
@@ -26,7 +25,7 @@ describe('init --agent claude', () => {
     const before = repo.git('status', '--porcelain=v1', '-uall');
     const r = await run('claude');
     expect(r.exitCode).toBe(0);
-    expect(r.files).toEqual([{ path: join(realpathSync(repo.dir), '.claude/settings.json'), action: 'created' }]);
+    expect(r.files).toEqual([{ path: join(realpathSync.native(repo.dir), '.claude/settings.json'), action: 'created' }]);
     expect(r.lines[0]).toBe('created .claude/settings.json: hooks PreToolUse (Bash and the edit tools), Stop and SubagentStop run `testwitness hook --agent claude`');
     expect(before).toBe('');
     expect(repo.git('status', '--porcelain=v1', '-uall')).toBe('?? .claude/settings.json\n');
@@ -43,12 +42,12 @@ describe('init --agent claude', () => {
   it('is idempotent: the second run changes no byte and says so', async () => {
     await run('claude');
     const first = read('.claude/settings.json');
-    const mtime = statSync(join(realpathSync(repo.dir), '.claude/settings.json')).mtimeMs;
+    const mtime = statSync(join(realpathSync.native(repo.dir), '.claude/settings.json')).mtimeMs;
     const r = await run('claude');
     expect(r.files[0]!.action).toBe('unchanged');
     expect(r.lines[0]).toBe('unchanged .claude/settings.json (already set up)');
     expect(read('.claude/settings.json')).toBe(first);
-    expect(statSync(join(realpathSync(repo.dir), '.claude/settings.json')).mtimeMs).toBe(mtime);
+    expect(statSync(join(realpathSync.native(repo.dir), '.claude/settings.json')).mtimeMs).toBe(mtime);
   });
 
   it('merges into an existing file without clobbering other keys or other hooks', async () => {
@@ -99,7 +98,7 @@ describe('init --agent claude', () => {
   });
 
   it('on a branch, the fresh hook config is advice to the hook it installs, not a block; removing an installed hook blocks', async () => {
-    const state = mkdtempSync(join(tmpdir(), 'tw-init-state-'));
+    const state = mkdtempSync(join(TMP, 'tw-init-state-'));
     const stop = (): Promise<Awaited<ReturnType<typeof runHook>>> => runHook({ agent: 'claude', input: JSON.stringify({ session_id: 's1', cwd: repo.dir, hook_event_name: 'Stop', stop_hook_active: false }), stateDir: state });
     try {
       // A settings file without our hook is on main; init adds the hook on a branch.
@@ -141,7 +140,7 @@ describe('init --agent cursor and codex', () => {
       },
     });
     expect((await run('cursor')).files[0]!.action).toBe('unchanged');
-    rmSync(join(realpathSync(repo.dir), '.cursor'), { recursive: true });
+    rmSync(join(realpathSync.native(repo.dir), '.cursor'), { recursive: true });
     expect((await run('cursor')).files[0]!.action).toBe('created');
     expect(json('.cursor/hooks.json')['version']).toBe(1);
   });
@@ -159,7 +158,7 @@ describe('init --agent cursor and codex', () => {
 });
 
 describe('init --agent git', () => {
-  const hookPath = (): string => join(realpathSync(repo.dir), '.git/hooks/pre-push');
+  const hookPath = (): string => join(realpathSync.native(repo.dir), '.git/hooks/pre-push');
 
   it('installs an executable pre-push hook in the git directory, idempotently, and leaves the working tree alone', async () => {
     const r = await run('git');
@@ -190,9 +189,9 @@ describe('init --agent git', () => {
   it('follows core.hooksPath, and needs a git repository', async () => {
     repo.git('config', 'core.hooksPath', '.githooks');
     const r = await run('git');
-    expect(r.files[0]!.path).toBe(join(realpathSync(repo.dir), '.githooks/pre-push'));
+    expect(r.files[0]!.path).toBe(join(realpathSync.native(repo.dir), '.githooks/pre-push'));
     expect(existsSync(hookPath())).toBe(false);
-    const outside = mkdtempSync(join(tmpdir(), 'tw-init-none-'));
+    const outside = mkdtempSync(join(TMP, 'tw-init-none-'));
     try {
       const none = await init({ agent: 'git', cwd: outside, command: 'testwitness' });
       expect(none.exitCode).toBe(2);
@@ -205,7 +204,7 @@ describe('init --agent git', () => {
 
 describe('how the hook starts testwitness', () => {
   it('uses testwitness when it is on PATH, else npx --no-install (never a download)', async () => {
-    const bin = mkdtempSync(join(tmpdir(), 'tw-init-bin-'));
+    const bin = mkdtempSync(join(TMP, 'tw-init-bin-'));
     try {
       expect(baseCommand({ pathEnv: bin })).toBe('npx --no-install testwitness');
       writeFileSync(join(bin, process.platform === 'win32' ? 'testwitness.cmd' : 'testwitness'), '');
@@ -259,7 +258,7 @@ describe('init leaves a weakened tree to the hook', () => {
   it('a hook written by init for another agent does not hide findings', async () => {
     await run('cursor');
     repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
-    const state = mkdtempSync(join(tmpdir(), 'tw-init-state-'));
+    const state = mkdtempSync(join(TMP, 'tw-init-state-'));
     try {
       const r = await runHook({ agent: 'cursor', input: JSON.stringify({ conversation_id: 'c1', hook_event_name: 'stop', status: 'completed', loop_count: 0, workspace_roots: [repo.dir] }), stateDir: state });
       expect(r.evaluation!.blocking.map((f) => f.ruleId)).toEqual(['A002']);
