@@ -107,3 +107,26 @@ describe('A002 Python shapes from the corpus', () => {
     expect(Object.keys(inv.helperAssertions ?? {})).toEqual(['_check']);
   });
 });
+
+describe('A002 equality against a computed value', () => {
+  it('reads == "1.0.0" turned into == a value read from a file as the same exact check', async () => {
+    expect(await a002('    assert spec.version == "1.0.0"', '    assert spec.version == manifest["release"]["version"]')).toEqual([]);
+  });
+
+  it('still reports an equality loosened to truthiness or to membership', async () => {
+    expect(await a002('    assert spec.version == "1.0.0"', '    assert spec.version')).toHaveLength(1);
+    expect(await a002('    assert spec.version == "1.0.0"', '    assert "1.0" in spec.version')).toHaveLength(1);
+  });
+});
+
+describe('A002 pairing when a check moved to another subject', () => {
+  const base = '    assert clean(left.err, a) == clean(right.err, b)\n    assert "hint" in clean(right.err, b)';
+  it('keeps the moved containment check paired with itself, so the equality that stays exact is not called loosened', async () => {
+    const head = '    assert clean(fold(left.err), a) == clean(fold(right.err), b)\n    assert "hint" in clean(left.err, a)';
+    expect(await a002(base, head)).toEqual([]);
+  });
+
+  it('still reports the equality when the head has only the containment check on its subject', async () => {
+    expect(await a002(base, '    assert "hint" in clean(left.err, a)')).toHaveLength(1);
+  });
+});

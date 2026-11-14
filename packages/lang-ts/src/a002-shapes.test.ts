@@ -138,3 +138,22 @@ describe('QUnit', () => {
     expect(out).toMatchObject([{ severity: 'medium', subject: 'jQuery.parseXML - error reporting' }]);
   });
 });
+
+describe('A002 when the expected value itself changed', () => {
+  it('reads "no value" replaced by a partial match on a new value as a new expectation, not a loosening', async () => {
+    expect(await a002(jest('expect(result.failure).toBeUndefined();'), jest("expect(result.failure).toMatchObject({ kind: 'aborted' });\n      expect(result.ok).toBe(false);"))).toEqual([]);
+  });
+
+  it('still reports an exact value loosened to a partial match on the same subject', async () => {
+    const out = await a002(jest("expect(result.failure).toEqual({ kind: 'aborted', at: 3 });"), jest("expect(result.failure).toMatchObject({ kind: 'aborted' });"));
+    expect(out).toHaveLength(1);
+  });
+
+  it('keeps a check whose subject moved to another value paired with itself, so an unrelated equality is not called loosened', async () => {
+    const base = "expect(left.err).toEqual(expected);\n      expect(right.err).toContain('hint');";
+    const head = "expect(left.err).toEqual(fold(expected));\n      expect(left.err).toContain('hint');";
+    expect(await a002(jest(base), jest(head))).toEqual([]);
+    // Without an equality left on left.err, the equality did become a containment check.
+    expect(await a002(jest(base), jest("expect(left.err).toContain('hint');"))).toHaveLength(1);
+  });
+});

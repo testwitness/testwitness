@@ -45,6 +45,29 @@ describe('A001 assertion removed', () => {
   });
 });
 
+describe('A001 never called checks on a removed test double', () => {
+  const never = { callee: 'expect.not.toHaveBeenCalled', subject: 'sendInvoice', kind: 'interaction' as const, text: 'expect(sendInvoice).not.toHaveBeenCalled()' };
+  const run = async (headSource: string) => {
+    const base = t({ name: 'closes the batch', body: 'b', assertions: [eq('batch.state', "'closed'"), never] });
+    const head = t({ name: 'closes the batch', body: 'h', assertions: [eq('batch.state', "'closed'")] });
+    const ctx = context({ pairs: [{ file: changedFile(P), base: inventory(P, [base]), head: inventory(P, [head]) }], changedProduction: ['src/billing.ts'] });
+    ctx.readHead = async () => headSource;
+    ctx.readBase = async () => '';
+    return A001.run(ctx, {});
+  };
+
+  it('reports the lost check low when the head of the file no longer has the double at all', async () => {
+    expect(await run("it('closes the batch', () => {\n  expect(batch.state).toBe('closed')\n})")).toMatchObject([{ severity: 'low', label: 'double removed' }]);
+  });
+
+  it('still reports it when the double stays in the file', async () => {
+    const out = await run("const sendInvoice = vi.fn()\nit('closes the batch', () => {\n  expect(batch.state).toBe('closed')\n})");
+    expect(out).toHaveLength(1);
+    expect(out[0]!.label).not.toBe('double removed');
+    expect(out[0]!.severity).toBe('medium');
+  });
+});
+
 describe('A001 inside an exception expectation', () => {
   const raises = { callee: 'pytest.raises', kind: 'exception' as const, text: 'with pytest.raises(AttributeError):', subject: 'cfg.timeout' };
   const touch = { callee: 'assert', kind: 'smoke' as const, text: 'assert cfg.timeout', subject: 'cfg.timeout', guarded: true };

@@ -855,6 +855,22 @@ function readAssertion(a: Assertion): Read {
   }
 }
 
+/**
+ * The assertion pins the subject to "no value": toBeNull, toBeUndefined, assertNull, `is None`, equality with null.
+ * A head assertion that requires a value (it contains, matches, exceeds, exists) cannot be a weaker form of it: the
+ * two accept disjoint values, so the expected value changed.
+ */
+export function expectsNullish(a: Assertion): boolean {
+  if (a.kind === 'custom' || a.kind === 'interaction' || a.kind === 'exception') return false;
+  if (CHAIN_NEGATED.test(a.callee) || NEGATED_CALLEE.test(a.callee)) return false;
+  const name = matcherName(a).trim().replace(/\s+/g, '-');
+  if (SHAPES[name] !== 'exact') return false;
+  if (/^(toBeNull|toBeUndefined|null|undefined|isNull|isUndefined|assertNull|assertIsNone|is-none)$/.test(name)) return true;
+  const subject = a.subject ?? '';
+  // assertEquals(null, x) in JUnit puts the expected value first.
+  return a.expected !== undefined && (isNullish(a.expected) || isNullish(subject));
+}
+
 function looksLikePredicate(subject: string): boolean {
   const call = wholeCall(squashSpace(subject));
   if (!call || call.receiver === undefined) return false;
