@@ -5,7 +5,7 @@ Optional `.testwitness.yml` at the repository root. In PR mode it is read from t
 ```yaml
 version: 1
 mode: report            # report | require-ack | strict
-fail_on: high           # strict and require-ack only: high | medium | low
+fail_on: medium         # the state, strict, require-ack and the hook: high | medium | low (default medium; the hook blocks A002 only at high)
 require_evidence: false # strict only: an unreadable run fails the check
 languages: [java, typescript, python]   # default: auto detect
 paths:

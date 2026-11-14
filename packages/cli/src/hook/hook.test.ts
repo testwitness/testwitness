@@ -41,9 +41,15 @@ function payload(agent: Agent, name: string, edit: (text: string) => string = (t
 const hook = (agent: Agent, name: string, extra: Partial<HookOptions> = {}): Promise<HookResult> => runHook({ agent, input: payload(agent, name), stateDir, ...extra });
 const out = (r: HookResult): Record<string, unknown> => JSON.parse(r.stdout) as Record<string, unknown>;
 
-/** The agent loosened one assertion and focused a test in another file: two high findings (A002, R005) and one medium (R003). */
+/**
+ * One assertion loosened to an existence check (A002 high), one made approximate (A002 medium, which the hook shows as
+ * advice: it blocks A002 only at high).
+ */
+const MATH_TEST_LOOSENED = MATH_TEST.replace('expect(add(1, 2)).toBe(3);', 'expect(add(1, 2)).toBeDefined();').replace('toBe(-3);', 'toBeCloseTo(-3);');
+
+/** The agent loosened two assertions and focused a test in another file: two high findings (A002, R005) and one A002 at medium. */
 function weaken(): void {
-  repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
+  repo.write('src/math.test.ts', MATH_TEST_LOOSENED);
   repo.write('src/other.test.ts', OTHER_TEST_FOCUSED);
 }
 
@@ -57,8 +63,8 @@ function expectReason(reason: string): void {
   expect(reason).toContain("it('is true', () => {");
   // the one sentence
   expect(reason).toContain('Restore the base text, or keep the change and state why in the PR description so a maintainer can acknowledge it.');
-  // medium is advice
-  expect(reason).toContain('Advice, not blocking: R003 medium src/math.test.ts:9');
+  // A002 at medium is advice
+  expect(reason).toContain('Advice, not blocking: A002 medium src/math.test.ts:10');
 }
 
 describe('recognising git commit and git push in a shell command', () => {
@@ -286,12 +292,21 @@ describe('what blocks', () => {
     repo = makeRepo();
   });
 
-  it('a clean tree, and a tree with only a medium finding, pass; the medium finding is shown as advice', async () => {
+  it('a clean tree, and a tree with only an A002 finding at medium, pass; the finding is shown as advice', async () => {
     expect(await hook('claude', 'stop.json')).toMatchObject({ stdout: '', stderr: '' });
-    repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
+    repo.write('src/math.test.ts', MATH_TEST.replace('toBe(-3);', 'toBeCloseTo(-3);'));
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
-    expect(out(r)).toEqual({ systemMessage: 'testwitness: 1 finding shown as advice, not blocking: R003 medium src/math.test.ts:9.' });
+    expect(out(r)).toEqual({ systemMessage: 'testwitness: 1 finding shown as advice, not blocking: A002 medium src/math.test.ts:10.' });
+  });
+
+  it('A002 blocks only at high, also when the base config sets fail_on: low', async () => {
+    repo.dispose();
+    repo = makeRepo({ '.testwitness.yml': 'fail_on: low\n' });
+    repo.write('src/math.test.ts', MATH_TEST.replace('toBe(-3);', 'toBeCloseTo(-3);'));
+    const r = await hook('claude', 'stop.json');
+    expect(r.decision.block).toBe(false);
+    expect(r.evaluation!.advice.map((f) => `${f.ruleId} ${f.severity}`)).toEqual(['A002 medium']);
   });
 
   it('fail_on: medium with the rule on hook.blocking makes the medium finding block', async () => {
@@ -374,19 +389,26 @@ describe('what blocks', () => {
     repo = makeRepo({ '.testwitness.yml': 'hook:\n  advice_only: [A002]\n' });
     repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
     const narrow = await hook('claude', 'stop.json');
-    expect(narrow.decision.block).toBe(false);
-    expect(narrow.evaluation!.advice.map((f) => f.ruleId).sort()).toEqual(['A002', 'R003']);
+    expect(narrow.evaluation!.blocking.map((f) => f.ruleId)).toEqual(['R003']);
+    expect(narrow.evaluation!.advice.map((f) => f.ruleId)).toEqual(['A002']);
   });
 
-  it('fail_on: medium lowers the threshold: a newly skipped test (R003, medium) blocks; a capped rule stays out', async () => {
-    repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: medium\n' });
+  it('the default threshold is medium: a newly skipped test (R003, medium) blocks; a capped rule stays out', async () => {
     repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
     repo.remove('src/other.test.ts');
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(true);
     expect(r.evaluation!.blocking.map((f) => `${f.ruleId} ${f.severity}`)).toEqual(['R003 medium']);
     expect(r.evaluation!.advice).toEqual([]);
+  });
+
+  it('fail_on: high in the base config makes R003 at medium advice again', async () => {
+    repo.dispose();
+    repo = makeRepo({ '.testwitness.yml': 'fail_on: high\n' });
+    repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
+    const r = await hook('claude', 'stop.json');
+    expect(r.decision.block).toBe(false);
+    expect(r.evaluation!.advice.map((f) => `${f.ruleId} ${f.severity}`)).toEqual(['R003 medium']);
   });
 });
 
@@ -406,7 +428,7 @@ describe('loop guard', () => {
     expect(b.decision.reason).toContain('Block 2 of 2 for this finding in this session.');
     expect(out(c)).toEqual({
       systemMessage:
-        'testwitness: the guard stepped aside: 2 findings were blocked 2 times in this session and are still open (A002 src/math.test.ts:6, R005 src/other.test.ts:3). It stops blocking so the agent is not stuck; review them before you merge. 1 finding shown as advice, not blocking: R003 medium src/math.test.ts:9.',
+        'testwitness: the guard stepped aside: 2 findings were blocked 2 times in this session and are still open (A002 src/math.test.ts:6, R005 src/other.test.ts:3). It stops blocking so the agent is not stuck; review them before you merge. 1 finding shown as advice, not blocking: A002 medium src/math.test.ts:10.',
     });
     expect(c.stderr).toContain('the guard stepped aside');
     // The state lives under the temp dir, keyed by repository and session, and the repository is untouched.
@@ -415,7 +437,7 @@ describe('loop guard', () => {
   });
 
   it('a new finding still blocks after the guard stepped aside for older ones', async () => {
-    repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
+    repo.write('src/math.test.ts', MATH_TEST_LOOSENED);
     await hook('claude', 'stop.json');
     await hook('claude', 'stop.json');
     expect((await hook('claude', 'stop.json')).decision.block).toBe(false);

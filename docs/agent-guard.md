@@ -63,11 +63,11 @@ The working tree means staged, unstaged and untracked files that are not ignored
 
 By default the hook blocks on the proven rules only, the same small set that v0.1 reports at medium or high, and stays quiet about everything else. An interruption in the middle of an agent's work costs more than a line in a PR comment, so a rule has to earn the right to block.
 
-* **Blocking by default:** R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened), plus a changed path on the `protect` list. These are the proven rules (`PROVEN_RULES` in `packages/core/src/proven.ts`), and none of them has a wrongful block at high on the corpus or on 300 real merged pull requests. R003 grades a newly skipped test medium, so it blocks only when the base config sets `fail_on: medium`; at the default it is shown as advice.
+* **Blocking by default:** R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened), plus a changed path on the `protect` list. These are the proven rules (`PROVEN_RULES` in `packages/core/src/proven.ts`), and none of them has a wrongful block at high on the corpus or on 300 real merged pull requests. R003, R004 and R005 block at medium and above. A002 blocks only at high: at medium it blocked one honest change on the corpus (a float comparison made approximate) and one in the trial, so a medium A002 finding is shown as advice and the pull request check still reports it.
 * **The one exception: W006**, a change to the gate itself (`.testwitness.yml`, the workflow step that runs testwitness, or the agent hook config). It is not a judgement about test code, only a maintainer may acknowledge it, and it has no wrongful block on either set. It keeps its severity in the report and it blocks.
 * **Every other rule does not block**, and its findings are capped at low in v0.1, so the hook does not show them either. That includes R001 and R002 (deleted tests and test files), the behaviour people complain about most. On an untuned replay of 300 ordinary merged pull requests from 20 repositories the rules had never been tuned on, none of the 60 findings at medium or high was correct. So v0.1 keeps four rules at medium or high and caps every other rule at low until it passes such a replay. Read the numbers in [precision](./precision#agent-hook-replay) before you rely on the default.
 * **Widening it is your call.** A rule outside the set blocks only when the repository opts it back in with a severity and lists it, in `.testwitness.yml` on the default branch: for example `rules: { R001: medium, R002: high }` and `hook: { blocking: [A002, R003, R004, R005, W006, R001, R002] }`. Listing it in `hook.blocking` alone is not enough, because its findings stay capped at low. `hook.advice_only` takes a rule off the list again.
-* `medium` findings never block unless the base config sets `fail_on: medium`, and then only for rules on the blocking list.
+* The hook blocks at `fail_on` and above (default medium), except A002 at high, and only for rules on the blocking list. Every other rule is capped at low and never blocks.
 
 A block message looks like this:
 
@@ -103,7 +103,7 @@ An edit to a listed path is denied at the edit tool, and a listed path that chan
 The hook reads `.testwitness.yml` from the merge base only, never from the working tree. An agent that edits the file to switch a rule off changes nothing, and the edit is itself a W006 finding that blocks. The same holds for the hook config files (`.claude/settings.json`, `.claude/settings.local.json`, `.cursor/hooks.json`, `.codex/hooks.json`, `.codex/config.toml`): removing or changing an installed testwitness hook is W006. Installing the hook for the first time on a branch is shown as advice and does not block that branch.
 
 ```yaml
-fail_on: high          # the hook blocks at this severity and above
+fail_on: medium        # the hook blocks at this severity and above (default); A002 only at high
 hook:
   timeout: 20          # seconds before the hook gives up and allows the action
   max_blocks: 2        # how often the same finding may block in one session

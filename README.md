@@ -73,13 +73,13 @@ testwitness init --agent claude    # or cursor, codex, git
 
 In Claude Code you can install it as a plugin instead, with the hook and the read only MCP server bundled (the package must be installed as above): `/plugin marketplace add testwitness/testwitness`, then `/plugin install testwitness@testwitness`.
 
-By default it blocks on the same four rules (a newly skipped test only with `fail_on: medium`, since that finding is medium) and on changes to the gate itself. Every other rule, deleted tests included, stays quiet until it passes an untuned replay; a maintainer can opt a rule in and widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
+By default it blocks on the same four rules and on changes to the gate itself: R003, R004 and R005 at medium and above, A002 only at high. A loosened assertion at medium blocked honest work in our replays, so the hook shows it as advice and the pull request check still reports it. Every other rule, deleted tests included, stays quiet until it passes an untuned replay; a maintainer can opt a rule in and widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
 
 ## What it reports
 
 Three states, never a verdict about honesty:
 
-- `pass`: no finding at or above the configured threshold.
+- `pass`: no finding at or above the configured threshold (`fail_on`, medium by default, so a finding of any of the four proven rules puts the PR in review).
 - `review`: this PR changed what its tests prove. A reviewer should look.
 - `unreadable`: the diff rules ran, but no test results were available to confirm what ran.
 
@@ -133,7 +133,7 @@ Optional `.testwitness.yml` at the repository root, read from the base ref so a 
 
 ```yaml
 mode: report          # report | require-ack | strict
-fail_on: high
+fail_on: medium
 rules:
   R003: high
   R001: medium        # naming a severity opts a rule that is not proven yet back in

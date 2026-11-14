@@ -9,11 +9,16 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { evaluate, runHook } from 'testwitness';
-import { HOOK_BLOCKING, PROVEN_RULES } from '@testwitness/core';
+import { defaultConfig, HOOK_BLOCKING, HOOK_HIGH_ONLY, PROVEN_RULES, SEVERITY_RANK, type Severity } from '@testwitness/core';
 import { judgeFindings, type CorpusEntry, type Judged } from './corpus.js';
 import { replayEntry, type ReplayResult } from './replay.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
+
+/** The lowest severity at which the hook blocks a rule on its list with the default config: fail_on, or high for HOOK_HIGH_ONLY. */
+export function hookThreshold(ruleId: string, failOn: Severity = defaultConfig().failOn): Severity {
+  return HOOK_HIGH_ONLY.includes(ruleId) && SEVERITY_RANK[failOn] < SEVERITY_RANK.high ? 'high' : failOn;
+}
 
 /** Per rule aggregates of the 300 pull request trial (corpus/trial/hook-trial-2026-11.json): judged counts, no names. */
 export interface TrialAggregates {
@@ -46,7 +51,7 @@ export interface EntryReplay {
     atDefault: string[];
     /** The same with every rule allowed to block at what it said before the v0.1 cap: every open high finding blocks. */
     everyHigh: string[];
-    /** The same grading with `fail_on: medium` in the base config (blocking list unchanged). */
+    /** The same grading if A002 also blocked at medium (HOOK_HIGH_ONLY empty, blocking list unchanged). */
     atMedium: string[];
     /** The hook's stdout, as Claude Code receives it. */
     stdout: string;
@@ -65,8 +70,8 @@ export async function replayWithHook(e: CorpusEntry): Promise<EntryReplay> {
         blocked: r.decision.block,
         blocking: (r.evaluation?.blocking ?? []).map((f) => f.fingerprint),
         atDefault: evaluate(wt, wt.config).blocking.map((f) => f.fingerprint),
-        everyHigh: evaluate(wt, wt.config, { blocking: 'all', uncapped: true }).blocking.map((f) => f.fingerprint),
-        atMedium: evaluate(wt, { ...wt.config, failOn: 'medium' }).blocking.map((f) => f.fingerprint),
+        everyHigh: evaluate(wt, { ...wt.config, failOn: 'high' }, { blocking: 'all', uncapped: true }).blocking.map((f) => f.fingerprint),
+        atMedium: evaluate(wt, wt.config, { highOnly: [] }).blocking.map((f) => f.fingerprint),
         stdout: r.stdout,
         note: r.decision.note,
       };
@@ -81,15 +86,17 @@ export interface HookRuleRow {
   ruleId: string;
   /** True positive findings of the rule in the corpus, any severity. */
   tp: number;
-  /** Of them, at high severity as the rule graded them before the v0.1 cap (the only ones the default setting can block on). */
+  /** Of them, at high severity as the rule graded them before the v0.1 cap. */
   tpHigh: number;
+  /** Of them, at or above the severity the hook blocks the rule at by default (hookThreshold). */
+  tpAtThreshold: number;
   /** True positives the hook blocks on at the default setting. */
   tpBlocked: number;
   /** Findings that are not true positives which would block if every high finding blocked. */
   wrongfulEveryHigh: number;
   /** Wrongful blocks at the default setting, for the rules on the blocking list. */
   wrongfulAtDefault: number;
-  /** True positives blocked, and wrongful blocks, when the base config sets `fail_on: medium`. */
+  /** True positives blocked, and wrongful blocks, if A002 also blocked at medium. */
   tpBlockedMedium: number;
   wrongfulAtMedium: number;
   /** The rule is on the hook's default blocking list. */
@@ -114,7 +121,7 @@ export interface HookStats {
   honestEntriesBlocked: number;
   /** Honest entries that would be blocked if every high finding blocked. */
   honestEntriesBlockedEveryHigh: number;
-  /** With `fail_on: medium`: true positive entries blocked, and honest entries blocked. */
+  /** If A002 also blocked at medium: true positive entries blocked, and honest entries blocked. */
   tpEntriesBlockedMedium: number;
   honestEntriesBlockedMedium: number;
 }
@@ -123,7 +130,7 @@ export function hookStats(all: EntryReplay[], trial: TrialAggregates = loadTrial
   const rows = new Map<string, HookRuleRow>();
   const row = (id: string): HookRuleRow => {
     let r = rows.get(id);
-    if (!r) rows.set(id, (r = { ruleId: id, tp: 0, tpHigh: 0, tpBlocked: 0, wrongfulEveryHigh: 0, wrongfulAtDefault: 0, tpBlockedMedium: 0, wrongfulAtMedium: 0, trialHighTp: 0, trialHighFp: 0, blocks: HOOK_BLOCKING.includes(id) }));
+    if (!r) rows.set(id, (r = { ruleId: id, tp: 0, tpHigh: 0, tpAtThreshold: 0, tpBlocked: 0, wrongfulEveryHigh: 0, wrongfulAtDefault: 0, tpBlockedMedium: 0, wrongfulAtMedium: 0, trialHighTp: 0, trialHighFp: 0, blocks: HOOK_BLOCKING.includes(id) }));
     return r;
   };
   const stats: HookStats = { entries: all.length, rows: [], tpEntries: 0, tpEntriesBlocked: 0, tpEntriesHigh: 0, honestEntries: 0, honestEntriesBlocked: 0, honestEntriesBlockedEveryHigh: 0, tpEntriesBlockedMedium: 0, honestEntriesBlockedMedium: 0 };
@@ -141,6 +148,7 @@ export function hookStats(all: EntryReplay[], trial: TrialAggregates = loadTrial
         const r = row(j.finding.ruleId);
         r.tp++;
         if (j.finding.severity === 'high') (r.tpHigh++, tpHigh++);
+        if (SEVERITY_RANK[j.finding.severity] >= SEVERITY_RANK[hookThreshold(j.finding.ruleId)]) r.tpAtThreshold++;
         if (atDefault.has(fp)) r.tpBlocked++;
         if (atMedium.has(fp)) r.tpBlockedMedium++;
       } else {
@@ -193,21 +201,20 @@ export function renderHookReplayMarkdown(s: HookStats, date: string, trial: Tria
   const lines = [
     HOOK_REPLAY_HEADING,
     '',
-    `Measured ${date} on the same ${s.entries} pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (\`testwitness hook --agent claude\`) runs on it with the default settings: it blocks on open high findings of the rules on its blocking list. A block is wrongful when the finding it rests on is not a true positive in the labels above. Severities in the columns about every high finding are what each rule says before the v0.1 cap; the hook itself sees the capped severity.`,
+    `Measured ${date} on the same ${s.entries} pull requests. Each one is applied as an uncommitted change on top of its base commit, the way a coding agent leaves it, and the Claude Code Stop hook (\`testwitness hook --agent claude\`) runs on it with the default settings: it blocks on open findings of the rules on its blocking list at medium or above, except A002, which blocks only at high. A block is wrongful when the finding it rests on is not a true positive in the labels above. Severities in the columns about every high finding are what each rule says before the v0.1 cap; the hook itself sees the capped severity.`,
     '',
-    `* ${s.tpEntries} pull requests have at least one true positive finding. The hook blocks ${s.tpEntriesBlocked} of them (${share(s.tpEntriesBlocked, s.tpEntries)}). ${s.tpEntriesHigh} have a true positive that its rule grades high; the others carry medium or low findings only, or high findings of rules that are capped at low in v0.1.`,
-    `* ${s.honestEntries} pull requests have no true positive finding. The hook blocks ${s.honestEntriesBlocked} of them. If every rule could block at the severity it gives before the cap, it would block ${s.honestEntriesBlockedEveryHigh}.`,
+    `* ${s.tpEntries} pull requests have at least one true positive finding. The hook blocks ${s.tpEntriesBlocked} of them (${share(s.tpEntriesBlocked, s.tpEntries)}). ${s.tpEntriesHigh} have a true positive that its rule grades high. The others it lets through carry findings of rules that are capped at low in v0.1, or an A002 finding at medium.`,
+    `* ${s.honestEntries} pull requests have no true positive finding. The hook blocks ${s.honestEntriesBlocked} of them. If every rule could block on its high findings, as graded before the cap, it would block ${s.honestEntriesBlockedEveryHigh}.`,
     `* Second set, the real world trial of ${trial.measured}: the ${trial.pullRequests / trial.repositories} most recent merged pull requests that touch tests in each of ${trial.repositories} popular open source repositories, ${trial.pullRequests} in all, every medium and high finding judged by hand. Their authors and reviewers accepted them, so nearly every block there is wrongful. If every high finding blocked, the hook would block ${trial.pullRequestsEveryHigh.blockedWithTruePositive + trial.pullRequestsEveryHigh.blockedWrongly} of them, ${trial.pullRequestsEveryHigh.blockedWrongly} wrongly. At the default setting it blocks ${trial.pullRequestsAtDefault.blockedWithTruePositive + trial.pullRequestsAtDefault.blockedWrongly}, ${trial.pullRequestsAtDefault.blockedWrongly} wrongly. These trial numbers are computed from the judged findings of the commit check, which the working tree check reproduces; the hook was not rerun on those repositories.`,
-    `* The hook blocks on the proven rules only, the same set v0.1 reports at medium or high: ${[...PROVEN_RULES].sort().join(', ')}. W006 is the one exception: it is the gate protecting itself, and it has no wrongful block on either set (it never fired on them). None of the listed rules has a wrongful block at high on either set. R003 grades a newly skipped test medium, so it blocks only when the base config sets \`fail_on: medium\`. Every other rule is capped at low and is not shown by the hook.${clean.length ? ` ${clean.join(', ')} ${clean.length === 1 ? 'has' : 'have'} a true positive at high on the corpus and no wrongful block at high on either set, but the rules were tuned on part of the corpus, so that is not proof; ${clean.length === 1 ? 'it blocks' : 'they block'} only after passing an untuned replay (docs/how-we-measure-precision.md).` : ''} A maintainer can opt a rule back in with a severity in \`rules\` and add it to \`hook.blocking\` in \`.testwitness.yml\`, or take a rule off with \`hook.advice_only\`.`,
-    `* On the corpus, with \`fail_on: medium\` in the base config the hook blocks ${s.tpEntriesBlockedMedium} of the ${s.tpEntries} pull requests with a true positive (${share(s.tpEntriesBlockedMedium, s.tpEntries)}) and ${s.honestEntriesBlockedMedium} of the ${s.honestEntries} without one; the last two columns give that setting per rule (the blocking list stays the same, so only its rules can block).`,
+    `* The hook blocks on the proven rules only, the same set v0.1 reports at medium or high: ${[...PROVEN_RULES].sort().join(', ')}. W006 is the one exception: it is the gate protecting itself, and it has no wrongful block on either set (it never fired on them). None of the listed rules has a wrongful block at high on either set. Every other rule is capped at low and is not shown by the hook.${clean.length ? ` ${clean.join(', ')} ${clean.length === 1 ? 'has' : 'have'} a true positive at high on the corpus and no wrongful block at high on either set, but the rules were tuned on part of the corpus, so that is not proof; ${clean.length === 1 ? 'it blocks' : 'they block'} only after passing an untuned replay (docs/how-we-measure-precision.md).` : ''} A maintainer can opt a rule back in with a severity in \`rules\` and add it to \`hook.blocking\` in \`.testwitness.yml\`, or take a rule off with \`hook.advice_only\`.`,
+    `* A002 blocks only at high because at medium it blocks honest work: if it also blocked at medium, the hook would block ${s.tpEntriesBlockedMedium} of the ${s.tpEntries} pull requests with a true positive on the corpus (${share(s.tpEntriesBlockedMedium, s.tpEntries)}) and ${s.honestEntriesBlockedMedium} of the ${s.honestEntries} without one, and ${trial.pullRequestsFailOnMedium.blockedWrongly} of the ${trial.pullRequests} trial pull requests wrongly. The last two columns give that setting per rule.`,
     '',
-    '| Rule | True positives (corpus) | Of them high | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked (corpus) | High findings judged true in the trial | Wrongful blocks if every high finding blocked (trial) | Wrongful blocks at the default, both sets | In the hook | Blocked with fail_on: medium (corpus) | Wrongful blocks with fail_on: medium (corpus) |',
-    '|---|---|---|---|---|---|---|---|---|---|---|---|',
+    '| Rule | True positives (corpus) | Of them high | Of them at the hook threshold | Blocked by the hook | Share of true positives blocked | Wrongful blocks if every high finding blocked (corpus) | High findings judged true in the trial | Wrongful blocks if every high finding blocked (trial) | Wrongful blocks at the default, both sets | In the hook | Blocked if A002 also blocked at medium (corpus) | Wrongful blocks then (corpus) |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
   ];
   for (const r of s.rows) {
-    lines.push(`| ${r.ruleId} | ${r.tp} | ${r.tpHigh} | ${r.tpBlocked} | ${share(r.tpBlocked, r.tp)} | ${r.wrongfulEveryHigh} | ${r.trialHighTp} | ${r.trialHighFp} | ${r.wrongfulAtDefault + (r.blocks ? r.trialHighFp : 0)} | ${r.blocks ? 'blocks' : 'capped at low'} | ${r.tpBlockedMedium} | ${r.wrongfulAtMedium} |`);
+    lines.push(`| ${r.ruleId} | ${r.tp} | ${r.tpHigh} | ${r.blocks ? r.tpAtThreshold : 'n/a'} | ${r.tpBlocked} | ${share(r.tpBlocked, r.tp)} | ${r.wrongfulEveryHigh} | ${r.trialHighTp} | ${r.trialHighFp} | ${r.wrongfulAtDefault + (r.blocks ? r.trialHighFp : 0)} | ${r.blocks ? (HOOK_HIGH_ONLY.includes(r.ruleId) ? 'blocks at high' : 'blocks') : 'capped at low'} | ${r.tpBlockedMedium} | ${r.wrongfulAtMedium} |`);
   }
-  lines.push('', `In the trial, \`fail_on: medium\` with the default blocking list would block ${trial.pullRequestsFailOnMedium.blockedWithTruePositive + trial.pullRequestsFailOnMedium.blockedWrongly} of the ${trial.pullRequests} pull requests, ${trial.pullRequestsFailOnMedium.blockedWrongly} of them wrongly.`);
-  lines.push('', 'The share is low for rules whose true positives are mostly medium: the hook does not block on medium unless the base config sets `fail_on: medium`. The numbers come from `corpus/runner/replay.test.ts`, which fails when this section and the measurement disagree. Regenerate with `pnpm corpus:report`.');
+  lines.push('', 'The share is low for rules whose true positives are mostly capped or, for A002, medium. The numbers come from `corpus/runner/replay.test.ts`, which fails when this section and the measurement disagree. Regenerate with `pnpm corpus:report`.');
   return lines.join('\n') + '\n';
 }

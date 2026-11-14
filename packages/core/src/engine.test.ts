@@ -358,8 +358,9 @@ describe('computeState', () => {
     expect(computeState([fakeFinding('high')], c, evidence(), [fakeFile('test')])).toBe('review');
   });
   it('ignores findings below failOn and acknowledged ones', () => {
-    expect(computeState([fakeFinding('medium')], c, evidence(), [])).toBe('pass');
-    expect(computeState([fakeFinding('medium')], { ...c, failOn: 'medium' }, evidence(), [])).toBe('review');
+    expect(computeState([fakeFinding('low')], c, evidence(), [])).toBe('pass');
+    expect(computeState([fakeFinding('medium')], c, evidence(), [])).toBe('review');
+    expect(computeState([fakeFinding('medium')], { ...c, failOn: 'high' }, evidence(), [])).toBe('pass');
     expect(computeState([fakeFinding('low')], { ...c, failOn: 'low' }, evidence(), [])).toBe('review');
     const acked = fakeFinding('high', { acknowledged: { by: 'a', reason: 'r', at: 'd', via: 'config' } });
     expect(computeState([acked], c, evidence(), [])).toBe('pass');

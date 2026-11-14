@@ -10,7 +10,7 @@
 //     a timeout allows the action and says so.
 import { realpathSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { git, GitError, isHookConfigPath, pathMatcher, SEVERITY_RANK, showFile, HOOK_DEFAULT_TIMEOUT_SECONDS, type ChangedFile, type Finding, type InventoryPair, type ResolvedConfig, type Severity } from '@testwitness/core';
+import { git, GitError, HOOK_HIGH_ONLY, isHookConfigPath, pathMatcher, SEVERITY_RANK, showFile, HOOK_DEFAULT_TIMEOUT_SECONDS, type ChangedFile, type Finding, type InventoryPair, type ResolvedConfig, type Severity } from '@testwitness/core';
 import { check, ConfigError, defaultBase, loadConfig, type CheckResult } from '../check.js';
 import { fallbackEvent, parseEvent, renderDecision, type Agent, type Decision, type HookEvent, type HookOutput } from './events.js';
 import { defaultStateDir, readCounts, writeCounts } from './state.js';
@@ -72,13 +72,15 @@ export interface EvaluateOptions {
    * severity. For measurement only: the corpus replay uses it to see what a rule would block if it were proven.
    */
   uncapped?: boolean;
+  /** Rules that block only at high, whatever `fail_on` says; default HOOK_HIGH_ONLY. The replay passes [] to measure the alternative. */
+  highOnly?: readonly string[];
 }
 
 /**
  * Grade a check result the way the hook does. Pure: no loop guard, no I/O.
  *
- * Blocking: open findings at or above `fail_on` (high unless the base config lowers it) of a rule on the blocking
- * list (`hook.blocking`, by default the proven rules and W006) and not on `hook.advice_only`, plus changed
+ * Blocking: open findings at or above `fail_on` (medium unless the base config changes it; high for the rules on
+ * HOOK_HIGH_ONLY, which is A002) of a rule on the blocking list (`hook.blocking`, by default the proven rules and W006) and not on `hook.advice_only`, plus changed
  * paths on the `protect` list. Everything else at medium or above is advice. Never blocking: acknowledged findings,
  * and W006 on a file the change adds or on a hook config that had no testwitness hook at the base (`gateInstalls`): a
  * gate that did not exist at the base cannot have been weakened, and running `testwitness init` on a branch must not
@@ -88,6 +90,7 @@ export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: 
   const allowed = opts.blocking ?? config.hook.blocking;
   const adviceOnly = opts.adviceOnly ?? config.hook.adviceOnly;
   const gateInstalls = opts.gateInstalls ?? new Set<string>();
+  const highOnly = opts.highOnly ?? HOOK_HIGH_ONLY;
   const blocking: GuardFinding[] = [];
   const advice: GuardFinding[] = [];
   const byPath = new Map(result.files.map((f) => [f.path, f]));
@@ -95,7 +98,8 @@ export function evaluate(result: Pick<CheckResult, 'report' | 'files'>, config: 
     if (f.acknowledged) continue;
     const severity = opts.uncapped ? (f.uncappedSeverity ?? f.severity) : f.severity;
     const g: GuardFinding = { ruleId: f.ruleId, severity, path: f.location.path, ...(f.location.line ? { line: f.location.line } : {}), message: f.message, fingerprint: f.fingerprint, finding: f };
-    const atThreshold = SEVERITY_RANK[severity] >= SEVERITY_RANK[config.failOn];
+    const threshold = highOnly.includes(f.ruleId) ? Math.max(SEVERITY_RANK[config.failOn], SEVERITY_RANK.high) : SEVERITY_RANK[config.failOn];
+    const atThreshold = SEVERITY_RANK[severity] >= threshold;
     const adviceRule = (allowed !== 'all' && !allowed.includes(f.ruleId)) || adviceOnly.includes(f.ruleId) || (f.ruleId === 'W006' && (byPath.get(f.location.path)?.status === 'added' || gateInstalls.has(f.location.path)));
     if (atThreshold && !adviceRule) blocking.push(g);
     else if (SEVERITY_RANK[severity] >= SEVERITY_RANK.medium) advice.push(g);

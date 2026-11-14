@@ -18,6 +18,14 @@ export const PROVEN_RULES: readonly string[] = ['A002', 'R003', 'R004', 'R005'];
  */
 export const GATE_RULES: readonly string[] = ['W006'];
 
+/**
+ * Proven rules the agent hook blocks on only at high, whatever `fail_on` says. A002 (assertion loosened) is proven at
+ * medium for the review state, but at medium it blocked one honest change on the corpus (a float comparison made
+ * approximate) and one in the 300 pull request trial. Blocking an agent is more costly than a line in a review, so the
+ * hook waits for high on A002. The pull request check still reports its medium findings.
+ */
+export const HOOK_HIGH_ONLY: readonly string[] = ['A002'];
+
 /** The highest severity a finding of an unproven rule is reported at. */
 export const UNPROVEN_SEVERITY_CAP: Severity = 'low';
 

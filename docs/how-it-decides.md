@@ -2,7 +2,7 @@
 
 ## Three states
 
-- `pass`: no open finding at or above `fail_on` (default `high`).
+- `pass`: no open finding at or above `fail_on` (default `medium`).
 - `review`: this PR changed what its tests prove. A reviewer should look.
 - `unreadable`: the diff rules ran and found nothing, but no JUnit XML was available to confirm what ran, and the PR touched tests or test configuration.
 
