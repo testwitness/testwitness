@@ -73,6 +73,15 @@ try {
   const stray = [...paths].filter((p) => /^(src|dist\/(?!cli\.js$|assets\/))/.test(p) || p.endsWith('.map') || p.endsWith('.d.ts'));
   if (stray.length) fail(`unexpected files in tarball: ${stray.join(', ')}`);
 
+  // Features cut from v0.1 (run history, coverage on changed lines, mutation on request) live on the experimental
+  // branch: none of their code may reach the bundle. These names are distinctive; the REMOVED_KEYS error messages
+  // and C002's reading of JaCoCo thresholds in pom.xml are expected and are not on the list.
+  const bundleText = readFileSync(join(extractDir, 'package', 'dist', 'cli.js'), 'utf8');
+  const cut = ['mutate-plan', 'readMutationFiles', 'readStrykerJson', 'pitTestKey', 'mutationOracle', 'planMutation', 'parseMutateCommand', 'measured weak', 'readCoverageFiles', 'toCoverageEvidence', 'normaliseCoveragePath', 'uncovered change', 'readHistoryFile', 'mergeHistory', 'applyHistory', 'history_artifact', 'testwitness-history', 'hides failure', 'recordHistory'];
+  const leaked = cut.filter((name) => bundleText.includes(name));
+  if (leaked.length) fail(`the bundle still holds code of features cut from v0.1: ${leaked.join(', ')}`);
+  else ok(`the bundle holds none of the ${cut.length} names of the features cut from v0.1`);
+
   const manifestText = run('tar', ['-xOzf', tarball, 'package/package.json']);
   const manifest = JSON.parse(manifestText);
   process.stdout.write(`published dependencies: ${JSON.stringify(manifest.dependencies ?? {})}\n`);
@@ -241,7 +250,8 @@ try {
   };
   const tapMissing = tapCheck('--results', join(tapCase('V003-tap-modified-test-missing'), 'results/results.tap'));
   const v003 = tapMissing.findings?.find((f) => f.ruleId === 'V003');
-  if (v003?.severity === 'high' && tapMissing.evidence?.formats?.join() === 'tap' && tapMissing.evidence.total === 12) ok(`--results read Node TAP and V003 reported: ${v003.message}`);
+  // V003 is not proven yet: the bundle reports it at low and keeps the rule's own high in uncappedSeverity.
+  if (v003?.severity === 'low' && v003.uncappedSeverity === 'high' && tapMissing.evidence?.formats?.join() === 'tap' && tapMissing.evidence.total === 12) ok(`--results read Node TAP and V003 reported (capped at low, the rule says high): ${v003.message}`);
   else fail(`--results with TAP did not give V003 and evidence.formats [tap]: ${JSON.stringify(tapMissing.error ?? tapMissing.evidence)}`);
   const tapAll = tapCheck('--junit', join(tapCase('V003-tap-all-changed-tests-ran'), 'results/results.tap'));
   if (tapAll.evidence?.formats?.join() === 'tap' && tapAll.evidence.total === 13 && !tapAll.findings?.some((f) => f.ruleId === 'V003')) ok('--junit, the older name, reads the same TAP and every changed test has a record');
@@ -323,10 +333,11 @@ function makeWeakenedRepo(dir) {
   git('add', '-A');
   git('commit', '-q', '-m', 'base');
   git('checkout', '-q', '-b', 'weaken');
-  // Head: delete one test per language.
+  // Head: skip the TypeScript test (R003, a proven rule, medium) and delete one test in Python and Java (R001, capped at
+  // low in v0.1). Each language still gives a finding, and the skip makes require-ack with fail-on medium exit 1.
   write(
     'src/math.test.ts',
-    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it('adds two numbers', () => {", '    expect(add(1, 2)).toBe(3);', '  });', '});', ''].join('\n'),
+    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it('adds two numbers', () => {", '    expect(add(1, 2)).toBe(3);', '  });', '', "  it.skip('handles negatives', () => {", '    expect(add(-1, -2)).toBe(-3);', '  });', '});', ''].join('\n'),
   );
   write('tests/test_math.py', ['def test_add():', '    assert 1 + 2 == 3', ''].join('\n'));
   write(
