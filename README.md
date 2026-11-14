@@ -99,14 +99,14 @@ v0.1 reports 4 rules at medium or high, the proven ones. Their numbers on the pu
 
 Every other rule still runs, but its findings are capped at low (informational, collapsed in the comment) until it passes an untuned replay on pull requests from repositories it was never tuned on ([how we measure](docs/how-we-measure-precision.md)). W006, a change to the gate itself, is the one exception and keeps its severity. A repository can opt a rule back in by naming its severity in `.testwitness.yml`, for example `rules: { R001: medium }`. The severity in brackets is what the rule says before the cap; the corpus counts are judged at that severity:
 
-- R001 Test function deleted (says medium): 32 true positives, 23 false positives on the corpus
+- R001 Test function deleted (says medium): 32 true positives, 19 false positives on the corpus
 - R002 Test file deleted (says high): 12 true positives, 3 false positives on the corpus
 - R006 Test body emptied or commented out (says high): no true positive on the corpus yet
 - R010 Test added then skipped (says low): 13 true positives, 0 false positives on the corpus
 - A001 Assertion removed (says low): 14 true positives, 0 false positives on the corpus
 - A009 Tautological assertion (says low): 3 true positives, 0 false positives on the corpus
 - O001 New test without an assertion (says low): 5 true positives, 0 false positives on the corpus
-- O002 New test with a smoke oracle only (says low): 9 true positives, 5 false positives on the corpus
+- O002 New test with a smoke oracle only (says low): 6 true positives, 0 false positives on the corpus
 - O006 New test file with no tests collected (says medium): no true positive on the corpus yet
 - E001 Catch all added in a test (says high): 3 true positives, 0 false positives on the corpus
 - W002 continue-on-error added to a test step or job (says high): 9 true positives, 2 false positives on the corpus

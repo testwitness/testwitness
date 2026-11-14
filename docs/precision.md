@@ -4,9 +4,9 @@ Measured 2026-11-14 on 347 public pull requests (corpus/). Precision counts medi
 
 | Rule | Split | True positives | Low (informational) | False positives (medium or high) | Missed | Precision | High severity false positives |
 |---|---|---|---|---|---|---|---|
-| A001 | all | 14 | 45 | 0 | 1 | 1.00 | 0 |
+| A001 | all | 14 | 46 | 0 | 1 | 1.00 | 0 |
 | A001 | heldout | 5 | 22 | 0 | 1 | 1.00 | 0 |
-| A001 | tuning | 9 | 23 | 0 | 0 | 1.00 | 0 |
+| A001 | tuning | 9 | 24 | 0 | 0 | 1.00 | 0 |
 | A002 | all | 27 | 0 | 1 | 0 | 0.96 | 0 |
 | A002 | heldout | 13 | 0 | 1 | 0 | 0.93 | 0 |
 | A002 | tuning | 14 | 0 | 0 | 0 | 1.00 | 0 |
@@ -27,12 +27,12 @@ Measured 2026-11-14 on 347 public pull requests (corpus/). Precision counts medi
 | O001 | all | 5 | 18 | 0 | 0 | 1.00 | 0 |
 | O001 | heldout | 0 | 10 | 0 | 0 | n/a | 0 |
 | O001 | tuning | 5 | 8 | 0 | 0 | 1.00 | 0 |
-| O002 | all | 9 | 42 | 5 | 0 | 0.64 | 0 |
-| O002 | heldout | 0 | 11 | 0 | 0 | n/a | 0 |
-| O002 | tuning | 9 | 31 | 5 | 0 | 0.64 | 0 |
-| R001 | all | 32 | 214 | 23 | 3 | 0.58 | 7 |
-| R001 | heldout | 23 | 106 | 7 | 2 | 0.77 | 2 |
-| R001 | tuning | 9 | 108 | 16 | 1 | 0.36 | 5 |
+| O002 | all | 6 | 44 | 0 | 3 | 1.00 | 0 |
+| O002 | heldout | 0 | 6 | 0 | 0 | n/a | 0 |
+| O002 | tuning | 6 | 38 | 0 | 3 | 1.00 | 0 |
+| R001 | all | 32 | 209 | 19 | 3 | 0.63 | 7 |
+| R001 | heldout | 23 | 105 | 7 | 2 | 0.77 | 2 |
+| R001 | tuning | 9 | 104 | 12 | 1 | 0.43 | 5 |
 | R002 | all | 12 | 13 | 3 | 0 | 0.80 | 3 |
 | R002 | heldout | 3 | 10 | 1 | 0 | 0.75 | 1 |
 | R002 | tuning | 9 | 3 | 2 | 0 | 0.82 | 2 |
@@ -112,7 +112,7 @@ Measured 2026-11-14 on the same 347 pull requests. Each one is applied as an unc
 | C003 | 1 | 1 | 0 | 0% | 2 | 0 | 0 | 0 | capped at low | 0 | 0 |
 | E001 | 3 | 3 | 0 | 0% | 0 | 0 | 9 | 0 | capped at low | 0 | 0 |
 | O001 | 5 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
-| O002 | 9 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
+| O002 | 6 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | capped at low | 0 | 0 |
 | R001 | 32 | 2 | 0 | 0% | 7 | 1 | 7 | 0 | capped at low | 0 | 0 |
 | R002 | 12 | 12 | 0 | 0% | 3 | 1 | 6 | 0 | capped at low | 0 | 0 |
 | R003 | 64 | 0 | 0 | 0% | 0 | 0 | 0 | 0 | blocks | 64 | 0 |
