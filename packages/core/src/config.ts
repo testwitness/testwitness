@@ -1,5 +1,6 @@
 import picomatch from 'picomatch';
 import { parse as parseYaml } from 'yaml';
+import { CONFIG_MAX_NESTING, nestsTooDeep } from './config-text.js';
 import type { LanguageId, Mode, ResolvedConfig, Rule, RuleConfigEntry, Severity, SeveritySetting } from './types.js';
 
 export class ConfigError extends Error {
@@ -71,7 +72,16 @@ function stringList(v: unknown, key: string): string[] {
 export function parseConfig(source: string | undefined, knownRules?: ReadonlyMap<string, Rule>): ResolvedConfig {
   const cfg = defaultConfig();
   if (!source || !source.trim()) return cfg;
-  const doc: unknown = parseYaml(source);
+  // See nestsTooDeep: a YAML document nested hundreds of levels deep can abort the process inside the parser.
+  if (nestsTooDeep(source, 'yaml-json')) throw new ConfigError(`config is nested deeper than ${CONFIG_MAX_NESTING} levels`);
+  let doc: unknown;
+  try {
+    doc = parseYaml(source);
+  } catch (err) {
+    // The parser throws its own error types (a syntax error, or a ReferenceError for an alias bomb). Callers handle
+    // ConfigError: the CLI exits 2 with one line, the hook and the MCP server say the config could not be read.
+    throw new ConfigError(`config is not valid YAML: ${String((err as Error).message ?? err).split('\n')[0]!.slice(0, 300)}`);
+  }
   if (doc === null || doc === undefined) return cfg;
   if (!isRecord(doc)) throw new ConfigError('config must be a mapping');
 

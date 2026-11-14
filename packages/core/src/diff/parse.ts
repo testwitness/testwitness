@@ -53,7 +53,8 @@ export function parseUnifiedDiff(text: string): ChangedFile[] {
       i++;
     }
     if (!oldPath && !newPath) {
-      const m = /^diff --git a\/(.+?) b\/(.+)$/.exec(header);
+      // The `s` flag: with core.quotePath off a path can hold U+2028, where `.` stops; `(.+)$` then failed from every ` b/`.
+      const m = /^diff --git a\/(.+?) b\/(.+)$/s.exec(header);
       if (m) {
         oldPath = m[1];
         newPath = m[2];
@@ -125,7 +126,12 @@ export function unquote(s: string): string {
       bytes.push(...Buffer.from(c, 'utf8'));
       continue;
     }
-    const n = inner[i + 1]!;
+    const n = inner[i + 1];
+    if (n === undefined) {
+      // A lone backslash at the end (git never writes one): keep it, do not throw.
+      bytes.push(92);
+      break;
+    }
     i++;
     switch (n) {
       case 'n': bytes.push(10); break;

@@ -8,6 +8,7 @@
  * set (letters, digits, `_ . / @ + -`) is left out of the plan with a note, so the shell lines never need escaping
  * beyond single quotes and a comma separated list can never be split by a file name.
  */
+import { replaceDelimited } from '../linear.js';
 import picomatch from 'picomatch';
 import type { ChangedFile, LanguageId, ResolvedConfig } from '../types.js';
 import { listTree, mergeBase, rawDiff, revParse, showFile } from '../git.js';
@@ -68,7 +69,7 @@ function ranges(lines: Set<number>): Array<[number, number]> {
 export function javaClassName(path: string, source: string | undefined): string | undefined {
   const simple = (path.split('/').pop() ?? '').replace(/\.java$/, '');
   if (!simple) return undefined;
-  const pkg = source ? /^\s*package\s+([\w.]+)\s*;/m.exec(source.replace(/\/\*[\s\S]*?\*\//g, ''))?.[1] : undefined;
+  const pkg = source ? /^[^\S\r\n\u2028\u2029]*package\s+([\w.]+)\s*;/m.exec(replaceDelimited(source, '/*', '*/', ''))?.[1] : undefined;
   if (pkg) return `${pkg}.${simple}`;
   const m = /(?:^|\/)src\/(?:main|test)\/java\/(.+)\.java$/.exec(path);
   return m ? m[1]!.replace(/\//g, '.') : simple;

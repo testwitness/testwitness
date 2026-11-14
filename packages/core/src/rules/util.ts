@@ -227,7 +227,7 @@ export function definedSymbols(src: string, language: string | undefined): Set<s
     language === 'python'
       ? [/^(?:async\s+)?def\s+(\w+)/gm, /^class\s+(\w+)/gm]
       : language === 'java'
-        ? [/\b(?:class|interface|enum|record)\s+(\w+)/g, /\b(?:public|protected)\s+(?:static\s+|final\s+|synchronized\s+|abstract\s+)*(?:<[^>]*>\s*)?[\w.<>[\],?\s]+?\s+(\w+)\s*\(/g]
+        ? [/\b(?:class|interface|enum|record)\s+(\w+)/g, /\b(?:public|protected)\s+(?:static\s+|final\s+|synchronized\s+|abstract\s+)*(?:<[^>]*>\s*)?(?!\s)[\w.<>[\],?\s]{1,300}?\s+(\w+)\s*\(/g]
         : [/^export\s+(?:default\s+)?(?:declare\s+)?(?:async\s+)?(?:function\*?|class|const|let|var|abstract\s+class)\s+(\w+)/gm, /^(?:async\s+)?function\*?\s+(\w+)/gm, /^class\s+(\w+)/gm];
   for (const re of res) for (const m of src.matchAll(re)) if (m[1] && m[1].length >= 4) out.add(m[1]);
   return out;
@@ -311,23 +311,108 @@ export async function versionGated(ctx: RuleContext, path: string, t: TestCase):
  * compares equal.
  */
 export function testTokens(src: string, language: string | undefined, name: string): string[] {
-  const hash = language === 'python';
-  const re = hash
-    ? /("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|(#[^\n]*)|([A-Za-z_$][\w$]*|\d[\w.]*)|(\S)/g
-    : /("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|([A-Za-z_$][\w$]*|\d[\w.]*)|(\S)/g;
   const out: string[] = [];
-  for (const m of src.matchAll(re)) {
-    if (m[2] !== undefined) continue;
-    if (m[1] !== undefined) {
-      const q = m[1].startsWith('"""') || m[1].startsWith("'''") ? 3 : 1;
-      const content = m[1].slice(q, -q);
+  for (const t of lexTokens(src, language === 'python')) {
+    if (t.kind === 'comment') continue;
+    if (t.kind === 'string') {
+      const q = t.text.startsWith('"""') || t.text.startsWith("'''") ? 3 : 1;
+      const content = t.text.slice(q, -q);
       if (content === name) continue;
       out.push(`"${content}`);
       continue;
     }
-    const tok = m[3] ?? m[4]!;
-    if (tok === ';' || tok === name) continue;
-    out.push(tok);
+    if (t.text === ';' || t.text === name) continue;
+    out.push(t.text);
+  }
+  return out;
+}
+
+const WORD = /[A-Za-z_$][\w$]*|\d[\w.]*/y;
+const LINE_BREAK = new Set(['\n', '\r', String.fromCharCode(0x2028), String.fromCharCode(0x2029)]);
+
+export interface LexToken {
+  kind: 'string' | 'comment' | 'word' | 'char';
+  text: string;
+}
+
+/**
+ * Strings, comments, words and single characters of a source text, in order, whitespace dropped. The same tokens as
+ * the two regular expressions this replaces (one for Python, one for the other languages: an alternation of string
+ * forms, comment forms, a word, and any other character), but an opener without its closer is remembered. The regex
+ * rescanned the rest of the line, or of the file, from every quote of an unterminated string, quadratic on a hostile
+ * test file. A quote inside a string that did not close was read as an escaped character, so a string that starts at
+ * it runs into the same end and is not tried again.
+ */
+export function lexTokens(src: string, python: boolean): LexToken[] {
+  const out: LexToken[] = [];
+  // For each quote character, the position up to which a string opened by it is known not to close.
+  const dead: Record<string, number> = { '"': 0, "'": 0, '`': 0 };
+  const noCloser = new Set<string>();
+  /** End of a quoted string that opens at `pos`, or -1. A `multiline` string may hold line breaks. */
+  const quoted = (pos: number, quote: string, multiline: boolean): number => {
+    if (pos < dead[quote]!) return -1;
+    let i = pos + 1;
+    for (; i < src.length; i++) {
+      const c = src[i]!;
+      if (c === quote) return i + 1;
+      if (c === '\\') {
+        // A backslash and one character that `.` matches, so not a line break.
+        const n = src[i + 1];
+        if (n === undefined || LINE_BREAK.has(n)) break;
+        i++;
+      } else if (!multiline && c === '\n') break;
+    }
+    dead[quote] = i;
+    return -1;
+  };
+  /** End of `open ... close` from `pos`, or -1; remembers when no closer is left. */
+  const delimited = (pos: number, open: string, close: string): number => {
+    if (noCloser.has(close)) return -1;
+    const end = src.indexOf(close, pos + open.length);
+    if (end < 0) {
+      noCloser.add(close);
+      return -1;
+    }
+    return end + close.length;
+  };
+  const lineEnd = (pos: number): number => {
+    const end = src.indexOf('\n', pos);
+    return end < 0 ? src.length : end;
+  };
+  let pos = 0;
+  while (pos < src.length) {
+    const c = src[pos]!;
+    if (/\s/.test(c)) {
+      pos++;
+      continue;
+    }
+    let end = -1;
+    let kind: LexToken['kind'] = 'string';
+    if (python) {
+      if (src.startsWith('"""', pos)) end = delimited(pos, '"""', '"""');
+      else if (src.startsWith("'''", pos)) end = delimited(pos, "'''", "'''");
+      if (end < 0 && (c === '"' || c === "'")) end = quoted(pos, c, false);
+      if (end < 0 && c === '#') {
+        end = lineEnd(pos);
+        kind = 'comment';
+      }
+    } else if (c === '"' || c === "'") end = quoted(pos, c, false);
+    else if (c === '`') end = quoted(pos, c, true);
+    else if (c === '/' && src[pos + 1] === '/') {
+      end = lineEnd(pos);
+      kind = 'comment';
+    } else if (c === '/' && src[pos + 1] === '*') {
+      end = delimited(pos, '/*', '*/');
+      kind = 'comment';
+    }
+    if (end < 0) {
+      WORD.lastIndex = pos;
+      const m = WORD.exec(src);
+      end = m ? pos + m[0].length : pos + 1;
+      kind = m ? 'word' : 'char';
+    }
+    out.push({ kind, text: src.slice(pos, end) });
+    pos = end;
   }
   return out;
 }

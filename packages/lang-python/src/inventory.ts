@@ -580,12 +580,14 @@ function collectCatchAlls(body: Node | null): CatchAll[] {
       for (const clause of node.namedChildren) {
         if (clause.type !== 'except_clause') continue;
         const typeNode = clause.namedChildren.find((c) => c.type !== 'block' && c.type !== 'comment');
-        const binding = typeNode ? typeNode.text.replace(/\s+as\s+\w+$/, '') : 'bare except';
+        // `(?<=\s)as` and trimEnd, not `\s+as`: the leading `\s+` was quadratic on a long run of spaces.
+        const alias = typeNode ? /(?<=\s)as\s+(\w+)$/.exec(typeNode.text) : null;
+        const binding = typeNode ? (alias ? typeNode.text.slice(0, alias.index).trimEnd() : typeNode.text) : 'bare except';
         const broad = !typeNode || /^(Exception|BaseException|\(.*\b(Exception|BaseException)\b.*\))$/.test(binding);
         if (!broad) continue;
         const block = clause.childForFieldName('body') ?? clause.namedChildren.find((c) => c.type === 'block');
         const text = block?.text ?? '';
-        const name = typeNode ? /\s+as\s+(\w+)$/.exec(typeNode.text)?.[1] : undefined;
+        const name = alias?.[1];
         const after = body.text.split('\n').slice(node.endPosition.row - body.startPosition.row).join('\n');
         const swallows = !/\b(raise|assert|pytest\.fail|self\.fail|fail\()/.test(text) && !capturedThenAsserted(text, name, after, /\b(assert\w*|self\.assert\w*|pytest\.fail)\b/);
         out.push({ line: line(clause), binding, swallows, snippet });

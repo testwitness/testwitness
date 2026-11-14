@@ -1,3 +1,4 @@
+import { replaceDelimited } from '../linear.js';
 /**
  * Claims in PR text. Deterministic phrase matching; each claim is later
  * classified supported, unsupported or unreadable against the evidence.
@@ -27,11 +28,10 @@ const PATTERNS: Array<{ kind: ClaimKind; re: RegExp }> = [
 
 /** Strip fenced code, inline code and HTML comments so claims inside code or templates are not counted. */
 export function stripNonProse(text: string): string {
-  return text
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`\n]*`/g, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/^\s*-\s*\[\s*\]\s.*$/gm, ' '); // unchecked checklist items are not claims
+  // Fences and comments are cut with one pass each: the lazy regexes rescanned the rest of the text from every
+  // opener without a closer. The checklist patterns take indentation only after `^`: `^\s*` ran over every following
+  // blank line from each line start. Both were quadratic on PR text.
+  return replaceDelimited(replaceDelimited(text, '```', '```', ' ').replace(/`[^`\n]*`/g, ' '), '<!--', '-->', ' ').replace(/^[^\S\r\n\u2028\u2029]*-\s*\[\s*\]\s.*$/gm, ' '); // unchecked checklist items are not claims
 }
 
 /**
@@ -40,7 +40,7 @@ export function stripNonProse(text: string): string {
  * caller asks (V004 does when the PR changes no test file).
  */
 export function stripChecklist(prose: string): string {
-  return prose.replace(/^\s*(?:[-*+]|\d+[.)])?\s*\[[ xX]?\]\s.*$/gm, ' ');
+  return prose.replace(/^[^\S\r\n\u2028\u2029]*(?:(?:[-*+]|\d+[.)])\s*)?\[[ xX]?\]\s.*$/gm, ' ');
 }
 
 /** Words on the same line that cancel an "added tests" claim: "Added tests: not applicable", "no new test". */

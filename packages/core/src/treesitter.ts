@@ -8,6 +8,7 @@ import type { Tree, Node } from 'web-tree-sitter';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { replaceDelimited } from './linear.js';
 
 export type { Tree, Node };
 export { Query, Language };
@@ -71,10 +72,9 @@ export function countParseErrors(root: Node): number {
     const node = stack.pop()!;
     if (node.hasError && (node.type === 'ERROR' || node.isMissing)) n++;
     if (node.hasError) {
-      for (let i = 0; i < node.childCount; i++) {
-        const c = node.child(i);
-        if (c) stack.push(c);
-      }
+      // node.children, not node.child(i) in a loop: child(i) walks from the first child each time, which is quadratic
+      // on an ERROR node with thousands of children (a file of unclosed brackets).
+      for (const c of node.children) if (c) stack.push(c);
     }
   }
   return n;
@@ -82,8 +82,8 @@ export function countParseErrors(root: Node): number {
 
 /** Normalised text: collapse whitespace, strip comments crudely. Used for body hashes. */
 export function normaliseText(text: string): string {
-  return text
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  // One pass for block comments: the lazy regex rescanned the rest of the text from every `/*` without a closer.
+  return replaceDelimited(text, '/*', '*/', ' ')
     .replace(/(^|[^:\\])\/\/[^\n]*/g, '$1')
     .replace(/(^|\s)#[^\n]*/g, '$1')
     .replace(/\s+/g, ' ')

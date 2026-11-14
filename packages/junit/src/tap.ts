@@ -79,10 +79,13 @@ export interface TapSummary {
   warnings: string[];
 }
 
-const POINT = /^(not ok|ok)\b\s*(\d+)?\s*(?:-\s*)?(.*)$/i;
-const PLAN = /^(\d+)\.\.(\d+)\s*(?:#\s*(.*))?$/;
-const SUBTEST = /^#\s*Subtest\b:?\s*(.*)$/i;
-const BAIL = /^Bail out!\s*(.*)$/i;
+// The `s` flag: a line is what stands between two LF, so a description may hold CR, U+2028 or U+2029. Without it
+// `(.*)$` failed on such a character and the whitespace runs in front were retried from every length, quadratic (cubic
+// for a test point) on a line of spaces.
+const POINT = /^(not ok|ok)\b\s*(\d+)?\s*(?:-\s*)?(.*)$/is;
+const PLAN = /^(\d+)\.\.(\d+)\s*(?:#\s*(.*))?$/s;
+const SUBTEST = /^#\s*Subtest\b:?\s*(.*)$/is;
+const BAIL = /^Bail out!\s*(.*)$/is;
 const VERSION = /^TAP version (\d+)\s*$/i;
 
 /** Split a point description at the first unescaped `#`; the remainder is a directive when it starts with SKIP or TODO. */
