@@ -29,8 +29,11 @@ afterEach(() => {
   rmSync(stateDir, { recursive: true, force: true });
 });
 
+/** A path as it appears inside a JSON string: Windows backslashes escaped, as an agent writes them. */
+const jsonText = (s: string): string => JSON.stringify(s).slice(1, -1);
+
 function payload(agent: Agent, name: string, edit: (text: string) => string = (t) => t): string {
-  const text = readFileSync(join(fixtures, agent, name), 'utf8').replaceAll('__REPO__', repo.dir);
+  const text = readFileSync(join(fixtures, agent, name), 'utf8').replaceAll('__REPO__', jsonText(repo.dir));
   return edit(text);
 }
 const hook = (agent: Agent, name: string, extra: Partial<HookOptions> = {}): Promise<HookResult> => runHook({ agent, input: payload(agent, name), stateDir, ...extra });
@@ -513,7 +516,7 @@ describe('protect list through a symbolic link', () => {
     repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
     const link = join(stateDir, 'linked-repo');
     symlinkSync(repo.dir, link, process.platform === 'win32' ? 'junction' : 'dir');
-    const input = payload('claude', 'pretooluse-edit.json').replaceAll(repo.dir, link);
+    const input = payload('claude', 'pretooluse-edit.json').replaceAll(jsonText(repo.dir), jsonText(link));
     const o = out(await runHook({ agent: 'claude', input, stateDir })) as { hookSpecificOutput: { permissionDecision: string } };
     expect(o.hookSpecificOutput.permissionDecision).toBe('deny');
   });
@@ -523,5 +526,25 @@ describe('protect list through a symbolic link', () => {
     mkdirSync(join(stateDir, 'real'));
     symlinkSync(join(stateDir, 'real'), link, process.platform === 'win32' ? 'junction' : 'dir');
     expect(realPathOf(join(link, 'new', 'file.ts'))).toBe(join(realpathSync(stateDir), 'real', 'new', 'file.ts'));
+  });
+});
+
+describe('the repository path as an agent writes it into the event', () => {
+  beforeEach(() => {
+    repo = makeRepo();
+  });
+
+  it('a Windows path arrives escaped in the JSON and is read back exactly', async () => {
+    const { parseEvent } = await import('./events.js');
+    const cwd = 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\tw-repo-abc';
+    const text = payload('claude', 'stop.json').replaceAll(jsonText(repo.dir), jsonText(cwd));
+    expect(parseEvent('claude', text).cwd).toBe(cwd);
+  });
+
+  it('the end of the turn is blocked when the event names the repository with this platform\'s own path text', async () => {
+    weaken();
+    const input = JSON.stringify({ ...JSON.parse(payload('claude', 'stop.json')), cwd: repo.dir });
+    const r = await runHook({ agent: 'claude', input, stateDir });
+    expect(r.decision.block).toBe(true);
   });
 });

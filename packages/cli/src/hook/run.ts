@@ -271,11 +271,12 @@ async function decide(event: HookEvent, opts: HookOptions, deadline: Deadline): 
     if (!config.protect.length) return allow;
     const isProtected = pathMatcher(config.protect);
     const hits: string[] = [];
+    // Real paths on both sides: an agent may name the file through a symbolic link (macOS /var is /private/var), and on
+    // Windows git can report the top level in its 8.3 short form (C:/Users/RUNNER~1/...) while the real path is long.
+    const realTop = realPathOf(top);
     for (const p of event.paths ?? []) {
-      // Real paths on both sides: an agent may name the file through a symbolic link (macOS /var is /private/var),
-      // and git reports the top level with links resolved.
       const abs = realPathOf(resolve(start, p.replace(/\\/g, '/')));
-      const rel = relative(top, abs).replace(/\\/g, '/');
+      const rel = relative(realTop, abs).replace(/\\/g, '/');
       if (rel && !rel.startsWith('..') && !isAbsolute(rel) && isProtected(rel)) hits.push(rel);
     }
     if (!hits.length) return allow;

@@ -80,7 +80,7 @@ describe('no execution of the repository', () => {
       const sha = repo.git('rev-parse', 'HEAD').trim();
       rmSync(marker, { force: true });
 
-      const payload = (agent: string, name: string): string => readFileSync(join(fixtures, agent, name), 'utf8').replaceAll('__REPO__', repo.dir).replace('__LOCAL_SHA__', sha);
+      const payload = (agent: string, name: string): string => readFileSync(join(fixtures, agent, name), 'utf8').replaceAll('__REPO__', JSON.stringify(repo.dir).slice(1, -1)).replace('__LOCAL_SHA__', sha);
       const results: Array<{ block: boolean; note?: string | undefined }> = [];
       const trace = await traceProcesses(async () => {
         for (const [agent, name] of [
