@@ -10,7 +10,8 @@ export default defineConfig({
     name: 'unit',
     include: ['packages/**/src/**/*.test.ts'],
     // Hostile input timing tests run minutes under instrumentation; they prove linearity, not behaviour.
-    exclude: ['**/node_modules/**', '**/review-hardening.test.ts'],
+    // The fuzz targets run 10,000 cases each; like the timing tests they are not what a mutant is judged by.
+    exclude: ['**/node_modules/**', '**/review-hardening.test.ts', '**/*.fuzz.test.ts', '**/hostile-input.test.ts'],
     environment: 'node',
     env: { TESTWITNESS_TIMING: 'off' },
   },

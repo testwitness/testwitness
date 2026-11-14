@@ -14,7 +14,7 @@ On a `pull_request` event from a fork the token is read only. testwitness still 
 
 ## Report paths and symbolic links
 
-The results, coverage, mutation and history globs do not follow symbolic links by default: a matched file that is a link, or that lies outside the repository through a linked directory, is skipped with a note. A pull request can commit links, so following them would let it point the check at any file on the runner. For Bazel, whose `bazel-testlogs` is a link made by the build, set `paths.followSymlinks: true` in `.testwitness.yml` (read from the base ref, so a pull request cannot turn it on) or pass `--follow-symlinks`:
+The report, the Markdown file and the history are never written through a symbolic link at the output path. The results, coverage, mutation and history globs do not follow symbolic links by default: a matched file that is a link, or that lies outside the repository through a linked directory, is skipped with a note. A pull request can commit links, so following them would let it point the check at any file on the runner. For Bazel, whose `bazel-testlogs` is a link made by the build, set `paths.followSymlinks: true` in `.testwitness.yml` (read from the base ref, so a pull request cannot turn it on) or pass `--follow-symlinks`:
 
 ```yaml
 paths:
@@ -27,11 +27,11 @@ Results files are read up to 1,000 files and 500 MB, coverage and mutation repor
 
 ## PR text is data
 
-The title and body are read from the event payload file, never interpolated into a shell or a workflow command, and escaped before they are quoted in the comment. Escaping also breaks `@mentions` and bare links in text the pull request controls (test names, file names, PR text), so the bot comment never pings anyone or links anywhere on their behalf.
+The title and body are read from the event payload file, never interpolated into a shell or a workflow command, never written into the checkout, and escaped before they are quoted in the comment. Escaping also breaks `@mentions`, issue references and bare links in text the pull request controls (test names, file names, PR text), so the bot comment never pings anyone or links anywhere on their behalf. Control characters, bidirectional overrides and invisible characters are replaced in every output, and no text from the pull request can start a workflow command in the step log. The [threat model](./threat-model) has the details for each output.
 
 ## Configuration from the base ref
 
-A PR cannot relax its own check: `.testwitness.yml` is read from the base ref, and any change to it or to the testwitness workflow step is reported as W006, which only a maintainer can acknowledge.
+A PR cannot relax its own check: `.testwitness.yml` is read from the merge base, and a config the pull request adds or changes is never read, also when the base branch has none. The `config` input of the Action is read at the merge base too when it names a file in the repository. Any change to the config or to the testwitness workflow step is reported as W006, which only someone with write access can acknowledge, by a comment. On `pull_request` events the workflow file itself comes from the pull request, so make the check required in the branch protection; see the [threat model](./threat-model).
 
 ## The agent hook
 
@@ -41,9 +41,14 @@ A PR cannot relax its own check: `.testwitness.yml` is read from the base ref, a
 * It makes no network call. The hook tests run with socket connect, DNS, UDP and fetch replaced by functions that throw, and pass in a network namespace without interfaces (`unshare -rn`).
 * The only program it starts is `git`, with local subcommands (`rev-parse`, `merge-base`, `symbolic-ref`, `diff`, `show`, `ls-tree`, `log`, `add`, `read-tree`, `write-tree`). A test traces every child process on a repository full of traps (package scripts, test runner configs, git hooks, an fsmonitor program, an external diff, a textconv) and asserts that none ran.
 * The working tree is read through a snapshot in a temporary index and a temporary object directory under the OS temp dir. The repository's index, refs and object store are not written. For the snapshot, git hooks and fsmonitor are switched off; `git diff` runs with `--no-ext-diff --no-textconv`. One thing does run: a clean filter you configured in git (Git LFS, git-crypt), as it does for `git add`. A repository's files can select a filter but cannot define one.
-* The loop guard's counts are in a per user directory under the OS temp dir (mode 0700, ownership checked), never in the repository.
+* The loop guard's counts are in a per user directory under the OS temp dir (mode 0700, ownership checked, not used when anyone else can write to it), never in the repository.
+* It fails open: a crash, the timeout and the loop guard all allow the action and say so. It is an early warning, not a sandbox; the [threat model](./threat-model#the-hook) lists what it does not stop.
 * `testwitness init` writes one config file and never runs anything from the repository. The hook command it writes never downloads a package (`npx --no-install` at most).
 
 ## Supply chain
 
 Dependencies are pinned by the lockfile; `dist/index.js` is built in CI from the tag; consumers should pin a SHA or a major tag. Report vulnerabilities per SECURITY.md.
+
+## The full picture
+
+The [threat model](./threat-model) goes through every entry point and output, names the test behind each claim, and lists what the security review of November 2026 found, what it fixed and what is still open.
