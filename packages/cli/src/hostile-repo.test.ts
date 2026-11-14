@@ -54,21 +54,19 @@ describe('a rule or a parser that fails', () => {
 });
 
 describe('output files in a checkout the pull request controls', () => {
-  it.skipIf(process.platform === 'win32')('--out and --history-out do not write through a committed symbolic link', async () => {
+  it.skipIf(process.platform === 'win32')('--out does not write through a committed symbolic link', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'tw-victim-'));
     try {
       const victim = join(outside, 'authorized_keys');
       writeFileSync(victim, 'untouched');
       const r = branch({ 'src/math.test.ts': MATH_TEST_WEAKENED });
       symlinkSync(victim, join(r.dir, 'testwitness.md'));
-      symlinkSync(victim, join(r.dir, 'history.json'));
       writeFileSync(join(r.dir, 'junit.xml'), '<testsuite><testcase classname="src/math.test.ts" name="add adds two numbers"/></testsuite>');
-      const code = await main(['check', '--cwd', r.dir, '--base', 'main', '--format', 'markdown', '--out', 'testwitness.md', '--results', 'junit.xml', '--history-out', 'history.json', '--quiet']);
+      const code = await main(['check', '--cwd', r.dir, '--base', 'main', '--format', 'markdown', '--out', 'testwitness.md', '--results', 'junit.xml', '--quiet']);
       expect(code).toBe(0);
       expect(readFileSync(victim, 'utf8')).toBe('untouched');
       expect(lstatSync(join(r.dir, 'testwitness.md')).isSymbolicLink()).toBe(false);
       expect(readFileSync(join(r.dir, 'testwitness.md'), 'utf8')).toContain('## testwitness: review');
-      expect(lstatSync(join(r.dir, 'history.json')).isSymbolicLink()).toBe(false);
     } finally {
       rmSync(outside, { recursive: true, force: true });
     }

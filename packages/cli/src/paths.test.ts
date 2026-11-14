@@ -5,8 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import fg from 'fast-glob';
-import { mergeHistory, serializeHistory } from '@testwitness/core';
-import { check, globBase, pathToPattern, splitGlobs, windowsGlobToPattern } from './check.js';
+import { check, globBase, splitGlobs, windowsGlobToPattern } from './check.js';
 import { TMP } from './testing/repo.js';
 
 describe('splitGlobs', () => {
@@ -56,24 +55,11 @@ describe('windowsGlobToPattern', () => {
   });
 });
 
-describe('pathToPattern', () => {
-  it('converts a Windows history path on any platform', () => {
-    expect(pathToPattern('C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\testwitness-history-x1\\history.json', 'win32')).toBe('C:/Users/RUNNER~1/AppData/Local/Temp/testwitness-history-x1/history.json');
-    expect(pathToPattern('\\\\srv\\share\\h [1]\\history.json', 'win32')).toBe('//srv/share/h \\[1\\]/history.json');
-    expect(pathToPattern('out\\history.json', 'win32')).toBe('out/history.json');
-  });
-
-  it('escapes glob characters of a POSIX path', () => {
-    expect(pathToPattern('/tmp/h [1] (x)/history.json', 'linux')).toBe('/tmp/h \\[1\\] \\(x\\)/history.json');
-    expect(pathToPattern('out/history.json', 'linux')).toBe('out/history.json');
-  });
-});
-
 describe('globBase', () => {
   it('is the leading literal part of a pattern, unescaped', () => {
     expect(globBase('**/*.xml')).toBe('.');
     expect(globBase('test-results/**/*.xml')).toBe('test-results');
-    expect(globBase('/tmp/h \\[1\\]/history.json')).toBe('/tmp/h [1]/history.json');
+    expect(globBase('/tmp/h \\[1\\]/junit.xml')).toBe('/tmp/h [1]/junit.xml');
     expect(globBase('C:/app/\\[id\\]/*.xml')).toBe('C:/app/[id]');
     expect(globBase('//srv/share/r/**/*.xml')).toBe('//srv/share/r');
     expect(globBase('out/[ab]/*.xml')).toBe('out');
@@ -101,27 +87,6 @@ function repoAt(dir: string, eol: '\n' | '\r\n' = '\n'): { base: string; head: s
 }
 
 describe('paths across platforms, end to end', () => {
-  it('reads a history outside the repository from a directory whose name has brackets, parentheses and spaces', async () => {
-    const root = mkdtempSync(join(TMP, 'tw-paths-'));
-    try {
-      const repo = join(root, 'repo');
-      mkdirSync(repo);
-      const r = repoAt(repo);
-      const histDir = join(root, 'history [run 1] (base)');
-      mkdirSync(histDir);
-      const history = join(histDir, 'history.json');
-      const failed = [{ key: 'test_cart::test_refunds', status: 'failed' as const, reruns: 0 }];
-      writeFileSync(history, serializeHistory(mergeHistory(mergeHistory(undefined, { id: '1', date: '2026-11-01' }, failed), { id: '2', date: '2026-11-02' }, failed)));
-      const notes: string[] = [];
-      // Native absolute path, as the Action passes the history it downloads to the temp directory.
-      const { report } = await check({ cwd: repo, base: r.base, head: r.head, junit: 'none/*.xml', format: 'json', quiet: true, history, log: (s) => notes.push(s) });
-      expect(notes.join('\n')).not.toMatch(/symbolic link or outside the repository/);
-      expect(report.history).toBeDefined();
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
-  });
-
   it('gives the same fingerprints and forward slash paths whatever the checkout path and line endings', async () => {
     const root = mkdtempSync(join(TMP, 'tw-fp-'));
     try {

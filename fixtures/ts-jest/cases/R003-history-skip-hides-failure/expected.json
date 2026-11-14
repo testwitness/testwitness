@@ -1,8 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "high",
-    "subject": "Billing \u203a charge \u203a fails on purpose",
-    "label": "hides failure"
-  }
-]

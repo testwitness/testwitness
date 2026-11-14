@@ -265,8 +265,6 @@ export interface Rule<Options = Record<string, unknown>> {
     summary: string;
     falsePositives: string;
     example: string;
-    /** How run history changes the severity, when it does (docs/history.md). */
-    history?: string;
   };
 }
 
@@ -295,8 +293,6 @@ export interface Evidence {
   keysForClass(classKey: string): string[];
   /** Every key, for template matching (test.each titles). */
   keys(): Iterable<string>;
-  /** Rerun and flaky child elements recorded for a key, for the run history. Optional; 0 when absent. */
-  rerunsOf?(key: string): number;
 }
 
 /** Line coverage of one source file: lines the tool instrumented and the subset some test executed. */
@@ -431,7 +427,7 @@ export interface ResolvedConfig {
   requireEvidence: boolean;
   languages: LanguageId[] | 'auto';
   /**
-   * `followSymlinks`: whether the results, coverage, mutation and history globs follow symbolic links. Off by
+   * `followSymlinks`: whether the results, coverage and mutation globs follow symbolic links. Off by
    * default, so a link committed by a pull request cannot make the check read a file outside the repository; turn it
    * on for layouts that link their outputs into the checkout (Bazel's bazel-testlogs).
    */
@@ -509,26 +505,10 @@ export interface Report {
   coverage?: CoverageSummary;
   /** Mutation reports read for M001, M002 and the O001 and O002 adjustment. Absent when none were attached. */
   mutation?: MutationSummary;
-  /** Run history used for dynamic severity. Absent when no history input was given. */
-  history?: HistorySummary;
   base: string;
   head: string;
   /** Git tree id of the working tree snapshot, when the check compared the working tree (--worktree) instead of the head commit. */
   headTree?: string;
-}
-
-/** The history section of the report. */
-export interface HistorySummary {
-  /** Where the history came from: a file path, or the artifact name and run id in the Action. */
-  source: string;
-  /** Earlier runs in the history that was read (0 when it could not be read or was empty). */
-  runs: number;
-  /** Test keys tracked in the history that was read. */
-  tests: number;
-  /** Findings whose severity or label the history changed. */
-  adjusted: number;
-  /** Why the history could not be read, and caps that were hit. */
-  notes: string[];
 }
 
 export interface HelperIndexSummary {

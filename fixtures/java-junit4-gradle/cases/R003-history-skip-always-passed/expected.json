@@ -1,7 +1,0 @@
-[
-  {
-    "ruleId": "R003",
-    "severity": "medium",
-    "subject": "StackTest#pushIncreasesSize"
-  }
-]

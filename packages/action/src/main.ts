@@ -11,10 +11,9 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { check } from 'testwitness';
-import { downloadBaseHistory, HISTORY_FILE, isDefaultBranchPush, uploadHistory } from './history.js';
 import { emitAnnotations, findOwnComment, info } from './annotations.js';
 import { pullRequestFromEvent, type EventPayload, type PullRequestPayload } from './pull-request.js';
-import { renderJson, renderMarkdown, writeFileNoFollow, serializeHistory, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
+import { renderJson, renderMarkdown, writeFileNoFollow, COMMENT_MARKER, applyAcknowledgements, parseAckCommands, parseMutateCommand, computeState, exitCodeFor, type ChangedFile, type Evidence, type Report, type ResolvedConfig, type PullRequestComment } from '@testwitness/core';
 
 export async function run(): Promise<void> {
   const cwd = process.env['GITHUB_WORKSPACE'] ?? process.cwd();
@@ -27,10 +26,8 @@ export async function run(): Promise<void> {
   const pr = await pullRequestFromEvent(ctx.eventName, ctx.payload as EventPayload, token ? (n) => fetchPullRequest(token, n) : undefined, (s) => info(s));
   const baseInput = core.getInput('base');
   const headInput = core.getInput('head');
-  const defaultPush = isDefaultBranchPush();
   const head = headInput || (pr ? (pr['head'] as { sha: string }).sha : 'HEAD');
-  // A push to the default branch has no pull request to compare; it runs to record history, so the diff is empty.
-  const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : defaultPush ? head : 'origin/main');
+  const base = baseInput || (pr ? (pr['base'] as { sha: string }).sha : 'origin/main');
   // `results` is the preferred input; `junit` is its older name and carries the default globs.
   const results = core.getInput('results') || undefined;
   const junit = core.getInput('junit') || undefined;
@@ -41,9 +38,6 @@ export async function run(): Promise<void> {
   const configPath = core.getInput('config') || undefined;
   const commentEnabled = (core.getInput('comment') || 'true') !== 'false';
   const outDir = core.getInput('output_dir') || '.';
-  const historyInput = core.getInput('history') || undefined;
-  const historyArtifact = core.getInput('history_artifact');
-  const historyWrite = core.getInput('history_write') === 'true' || defaultPush;
 
   // PR text comes from the event payload file, read as data. It is handed to the check in memory: it used to be
   // written to .testwitness-pr-body.txt in the checkout, where a link committed under that name would have been
@@ -60,18 +54,10 @@ export async function run(): Promise<void> {
   const author = typeof user?.login === 'string' && user.login ? user.login : undefined;
   const authorType = typeof user?.type === 'string' ? user.type : undefined;
 
-  // History: a local file when given, else the artifact of the base branch on pull requests.
-  let history: { path: string; source?: string } | undefined = historyInput ? { path: historyInput } : undefined;
-  if (!history && pr && historyArtifact) {
-    const baseRef = String((pr['base'] as { ref?: unknown } | undefined)?.ref ?? '');
-    if (baseRef) history = await downloadBaseHistory(token, historyArtifact, baseRef);
-  }
-
-  const { report, config, history: updatedHistory, files, evidence } = await check({
+  const { report, config, files, evidence } = await check({
     cwd, base, head, results, junit, coverage, mutation, mode, failOn, config: configPath, configFromBaseOnly: true, format: 'json', prTitle, prBody, author, authorType, quiet: false,
     // Log lines name files and quote results files of the pull request; they are made safe for the step log.
     log: (s) => info(s),
-    history: history?.path, historySource: history?.source, recordHistory: !!historyArtifact || !!historyInput || historyWrite,
   });
 
   // Acknowledgements from PR comments and the label. Comments are readable on fork PRs with the read only token.
@@ -97,13 +83,6 @@ export async function run(): Promise<void> {
   core.setOutput('report', jsonPath);
   core.setOutput('findings_high', String(report.summary.findings.high));
   core.setOutput('findings_medium', String(report.summary.findings.medium));
-  if (updatedHistory) {
-    const historyPath = resolve(cwd, outDir, HISTORY_FILE);
-    await writeFileNoFollow(historyPath, serializeHistory(updatedHistory));
-    core.setOutput('history', historyPath);
-    if (historyWrite && historyArtifact) await uploadHistory(historyArtifact, historyPath);
-    else if (historyWrite) core.info('History: history_artifact is empty, so the history was written but not uploaded.');
-  }
 
   // Annotations render on the Files tab without any token.
   emitAnnotations(report.findings, config.mode === 'strict');

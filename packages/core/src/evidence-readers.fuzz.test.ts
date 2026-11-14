@@ -1,12 +1,11 @@
-// Fuzz: the coverage readers (lcov, Cobertura, JaCoCo), the mutation readers (Stryker JSON, PIT XML), the history
-// reader and the config loader (docs/threat-model.md, "Fuzzing"). Coverage and mutation reports are written by the
-// pull request's own run; the history comes from an artifact; the config from the base ref.
+// Fuzz: the coverage readers (lcov, Cobertura, JaCoCo), the mutation readers (Stryker JSON, PIT XML) and the config
+// loader (docs/threat-model.md, "Fuzzing"). Coverage and mutation reports are written by the pull request's own run;
+// the config comes from the base ref.
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { fuzz, hostileText, mutated, TARGET_TIMEOUT_MS } from '../../../fuzz/kit.js';
 import { ConfigError, parseConfig } from './config.js';
 import { readCoverageString, toCoverageEvidence } from './coverage/reader.js';
-import { mergeHistory, parseHistory, serializeHistory } from './history/history.js';
 import { emptyMutation, outerClass, readMutationString, readStrykerJson, toMutationEvidence } from './mutation/reader.js';
 import { ruleMap } from './rules/index.js';
 import { XML_MAX_ERRORS } from './xml-errors.js';
@@ -16,7 +15,6 @@ const COBERTURA = ['<?xml version="1.0" ?>\n<!DOCTYPE coverage SYSTEM "http://co
 const JACOCO = ['<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd"><report name="demo"><sessioninfo id="x" start="1" dump="2"/><package name="com/acme"><class name="com/acme/Cart" sourcefilename="Cart.java"><method name="add" desc="()V" line="3"/></class><sourcefile name="Cart.java"><line nr="3" mi="0" ci="2" mb="0" cb="0"/><line nr="4" mi="2" ci="0"/><counter type="LINE" missed="1" covered="1"/></sourcefile></package></report>'];
 const STRYKER = ['{"schemaVersion":"2","thresholds":{"high":80,"low":60},"projectRoot":"/repo","files":{"src/math.ts":{"language":"typescript","source":"x","mutants":[{"id":"1","mutatorName":"A","location":{"start":{"line":3,"column":1},"end":{"line":3,"column":9}},"status":"Killed","killedBy":["t1"],"coveredBy":["t1","t2"]},{"id":"2","location":{"start":{"line":4,"column":1}},"status":"Survived","coveredBy":["t2"]},{"id":"3","location":{"start":{"line":9}},"status":"NoCoverage"}]}},"testFiles":{"src/math.test.ts":{"tests":[{"id":"t1","name":"math adds"},{"id":"t2","name":"math subtracts"}]}}}'];
 const PIT = ['<?xml version="1.0" encoding="UTF-8"?><mutations partial="true"><mutation detected="true" status="KILLED" numberOfTestsRun="1"><sourceFile>Cart.java</sourceFile><mutatedClass>com.acme.Cart$Line</mutatedClass><mutatedMethod>add</mutatedMethod><lineNumber>12</lineNumber><mutator>M</mutator><killingTest>com.acme.CartTest.[engine:junit-jupiter]/[class:com.acme.CartTest]/[method:adds()]</killingTest><description>d</description></mutation><mutation detected="false" status="SURVIVED"><sourceFile>Cart.java</sourceFile><mutatedClass>com.acme.Cart</mutatedClass><lineNumber>13</lineNumber><killingTests>a.B.c(a.B)|a.B.d</killingTests></mutation><mutation status="NO_COVERAGE"><sourceFile>Cart.java</sourceFile><mutatedClass>com.acme.Cart</mutatedClass><lineNumber>14</lineNumber></mutation></mutations>'];
-const HISTORY = [serializeHistory(mergeHistory(mergeHistory(undefined, { id: '1', date: '2026-11-12' }, [{ key: 'a::adds', status: 'passed', reruns: 0 }, { key: 'a::fails', status: 'failed', reruns: 1 }]), { id: '2', date: '2026-11-13' }, [{ key: 'a::adds', status: 'flaky', reruns: 1 }]))];
 const CONFIG = [
   'version: 1\nmode: strict\nfail_on: medium\nrequire_evidence: true\nlanguages: [java, python]\npaths:\n  tests: ["spec/**"]\n  ignore: ["gen/**"]\n  followSymlinks: false\nresults:\n  head: "out/*.xml"\ncoverage:\n  paths: "coverage/lcov.info, cov.xml"\nmutation:\n  paths: [reports/mutation.json]\nrules:\n  R003: off\n  A002:\n    severity: high\nacknowledge:\n  - fingerprint: abc\n    reason: ok\n    by: maple\n    date: 2026-11-13\nprovenance:\n  show: false\nclaims:\n  enabled: true\n  phrases_extra: ["works on my machine"]\ncomment:\n  collapse_low: false\nprotect: ["src/**/*.golden"]\nhook:\n  timeout: 30\n  max_blocks: 3\n  blocking: [A002]\n  advice_only: [R004]\n',
   'a: &a [x, x, x]\nb: &b [*a, *a, *a]\nc: [*b, *b, *b]\nmode: report\n',
@@ -61,20 +59,6 @@ describe('fuzz: mutation readers', () => {
       });
     }, TARGET_TIMEOUT_MS);
   }
-});
-
-describe('fuzz: history reader', () => {
-  it('a damaged history is refused with a reason or read as a valid document that serialises again', async () => {
-    await fuzz('history reader', mutated(HISTORY), (text) => {
-      const { doc, error } = parseHistory(text);
-      expect(doc === undefined).toBe(error !== undefined);
-      if (!doc) return;
-      for (const v of Object.values(doc.tests)) expect(v.length).toBe(doc.runs.length);
-      expect(parseHistory(serializeHistory(doc)).doc).toBeDefined();
-      mergeHistory(doc, { id: 'now', date: '2026-11-13' }, [{ key: 'a::adds', status: 'passed', reruns: 0 }]);
-      pristine();
-    });
-  }, TARGET_TIMEOUT_MS);
 });
 
 describe('fuzz: config loader', () => {

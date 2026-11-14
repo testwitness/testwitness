@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { mergeHistory, parseHistory, serializeHistory } from '@testwitness/core';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -55,7 +54,7 @@ interface Outcome {
   exitCode: number | string | undefined;
 }
 
-async function runAction(opts: { trailer: boolean; marker: boolean; user: { login: string; type: string }; setup?: (dir: string, repo: string) => Record<string, string> }): Promise<Outcome & { files: Record<string, string> }> {
+async function runAction(opts: { trailer: boolean; marker: boolean; user: { login: string; type: string }; setup?: (dir: string, repo: string) => Record<string, string> }): Promise<Outcome> {
   const dir = mkdtempSync(join(tmpdir(), 'tw-action-'));
   const repo = join(dir, 'repo');
   mkdirSync(repo);
@@ -71,9 +70,6 @@ async function runAction(opts: { trailer: boolean; marker: boolean; user: { logi
     INPUT_COMMENT: 'true',
     INPUT_OUTPUT_DIR: '.',
     INPUT_JUNIT: '',
-    INPUT_HISTORY: '',
-    INPUT_HISTORY_ARTIFACT: 'testwitness-history',
-    INPUT_HISTORY_WRITE: 'false',
     ...(opts.setup ? opts.setup(dir, repo) : {}),
   });
   process.exitCode = undefined;
@@ -89,13 +85,11 @@ async function runAction(opts: { trailer: boolean; marker: boolean; user: { logi
   process.exitCode = undefined;
   const markdown = readFileSync(join(repo, 'testwitness.md'), 'utf8');
   const json = JSON.parse(readFileSync(join(repo, 'testwitness.json'), 'utf8'));
-  const files: Record<string, string> = {};
-  if (existsSync(join(repo, 'testwitness-history.json'))) files['testwitness-history.json'] = readFileSync(join(repo, 'testwitness-history.json'), 'utf8');
   rmSync(dir, { recursive: true, force: true });
-  return { markdown, json, exitCode, files };
+  return { markdown, json, exitCode };
 }
 
-const ENV_KEYS = ['GITHUB_EVENT_PATH', 'GITHUB_EVENT_NAME', 'GITHUB_WORKSPACE', 'GITHUB_REPOSITORY', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT', 'INPUT_MODE', 'INPUT_COMMENT', 'INPUT_OUTPUT_DIR', 'INPUT_JUNIT', 'INPUT_HISTORY', 'INPUT_HISTORY_ARTIFACT', 'INPUT_HISTORY_WRITE', 'INPUT_TOKEN', 'GITHUB_TOKEN', 'GITHUB_STEP_SUMMARY', 'GITHUB_OUTPUT'];
+const ENV_KEYS = ['GITHUB_EVENT_PATH', 'GITHUB_EVENT_NAME', 'GITHUB_WORKSPACE', 'GITHUB_REPOSITORY', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT', 'INPUT_MODE', 'INPUT_COMMENT', 'INPUT_OUTPUT_DIR', 'INPUT_JUNIT', 'INPUT_TOKEN', 'GITHUB_TOKEN', 'GITHUB_STEP_SUMMARY', 'GITHUB_OUTPUT'];
 
 describe('action provenance on a pull_request event payload', () => {
   let saved: Record<string, string | undefined>;
@@ -142,56 +136,5 @@ describe('action provenance on a pull_request event payload', () => {
     expect(withAgent.json.findings).toEqual(without.json.findings);
     expect(withAgent.json.state).toBe(without.json.state);
     expect(withAgent.exitCode).toBe(without.exitCode);
-  });
-});
-
-describe('action run history', () => {
-  let saved: Record<string, string | undefined>;
-  let stdout: ReturnType<typeof vi.spyOn>;
-  beforeEach(() => {
-    saved = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
-    for (const k of ['INPUT_TOKEN', 'GITHUB_TOKEN', 'GITHUB_STEP_SUMMARY', 'GITHUB_OUTPUT', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT']) delete process.env[k];
-    stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-  });
-  afterEach(() => {
-    stdout.mockRestore();
-    for (const k of ENV_KEYS) {
-      if (saved[k] === undefined) delete process.env[k];
-      else process.env[k] = saved[k];
-    }
-  });
-  const user = { login: 'maple-ridge-dev', type: 'User' };
-  const JUNIT = '<testsuite name="round2"><testcase classname="src/money.test.ts" name="round2 › rounds up"/><testcase classname="src/money.test.ts" name="round2 › handles negatives"/></testsuite>';
-
-  it('grades a deletion of a test that kept failing as hides failure from a local history file and writes the merged history', async () => {
-    let earlier = mergeHistory(undefined, { id: '100', date: '2026-11-01' }, [{ key: 'money::round2 keeps integers', status: 'failed', reruns: 0 }]);
-    earlier = mergeHistory(earlier, { id: '101', date: '2026-11-02' }, [{ key: 'money::round2 keeps integers', status: 'failed', reruns: 0 }]);
-    const out = await runAction({
-      trailer: false,
-      marker: false,
-      user,
-      setup: (dir, repo) => {
-        writeFileSync(join(dir, 'history.json'), serializeHistory(earlier));
-        writeFileSync(join(repo, 'junit.xml'), JUNIT);
-        return { INPUT_HISTORY: join(dir, 'history.json'), INPUT_JUNIT: 'junit.xml', GITHUB_RUN_ID: '102' };
-      },
-    });
-    const r001 = (out.json.findings as Array<{ ruleId: string; severity: string; label?: string; message: string }>).find((f) => f.ruleId === 'R001');
-    expect(r001).toMatchObject({ severity: 'high', label: 'hides failure' });
-    expect(r001!.message).toMatch(/failed in 2 of the last 2 runs$/);
-    expect(out.markdown).toMatch(/- History: 2 earlier runs, 1 test tracked, from .*history\.json; 1 finding graded by history/);
-    const written = parseHistory(out.files['testwitness-history.json']!).doc!;
-    expect(written.runs.map((r) => r.id)).toEqual(['100', '101', '102']);
-    expect(written.tests['money::round2 keeps integers']).toBe('FF-');
-    expect(written.tests['money::round2 rounds up']).toBe('--P');
-  });
-
-  it('reads no history and says so in the log only when there is no token', async () => {
-    const out = await runAction({ trailer: false, marker: false, user });
-    expect(out.json.history).toBeUndefined();
-    expect(out.markdown).not.toContain('History:');
-    const logged = stdout.mock.calls.map((c) => String(c[0])).join('');
-    expect(logged).toContain('History: no token, so the testwitness-history artifact of main was not read.');
-    expect(out.files['testwitness-history.json']).toBeUndefined();
   });
 });
