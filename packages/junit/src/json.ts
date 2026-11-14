@@ -77,7 +77,8 @@ function readJestLike(doc: Json, source: string, data: ResultIndexData, label: s
       const name = chain.length ? chain.join(' › ') : (str(a['fullName']) ?? '');
       const raw = str(a['status']) ?? '';
       const failedAttempts = arr(a['failureMessages']).length;
-      const invocations = typeof a['invocations'] === 'number' ? a['invocations'] : undefined;
+      // A whole number only: 2.5 invocations would give 1.5 reruns.
+      const invocations = typeof a['invocations'] === 'number' && Number.isSafeInteger(a['invocations']) ? a['invocations'] : undefined;
       let status: TestStatus;
       let reruns = 0;
       if (raw === 'passed' || raw === 'focused') {

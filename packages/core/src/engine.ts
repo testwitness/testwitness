@@ -177,6 +177,9 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
   const tParse0 = performance.now();
   const pairs: InventoryPair[] = [];
   const invCache = new Map<string, Promise<TestInventory | undefined>>();
+  // A parser or rule that throws used to leave only a log line: the report then read as if nothing was wrong, so an
+  // input that crashes a rule was a way to hide a finding. Each failure is a note at the top of the report.
+  const failures = new Set<string>();
   const inventory = async (ref: string, path: string, lang: LanguageId | undefined): Promise<TestInventory | undefined> => {
     const fe = frontEndFor(lang);
     if (!fe) return undefined;
@@ -190,6 +193,7 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
           return await fe.inventory(path, src, profile);
         } catch (err) {
           log(`inventory failed for ${path}: ${(err as Error).message}`);
+          failures.add(`${path} could not be parsed, so the rules that read test code did not see it.`);
           return undefined;
         }
       })();
@@ -305,6 +309,7 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
       result = await rule.run(ctx, options);
     } catch (err) {
       log(`rule ${rule.id} failed: ${(err as Error).stack ?? (err as Error).message}`);
+      failures.add(`Rule ${rule.id} failed on this change and reported nothing. That is a bug in testwitness; the other rules ran.`);
       continue;
     }
     if (opts.history) adjusted += applyHistory(result, opts.history, files);
@@ -359,6 +364,7 @@ async function runEngineOn(opts: EngineOptions, snapshot: WorktreeSnapshot | und
     generatedAt: new Date().toISOString(),
     state,
     mode: opts.config.mode,
+    ...(failures.size ? { notes: [...failures].slice(0, 10) } : {}),
     summary: {
       testsDeleted: findings.filter((f) => (f.ruleId === 'R001' || f.ruleId === 'R002') && f.severity !== 'low').length,
       testsSkipped: findings.filter((f) => (f.ruleId === 'R003' || f.ruleId === 'R004') && f.severity !== 'low').length,

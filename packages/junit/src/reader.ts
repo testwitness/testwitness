@@ -4,7 +4,7 @@ import { createReadStream } from 'node:fs';
 import { open, readFile, stat } from 'node:fs/promises';
 import { StringDecoder } from 'node:string_decoder';
 import type { TestStatus } from '@testwitness/core';
-import { normaliseKey } from '@testwitness/core';
+import { normaliseKey, XmlErrors } from '@testwitness/core';
 import type { ResultFormat, ResultIndexData, TestRecord } from './records.js';
 import { addRecord, emptyIndex, finaliseTotals } from './records.js';
 import { readTapStream } from './tap.js';
@@ -27,16 +27,14 @@ const RERUN_CHILDREN = new Set(['rerunFailure', 'rerunError']);
 export function readJunitStream(stream: NodeJS.ReadableStream, source: string, data: ResultIndexData): Promise<void> {
   return new Promise((resolve, reject) => {
     const parser = new SaxesParser({ xmlns: false, position: false });
+    const errors = new XmlErrors(source, data.warnings);
     const suiteStack: string[] = [];
     interface Current { classname: string; name: string; file?: string; time?: string; status: TestStatus; reruns: number }
     let current: Current | undefined;
     let depthInsideCase = 0;
     let sawTestcase = false;
 
-    parser.on('error', (e) => {
-      data.warnings.push(`${source}: ${e.message}`);
-      // saxes can continue after some errors; keep going.
-    });
+    parser.on('error', (e) => errors.add(e.message));
 
     parser.on('opentag', (tag: SaxesTagPlain) => {
       const name = tag.name;
@@ -89,7 +87,8 @@ export function readJunitStream(stream: NodeJS.ReadableStream, source: string, d
           if (current.file !== undefined) rec.file = current.file;
           if (current.time !== undefined) {
             const t = Number(current.time);
-            if (!Number.isNaN(t)) rec.timeMs = Math.round(t * 1000);
+            // Finite and not negative: `time="1e999"` is Infinity, which JSON writes as null.
+            if (Number.isFinite(t) && t >= 0 && Number.isFinite(t * 1000)) rec.timeMs = Math.round(t * 1000);
           }
           addRecord(data, rec);
           current = undefined;
@@ -107,7 +106,7 @@ export function readJunitStream(stream: NodeJS.ReadableStream, source: string, d
       try {
         parser.write(typeof chunk === 'string' ? chunk : decoder.write(chunk));
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
     });
     stream.on('end', () => {
@@ -116,8 +115,9 @@ export function readJunitStream(stream: NodeJS.ReadableStream, source: string, d
         if (rest) parser.write(rest);
         parser.close();
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
+      errors.done();
       if (!sawTestcase) data.warnings.push(`${source}: no testcase elements found`);
       data.sources.push(source);
       data.formats.add('junit-xml');

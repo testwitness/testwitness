@@ -11,6 +11,7 @@ import { StringDecoder } from 'node:string_decoder';
 import { SaxesParser } from 'saxes';
 import type { SaxesTagPlain } from 'saxes';
 import type { CoverageEvidence, FileCoverage } from '../types.js';
+import { XmlErrors } from '../xml-errors.js';
 
 export const COVERAGE_MAX_FILES = 200;
 export const COVERAGE_MAX_BYTES = 50 * 1024 * 1024;
@@ -125,6 +126,7 @@ export async function readLcovStream(stream: NodeJS.ReadableStream, source: stri
 export function readCoverageXmlStream(stream: NodeJS.ReadableStream, source: string, data: CoverageData, root?: string): Promise<CoverageFormat | undefined> {
   return new Promise((resolve, reject) => {
     const parser = new SaxesParser({ xmlns: false, position: false });
+    const errors = new XmlErrors(source, data.warnings);
     const stack: string[] = [];
     let format: CoverageFormat | undefined;
     const sourceRoots: string[] = [];
@@ -132,9 +134,7 @@ export function readCoverageXmlStream(stream: NodeJS.ReadableStream, source: str
     let current: MutableFileCoverage | undefined;
     let pkg = '';
     let files = 0;
-    parser.on('error', (e) => {
-      data.warnings.push(`${source}: ${e.message}`);
-    });
+    parser.on('error', (e) => errors.add(e.message));
     parser.on('opentag', (tag: SaxesTagPlain) => {
       const name = tag.name;
       const a = tag.attributes as Record<string, string>;
@@ -175,7 +175,7 @@ export function readCoverageXmlStream(stream: NodeJS.ReadableStream, source: str
       try {
         parser.write(typeof chunk === 'string' ? chunk : decoder.write(chunk));
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
     });
     stream.on('end', () => {
@@ -184,8 +184,9 @@ export function readCoverageXmlStream(stream: NodeJS.ReadableStream, source: str
         if (rest) parser.write(rest);
         parser.close();
       } catch (e) {
-        data.warnings.push(`${source}: ${(e as Error).message}`);
+        errors.add((e as Error).message);
       }
+      errors.done();
       if (!format) data.warnings.push(`${source}: not a Cobertura or JaCoCo report`);
       else if (!files) data.warnings.push(`${source}: no source files in the report`);
       data.sources.push(source);
