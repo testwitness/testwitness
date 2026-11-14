@@ -1,8 +1,8 @@
 import type { Assertion, CallSite, ChangedFile, Finding, Rule, Severity, TestCase } from '../types.js';
-import { meaningOf, RANK, relatedSubjects } from '../assertion-meaning.js';
+import { expectsNullish, meaningOf, RANK, relatedSubjects } from '../assertion-meaning.js';
 import type { Meaning } from '../assertion-meaning.js';
 import { allChanges, isNonOracleCall } from '../inventory.js';
-import { changedProductionStems, makeFinding, exercisesChangedProduction } from './util.js';
+import { changedProductionStems, headTestNames, makeFinding, exercisesChangedProduction, removedNameIn } from './util.js';
 
 const RULE_SINCE = '0.1.0';
 
@@ -46,10 +46,10 @@ export const A001: Rule = {
   docs: {
     summary: 'A modified test lost one or more assertions and gained no replacement on the same subject.',
     falsePositives:
-      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. An assertion removed from inside an exception expectation that stays (the block of pytest.raises or assertRaises, the callable of assertThrows or assertThatThrownBy, the function given to expect(fn).toThrow(TypeError)) is reported low with the label inside exception expectation: the code raises before such an assertion is evaluated, so the expectation is the oracle. This does not apply when the expected type is one an assertion failure satisfies (AssertionError, Exception, Error, Throwable, a bare toThrow()). A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.',
+      'Consolidation of several assertions into one on the same subject (toEqual on an object, assertAll), and message asserts folded into a new match= on pytest.raises, are reported low as consolidated. An assertion removed from inside an exception expectation that stays (the block of pytest.raises or assertRaises, the callable of assertThrows or assertThatThrownBy, the function given to expect(fn).toThrow(TypeError)) is reported low with the label inside exception expectation: the code raises before such an assertion is evaluated, so the expectation is the oracle. This does not apply when the expected type is one an assertion failure satisfies (AssertionError, Exception, Error, Throwable, a bare toThrow()). A reduction matched by an increase in another test of the same class or describe block is reported low as assertions moved. A lost assertion that names something this PR removed from the production code (a class, function, method, field or config key that no changed production file mentions any more, or a name the test file imported from a module the PR deletes) and that the head of the test file no longer uses is reported low with the label production removed. A lost never called check (not.toHaveBeenCalled, assert_not_called, verify with never()) on a test double that the head of the test file no longer mentions at all is reported low with the label double removed: the double, its setup and its checks went away together because the code under test no longer reaches that dependency. Assertions moved into a helper are still counted when the helper is defined in the same file, or in a test support file of the checkout that contains an assertion (the helper index: files under test, tests, __tests__, spec, testing, test-utils, testutils or fixtures directories, conftest.py, src/test; a helper that calls another helper that asserts counts too). Such a replacement, for example inline asserts turned into result.did_create(path) with did_create defined in tests/lib, is a helper extraction and is silent. When the test gained at least as many new call statements as it lost assertions and none of them resolves to a helper with an assertion (a callee name not called anywhere in the base body, not a print, log or sleep call), the helper is outside the scanned locations, not on disk, or does not assert in a way the front end reads (a plain throw): the finding is low and is labelled replaced by call with the first new callee in the message. A001 ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.29, and 1 of its 4 findings in the 300 PR real world trial was true. A finding on a test that exercises a production file the PR changed (by name convention or import) is raised to medium. Raise it per repository with rules: { A001: medium } in .testwitness.yml.',
     example: '   expect(res.status).toBe(200);\n-  expect(res.body.total).toBe(1250);\n-  expect(ledger.entries).toHaveLength(2);',
   },
-  run(ctx) {
+  async run(ctx) {
     const out: Finding[] = [];
     const stems = changedProductionStems(ctx);
     for (const pair of ctx.pairs) {
@@ -142,6 +142,32 @@ export const A001: Rule = {
           );
           continue;
         }
+        // Removed with the production code: every lost assertion names something this PR removed from the production
+        // code and that the head of the test file no longer uses. There was nothing left for it to check.
+        const gone = await Promise.all(removed.map((r) => removedNameIn(ctx, pair.file.path, r.text)));
+        if (gone.every((g) => g !== undefined)) {
+          out.push(
+            makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} assertion${lost === 1 ? '' : 's'} on ${[...new Set(gone)].join(', ')}, which this PR removed from the production code`, {
+              ...where,
+              label: 'production removed',
+            }),
+          );
+          continue;
+        }
+        // A "never called" check on a test double that the head of the file no longer has at all: the PR removed the
+        // double, its setup and every check on it, because the code under test no longer reaches that dependency.
+        // A double that stays in the file, or a positive interaction check, is not covered.
+        const stillNamed = await headTestNames(ctx, pair.file.path);
+        const doubles = removed.map((r) => (NEVER_CALLED.test(r.callee) || NEVER_CALLED.test(r.text) ? doubleName(r) : undefined));
+        if (doubles.every((d) => d !== undefined && !stillNamed.has(d))) {
+          out.push(
+            makeFinding(ctx, 'A001', 'low', pair.file, head.qualifiedName, `Test ${head.qualifiedName} lost ${lost} "never called" check${lost === 1 ? '' : 's'} on ${[...new Set(doubles)].join(', ')}, a test double this PR removed from the file`, {
+              ...where,
+              label: 'double removed',
+            }),
+          );
+          continue;
+        }
         const touches = removed.some((r) => mentionsChangedProduction(r.text, stems)) || exercisesChangedProduction(pair.head, pair.file.path, ctx);
         const sev: Severity = touches ? 'medium' : 'low';
         // Replaced by call: at least as many new call statements as lost assertions. The helper may assert (pip's
@@ -223,6 +249,39 @@ export function pairAssertions(
     doneBase.add(i);
     pairs.push({ base: baseList[i]!, head: headList[j]!, bm: bm[i]!, hm: hm[j]!, stage, nested });
   };
+  // Stage 0: a check that kept its matcher and expected operand and only changed its subject is the same check on
+  // another value. When that new subject is the subject of a different base assertion, pairing by subject would call
+  // that other assertion loosened (an equality on b.err "became" the containment check that used to read a.err).
+  // The edited check keeps its own partner, provided the other base assertion has a head assertion of its own that
+  // is at least as strong on a related subject. Without such a partner the subject pairing stands.
+  const sameSubject = (i: number, j: number): boolean => {
+    const s = norm(baseList[i]!.subject);
+    return (s !== '' && s === norm(headList[j]!.subject)) || (bm[i]!.subjectKey !== '' && bm[i]!.subjectKey === hm[j]!.subjectKey);
+  };
+  const sameCheck = (i: number, j: number): boolean => {
+    const b = baseList[i]!;
+    const h = headList[j]!;
+    return b.callee === h.callee && norm(b.matcher) === norm(h.matcher) && norm(b.expected) !== '' && norm(b.expected) === norm(h.expected) && bm[i]!.rank === hm[j]!.rank && !sameSubject(i, j);
+  };
+  headList.forEach((_, j) => {
+    if (usedHead.has(j)) return;
+    const owners = baseList.map((_b, i) => i).filter((i) => !doneBase.has(i) && sameCheck(i, j));
+    if (owners.length !== 1) return;
+    const own = owners[0]!;
+    if (headList.some((_h, k) => k !== j && !usedHead.has(k) && sameCheck(own, k))) return;
+    const rivals = baseList.map((_b, i) => i).filter((i) => i !== own && !doneBase.has(i) && sameSubject(i, j));
+    if (rivals.length === 0) return;
+    const settled = rivals.every((i) => {
+      const br = bm[i]!.rank;
+      if (br === undefined) return false;
+      return headList.some((h, k) => {
+        if (k === j || usedHead.has(k)) return false;
+        const hr = hm[k]!.rank;
+        return hr !== undefined && hr >= br && comparable(baseList[i]!, bm[i]!, h, hm[k]!) && relatedSubjects(bm[i]!.subjectKey || bm[i]!.subject, hm[k]!.subjectKey || hm[k]!.subject);
+      });
+    });
+    if (settled) take(own, j, 3);
+  });
   // Stage 1: same subject text. A candidate in the same library family is preferred, as before the lattice existed.
   baseList.forEach((b, i) => {
     if (doneBase.has(i)) return;
@@ -270,12 +329,23 @@ function strengthSeverity(bs: number, hs: number): Severity {
  * the test exercises a production file this PR changed (name convention or import, as for A001).
  */
 export function judgePair(p: Pairing, productionChanged = false): Judgement | undefined {
+  // "No value" replaced by a check that requires a value: the expected value changed, nothing was loosened.
+  if (expectsNullish(p.base) && p.hm.rank !== undefined && !expectsNullish(p.head)) return undefined;
   const bs = p.base.strength;
   const hs = p.head.strength;
   const br = p.bm.rank;
   const hr = p.hm.rank;
   const sameLibrary = p.base.family !== undefined && p.base.family === p.head.family && bs !== undefined && hs !== undefined;
   const plain = p.stage === 1 && sameLibrary && !p.bm.viaWrapper && !p.hm.viaWrapper && !p.nested;
+  // Exact equality on both sides through the same call and matcher. A front end may grade `== "1.0"` above
+  // `== spec["version"]`, but both pin one value: the expected operand changed from a literal to a computed value, the
+  // check did not loosen. A change of matcher (toStrictEqual to toEqual) is still judged below, and so is an expected
+  // value computed from the subject itself (`== 7` turned into `== cart.total()` on cart.total()), which checks nothing.
+  const selfReferent = (): boolean => {
+    const subject = norm(p.head.subject);
+    return subject !== '' && norm(p.head.expected).includes(subject);
+  };
+  if (br === RANK.exact && hr === RANK.exact && p.base.callee === p.head.callee && norm(p.base.matcher) === norm(p.head.matcher) && !selfReferent()) return undefined;
   if (plain) {
     if (hs! < bs!) return { pair: p, severity: strengthSeverity(bs!, hs!), byLattice: false, drop: bs! - hs! };
     if (hs === bs && br !== undefined && hr !== undefined && hr < br) return { pair: p, severity: 'medium', byLattice: true, drop: br - hr };
@@ -341,6 +411,16 @@ function strongerSubAssertion(head: TestCase, p: Pairing): boolean {
   });
 }
 
+/** A negated interaction check: the double was never called. */
+const NEVER_CALLED = /\.not\.(toHaveBeenCalled|toBeCalled|toHaveBeenCalledWith|toBeCalledWith|toHaveBeenCalledTimes)\b|\bassert_not_called\b|\bverify(?:NoInteractions|ZeroInteractions)\b|\bverify\([^)]*,\s*(?:Mockito\.)?never\(\)\)/;
+
+/** The name of the double a "never called" check reads: the root identifier of its subject. */
+function doubleName(a: Assertion): string | undefined {
+  const text = a.subject ?? (/\bexpect\(\s*([^)]*)\)/.exec(a.text)?.[1] ?? /\bverify\w*\(\s*([^,)]*)/.exec(a.text)?.[1] ?? a.text.split('.assert_not_called')[0]);
+  const root = /^\s*(?:self\.|this\.)?([A-Za-z_$][\w$]*)/.exec(text ?? '')?.[1];
+  return root && root.length > 1 ? root : undefined;
+}
+
 /** A002 Assertion loosened. */
 export const A002: Rule = {
   id: 'A002',
@@ -354,7 +434,7 @@ export const A002: Rule = {
     summary:
       'An assertion on a subject was replaced by a weaker one. Every assertion is read onto one lattice shared by all languages: exact equality and snapshots at the top, then ordered or near equality (startsWith, an anchored regex, containsExactlyInAnyOrder, closeTo), then containment (toContain, contains, in, toMatchObject, hasItem, an unanchored regex), then a bound (greaterThan, >=, toBeLessThan), then a non empty check (greater than zero, not equal to zero, isNotEmpty), and at the bottom existence or truthiness (assertNotNull, toBeDefined, is not None, assertTrue on a plain value). Mock, exception and other library specific checks keep the strength their front end gives them. Base and head assertions are paired by subject: the same text first, then the same subject once identity accessors (length, size(), len(), trim(), get()), copies with a few fields overridden and boolean wrappers are removed, so assertTrue(body.contains(x)) is a containment check on body and all(d.get(k) == v for k, v in e.items()) is a subset check on d. A local name bound once to a projection of another reference is followed to that reference.',
     falsePositives:
-      'Textually unchanged assertions pair first and are never compared. A negative check (not equal, not in) is never paired with a positive one, except that not equal to zero reads as a lower bound and not equal to null as an existence check. An assertion that got stronger, or moved between spellings of the same rank (is(equalTo(x)) to equalTo(x), assertEquals(true, c) to assertTrue(c)), is silent. Pairing by position happens only when the leftover assertions match one for one and each pair shares an identifier word in its subject, so a subject replaced by an unrelated one is not paired, and such a pairing is never more than medium. A move accompanied by a stronger assertion on a sub expression of the same subject is low and labelled narrowed. A loosening in a test that gained parameterised cases is low. A test yields at most one finding, the worst pair, naming the matcher before and after. Within one library family the v0.1 grading holds: two steps down, or landing on a smoke check, is high; otherwise a drop is medium, and it is high when the head checks nothing about the value (existence or truthiness) on the same subject, or when the test exercises a production file the PR changed (by name convention or import, as for A001). Checks inside a helper defined in the test file, or inside a project matcher (a Hamcrest matcher passed to a project method, an expectation object passed to a project toMatch), are compared the same way and capped at medium, labelled in helper or nested.',
+      'Textually unchanged assertions pair first and are never compared. A check that kept its call, matcher and expected operand and only changed its subject stays paired with itself when its new subject is the subject of another base assertion that keeps an equally strong check in the head, so two unrelated assertions are not compared. Exact equality on both sides through the same call and matcher is never a loosening, even when a front end grades a literal above a computed expected value (== "1.0" turned into == spec["version"]). A base assertion that the subject has no value (toBeNull, toBeUndefined, assertIsNone, equality with null) replaced by a check that requires a value is a new expected value, not a loosening. A negative check (not equal, not in) is never paired with a positive one, except that not equal to zero reads as a lower bound and not equal to null as an existence check. An assertion that got stronger, or moved between spellings of the same rank (is(equalTo(x)) to equalTo(x), assertEquals(true, c) to assertTrue(c)), is silent. Pairing by position happens only when the leftover assertions match one for one and each pair shares an identifier word in its subject, so a subject replaced by an unrelated one is not paired, and such a pairing is never more than medium. A move accompanied by a stronger assertion on a sub expression of the same subject is low and labelled narrowed. A loosening in a test that gained parameterised cases is low. A test yields at most one finding, the worst pair, naming the matcher before and after. Within one library family the v0.1 grading holds: two steps down, or landing on a smoke check, is high; otherwise a drop is medium, and it is high when the head checks nothing about the value (existence or truthiness) on the same subject, or when the test exercises a production file the PR changed (by name convention or import, as for A001). Checks inside a helper defined in the test file, or inside a project matcher (a Hamcrest matcher passed to a project method, an expectation object passed to a project toMatch), are compared the same way and capped at medium, labelled in helper or nested.',
     example: '-  assertEquals(new BigDecimal("12.50"), invoice.total());\n+  assertNotNull(invoice.total());',
   },
   run(ctx) {
