@@ -10,7 +10,6 @@ import { looksLikeTestSource } from './diff/classify.js';
 import { findClaims, stripChecklist, stripNonProse } from './evidence/claims.js';
 import { regexLines, replaceDelimited, trimEndChars } from './linear.js';
 import { isGeneratedPattern, selectorsOf, thresholdsOf } from './rules/C.js';
-import { claimsRegression } from './rules/O.js';
 import { definedSymbols, testTokens } from './rules/util.js';
 import { templateTitle } from './rules/V.js';
 import { INLINE_SUPPRESSORS, stripYamlAndJson, usesTestwitness } from './rules/W.js';
@@ -43,13 +42,6 @@ describe('linear replacements read the same language as the regular expressions 
       expect(replaceDelimited(s, '/*', '*/', '')).toBe(s.replace(/\/\*[\s\S]*?\*\//g, ''));
       expect(replaceDelimited(s, '<!--', '-->', ' ')).toBe(s.replace(/<!--[\s\S]*?-->/g, ' '));
       expect(replaceDelimited(s, '```', '```', ' ')).toBe(s.replace(/```[\s\S]*?```/g, ' '));
-    }), RUNS);
-  });
-
-  it('claimsRegression', () => {
-    const old = /\bregression\b|\bfix(es|ed)?\b.*\btests?\b/i;
-    fc.assert(fc.property(made(['fix', 'fixes', 'Fixed', 'test', 'tests', 'regression', ' ', '\n', '\r', '\u2028', 'x', '-', 'the ', 'prefix', 'contest']), (s) => {
-      expect(claimsRegression(s)).toBe(old.test(s));
     }), RUNS);
   });
 
@@ -107,7 +99,6 @@ describe('100 kB of the input each pattern was slow on', () => {
     fast('comment openers', () => stripNonProse('<!--'.repeat(N / 4)));
     fast('fence openers', () => stripNonProse('``` a '.repeat(N / 6)));
     fast('claims', () => findClaims(`${'<!-- '.repeat(N / 5)}\n${'\n'.repeat(N)}All tests pass`));
-    expect(fast('fix fix fix', () => claimsRegression('fix '.repeat(N / 4)))).toBe(false);
   });
 
   it('still strips what it stripped', () => {

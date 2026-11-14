@@ -1,7 +1,7 @@
 [
   {
     "ruleId": "O002",
-    "severity": "medium",
+    "severity": "low",
     "subject": "CartTest#checkoutProducesReceipt",
     "label": "smoke"
   }

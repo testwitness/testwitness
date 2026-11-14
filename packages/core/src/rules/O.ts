@@ -1,4 +1,3 @@
-import { regexLines } from '../linear.js';
 import picomatch from 'picomatch';
 import type { Finding, Rule, RuleContext, TestCase } from '../types.js';
 import { allChanges, isSkipped, isXfail } from '../inventory.js';
@@ -51,13 +50,6 @@ function onlySmoke(t: TestCase): boolean {
   return t.assertions.length > 0 && t.assertions.every((a) => a.kind === 'smoke' || a.kind === 'snapshot');
 }
 
-/** A no throw check: expect(fn).not.toThrow(), assert.doesNotThrow, assertDoesNotThrow, assertThatCode(...).doesNotThrowAnyException(). */
-const NO_THROW = /(^|\.)(assertDoesNotThrow|doesNotThrowAnyException|doesNotThrow|doesNotReject)$|\.not\.(toThrow|toThrowError|throw|throws)$/;
-
-function onlyNoThrow(t: TestCase): boolean {
-  return t.assertions.length > 0 && t.assertions.every((a) => NO_THROW.test(a.callee) || (a.family === 'exception' && a.kind === 'smoke'));
-}
-
 /** O002 New test with a smoke oracle only. */
 export const O002: Rule = {
   id: 'O002',
@@ -70,23 +62,22 @@ export const O002: Rule = {
   docs: {
     summary: 'A new test whose only assertions are existence or type checks (toBeDefined, assertNotNull, isNotNone, not.toThrow, assertDoesNotThrow) or a bare snapshot. It proves the code ran, not what it did.',
     falsePositives:
-      'A test that is meant as a smoke test. Reported low by default; medium when the PR text calls it a regression test, unless every assertion of the test is a does not throw check (not.toThrow, assertDoesNotThrow, doesNotThrowAnyException): a crash regression is pinned by not throwing, so the claim says nothing against such a test. Ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
+      'A test that is meant as a smoke test. Reported low by default. The PR text does not raise it: a description that speaks of regression tests says nothing about the oracle of one test, and on 300 pull requests of unseen repositories none of the findings it raised was true. A Python boolean assert is a smoke check only when its truth says that a value exists, has a type or is empty (assert x, assert not x, assert x is not None, assert isinstance(x, T), assert len(x)); a call relating two or more arguments (assert has_edge(graph, a, b)), a function named like a question (assert registry.is_open(name)), assert all(...) or any(...) over a condition, assert not any(...), assert not [x for x in rows if ...] and a comparison joined by and are value checks, and the same reading applies to assertTrue and assertFalse. Ships at low (informational) by default until its measured precision improves: when this default was set (13 November 2026), its precision on medium and high findings on the held out half of the corpus was 0.00, and neither of its 2 findings in the 300 PR real world trial was true. Raise it per repository with rules: { O002: medium } in .testwitness.yml.',
     example: "+  it('computes the discount', () => {\n+    expect(computeDiscount(cart)).toBeDefined();\n+  });",
   },
   run(ctx) {
     const out: Finding[] = [];
-    const regression = ctx.prText ? claimsRegression(`${ctx.prText.title}\n${ctx.prText.body}`) : false;
     for (const { pair, change } of allChanges(ctx.pairs)) {
       if (change.kind !== 'added') continue;
       const t = change.head;
       if (!onlySmoke(t)) continue;
       if (isSkipped(t) || isXfail(t)) continue;
       const kinds = [...new Set(t.assertions.map((a) => a.callee))].join(', ');
-      // A crash regression is pinned by "does not throw": for such a test the PR's regression claim is no evidence of
-      // a weak oracle, because not throwing is the whole contract (a validator that accepts its input).
-      const raised = regression && !onlyNoThrow(t);
+      // The PR text never raises the severity. It speaks about the pull request, not about this test: the word
+      // regression anywhere in the description raised every new smoke test of the PR, and none of those findings held
+      // up on unseen repositories.
       out.push(
-        makeFinding(ctx, 'O002', raised ? 'medium' : 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})`, {
+        makeFinding(ctx, 'O002', 'low', pair.file, t.qualifiedName, `New test ${t.qualifiedName} only checks existence or a snapshot (${kinds})`, {
           line: t.startLine,
           endLine: t.endLine,
           label: 'smoke',
@@ -201,18 +192,4 @@ export const O006: Rule = {
 
 export function rulesO(): Rule[] {
   return [O001, O002, O006];
-}
-
-/**
- * The PR text speaks of a regression, or of a fix and, later on the same line, of a test. The same language as
- * `/\bregression\b|\bfix(es|ed)?\b.*\btests?\b/i`, read line by line from the first `fix`: the regex rescanned the
- * rest of the line from every `fix`, quadratic on one long line.
- */
-export function claimsRegression(text: string): boolean {
-  if (/\bregression\b/i.test(text)) return true;
-  for (const line of regexLines(text)) {
-    const fix = /\bfix(es|ed)?\b/i.exec(line);
-    if (fix && /\btests?\b/i.test(line.slice(fix.index + fix[0].length))) return true;
-  }
-  return false;
 }
