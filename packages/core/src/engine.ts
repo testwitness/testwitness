@@ -34,7 +34,7 @@ import type { HelperIndexSummary, TestCase } from './types.js';
 export const REPORT_SCHEMA = 'https://testwitness.github.io/testwitness/report.schema.json';
 /** Version of the report shape. Additive changes keep it; a removed or retyped field bumps it. */
 export const REPORT_SCHEMA_VERSION = '1' as const;
-export const TOOL_VERSION = '0.1.0';
+export const TOOL_VERSION = '0.1.1';
 
 export interface EngineOptions {
   cwd: string;
