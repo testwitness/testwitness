@@ -53,7 +53,13 @@ Order: nothing is tagged before the security fixes and the v0.1 scope are on mai
    - `git ls-remote --tags origin` shows v0.1.0 and v0 on the same commit, "build: dist for v0.1.0".
    - The release page for v0.1.0 exists with generated notes.
    - release-smoke ran after it and is green: the published Action ran on node24 from v0.
-9. **Marketplace.** Open the v0.1.0 release, Edit, tick "Publish this Action to the GitHub Marketplace", accept the agreement if asked (it needs two factor authentication on the account), choose the categories Code quality and Testing, Update release.
+9. **Marketplace.** Open the release (v0.1.0 was refused for its long description; v0.1.1 is the first one listed), Edit, tick "Publish this Action to the GitHub Marketplace", accept the agreement if asked (it needs two factor authentication on the account), choose the categories Code quality and Testing, Update release.
+
+## Validating trusted publishing (0.1.1)
+
+npm shows a new trusted publisher as "Pending validation" until the workflow has published one version through it, and drops it if that does not happen within a few days. 0.1.0 was published by hand, so the v0.1.0 tag skipped the publish and did not validate it. 0.1.1 is the first version the workflow publishes: merge the version bump, tag `v0.1.1` on main, and check that `npm view testwitness@0.1.1` lists it with provenance and that the npm settings page no longer says pending. If the publish fails, add the trusted publisher again on npmjs.com; a maintainer with the security key can always publish by hand.
+
+The GitHub Marketplace lists an Action only if the description in action.yml is under 125 characters; `packages/action/src/action-yml.test.ts` checks it.
 
 ## Later releases
 

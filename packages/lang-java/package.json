@@ -1,6 +1,6 @@
 {
   "name": "@testwitness/lang-java",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Java front end (JUnit 4 and 5, TestNG, AssertJ, Mockito)",
   "license": "Apache-2.0",

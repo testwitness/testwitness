@@ -1,5 +1,5 @@
 name: testwitness
-description: Did this PR weaken its tests, and did they actually run? Reads the diff, the test code and the test results (JUnit XML, TAP or a JSON reporter). Java, TypeScript, JavaScript and Python. No model, no secrets. The only network calls go to the GitHub API, for the optional comment.
+description: Flags pull requests that skip, focus, mark as failing or loosen their own tests. Java, TypeScript and Python.
 author: Sajjad Hossain
 branding:
   icon: eye
