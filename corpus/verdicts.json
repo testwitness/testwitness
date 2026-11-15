@@ -772,6 +772,22 @@
   {
     "slug": "apache-kafka-22875",
     "split": "heldout",
+    "ruleId": "O001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "CreateTopicsTest#testCreateManyTopics"
+  },
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
+    "ruleId": "O001",
+    "severity": "low",
+    "verdict": "expected-low",
+    "subject": "DeleteTopicTest#testCreateAndDeleteTopic"
+  },
+  {
+    "slug": "apache-kafka-22875",
+    "split": "heldout",
     "ruleId": "R001",
     "severity": "medium",
     "verdict": "fp",

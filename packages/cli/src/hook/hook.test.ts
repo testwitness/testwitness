@@ -42,6 +42,13 @@ const hook = (agent: Agent, name: string, extra: Partial<HookOptions> = {}): Pro
 const out = (r: HookResult): Record<string, unknown> => JSON.parse(r.stdout) as Record<string, unknown>;
 
 /**
+ * A002 is capped at low since 0.1.2. These tests opt it back in, the documented way, so the shapes they use (an
+ * assertion loosened, a focused test) keep exercising blocking, advice and the loop guard.
+ */
+const A002_IN = 'rules:\n  A002: medium\nhook:\n  blocking: [A002, R003, R004, R005, W006]\n';
+const repoWith = (files: Record<string, string> = {}): TestRepo => makeRepo({ '.testwitness.yml': A002_IN, ...files });
+
+/**
  * One assertion loosened to an existence check (A002 high), one made approximate (A002 medium, which the hook shows as
  * advice: it blocks A002 only at high).
  */
@@ -102,7 +109,7 @@ describe('every fixture parses', () => {
 
 describe('Claude Code (fixtures/hooks/claude)', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('PreToolUse on git commit: denies with hookSpecificOutput and the finding, exit 0', async () => {
@@ -157,7 +164,7 @@ describe('Claude Code (fixtures/hooks/claude)', () => {
 
   it('editing a path on the protect list of the base config is denied', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
+    repo = repoWith({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
     const o = out(await hook('claude', 'pretooluse-edit.json')) as { hookSpecificOutput: { permissionDecision: string; permissionDecisionReason: string } };
     expect(o.hookSpecificOutput.permissionDecision).toBe('deny');
     expect(o.hookSpecificOutput.permissionDecisionReason).toContain('src/math.test.ts is on the protect list');
@@ -173,7 +180,7 @@ describe('Claude Code (fixtures/hooks/claude)', () => {
 
   it('a changed protected path blocks the commit even when the edit went around the edit tools', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/other.test.ts"\n' });
+    repo = repoWith({ '.testwitness.yml': 'protect:\n  - "src/other.test.ts"\n' });
     repo.write('src/other.test.ts', "import { expect, it } from 'vitest';\n\nit('is true', () => {\n  expect(1 + 1).toBe(2);\n  expect(2).toBe(2);\n});\n");
     const o = out(await hook('claude', 'pretooluse-bash-git-commit.json')) as { hookSpecificOutput: { permissionDecisionReason: string } };
     expect(o.hookSpecificOutput.permissionDecisionReason).toContain('protect high src/other.test.ts: src/other.test.ts is on the protect list of .testwitness.yml and was modified');
@@ -182,7 +189,7 @@ describe('Claude Code (fixtures/hooks/claude)', () => {
 
 describe('Cursor (fixtures/hooks/cursor)', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('beforeShellExecution on git commit: {"permission":"deny"} with a user and an agent message', async () => {
@@ -220,7 +227,7 @@ describe('Cursor (fixtures/hooks/cursor)', () => {
 
   it('preToolUse on a protected path: deny', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'protect: ["src/*.test.ts"]\n' });
+    repo = repoWith({ '.testwitness.yml': 'protect: ["src/*.test.ts"]\n' });
     const o = out(await hook('cursor', 'pre-tool-use-write.json')) as { permission: string; agent_message: string };
     expect(o.permission).toBe('deny');
     expect(o.agent_message).toContain('protect list');
@@ -229,7 +236,7 @@ describe('Cursor (fixtures/hooks/cursor)', () => {
 
 describe('Codex (fixtures/hooks/codex)', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('PreToolUse on git commit: hookSpecificOutput deny', async () => {
@@ -253,7 +260,7 @@ describe('Codex (fixtures/hooks/codex)', () => {
   it('apply_patch is not blocked by default, and is denied on a protected path', async () => {
     expect((await hook('codex', 'pretooluse-apply-patch.json')).stdout).toBe('');
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'protect: ["src/math.test.ts"]\n' });
+    repo = repoWith({ '.testwitness.yml': 'protect: ["src/math.test.ts"]\n' });
     const o = out(await hook('codex', 'pretooluse-apply-patch.json')) as { hookSpecificOutput: { permissionDecision: string } };
     expect(o.hookSpecificOutput.permissionDecision).toBe('deny');
   });
@@ -261,7 +268,7 @@ describe('Codex (fixtures/hooks/codex)', () => {
 
 describe('git pre-push (fixtures/hooks/git)', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
   const push = (extra: Partial<HookOptions> = {}): Promise<HookResult> =>
     runHook({ agent: 'git', input: readFileSync(join(fixtures, 'git/pre-push.txt'), 'utf8').replace('__LOCAL_SHA__', repo.git('rev-parse', 'HEAD').trim()), cwd: repo.dir, stateDir, ...extra });
@@ -289,7 +296,7 @@ describe('git pre-push (fixtures/hooks/git)', () => {
 
 describe('what blocks', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('a clean tree, and a tree with only an A002 finding at medium, pass; the finding is shown as advice', async () => {
@@ -300,9 +307,19 @@ describe('what blocks', () => {
     expect(out(r)).toEqual({ systemMessage: 'testwitness: 1 finding shown as advice, not blocking: A002 medium src/math.test.ts:10.' });
   });
 
+  it('without a config, A002 is capped at low (0.1.2): a loosened assertion neither blocks nor shows as advice', async () => {
+    repo.dispose();
+    repo = makeRepo();
+    repo.write('src/math.test.ts', MATH_TEST_LOOSENED);
+    const r = await hook('claude', 'stop.json');
+    expect(r.decision.block).toBe(false);
+    expect(r.evaluation!.advice).toEqual([]);
+    expect(r.stdout).toBe('');
+  });
+
   it('A002 blocks only at high, also when the base config sets fail_on: low', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: low\n' });
+    repo = repoWith({ '.testwitness.yml': `fail_on: low\n${A002_IN}` });
     repo.write('src/math.test.ts', MATH_TEST.replace('toBe(-3);', 'toBeCloseTo(-3);'));
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
@@ -311,7 +328,7 @@ describe('what blocks', () => {
 
   it('fail_on: medium with the rule on hook.blocking makes the medium finding block', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: medium\nhook:\n  blocking: [R003]\n' });
+    repo = repoWith({ '.testwitness.yml': 'fail_on: medium\nhook:\n  blocking: [R003]\n' });
     repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
     const o = out(await hook('claude', 'stop.json')) as { decision: string; reason: string };
     expect(o.decision).toBe('block');
@@ -320,7 +337,7 @@ describe('what blocks', () => {
 
   it('the working tree cannot relax the check: an edited .testwitness.yml is ignored and is itself a blocking W006', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'mode: report\n' });
+    repo = repoWith({ '.testwitness.yml': `mode: report\n${A002_IN}` });
     weaken();
     repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R005: off\n  W006: off\nacknowledge: []\nhook:\n  advice_only: [A002, R005, W006]\n');
     const r = await hook('claude', 'stop.json');
@@ -330,21 +347,24 @@ describe('what blocks', () => {
   });
 
   it('a .testwitness.yml the change adds is advice (no gate existed at the base), and still has no effect', async () => {
+    repo.dispose();
+    repo = makeRepo();
     weaken();
     repo.write('.testwitness.yml', 'rules:\n  A002: off\n  R005: off\n');
     const r = await hook('claude', 'stop.json');
-    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['A002', 'R005']);
+    // No base config: A002 is capped at low (0.1.2), so only the focused test blocks.
+    expect(r.evaluation!.blocking.map((f) => f.ruleId).sort()).toEqual(['R005']);
     expect(r.evaluation!.advice.map((f) => f.ruleId)).toContain('W006');
   });
 
   it('a finding acknowledged in the base config does not block', async () => {
     repo.dispose();
-    repo = makeRepo();
+    repo = repoWith();
     weaken();
     const first = await hook('claude', 'stop.json', { stateDir: mkdtempSync(join(stateDir, 's-')) });
     const acks = first.evaluation!.blocking.map((f) => `  - fingerprint: "${f.fingerprint}"\n    reason: intended\n`).join('');
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': `acknowledge:\n${acks}` });
+    repo = repoWith({ '.testwitness.yml': `acknowledge:\n${acks}` });
     weaken();
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
@@ -359,17 +379,20 @@ describe('what blocks', () => {
     };
     edit();
     // R001 and R002 are not proven yet: capped at low, so they neither block nor show as advice.
+    repo.dispose();
+    repo = makeRepo();
+    edit();
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
     expect(r.evaluation!.advice).toEqual([]);
     // On the blocking list but not opted in: still capped, still no block.
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'hook:\n  blocking: [A002, R003, R004, R005, W006, R001, R002]\n' });
+    repo = repoWith({ '.testwitness.yml': 'hook:\n  blocking: [A002, R003, R004, R005, W006, R001, R002]\n' });
     edit();
     expect((await hook('claude', 'stop.json')).decision.block).toBe(false);
     // Opted in with a severity and on the blocking list: they block.
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'rules:\n  R001: medium\n  R002: high\nhook:\n  blocking: [A002, R003, R004, R005, W006, R001, R002]\n' });
+    repo = repoWith({ '.testwitness.yml': 'rules:\n  R001: medium\n  R002: high\nhook:\n  blocking: [A002, R003, R004, R005, W006, R001, R002]\n' });
     edit();
     const wide = await hook('claude', 'stop.json');
     expect(wide.decision.block).toBe(true);
@@ -378,15 +401,15 @@ describe('what blocks', () => {
     expect(wide.decision.reason).toContain('the whole file: git show');
     // Opted in but not on the blocking list: advice at its own severity.
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'rules:\n  R001: medium\n  R002: high\n' });
+    repo = repoWith({ '.testwitness.yml': 'rules:\n  R001: medium\n  R002: high\n  A002: medium\nhook:\n  blocking: [A002, R003, R004, R005, W006]\n' });
     edit();
     const advised = await hook('claude', 'stop.json');
     expect(advised.decision.block).toBe(false);
     expect(advised.evaluation!.advice.map((f) => `${f.ruleId} ${f.severity}`).sort()).toEqual(['R001 high', 'R002 high']);
     expect(advised.decision.note).toContain('R001 high src/math.test.ts');
-    // advice_only takes a rule off the list again: A002 is on the default list, and here it only advises.
+    // advice_only takes a rule off the list again: A002, opted back in and on the list, here only advises.
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'hook:\n  advice_only: [A002]\n' });
+    repo = repoWith({ '.testwitness.yml': `${A002_IN}  advice_only: [A002]\n` });
     repo.write('src/math.test.ts', MATH_TEST_WEAKENED);
     const narrow = await hook('claude', 'stop.json');
     expect(narrow.evaluation!.blocking.map((f) => f.ruleId)).toEqual(['R003']);
@@ -404,7 +427,7 @@ describe('what blocks', () => {
 
   it('fail_on: high in the base config makes R003 at medium advice again', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: high\n' });
+    repo = repoWith({ '.testwitness.yml': 'fail_on: high\n' });
     repo.write('src/math.test.ts', MATH_TEST.replace("it('handles negatives'", "it.skip('handles negatives'"));
     const r = await hook('claude', 'stop.json');
     expect(r.decision.block).toBe(false);
@@ -414,7 +437,7 @@ describe('what blocks', () => {
 
 describe('loop guard', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('the same finding blocks twice in a session, then the hook allows with a visible note', async () => {
@@ -461,7 +484,7 @@ describe('loop guard', () => {
 
   it('hook.max_blocks from the base config changes the cap', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'hook:\n  max_blocks: 1\n' });
+    repo = repoWith({ '.testwitness.yml': 'hook:\n  max_blocks: 1\n' });
     weaken();
     expect((await hook('claude', 'stop.json')).decision.block).toBe(true);
     expect((await hook('claude', 'stop.json')).decision.block).toBe(false);
@@ -489,7 +512,7 @@ describe('loop guard', () => {
 
 describe('a hook that fails allows the action and says so', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
     weaken();
   });
 
@@ -509,7 +532,7 @@ describe('a hook that fails allows the action and says so', () => {
     expect(r.decision.block).toBe(false);
     expect(out(r)).toEqual({ systemMessage: 'testwitness: the hook timed out after 0.2 s; the action was allowed without a check. Run testwitness check --worktree to see the findings.' });
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'hook:\n  timeout: 0.3\n' });
+    repo = repoWith({ '.testwitness.yml': 'hook:\n  timeout: 0.3\n' });
     weaken();
     const viaConfig = await hook('codex', 'stop.json', { beforeCheck: slow });
     expect(viaConfig.decision.note).toContain('timed out after 0.3 s');
@@ -533,7 +556,7 @@ describe('a hook that fails allows the action and says so', () => {
 
   it('a broken base config, an unknown base ref and a directory that is not a repository', async () => {
     repo.dispose();
-    repo = makeRepo({ '.testwitness.yml': 'fail_on: maybe\n' });
+    repo = repoWith({ '.testwitness.yml': 'fail_on: maybe\n' });
     weaken();
     const bad = await hook('claude', 'stop.json');
     expect(bad.decision).toEqual({ block: false, note: 'the hook could not run the check (fail_on must be high, medium or low); the action was allowed without a check.' });
@@ -552,7 +575,7 @@ describe('a hook that fails allows the action and says so', () => {
 
 describe('protect list through a symbolic link', () => {
   it('denies an edit named through a linked path to the repository', async () => {
-    repo = makeRepo({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
+    repo = repoWith({ '.testwitness.yml': 'protect:\n  - "src/math.test.ts"\n' });
     const link = join(stateDir, 'linked-repo');
     symlinkSync(repo.dir, link, process.platform === 'win32' ? 'junction' : 'dir');
     const input = payload('claude', 'pretooluse-edit.json').replaceAll(jsonText(repo.dir), jsonText(link));
@@ -570,7 +593,7 @@ describe('protect list through a symbolic link', () => {
 
 describe('the repository path as an agent writes it into the event', () => {
   beforeEach(() => {
-    repo = makeRepo();
+    repo = repoWith();
   });
 
   it('a Windows path arrives escaped in the JSON and is read back exactly', async () => {

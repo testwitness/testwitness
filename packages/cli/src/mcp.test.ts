@@ -49,7 +49,7 @@ function weakenedRepo(dir: string): void {
   git(dir, 'checkout', '-q', '-b', 'weaken');
   write(
     'src/math.test.ts',
-    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it('adds two numbers', () => {", '    expect(add(1, 2)).toBeDefined();', '  });', '});', ''].join('\n'),
+    ["import { describe, expect, it } from 'vitest';", "import { add } from './math';", '', "describe('add', () => {", "  it.skip('adds two numbers', () => {", '    expect(add(1, 2)).toBeDefined();', '  });', '});', ''].join('\n'),
   );
   git(dir, 'commit', '-q', '-am', 'weaken tests');
 }
@@ -121,6 +121,7 @@ describe('testwitness mcp server', () => {
     const ids = report.findings.map((f) => f.ruleId);
     expect(ids).toContain('R001');
     expect(ids).toContain('A002');
+    expect(ids).toContain('R003');
     const summary = text(r);
     expect(summary).toMatch(/^testwitness review: \d+ high, \d+ medium, \d+ low open findings/);
     expect(summary).toMatch(/R001 src\/math\.test\.ts:\d+: /);

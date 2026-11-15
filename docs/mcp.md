@@ -78,11 +78,12 @@ Inputs:
 
 The MCP check compares commits, so uncommitted changes are not seen; `testwitness check --worktree` and the [agent guard](./agent-guard) compare the working tree. Configuration is read from the base ref, the same as in CI, so a branch cannot relax its own check.
 
-R001 is not a proven rule, so its finding is capped at low; the JSON report keeps the rule's own severity in `uncappedSeverity`. The structured result is the full JSON report, `schemaVersion` 1, described by the JSON Schema at `https://testwitness.github.io/testwitness/report.schema.json` (source: `docs/report.schema.json` in the repository). The text content is a summary for the agent to read first:
+R001 and A002 are not proven rules, so their findings are capped at low; the JSON report keeps the rule's own severity in `uncappedSeverity`. The structured result is the full JSON report, `schemaVersion` 1, described by the JSON Schema at `https://testwitness.github.io/testwitness/report.schema.json` (source: `docs/report.schema.json` in the repository). The text content is a summary for the agent to read first:
 
 ```text
-testwitness review: 1 high, 0 medium, 2 low open findings (0 acknowledged). Evidence: unreadable.
-high A002 src/math.test.ts:6: Test add › adds two numbers: expect.toBe on add(1, 2) became expect.toBeDefined
+testwitness review: 0 high, 1 medium, 3 low open findings (0 acknowledged). Evidence: unreadable.
+medium R003 src/math.test.ts:5: Test add › adds two numbers is now skipped (it.skip)
+low A002 src/math.test.ts:6: Test add › adds two numbers: expect.toBe on add(1, 2) became expect.toBeDefined
 low R001 src/math.test.ts:9: Test add › handles negatives was deleted
 low V005 results: No test results found for this run. Add a reporter (...) so changed tests can be checked against what ran. (unreadable)
 ```

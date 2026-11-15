@@ -7,15 +7,15 @@ import type { Finding, Severity } from './types.js';
 const finding = (ruleId: string, severity: Severity): Finding => ({ ruleId, severity, message: 'm', location: { path: 'a.ts' }, fingerprint: `${ruleId}:a` });
 
 describe('the proven rules of v0.1', () => {
-  it('are R003, R004, R005 and A002, and each is a built in rule', () => {
-    expect([...PROVEN_RULES].sort()).toEqual(['A002', 'R003', 'R004', 'R005']);
+  it('are R003, R004 and R005 (A002 capped since 0.1.2), and each is a built in rule', () => {
+    expect([...PROVEN_RULES].sort()).toEqual(['R003', 'R004', 'R005']);
     const ids = new Set(builtinRules().map((r) => r.id));
     for (const id of [...PROVEN_RULES, ...GATE_RULES]) expect(ids.has(id), id).toBe(true);
     expect(UNPROVEN_SEVERITY_CAP).toBe('low');
   });
 
   it('are the agent hook blocking list, with W006 as the one exception', () => {
-    expect([...HOOK_BLOCKING]).toEqual(['A002', 'R003', 'R004', 'R005', 'W006']);
+    expect([...HOOK_BLOCKING]).toEqual(['R003', 'R004', 'R005', 'W006']);
     expect([...HOOK_BLOCKING_UNMEASURED]).toEqual(['W006']);
     expect(defaultConfig().hook.blocking).toEqual([...HOOK_BLOCKING]);
   });
