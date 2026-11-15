@@ -1,6 +1,6 @@
 # How often do coding agents weaken tests in real pull requests?
 
-A study of 3,233 public pull requests from 60 repositories where coding agents write much of the code, measured in November 2026 with the method committed before any data was collected ([preregistration](./evaluation/agent-prs-preregistration.md), [preregistration 2](./evaluation/agent-prs-preregistration-2.md), [judging rubric](./evaluation/agent-prs-judging.md)). Aggregates only; no repository, person or pull request is named.
+A study of 3,142 distinct public pull requests from 60 repositories where coding agents write much of the code, measured in November 2026 with the method committed before any data was collected ([preregistration](./evaluation/agent-prs-preregistration.md), [preregistration 2](./evaluation/agent-prs-preregistration-2.md), [judging rubric](./evaluation/agent-prs-judging.md)). Aggregates only; no repository, person or pull request is named.
 
 ## Limits first
 
@@ -8,11 +8,12 @@ A study of 3,233 public pull requests from 60 repositories where coding agents w
 - **Two bounds for every rate.** Each candidate was judged by two independent judges. The upper bound counts a case when either judge called it a weakening; the lower bound only when both did. The truth is probably in between.
 - **"Weakening" means four shapes only:** a test newly skipped, turned into an expected failure, focused, or an assertion made strictly weaker. Deleted tests are not counted, because most deletions in this sample went with the code they tested.
 - **Not a random sample of GitHub.** Repositories were found through agent activity and filtered to at least 200 stars and a real test suite. Their pull requests touch tests and change at most 3,000 lines.
+- **The samples overlap a little.** 18 pull requests are in both the closed and the restore cohorts, and 91 merged agent pull requests in the restore cohort are also in the merged sample, so the rows below are not independent. Counted once each, the study covers 3,142 distinct pull requests (2,176 merged plus 966 more from the second sample).
 - **The restore cohort is loose.** It is agent pull requests whose comments matched a phrase like "restore the test" in GitHub search; nobody confirmed that a reviewer asked for it.
 - **Misses are estimated, not counted.** Weakenings were found by a lexical screen over every pull request, by the tool's own findings at any severity, and by reading 60 random pull requests per set in full. A weakening none of those catch is not in the numbers.
 - **One deviation.** The preregistered bar for opening the sealed test set could not be met (merged pull requests give about 2 findings per 650), so it was opened once, on the build released as 0.1.2, and recorded as a deviation.
 
-## What we found
+## Findings
 
 | Agent pull requests | Count | With a real weakening, per 100 (upper bound) | Per 100 (lower bound) |
 |---|---|---|---|
@@ -39,6 +40,6 @@ testwitness is a small check: it reports only three shapes at medium or high, R0
 ## How it was measured
 
 - Merged sample: 2,176 pull requests (1,257 agent, 919 human), split by repository into tune (18 repositories), validate (18) and a sealed test set (24). Fixes were designed on tune only.
-- Second sample: 1,057 agent pull requests from the same repositories, closed without merge (670) or with a restore phrase in comments (405), 18 in both.
+- Second sample: 1,057 distinct agent pull requests from the same repositories, closed without merge (670) or with a restore phrase in comments (405), 18 in both. 91 of the restore cohort were merged agent pull requests already in the merged sample.
 - Agents identified by the signals the tool already reads: the bot accounts of Copilot, Devin, Cursor and the Claude app, and the trailers or links Claude Code, Codex and Cursor leave. Claude Code, Cursor, Devin, Copilot and Codex are represented; others too rarely to count.
 - Every finding the tool gave at medium or high, every finding a capped rule would have given at medium or high, every screen hit, and the random reads were labelled by two independent judges with the written rubric. The full log, data and scripts stay with the maintainers for audit; the repositories are not named here.
