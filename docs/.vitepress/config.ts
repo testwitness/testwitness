@@ -32,6 +32,7 @@ export default defineConfig({
       { text: 'Rules reference', link: '/rules' },
       { text: 'Precision', link: '/precision' },
       { text: 'How we measure precision', link: '/how-we-measure-precision' },
+      { text: 'Agents and test weakening', link: '/agent-pr-evaluation' },
       { text: 'Design', link: '/design' },
       { text: 'Mutation testing (our own)', link: '/mutation' },
       { text: 'Contributing', link: 'https://github.com/testwitness/testwitness/blob/main/CONTRIBUTING.md' },

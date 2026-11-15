@@ -8,8 +8,13 @@ import type { Finding, ResolvedConfig, Severity } from './types.js';
  * 2026 (300 pull requests, 20 unseen repositories) found no correct finding at medium or high for any other rule, so
  * every other rule still runs, but its findings are capped at low (informational) until it passes such a replay.
  * docs/how-we-measure-precision.md says how a rule earns its way onto the list; ROADMAP.md says which rule is next.
+ *
+ * A002 (assertion loosened) was on the list until 0.1.2. On real agent pull requests (the evaluation of 15 November
+ * 2026, docs/agent-pr-evaluation.md) 1 of its 18 medium findings was real: most paired an old and a new assertion across a test
+ * rewritten after the code under test changed. It is capped at low until its pairing is fixed and it passes a fresh
+ * unseen set.
  */
-export const PROVEN_RULES: readonly string[] = ['A002', 'R003', 'R004', 'R005'];
+export const PROVEN_RULES: readonly string[] = ['R003', 'R004', 'R005'];
 
 /**
  * The one exception to the cap: W006, the gate protecting itself. It reports a change to .testwitness.yml, to the
@@ -19,10 +24,10 @@ export const PROVEN_RULES: readonly string[] = ['A002', 'R003', 'R004', 'R005'];
 export const GATE_RULES: readonly string[] = ['W006'];
 
 /**
- * Proven rules the agent hook blocks on only at high, whatever `fail_on` says. A002 (assertion loosened) is proven at
- * medium for the review state, but at medium it blocked one honest change on the corpus (a float comparison made
- * approximate) and one in the 300 pull request trial. Blocking an agent is more costly than a line in a review, so the
- * hook waits for high on A002. The pull request check still reports its medium findings.
+ * Rules the agent hook blocks on only at high, whatever `fail_on` says. A002 (assertion loosened) is capped at low
+ * since 0.1.2, so by default it never reaches the hook; a repository that opts it back in (`rules: { A002: medium }`
+ * and A002 on `hook.blocking`) still has the hook wait for high, because at medium it blocked honest work on the
+ * corpus and in the 300 pull request trial. The pull request check reports its medium findings.
  */
 export const HOOK_HIGH_ONLY: readonly string[] = ['A002'];
 

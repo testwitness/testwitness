@@ -5,7 +5,7 @@ Optional `.testwitness.yml` at the repository root. In PR mode it is read from t
 ```yaml
 version: 1
 mode: report            # report | require-ack | strict
-fail_on: medium         # the state, strict, require-ack and the hook: high | medium | low (default medium; the hook blocks A002 only at high)
+fail_on: medium         # the state, strict, require-ack and the hook: high | medium | low (default medium)
 require_evidence: false # strict only: an unreadable run fails the check
 languages: [java, typescript, python]   # default: auto detect
 paths:
@@ -44,7 +44,7 @@ protect:                # agent hook only: paths a coding agent may not change (
 hook:                   # agent hook only
   timeout: 20           # seconds before the hook gives up and allows the action
   max_blocks: 2         # how often the same finding may block in one agent session
-  blocking: [A002, R003, R004, R005, W006]   # the rules the hook may block on; the default is the proven rules and W006
+  blocking: [R003, R004, R005, W006]   # the rules the hook may block on; the default is the proven rules and W006
   advice_only: []       # rules taken off the blocking list again
 ```
 
@@ -52,7 +52,7 @@ hook:                   # agent hook only
 
 ## Proven rules and the cap at low
 
-v0.1 reports four rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule still runs, but its findings are capped at low until it passes an untuned replay ([how we measure precision](./how-we-measure-precision#proven-and-unproven-rules)). W006, a change to the gate itself, is the one exception and keeps its severity. In `testwitness.json` a capped finding carries the severity the rule gave in `uncappedSeverity`.
+v0.1 reports three rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure) and R005 (focused test added). A002 (assertion loosened) is capped at low since 0.1.2. Every other rule still runs, but its findings are capped at low until it passes an untuned replay ([how we measure precision](./how-we-measure-precision#proven-and-unproven-rules)). W006, a change to the gate itself, is the one exception and keeps its severity. In `testwitness.json` a capped finding carries the severity the rule gave in `uncappedSeverity`.
 
 A repository that has checked a rule on its own pull requests can opt it back in by naming its severity under `rules`:
 

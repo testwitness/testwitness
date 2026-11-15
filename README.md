@@ -2,7 +2,7 @@
 
 testwitness reads a pull request's diff and test results and tells the reviewer when tests were deleted, skipped or loosened, or did not run.
 
-![A terminal running git diff on a branch that loosens one assertion, skips one test and deletes another, then testwitness check reporting review with one high finding (A002, assertion loosened) and one medium finding (R003, test skipped), and the deleted test counted in the summary and kept among the low findings, since deleted test findings report at low in v0.1](docs/public/demo.gif)
+![A terminal running git diff on a branch that loosens one assertion, skips one test and deletes another, then testwitness check reporting review with one medium finding (R003, test skipped), and the loosened assertion and the deleted test counted in the summary and kept among the low findings, since those rules report at low in v0.1](docs/public/demo.gif)
 
 ```bash
 npx testwitness check --base origin/main
@@ -11,10 +11,11 @@ npx testwitness check --pr https://github.com/<owner>/<repo>/pull/<n>   # trial 
 
 Needs Node 20 or newer and a git checkout with the base branch fetched. Supported on Linux and macOS; Windows is experimental in v0.1 and tracked in [an issue](https://github.com/testwitness/testwitness/issues?q=is%3Aissue+windows+support). For pull requests, use the [GitHub Action](#github-action).
 
-v0.1 reports four rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure), R005 (focused test added) and A002 (assertion loosened). Every other rule runs and reports at low until it passes an untuned replay. Two numbers, both on pull requests no rule was tuned on ([how we measure](docs/how-we-measure-precision.md)):
+v0.1 reports three rules at medium or high: R003 (test newly skipped), R004 (test turned into an expected failure) and R005 (focused test added). Every other rule runs and reports at low until it passes an untuned replay. A002 (assertion loosened) was the fourth until 0.1.2: on real agent pull requests 1 of its 18 findings was real, so it is capped at low until it passes a fresh unseen set. Two numbers, both on pull requests no rule was tuned on ([how we measure](docs/how-we-measure-precision.md)):
 
-- Noise: on 300 ordinary merged pull requests from 20 repositories testwitness was never tuned on, it reported 3 findings at medium or high, 1.0 per 100 pull requests. All 3 were wrong: two loosened assertions that were exact checks of a new value, and a skip added to a test that already ran nothing. So false findings are rare on ordinary work, but not zero. Measured 14 November 2026 with v0.1 as shipped, judged by two independent judges with a written rubric where a doubtful finding counts as false.
-- <!-- recall:start -->Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the four rules report 57 of their 64 true positive labels at medium or high (89%).<!-- recall:end -->
+- Noise: on 300 ordinary merged pull requests from 20 repositories testwitness was never tuned on, 0.1.1 reported 3 findings at medium or high, 1.0 per 100 pull requests. All 3 were wrong: two loosened assertions that were exact checks of a new value (A002, capped at low since 0.1.2), and a skip added to a test that already ran nothing. So false findings are rare on ordinary work, but not zero. Measured 14 November 2026, judged by two independent judges with a written rubric where a doubtful finding counts as false.
+- Real agent pull requests: we measured how often coding agents weaken tests in 3,233 public pull requests from 60 repositories. In merged agent work it is rare, 0.16 to 0.24 per 100 pull requests depending on how judge disagreements are counted; in agent pull requests closed without merge it is 0.60 to 0.90 per 100. When testwitness reports at medium or high it has been right (R003, 4 of 4), but it misses most weakenings, chiefly loosened assertions, which 0.1.2 reports at low. Limits, method fixed in advance and intervals: [docs/agent-pr-evaluation.md](docs/agent-pr-evaluation.md).
+- <!-- recall:start -->Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the three proven rules report 44 of their 51 true positive labels at medium or high (86%).<!-- recall:end -->
 
 ## What it checks
 
@@ -73,13 +74,13 @@ testwitness init --agent claude    # or cursor, codex, git
 
 In Claude Code you can install it as a plugin instead, with the hook and the read only MCP server bundled (the package must be installed as above): `/plugin marketplace add testwitness/testwitness`, then `/plugin install testwitness@testwitness`.
 
-By default it blocks on the same four rules and on changes to the gate itself: R003, R004 and R005 at medium and above, A002 only at high. A loosened assertion at medium blocked honest work in our replays, so the hook shows it as advice and the pull request check still reports it. Every other rule, deleted tests included, stays quiet until it passes an untuned replay; a maintainer can opt a rule in and widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
+By default it blocks on the same three rules, at medium and above, and on changes to the gate itself. Every other rule, deleted tests included, stays quiet until it passes an untuned replay; a maintainer can opt a rule in and widen the list. What it blocks, the numbers and the limits: [docs/agent-guard.md](docs/agent-guard.md).
 
 ## What it reports
 
 Three states, never a verdict about honesty:
 
-- `pass`: no finding at or above the configured threshold (`fail_on`, medium by default, so a finding of any of the four proven rules puts the PR in review).
+- `pass`: no finding at or above the configured threshold (`fail_on`, medium by default, so a finding of any of the three proven rules puts the PR in review).
 - `review`: this PR changed what its tests prove. A reviewer should look.
 - `unreadable`: the diff rules ran, but no test results were available to confirm what ran.
 
@@ -88,14 +89,13 @@ One PR comment, updated in place, with a four number summary (tests deleted, tes
 ## Rules in v0.1
 
 <!-- rules:start -->
-v0.1 reports 4 rules at medium or high, the proven ones. Their numbers on the public PR corpus ([docs/precision.md](docs/precision.md)):
+v0.1 reports 3 rules at medium or high, the proven ones. Their numbers on the public PR corpus ([docs/precision.md](docs/precision.md)):
 
 | Rule | Finding | Severity | True positives (corpus) | False positives (medium or high) | Held out precision (medium or high) |
 |---|---|---|---|---|---|
 | R003 | Test newly skipped or disabled | medium | 64 | 0 | 1.00 |
 | R004 | Test converted to expected failure | high | 28 | 0 | 1.00 |
 | R005 | Focused test added | high | 15 | 0 | 1.00 |
-| A002 | Assertion loosened | medium | 27 | 1 | 0.93 |
 
 Every other rule still runs, but its findings are capped at low (informational, collapsed in the comment) until it passes an untuned replay on pull requests from repositories it was never tuned on ([how we measure](docs/how-we-measure-precision.md)). W006, a change to the gate itself, is the one exception and keeps its severity. A repository can opt a rule back in by naming its severity in `.testwitness.yml`, for example `rules: { R001: medium }`. The severity in brackets is what the rule says before the cap; the corpus counts are judged at that severity:
 
@@ -104,6 +104,7 @@ Every other rule still runs, but its findings are capped at low (informational, 
 - R006 Test body emptied or commented out (says high): no true positive on the corpus yet
 - R010 Test added then skipped (says low): 13 true positives, 0 false positives on the corpus
 - A001 Assertion removed (says low): 14 true positives, 0 false positives on the corpus
+- A002 Assertion loosened (says medium): 27 true positives, 1 false positive on the corpus
 - A009 Tautological assertion (says low): 3 true positives, 0 false positives on the corpus
 - O001 New test without an assertion (says low): 5 true positives, 0 false positives on the corpus
 - O002 New test with a smoke oracle only (says low): 6 true positives, 0 false positives on the corpus

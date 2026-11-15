@@ -83,7 +83,7 @@ for (const v of verdicts) {
 }
 const recall = [
   '<!-- recall:start -->',
-  `Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the four rules report ${found} of their ${labels} true positive labels at medium or high (${labels ? Math.round((100 * found) / labels) : 0}%).`,
+  `Recall: on the weakened pull requests in the held out half of the corpus, which was never used to tune a rule, the ${['no', 'one', 'two', 'three', 'four', 'five'][PROVEN_RULES.length] ?? PROVEN_RULES.length} proven rules report ${found} of their ${labels} true positive labels at medium or high (${labels ? Math.round((100 * found) / labels) : 0}%).`,
   '<!-- recall:end -->',
 ].join('');
 const readmePath = join(root, 'README.md');

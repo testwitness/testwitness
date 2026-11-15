@@ -6,6 +6,10 @@ Each entry: the decision, my recommendation, and the reversible default I am pro
 
 Decided by Sajjad: v0.1 supports Linux and macOS. The Windows job runs on every pull request and is visible, but it is out of the required check until it has been green for a week. The self check reports that as a weakened gate (W006), which is correct.
 
+## 2026-11-15: A002 capped at low in 0.1.2; the test set opened once on 0.1.2
+
+Decided by Sajjad (15 Nov). On real agent pull requests 1 of 18 A002 findings at medium was real, so A002 leaves PROVEN_RULES: v0.1 reports and blocks only on R003, R004 and R005. A repository can opt A002 back in; the hook still waits for high on it. A002 returns to medium only after its pairing is fixed on the tune set and it passes a fresh unseen set. The preregistered bar for opening the test set could not be met (about 2 findings per 650 merged pull requests on validate), so the test set was opened once on the 0.1.2 build as a recorded deviation, and the result is published whatever it is (docs/agent-pr-evaluation.md).
+
 ## 2026-11-14: medium is the default threshold; the hook blocks A002 only at high
 
 Decided by Sajjad (14 Nov). `fail_on` defaults to medium, so a finding of any of the four proven rules puts a pull request in review. The hook blocks R003, R004 and R005 at medium and above, and A002 only at high (`HOOK_HIGH_ONLY` in packages/core/src/proven.ts): at medium A002 blocked one honest change on the corpus (a float comparison made approximate) and one in the 300 pull request trial. A medium A002 finding is advice in the hook and still reported by the pull request check. With these defaults the hook blocks 43 of the 130 corpus pull requests with a true positive and none of the 217 without one; in the trial it blocks 1 pull request, rightly. The demo needs no config any more.

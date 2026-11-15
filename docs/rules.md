@@ -2,7 +2,7 @@
 
 Generated from the rule definitions in `packages/core/src/rules`. Do not edit by hand; run `pnpm gen:docs`.
 
-v0.1 reports only the proven rules at medium or high: A002, R003, R004, R005. Every other rule still runs, but its findings are capped at low (informational) until it passes an untuned replay, and the report keeps the severity the rule gave in `uncappedSeverity`. W006, the gate protecting itself, is the one exception. The default severity below is what the rule itself says. A repository can opt a rule back in by naming its severity in `.testwitness.yml`, for example `rules: { R001: medium }`. See [how we measure precision](how-we-measure-precision.md).
+v0.1 reports only the proven rules at medium or high: R003, R004, R005. Every other rule still runs, but its findings are capped at low (informational) until it passes an untuned replay, and the report keeps the severity the rule gave in `uncappedSeverity`. W006, the gate protecting itself, is the one exception. The default severity below is what the rule itself says. A repository can opt a rule back in by naming its severity in `.testwitness.yml`, for example `rules: { R001: medium }`. See [how we measure precision](how-we-measure-precision.md).
 
 ## R001 Test function deleted
 
@@ -113,7 +113,7 @@ A modified test lost one or more assertions and gained no replacement on the sam
 
 ## A002 Assertion loosened
 
-Proven: reported at the severity below. Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
+Not proven yet: reported at low unless the repository opts it in. Default severity: medium. Since 0.1.0. Languages: all. Needs: diff, ast.
 
 An assertion on a subject was replaced by a weaker one. Every assertion is read onto one lattice shared by all languages: exact equality and snapshots at the top, then ordered or near equality (startsWith, an anchored regex, containsExactlyInAnyOrder, closeTo), then containment (toContain, contains, in, toMatchObject, hasItem, an unanchored regex), then a bound (greaterThan, &gt;=, toBeLessThan), then a non empty check (greater than zero, not equal to zero, isNotEmpty), and at the bottom existence or truthiness (assertNotNull, toBeDefined, is not None, assertTrue on a plain value). Mock, exception and other library specific checks keep the strength their front end gives them. Base and head assertions are paired by subject: the same text first, then the same subject once identity accessors (length, size(), len(), trim(), get()), copies with a few fields overridden and boolean wrappers are removed, so assertTrue(body.contains(x)) is a containment check on body and all(d.get(k) == v for k, v in e.items()) is a subset check on d. A local name bound once to a projection of another reference is followed to that reference.
 
