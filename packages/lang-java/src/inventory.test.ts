@@ -512,6 +512,19 @@ class FooTest { @Disabled("flaky, see #123") @Test void a() { assertTrue(true); 
     expect(t.markers).toEqual([{ marker: '@Disabled', kind: 'skip', constant: true, reason: 'flaky, see #123', line: 9 }]);
   });
 
+  it('a project\'s own JUnit 5 test annotation makes a test, and @Disabled on it is a constant skip', async () => {
+    const t = await one(`${JUNIT5_HEADER}
+class FooTest { @Disabled("SLCORE-1 moved to the ITs") @SonarLintTest void simpleCsharp(Harness h) { assertTrue(h.ok()); } }`);
+    expect(t.name).toBe('simpleCsharp');
+    expect(t.markers).toEqual([{ marker: '@Disabled', kind: 'skip', constant: true, reason: 'SLCORE-1 moved to the ITs', line: 9 }]);
+  });
+
+  it('a class level slice annotation such as @SpringBootTest does not turn helper methods into tests', async () => {
+    const i = await inv(`${JUNIT5_HEADER}
+@SpringBootTest class FooTest { void helper() { } @Test void a() { assertTrue(true); } }`);
+    expect(i.tests.map((t) => t.name)).toEqual(['a']);
+  });
+
   it('class level @Disabled applies to every method and is a file marker', async () => {
     const i = await inv(`${JUNIT5_HEADER}
 @Disabled
