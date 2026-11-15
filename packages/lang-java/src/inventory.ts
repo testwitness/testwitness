@@ -1162,12 +1162,20 @@ function methodInfo(node: Node): MethodInfo | undefined {
   return { node, name, body, annotations: annotationsOf(node), containers, modifiers: modifierWords(node) };
 }
 
+const CUSTOM_TEST_ANNOTATION = /^[A-Z]\w*Test$/;
+const CLASS_LEVEL_TEST_ANNOTATIONS = new Set(['SpringBootTest', 'WebMvcTest', 'WebFluxTest', 'DataJpaTest', 'DataJdbcTest', 'DataMongoTest', 'DataRedisTest', 'DataR2dbcTest', 'JdbcTest', 'JsonTest', 'RestClientTest', 'GraphQlTest', 'JooqTest', 'QuarkusTest', 'QuarkusIntegrationTest', 'MicronautTest', 'NativeImageTest']);
+
 function isTestMethod(m: MethodInfo, framework: JavaFramework): boolean {
   const testNames = new Set<string>();
   for (const t of frameworkTables) for (const n of t.testAnnotations) testNames.add(n);
   const lifecycle = new Set<string>();
   for (const t of frameworkTables) for (const n of t.lifecycleAnnotations) lifecycle.add(n);
   if (m.annotations.some((a) => testNames.has(a.name))) return true;
+  // A project's own JUnit 5 test annotation (@SonarLintTest, @IntegrationTest): JUnit 5 lets a team meta annotate
+  // its own annotation with @Test or @TestTemplate, and the definition usually sits in another file the inventory
+  // cannot see. On a method, an annotation whose simple name ends in Test is that; Spring's slice annotations
+  // (@SpringBootTest, @WebMvcTest) go on classes, never on methods.
+  if (framework === 'junit5' && m.annotations.some((a) => CUSTOM_TEST_ANNOTATION.test(a.name) && !CLASS_LEVEL_TEST_ANNOTATIONS.has(a.name))) return true;
   // An @Override of an inherited test that only delegates to super and carries a skip or ignore marker:
   // JUnit inherits @Test from the superclass method, so this is the inherited test, now disabled.
   if (m.annotations.some((a) => a.name === 'Override') && m.annotations.some((a) => /^(Disabled|Ignore|Disabled[A-Z]\w*)$/.test(a.name)) && isOverrideOnly(m.body)) return true;
