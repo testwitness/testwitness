@@ -50,6 +50,10 @@ The `text` format is for a person at a terminal: findings sorted high first, eac
 
 `testwitness rules` lists the built in rules.
 
+## The run ledger
+
+`testwitness ledger --transcript <file>` reads a Claude Code transcript (JSONL), `claude -p --output-format stream-json` output or `codex exec --json` output and prints what the session can claim about its tests: the last full run and its result, runs narrowed to part of the suite, exit statuses hidden by a pipe, and files changed after the last run. `--format json` prints the same as JSON. `--fail-on-unsupported` exits 1 when the final message says the tests pass and the session does not show it. See [the run ledger](./agent-guard#the-run-ledger).
+
 ## Running it locally
 
 **From source, before the package is published.** Clone this repository, then run `pnpm install --frozen-lockfile` and `pnpm bundle:cli`. The CLI is then `node packages/cli/bin/testwitness.js`, with the same options as `testwitness`.

@@ -67,6 +67,8 @@ See [docs/cli.md](docs/cli.md) for every option.
 
 The same engine can run before the pull request exists, as a hook in Claude Code, Cursor or Codex, or as a git pre-push hook. When the agent tries to commit, push or end its turn with weakened tests in the working tree, the hook blocks and hands back the rule, the file, the line and the base text to restore. It blocks the same finding at most twice per session, and a crash or a timeout lets the action through.
 
+The block message ends with a run ledger: what the session can actually claim about its tests, counted from its own commands, exit codes and edits (the last full run and its result, runs narrowed to one file, exit statuses hidden by `| tail`, files changed after the last run). `testwitness ledger --transcript <file>` prints the same for any Claude Code or Codex session. See [the run ledger](docs/agent-guard.md#the-run-ledger).
+
 ```bash
 npm i -g testwitness
 testwitness init --agent claude    # or cursor, codex, git

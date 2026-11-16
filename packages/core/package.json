@@ -1,6 +1,6 @@
 {
   "name": "@testwitness/core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "testwitness engine: diff, inventory, rules, evidence, report",
   "license": "Apache-2.0",
