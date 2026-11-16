@@ -1,7 +1,7 @@
 {
   "name": "testwitness",
   "version": "0.1.3",
-  "description": "Blocks a commit, a push or the end of a turn when the working tree deletes, skips or loosens tests, and gives the agent the base text to restore. Bundles the testwitness hook and the read only MCP server. No model, no network, never runs your code.",
+  "description": "Blocks a commit, a push or the end of a turn when the working tree skips, focuses or marks as an expected failure a test that used to run, gives the agent the base text to restore, and shows what the session can claim about its tests. Bundles the testwitness hook and the read only MCP server. No model, no network, never runs your code.",
   "author": {
     "name": "testwitness"
   },

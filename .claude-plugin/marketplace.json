@@ -6,7 +6,7 @@
     {
       "name": "testwitness",
       "source": "./packages/cli/plugin",
-      "description": "Blocks a commit, push or end of turn when the working tree deletes, skips or loosens tests. Bundles the hook and a read only MCP server.",
+      "description": "Blocks a commit, push or end of turn when the working tree skips, focuses or marks as failing a test that used to run. Bundles the hook and a read only MCP server.",
       "category": "development",
       "tags": ["testing", "hooks", "mcp"]
     }
