@@ -165,10 +165,21 @@ try {
   else fail(`mcp server tools/list returned ${JSON.stringify(tools)} (exit ${mcp.status}, stderr ${mcp.stderr.trim()})`);
 
   // 4d2. the agent guard from the installed package: check --worktree, hook, init and a real refused git push
-  for (const required of ['plugin/.claude-plugin/plugin.json', 'plugin/hooks/hooks.json', 'plugin/.mcp.json']) {
+  for (const required of ['plugin/.claude-plugin/plugin.json', 'plugin/hooks/hooks.json', 'plugin/.mcp.json', 'plugin/scripts/run.mjs']) {
     if (paths.has(required)) ok(`tarball has ${required}`);
     else fail(`tarball is missing ${required}`);
   }
+  // The plugin's launcher runs the CLI that ships next to it, with no testwitness on PATH.
+  const launcher = join(proj, 'node_modules', 'testwitness', 'plugin', 'scripts', 'run.mjs');
+  const viaPlugin = spawnSync(bin, [launcher, '--version'], { encoding: 'utf8', env: { ...cleanEnv, PATH: dirname(bin) }, timeout: 30_000 });
+  if (viaPlugin.status === 0 && viaPlugin.stdout.trim() === version) ok(`plugin launcher runs the bundled CLI (${viaPlugin.stdout.trim()})`);
+  else fail(`plugin launcher: exit ${viaPlugin.status}, stdout ${viaPlugin.stdout.trim()}, stderr ${viaPlugin.stderr.trim()}`);
+  // The ledger command from the installed package reads a Codex stream and flags an unsupported claim.
+  const ledgerFile = join(work, 'session.jsonl');
+  writeFileSync(ledgerFile, [{ type: 'item.completed', item: { type: 'command_execution', command: 'pytest | tail -2', aggregated_output: '== 1 failed, 3 passed in 1s ==', exit_code: 0 } }, { type: 'item.completed', item: { type: 'agent_message', text: 'All tests pass.' } }].map((l) => JSON.stringify(l)).join('\n'));
+  const led = spawnSync(bin, [binJs, 'ledger', '--transcript', ledgerFile, '--fail-on-unsupported'], { encoding: 'utf8', env: cleanEnv, timeout: 30_000 });
+  if (led.status === 1 && /the last full run failed/.test(led.stdout)) ok('ledger flags a pass claim after a failing run piped into tail');
+  else fail(`ledger: exit ${led.status}, stdout ${led.stdout.slice(0, 300)}`);
   const guardRepo = join(work, 'guard-repo');
   makeWeakenedRepo(guardRepo);
   const guardGit = (dir, ...a) => run('git', ['-c', 'user.name=pack', '-c', 'user.email=pack@testwitness.local', '-c', 'commit.gpgsign=false', ...a], { cwd: dir });

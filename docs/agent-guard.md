@@ -111,6 +111,32 @@ hook:
   advice_only: []      # rules taken off the blocking list again
 ```
 
+## The run ledger
+
+"All tests pass" is the claim agents get wrong most often: the last run was before a later edit, it ran one file, its exit status went through `| tail`, or it collected no tests. The ledger counts what the session actually did, from the agent's own record of commands, exit codes and edits. There is no model in it.
+
+When the Stop hook blocks, the reason ends with the ledger, so the agent sees what it can and cannot claim before it answers again:
+
+```text
+Test run ledger for this session:
+- Test runs: 3 (2 narrowed to part of the suite).
+- Last full run: `npx vitest run 2>&1 | tail -3`: fail, 4 passed, 1 failed (exit status hidden by a pipe or ||).
+- Nothing changed after it.
+- The final message says the tests pass, which this session does not show: the last full run failed (npx vitest run 2>&1 | tail -3, 1 failed).
+```
+
+Claude Code names its transcript in the Stop event, so the hook reads it there. For any session you can also run it yourself:
+
+```bash
+testwitness ledger --transcript ~/.claude/projects/<project>/<session>.jsonl
+claude -p "..." --output-format stream-json --verbose > session.jsonl && testwitness ledger --transcript session.jsonl
+codex exec --json "..." > session.jsonl && testwitness ledger --transcript session.jsonl --fail-on-unsupported
+```
+
+What it reads: test commands for pytest, tox, unittest, Vitest, Jest, Mocha, AVA, node --test, npm, pnpm, yarn and bun test scripts, Maven, Gradle, go test, cargo test and make test; the runner's own summary line (passed, failed, nothing collected) first and the exit status second; whether a run was narrowed (a test file, `-k`, `-t`, `-Dtest=`, a node id); whether the exit status was hidden (`| tail`, `| grep`, `|| true`, `; echo`, unless `set -o pipefail`); and which files were edited after the last full run. A claim is read from the final message by a short list of phrases ("all tests pass", "the suite is green"); a sentence that negates it does not count.
+
+In v0.1 the ledger never blocks on its own. It is shown when the guard blocks for a test integrity finding, and by `testwitness ledger`.
+
 ## The loop guard
 
 A Stop hook that always blocks can keep an agent running forever and burn your budget. So:
